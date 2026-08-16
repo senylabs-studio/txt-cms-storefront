@@ -34,7 +34,7 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-    if (search) setSearchParams({ search });
+    if (debouncedSearch) setSearchParams({ search: debouncedSearch });
     else setSearchParams({});
   }, [debouncedSearch]);
 
