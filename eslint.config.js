@@ -25,6 +25,12 @@ export default defineConfig([
       // effect the rule itself allows for, but it still flags the setState
       // call, so keep it a warning rather than a hard error here.
       'react-hooks/set-state-in-effect': 'warn',
+      // Purely a dev-mode HMR nicety (a changed context file triggers a full
+      // page reload instead of hot-swapping) — no correctness or production
+      // impact. Fixing it means splitting every Provider+hook context file
+      // into two, which was assessed and deliberately deferred; keep it from
+      // blocking CI in the meantime.
+      'react-refresh/only-export-components': 'warn',
     },
   },
 ])
