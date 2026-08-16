@@ -19,5 +19,12 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      // This app fetches data with axios inside useEffect + setState (no React
+      // Query/SWR) — that's the standard "synchronize with an external system"
+      // effect the rule itself allows for, but it still flags the setState
+      // call, so keep it a warning rather than a hard error here.
+      'react-hooks/set-state-in-effect': 'warn',
+    },
   },
 ])
