@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { Container, Card, Form, Button, Alert, Spinner } from 'react-bootstrap';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -11,7 +12,7 @@ const LoginPage: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = (location.state as any)?.from?.pathname ?? '/catalog';
+  const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? '/catalog';
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,8 +27,8 @@ const LoginPage: React.FC = () => {
       const data = await loginService({ email, password });
       login(data);
       navigate(from, { replace: true });
-    } catch (e: any) {
-      setError(e?.response?.data?.message ?? t('auth.login.error'));
+    } catch (e) {
+      setError((axios.isAxiosError(e) && e.response?.data?.message) ?? t('auth.login.error'));
     } finally {
       setLoading(false);
     }

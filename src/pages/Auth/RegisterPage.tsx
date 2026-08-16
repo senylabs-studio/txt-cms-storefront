@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { Container, Card, Form, Button, Alert, Spinner } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -26,8 +27,8 @@ const RegisterPage: React.FC = () => {
       const data = await registerService({ name, email, password, phone: phone || undefined });
       login(data);
       navigate('/catalog', { replace: true });
-    } catch (e: any) {
-      const msg = e?.response?.data?.message ?? e?.response?.data?.errors;
+    } catch (e) {
+      const msg = axios.isAxiosError(e) ? (e.response?.data?.message ?? e.response?.data?.errors) : undefined;
       setError(typeof msg === 'string' ? msg : t('auth.register.error'));
     } finally {
       setLoading(false);

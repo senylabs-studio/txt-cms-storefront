@@ -20,7 +20,7 @@ export const getPageBySlug = async (
   pageSize = 12,
   filters: PageFilters = {}
 ): Promise<StorefrontPageDetail> => {
-  const params: Record<string, any> = { page, pageSize };
+  const params: Record<string, string | number> = { page, pageSize };
   if (filters.minPrice !== undefined) params.minPrice = filters.minPrice;
   if (filters.maxPrice !== undefined) params.maxPrice = filters.maxPrice;
   if (filters.width !== undefined) params.width = filters.width;

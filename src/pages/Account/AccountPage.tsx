@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { Container, Row, Col, Card, Form, Button, Alert, Spinner, Badge, Modal } from 'react-bootstrap';
 import { FaPlus, FaEdit, FaTrash, FaMapMarkerAlt, FaUser } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
@@ -71,8 +72,8 @@ const AccountPage: React.FC = () => {
       const p = await getProfile();
       setProfile(p);
       setShowAddr(false);
-    } catch (e: any) {
-      setAddrError(e?.response?.data?.message ?? t('account.addrSaveError'));
+    } catch (e) {
+      setAddrError((axios.isAxiosError(e) && e.response?.data?.message) ?? t('account.addrSaveError'));
     } finally {
       setAddrSaving(false);
     }

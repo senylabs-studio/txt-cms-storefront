@@ -108,6 +108,8 @@ const CartDrawer: React.FC = () => {
               <Button variant="primary" size="lg" className="w-100 mb-2" onClick={() => { closeDrawer(); navigate('/checkout'); }}>
                 {t('cart.checkout')}
               </Button>
+              {/* react-bootstrap's Button.as prop type is too narrow for React Router's Link in this version combo */}
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               <Button variant="outline-secondary" className="w-100" as={Link as any} to="/cart" onClick={closeDrawer}>
                 {t('cart.viewFull')}
               </Button>

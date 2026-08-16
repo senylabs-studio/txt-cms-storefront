@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Container, Row, Col, Button, Badge, Spinner, Alert } from 'react-bootstrap';
 import { FaShoppingCart, FaArrowLeft, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
@@ -73,7 +74,7 @@ const VariantDetailPage: React.FC = () => {
     if (!isAuthenticated) { navigate('/login'); return; }
     setError('');
     try { await addItem(undefined, variant.id, quantity); }
-    catch (e: any) { setError(e?.response?.data?.message ?? t('product.addError')); }
+    catch (e) { setError((axios.isAxiosError(e) && e.response?.data?.message) ?? t('product.addError')); }
   };
 
   // Composition
