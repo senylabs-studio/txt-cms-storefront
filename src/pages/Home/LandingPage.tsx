@@ -4,15 +4,23 @@ import { Link } from 'react-router-dom';
 import { FaShoppingCart } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
-import { getHomeBlocks, type StorefrontHomeBlock } from '../../services/homeService';
+import {
+  getHomeBlocks,
+  type StorefrontHomeBlock,
+  type HomeBannerBlockConfig,
+  type HomeImageGridBlockConfig,
+  type HomeFeaturedProductsBlockConfig,
+  type HomeFeaturedItem,
+  type HomeImageTextBlockConfig,
+} from '../../services/homeService';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import './LandingPage.css';
 
 // ─── Banner (carousel) ────────────────────────────────────────────────────────
-const BannerBlock: React.FC<{ config: any }> = ({ config }) => {
-  const slides: any[] = config.slides ?? [];
+const BannerBlock: React.FC<{ config: HomeBannerBlockConfig }> = ({ config }) => {
+  const slides = config.slides ?? [];
   const height = config.height ?? 500;
 
   if (slides.length === 0) return null;
@@ -37,7 +45,7 @@ const BannerBlock: React.FC<{ config: any }> = ({ config }) => {
 
   return (
     <Carousel fade interval={5000} className="home-carousel" style={{ minHeight: height }}>
-      {slides.map((slide: any, i: number) => (
+      {slides.map((slide, i) => (
         <Carousel.Item key={i} style={{ minHeight: height }}>
           <div
             className="home-banner"
@@ -58,16 +66,16 @@ const BannerBlock: React.FC<{ config: any }> = ({ config }) => {
 };
 
 // ─── Image Grid ───────────────────────────────────────────────────────────────
-const ImageGridBlock: React.FC<{ config: any }> = ({ config }) => {
-  const images: any[] = config.images ?? [];
+const ImageGridBlock: React.FC<{ config: HomeImageGridBlockConfig }> = ({ config }) => {
+  const images = config.images ?? [];
   if (images.length === 0) return null;
-  const colSize = Math.max(2, Math.floor(12 / images.length));
+  const colSize = Math.max(2, Math.floor(12 / images.length)) as 2 | 3 | 4 | 6 | 12;
   return (
     <Container className="py-4">
       {config.title && <h2 className="text-center mb-4 fw-bold">{config.title}</h2>}
       <Row className="g-3">
-        {images.map((img: any, i: number) => (
-          <Col key={i} xs={6} sm={4} md={colSize as any}>
+        {images.map((img, i) => (
+          <Col key={i} xs={6} sm={4} md={colSize}>
             {img.linkUrl ? (
               <Link to={img.linkUrl} className="d-block">
                 <div className="home-image-grid-item">
@@ -89,22 +97,24 @@ const ImageGridBlock: React.FC<{ config: any }> = ({ config }) => {
 };
 
 // ─── Featured Products ────────────────────────────────────────────────────────
-const FeaturedProductsBlock: React.FC<{ config: any }> = ({ config }) => {
+type FeaturedItem = HomeFeaturedItem & { _isVariant: boolean };
+
+const FeaturedProductsBlock: React.FC<{ config: HomeFeaturedProductsBlockConfig }> = ({ config }) => {
   const { t } = useTranslation();
   const { addItem, loading: cartLoading } = useCart();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  const variants: any[] = config.variants ?? [];
-  const products: any[] = config.products ?? [];
-  const allItems = [
-    ...variants.map((v: any) => ({ ...v, _isVariant: true })),
-    ...products.map((p: any) => ({ ...p, _isVariant: false })),
+  const variants = config.variants ?? [];
+  const products = config.products ?? [];
+  const allItems: FeaturedItem[] = [
+    ...variants.map(v => ({ ...v, _isVariant: true })),
+    ...products.map(p => ({ ...p, _isVariant: false })),
   ];
 
   if (allItems.length === 0) return null;
 
-  const handleAdd = async (e: React.MouseEvent, item: any) => {
+  const handleAdd = async (e: React.MouseEvent, item: FeaturedItem) => {
     e.preventDefault();
     if (!isAuthenticated) { navigate('/login'); return; }
     if (item._isVariant) await addItem(undefined, item.id, 1);
@@ -116,7 +126,7 @@ const FeaturedProductsBlock: React.FC<{ config: any }> = ({ config }) => {
     <Container className="py-4">
       {config.title && <h2 className="text-center mb-4 fw-bold">{config.title}</h2>}
       <Row className="g-3 justify-content-center">
-        {allItems.map((item: any) => {
+        {allItems.map(item => {
           const slug = item._isVariant ? `/variant/${item.id}` : `/product/${item.slug}`;
           const outOfStock = item.availableStock <= 0;
           const hasDiscount = item.originalPrice > item.price;
@@ -165,7 +175,7 @@ const FeaturedProductsBlock: React.FC<{ config: any }> = ({ config }) => {
 };
 
 // ─── Image + Text ─────────────────────────────────────────────────────────────
-const ImageTextBlock: React.FC<{ config: any }> = ({ config }) => {
+const ImageTextBlock: React.FC<{ config: HomeImageTextBlockConfig }> = ({ config }) => {
   const imageLeft = (config.imagePosition ?? 'left') === 'left';
   return (
     <Container className="py-5">
