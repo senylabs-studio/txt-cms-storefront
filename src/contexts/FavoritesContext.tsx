@@ -45,13 +45,13 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     if (variantId != null) {
       setVariantIds(prev => {
         const next = new Set(prev);
-        next.has(variantId) ? next.delete(variantId) : next.add(variantId);
+        if (next.has(variantId)) next.delete(variantId); else next.add(variantId);
         return next;
       });
     } else if (productId != null) {
       setProductIds(prev => {
         const next = new Set(prev);
-        next.has(productId) ? next.delete(productId) : next.add(productId);
+        if (next.has(productId)) next.delete(productId); else next.add(productId);
         return next;
       });
     }
@@ -61,13 +61,13 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       if (variantId != null) {
         setVariantIds(prev => {
           const next = new Set(prev);
-          result.isFavorite ? next.add(variantId) : next.delete(variantId);
+          if (result.isFavorite) next.add(variantId); else next.delete(variantId);
           return next;
         });
       } else if (productId != null) {
         setProductIds(prev => {
           const next = new Set(prev);
-          result.isFavorite ? next.add(productId) : next.delete(productId);
+          if (result.isFavorite) next.add(productId); else next.delete(productId);
           return next;
         });
       }

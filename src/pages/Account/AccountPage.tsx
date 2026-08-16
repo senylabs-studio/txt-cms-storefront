@@ -84,7 +84,9 @@ const AccountPage: React.FC = () => {
     try {
       await deleteAddress(id);
       setProfile(p => p ? { ...p, addresses: p.addresses.filter(a => a.id !== id) } : p);
-    } catch {}
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   if (loading) return <MainLayout><div className="text-center py-5"><Spinner animation="border" variant="primary" /></div></MainLayout>;
