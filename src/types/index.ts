@@ -223,13 +223,149 @@ export interface BlockStyle {
   letterSpacing?: 'normal' | 'wide' | 'wider';
 }
 
-export interface StorefrontPageBlock {
-  id: number;
-  type: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  config: any;
-  sortOrder: number;
+export type StorefrontPageBlockType =
+  | 'Header'
+  | 'Paragraph'
+  | 'HeaderParagraph'
+  | 'List'
+  | 'Image'
+  | 'ImageText'
+  | 'Divider'
+  | 'Gallery'
+  | 'FormField'
+  | 'Banner'
+  | 'SubPages'
+  | 'Products'
+  | 'FeaturedProducts';
+
+export interface HeaderBlockConfig {
+  text: string;
+  level: 'h1' | 'h2' | 'h3' | 'h4';
+  style?: BlockStyle;
 }
+
+export interface ParagraphBlockConfig {
+  text: string;
+  style?: BlockStyle;
+}
+
+/** `header`/`text` are legacy field names kept around for old saved blocks. */
+export interface HeaderParagraphBlockConfig {
+  headerText?: string;
+  header?: string;
+  paragraphText?: string;
+  text?: string;
+  level?: 'h1' | 'h2' | 'h3' | 'h4';
+  style?: BlockStyle;
+}
+
+export interface ListBlockConfig {
+  items: string | string[];
+  variant?: 'unordered' | 'ordered';
+  style?: BlockStyle;
+}
+
+export interface ImageBlockConfig {
+  imageUrl: string;
+  altText?: string;
+  linkUrl?: string;
+  caption?: string;
+  style?: BlockStyle;
+}
+
+export interface ImageTextBlockConfig {
+  imageUrl?: string;
+  title?: string;
+  text?: string;
+  imagePosition?: 'left' | 'right';
+  buttonText?: string;
+  buttonUrl?: string;
+  style?: BlockStyle;
+}
+
+export interface DividerBlockConfig {
+  style?: BlockStyle;
+}
+
+export interface GalleryImage {
+  imageUrl: string;
+  altText?: string;
+  linkUrl?: string;
+}
+
+export interface GalleryBlockConfig {
+  images: GalleryImage[];
+  columns?: number;
+  style?: BlockStyle;
+}
+
+export interface FormFieldBlockConfig {
+  fieldType?: 'text' | 'email' | 'phone' | 'textarea' | 'select' | 'checkbox';
+  label: string;
+  placeholder?: string;
+  required?: boolean;
+  options?: string;
+  style?: BlockStyle;
+}
+
+export interface SubPagesBlockConfig {
+  columns?: number;
+  style?: BlockStyle;
+}
+
+export interface ProductsBlockConfig {
+  columns?: number;
+  style?: BlockStyle;
+}
+
+export interface BannerSlide {
+  imageUrl?: string;
+  title?: string;
+  subtitle?: string;
+  buttonText?: string;
+  buttonUrl?: string;
+}
+
+export interface BannerBlockConfig {
+  slides: BannerSlide[];
+  height?: number;
+  style?: BlockStyle;
+}
+
+export interface FeaturedProductsBlockConfig {
+  title?: string;
+  productIds?: number[];
+  style?: BlockStyle;
+}
+
+export interface PageBlockConfigMap {
+  Header: HeaderBlockConfig;
+  Paragraph: ParagraphBlockConfig;
+  HeaderParagraph: HeaderParagraphBlockConfig;
+  List: ListBlockConfig;
+  Image: ImageBlockConfig;
+  ImageText: ImageTextBlockConfig;
+  Divider: DividerBlockConfig;
+  Gallery: GalleryBlockConfig;
+  FormField: FormFieldBlockConfig;
+  Banner: BannerBlockConfig;
+  SubPages: SubPagesBlockConfig;
+  Products: ProductsBlockConfig;
+  FeaturedProducts: FeaturedProductsBlockConfig;
+}
+
+/** Union of every possible page-block config shape. */
+export type PageBlockConfig = PageBlockConfigMap[StorefrontPageBlockType];
+
+/** Distributed so `block.type` correctly narrows `block.config`'s shape. */
+export type StorefrontPageBlock = {
+  [K in StorefrontPageBlockType]: {
+    id: number;
+    type: K;
+    config: PageBlockConfigMap[K];
+    sortOrder: number;
+  };
+}[StorefrontPageBlockType];
 
 export interface StorefrontChildPage {
   id: number;

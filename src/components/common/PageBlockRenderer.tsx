@@ -1,6 +1,25 @@
 import React, { type JSX } from 'react';
 import { Row, Col, Carousel } from 'react-bootstrap';
-import type { StorefrontPageBlock, StorefrontPageDetail, BlockStyle } from '../../types';
+import type {
+  StorefrontPageBlock,
+  StorefrontPageBlockType,
+  StorefrontPageDetail,
+  BlockStyle,
+  PageBlockConfig,
+  HeaderBlockConfig,
+  ParagraphBlockConfig,
+  HeaderParagraphBlockConfig,
+  ListBlockConfig,
+  ImageBlockConfig,
+  ImageTextBlockConfig,
+  DividerBlockConfig,
+  GalleryBlockConfig,
+  FormFieldBlockConfig,
+  BannerBlockConfig,
+  SubPagesBlockConfig,
+  ProductsBlockConfig,
+  FeaturedProductsBlockConfig,
+} from '../../types';
 import { pageUrl } from '../../utils/pageUrl';
 import VariantCard from '../Product/VariantCard/VariantCard';
 import './PageBlockRenderer.css';
@@ -35,12 +54,12 @@ function buildStyle(style?: BlockStyle): React.CSSProperties {
 }
 
 // ─── Block renderers ──────────────────────────────────────────────────────────
-const HeaderBlock: React.FC<{ config: any }> = ({ config }) => {
+const HeaderBlock: React.FC<{ config: HeaderBlockConfig }> = ({ config }) => {
   const Tag = (config.level ?? 'h2') as keyof JSX.IntrinsicElements;
   return <Tag style={buildStyle(config.style)}>{config.text}</Tag>;
 };
 
-const ParagraphBlock: React.FC<{ config: any }> = ({ config }) => (
+const ParagraphBlock: React.FC<{ config: ParagraphBlockConfig }> = ({ config }) => (
   <div
     className="rich-text"
     style={buildStyle(config.style)}
@@ -48,7 +67,7 @@ const ParagraphBlock: React.FC<{ config: any }> = ({ config }) => (
   />
 );
 
-const HeaderParagraphBlock: React.FC<{ config: any }> = ({ config }) => {
+const HeaderParagraphBlock: React.FC<{ config: HeaderParagraphBlockConfig }> = ({ config }) => {
   const lvl = config.level;
   let Tag: keyof JSX.IntrinsicElements = 'h2';
   if (typeof lvl === 'number') {
@@ -68,7 +87,7 @@ const HeaderParagraphBlock: React.FC<{ config: any }> = ({ config }) => {
   );
 };
 
-const ListBlock: React.FC<{ config: any }> = ({ config }) => {
+const ListBlock: React.FC<{ config: ListBlockConfig }> = ({ config }) => {
   const rawItems = typeof config.items === 'string'
     ? config.items
     : Array.isArray(config.items)
@@ -86,7 +105,7 @@ const ListBlock: React.FC<{ config: any }> = ({ config }) => {
   );
 };
 
-const ImageBlock: React.FC<{ config: any }> = ({ config }) => {
+const ImageBlock: React.FC<{ config: ImageBlockConfig }> = ({ config }) => {
   if (!config.imageUrl) return null;
   const img = <img src={config.imageUrl} alt={config.altText ?? ''} />;
   return (
@@ -97,7 +116,7 @@ const ImageBlock: React.FC<{ config: any }> = ({ config }) => {
   );
 };
 
-const ImageTextBlock: React.FC<{ config: any }> = ({ config }) => {
+const ImageTextBlock: React.FC<{ config: ImageTextBlockConfig }> = ({ config }) => {
   const imageLeft = (config.imagePosition ?? 'left') === 'left';
   const imgCol = config.imageUrl ? (
     <Col md={5}>
@@ -122,12 +141,12 @@ const ImageTextBlock: React.FC<{ config: any }> = ({ config }) => {
   );
 };
 
-const DividerBlock: React.FC<{ config: any }> = ({ config }) => (
+const DividerBlock: React.FC<{ config: DividerBlockConfig }> = ({ config }) => (
   <hr style={{ borderColor: config.style?.color || '#dee2e6', ...buildStyle(config.style), padding: undefined, margin: config.style?.padding ? PADDING[config.style.padding] : '0.75rem 0' }} />
 );
 
-const GalleryBlock: React.FC<{ config: any }> = ({ config }) => {
-  const images: any[] = config.images ?? [];
+const GalleryBlock: React.FC<{ config: GalleryBlockConfig }> = ({ config }) => {
+  const images = config.images ?? [];
   const cols = config.columns ?? 3;
   if (images.length === 0) return null;
   return (
@@ -148,7 +167,7 @@ const GalleryBlock: React.FC<{ config: any }> = ({ config }) => {
   );
 };
 
-const FormFieldBlock: React.FC<{ config: any }> = ({ config }) => (
+const FormFieldBlock: React.FC<{ config: FormFieldBlockConfig }> = ({ config }) => (
   <div style={buildStyle(config.style)}>
     <label className="pbr-form-label">
       {config.label}
@@ -184,8 +203,8 @@ const FormFieldBlock: React.FC<{ config: any }> = ({ config }) => (
   </div>
 );
 
-const BannerBlock: React.FC<{ config: any }> = ({ config }) => {
-  const slides: any[] = config.slides ?? [];
+const BannerBlock: React.FC<{ config: BannerBlockConfig }> = ({ config }) => {
+  const slides = config.slides ?? [];
   if (slides.length === 0) return null;
 
   const height = config.height ?? 500;
@@ -217,7 +236,7 @@ const BannerBlock: React.FC<{ config: any }> = ({ config }) => {
   );
 };
 
-const SubPagesBlock: React.FC<{ config: any; pageDetail?: StorefrontPageDetail }> = ({ config, pageDetail }) => {
+const SubPagesBlock: React.FC<{ config: SubPagesBlockConfig; pageDetail?: StorefrontPageDetail }> = ({ config, pageDetail }) => {
   const children = pageDetail?.childPages ?? [];
   const cols = config.columns ?? 3;
   if (children.length === 0) return null;
@@ -244,7 +263,7 @@ const SubPagesBlock: React.FC<{ config: any; pageDetail?: StorefrontPageDetail }
   );
 };
 
-const ProductsBlock: React.FC<{ config: any; pageDetail?: StorefrontPageDetail }> = ({ config, pageDetail }) => {
+const ProductsBlock: React.FC<{ config: ProductsBlockConfig; pageDetail?: StorefrontPageDetail }> = ({ config, pageDetail }) => {
   const items = pageDetail?.items ?? [];
   const cols = config.columns ?? 4;
   if (items.length === 0) return null;
@@ -276,11 +295,11 @@ const ProductsBlock: React.FC<{ config: any; pageDetail?: StorefrontPageDetail }
   );
 };
 
-const FeaturedProductsBlock: React.FC<{ config: any }> = ({ config }) => {
+const FeaturedProductsBlock: React.FC<{ config: FeaturedProductsBlockConfig }> = ({ config }) => {
   // productIds are stored in config; the storefront would need to fetch them.
   // This renders a placeholder if no data is injected externally.
   const title = config.title;
-  const ids: number[] = config.productIds ?? [];
+  const ids = config.productIds ?? [];
   if (ids.length === 0 && !title) return null;
   return (
     <div style={buildStyle(config.style)}>
@@ -291,21 +310,24 @@ const FeaturedProductsBlock: React.FC<{ config: any }> = ({ config }) => {
 };
 
 // ─── Registry ─────────────────────────────────────────────────────────────────
-const RENDERERS: Record<string, React.FC<{ config: any; pageDetail?: StorefrontPageDetail }>> = {
-  Header: ({ config }) => <HeaderBlock config={config} />,
-  Paragraph: ({ config }) => <ParagraphBlock config={config} />,
-  HeaderParagraph: ({ config }) => <HeaderParagraphBlock config={config} />,
-  List: ({ config }) => <ListBlock config={config} />,
-  Image: ({ config }) => <ImageBlock config={config} />,
-  ImageText: ({ config }) => <ImageTextBlock config={config} />,
-  Divider: ({ config }) => <DividerBlock config={config} />,
-  Gallery: ({ config }) => <GalleryBlock config={config} />,
-  FormField: ({ config }) => <FormFieldBlock config={config} />,
-  Banner: ({ config }) => <BannerBlock config={config} />,
-  SubPages: ({ config, pageDetail }) => <SubPagesBlock config={config} pageDetail={pageDetail} />,
-  Products: ({ config, pageDetail }) => <ProductsBlock config={config} pageDetail={pageDetail} />,
-  FeaturedProducts: ({ config }) => <FeaturedProductsBlock config={config} />,
-};
+// Each *Block component above is precisely typed against its own config shape —
+// only this lookup-by-runtime-type registry needs a shared shape (same reasoning
+// as CONFIG_EDITORS in the CMS's BlockEditors.tsx).
+const RENDERERS = {
+  Header: ({ config }: { config: HeaderBlockConfig }) => <HeaderBlock config={config} />,
+  Paragraph: ({ config }: { config: ParagraphBlockConfig }) => <ParagraphBlock config={config} />,
+  HeaderParagraph: ({ config }: { config: HeaderParagraphBlockConfig }) => <HeaderParagraphBlock config={config} />,
+  List: ({ config }: { config: ListBlockConfig }) => <ListBlock config={config} />,
+  Image: ({ config }: { config: ImageBlockConfig }) => <ImageBlock config={config} />,
+  ImageText: ({ config }: { config: ImageTextBlockConfig }) => <ImageTextBlock config={config} />,
+  Divider: ({ config }: { config: DividerBlockConfig }) => <DividerBlock config={config} />,
+  Gallery: ({ config }: { config: GalleryBlockConfig }) => <GalleryBlock config={config} />,
+  FormField: ({ config }: { config: FormFieldBlockConfig }) => <FormFieldBlock config={config} />,
+  Banner: ({ config }: { config: BannerBlockConfig }) => <BannerBlock config={config} />,
+  SubPages: ({ config, pageDetail }: { config: SubPagesBlockConfig; pageDetail?: StorefrontPageDetail }) => <SubPagesBlock config={config} pageDetail={pageDetail} />,
+  Products: ({ config, pageDetail }: { config: ProductsBlockConfig; pageDetail?: StorefrontPageDetail }) => <ProductsBlock config={config} pageDetail={pageDetail} />,
+  FeaturedProducts: ({ config }: { config: FeaturedProductsBlockConfig }) => <FeaturedProductsBlock config={config} />,
+} as unknown as Record<StorefrontPageBlockType, React.FC<{ config: PageBlockConfig; pageDetail?: StorefrontPageDetail }>>;
 
 // ─── Main export ──────────────────────────────────────────────────────────────
 interface PageBlockRendererProps {
@@ -321,7 +343,7 @@ const PageBlockRenderer: React.FC<PageBlockRendererProps> = ({ blocks, pageDetai
       {blocks.map(block => {
         const Renderer = RENDERERS[block.type];
         if (!Renderer) return null;
-        const bgColor = block.config?.style?.backgroundColor;
+        const bgColor = block.config.style?.backgroundColor;
         return (
           <div
             key={block.id}
