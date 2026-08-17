@@ -132,7 +132,7 @@ const Footer: React.FC = () => {
   const activeSocials = SOCIAL.filter(s => settings[s.field]);
   const visibleColumns = settings.footerColumns.filter(c => c.isVisible !== false);
   const copyright = settings.copyright ||
-    `© ${new Date().getFullYear()} ${settings.siteName}. Todos los derechos reservados.`;
+    t('footer.copyright', { year: new Date().getFullYear(), siteName: settings.siteName });
 
   return (
     <footer className="storefront-footer">

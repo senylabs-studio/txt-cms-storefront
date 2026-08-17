@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Container } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getMenu } from '../../services/pageService';
 import type { StorefrontMenuItem } from '../../types';
 import { pageUrl } from '../../utils/pageUrl';
@@ -13,6 +14,7 @@ function resolveHref(item: StorefrontMenuItem): string {
 const COLS = 4; // max columns in the mega panel
 
 const MegaPanel: React.FC<{ item: StorefrontMenuItem; onClose: () => void }> = ({ item, onClose }) => {
+  const { t } = useTranslation();
   const href = resolveHref(item);
   const isExternal = !!item.externalUrl;
   const children = item.children;
@@ -38,7 +40,7 @@ const MegaPanel: React.FC<{ item: StorefrontMenuItem; onClose: () => void }> = (
                   </a>
                 ) : (
                   <Link to={href} className="mega-section-title" onClick={onClose}>
-                    {item.name} — Ver todo →
+                    {item.name} — {t('nav.viewAll')}
                   </Link>
                 )}
               </div>
@@ -74,7 +76,7 @@ const MegaPanel: React.FC<{ item: StorefrontMenuItem; onClose: () => void }> = (
             {item.imageUrl && (
               <Link to={href} className="mega-image-wrap" onClick={onClose}>
                 <img src={item.imageUrl} alt={item.name} className="mega-image" />
-                <span className="mega-image-label">Descubre más →</span>
+                <span className="mega-image-label">{t('nav.discoverMore')}</span>
               </Link>
             )}
           </div>

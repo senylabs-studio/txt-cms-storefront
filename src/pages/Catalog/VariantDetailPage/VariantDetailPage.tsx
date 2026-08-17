@@ -113,14 +113,14 @@ const VariantDetailPage: React.FC = () => {
                   <button
                     className="vdp-nav-btn vdp-nav-btn--prev"
                     onClick={() => setSelectedImage(i => (i - 1 + images.length) % images.length)}
-                    aria-label="Imagen anterior"
+                    aria-label={t('product.previousImage')}
                   >
                     <FaChevronLeft size={13} />
                   </button>
                   <button
                     className="vdp-nav-btn vdp-nav-btn--next"
                     onClick={() => setSelectedImage(i => (i + 1) % images.length)}
-                    aria-label="Imagen siguiente"
+                    aria-label={t('product.nextImage')}
                   >
                     <FaChevronRight size={13} />
                   </button>
@@ -131,7 +131,7 @@ const VariantDetailPage: React.FC = () => {
                         key={i}
                         className={`vdp-dot${i === selectedImage ? ' vdp-dot--active' : ''}`}
                         onClick={() => setSelectedImage(i)}
-                        aria-label={`Ir a imagen ${i + 1}`}
+                        aria-label={t('product.goToImage', { count: i + 1 })}
                       />
                     ))}
                   </div>

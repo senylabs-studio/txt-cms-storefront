@@ -8,7 +8,12 @@
     "register": "Registrar-se",
     "search": "Cercar productes..."
   },
+  "nav": {
+    "viewAll": "Veure-ho tot →",
+    "discoverMore": "Descobreix més →"
+  },
   "footer": {
+    "copyright": "© {{year}} {{siteName}}. Tots els drets reservats.",
     "noPartners": "Sense partners configurats",
     "noPaymentMethods": "Sense mètodes configurats",
     "legalNotice": "Avís Legal",
@@ -171,7 +176,8 @@
     "title": "Els meus favorits",
     "empty": "Encara no tens productes favorits.",
     "explore": "Explorar catàleg",
-    "remove": "Treure dels favorits"
+    "remove": "Treure dels favorits",
+    "add": "Afegir a favorits"
   },
   "product": {
     "outOfStock": "Sense estoc",
@@ -204,7 +210,10 @@
     "addError": "Error en afegir a la cistella",
     "productNotFound": "Producte no trobat.",
     "referencesCount": "{{count}} referències",
-    "inStockCount": "{{count}} en estoc"
+    "inStockCount": "{{count}} en estoc",
+    "previousImage": "Imatge anterior",
+    "nextImage": "Imatge següent",
+    "goToImage": "Anar a la imatge {{count}}"
   },
   "filters": {
     "title": "Filtres",

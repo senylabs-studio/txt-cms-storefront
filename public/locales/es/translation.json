@@ -8,7 +8,12 @@
     "register": "Registrarse",
     "search": "Buscar productos..."
   },
+  "nav": {
+    "viewAll": "Ver todo →",
+    "discoverMore": "Descubre más →"
+  },
   "footer": {
+    "copyright": "© {{year}} {{siteName}}. Todos los derechos reservados.",
     "noPartners": "Sin partners configurados",
     "noPaymentMethods": "Sin métodos configurados",
     "legalNotice": "Aviso Legal",
@@ -171,7 +176,8 @@
     "title": "Mis favoritos",
     "empty": "No tienes productos favoritos aún.",
     "explore": "Explorar catálogo",
-    "remove": "Quitar de favoritos"
+    "remove": "Quitar de favoritos",
+    "add": "Añadir a favoritos"
   },
   "product": {
     "outOfStock": "Sin stock",
@@ -204,7 +210,10 @@
     "addError": "Error al añadir al carrito",
     "productNotFound": "Producto no encontrado.",
     "referencesCount": "{{count}} referencias",
-    "inStockCount": "{{count}} en stock"
+    "inStockCount": "{{count}} en stock",
+    "previousImage": "Imagen anterior",
+    "nextImage": "Imagen siguiente",
+    "goToImage": "Ir a imagen {{count}}"
   },
   "filters": {
     "title": "Filtros",

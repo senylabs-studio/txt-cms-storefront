@@ -8,7 +8,12 @@
     "register": "Sign up",
     "search": "Search products..."
   },
+  "nav": {
+    "viewAll": "View all →",
+    "discoverMore": "Discover more →"
+  },
   "footer": {
+    "copyright": "© {{year}} {{siteName}}. All rights reserved.",
     "noPartners": "No partners configured",
     "noPaymentMethods": "No payment methods configured",
     "legalNotice": "Legal Notice",
@@ -171,7 +176,8 @@
     "title": "My favourites",
     "empty": "You have no favourite products yet.",
     "explore": "Explore catalog",
-    "remove": "Remove from favourites"
+    "remove": "Remove from favourites",
+    "add": "Add to favourites"
   },
   "product": {
     "outOfStock": "Out of stock",
@@ -204,7 +210,10 @@
     "addError": "Error adding to cart",
     "productNotFound": "Product not found.",
     "referencesCount": "{{count}} references",
-    "inStockCount": "{{count}} in stock"
+    "inStockCount": "{{count}} in stock",
+    "previousImage": "Previous image",
+    "nextImage": "Next image",
+    "goToImage": "Go to image {{count}}"
   },
   "filters": {
     "title": "Filters",
