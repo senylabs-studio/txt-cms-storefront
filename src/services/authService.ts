@@ -10,3 +10,13 @@ export const login = async (data: { email: string; password: string }): Promise<
   const res = await apiClient.post('/storefront/auth/login', data);
   return res.data;
 };
+
+export const forgotPassword = async (email: string): Promise<{ message: string }> => {
+  const res = await apiClient.post('/storefront/auth/forgot-password', { email });
+  return res.data;
+};
+
+export const resetPassword = async (data: { email: string; token: string; newPassword: string }): Promise<{ message: string }> => {
+  const res = await apiClient.post('/storefront/auth/reset-password', data);
+  return res.data;
+};

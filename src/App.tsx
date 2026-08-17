@@ -18,6 +18,8 @@ import CheckoutSuccessPage from './pages/Checkout/CheckoutSuccessPage';
 import CheckoutErrorPage from './pages/Checkout/CheckoutErrorPage';
 import LoginPage from './pages/Auth/LoginPage';
 import RegisterPage from './pages/Auth/RegisterPage';
+import ForgotPasswordPage from './pages/Auth/ForgotPasswordPage';
+import ResetPasswordPage from './pages/Auth/ResetPasswordPage';
 import AccountPage from './pages/Account/AccountPage';
 import OrdersPage from './pages/Account/OrdersPage';
 import OrderDetailPage from './pages/Account/OrderDetailPage';
@@ -43,6 +45,8 @@ function App() {
               <Route path="/:slug" element={<PageCatalogPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
 
               {/* Protected (Customer) */}
               <Route element={<ProtectedRoute />}>

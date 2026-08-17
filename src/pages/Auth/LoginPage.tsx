@@ -59,7 +59,7 @@ const LoginPage: React.FC = () => {
                 />
               </Form.Group>
 
-              <Form.Group className="mb-4">
+              <Form.Group className="mb-2">
                 <Form.Label>{t('auth.login.password')}</Form.Label>
                 <Form.Control
                   type="password"
@@ -69,6 +69,10 @@ const LoginPage: React.FC = () => {
                   required
                 />
               </Form.Group>
+
+              <p className="text-end mb-3">
+                <Link to="/forgot-password" className="small">{t('auth.forgotPasswordLink')}</Link>
+              </p>
 
               <Button type="submit" variant="primary" className="w-100" disabled={loading}>
                 {loading ? <><Spinner size="sm" animation="border" className="me-2" />{t('auth.login.loading')}</> : t('auth.login.submit')}
