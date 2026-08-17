@@ -1,5 +1,6 @@
 import React, { type JSX } from 'react';
 import { Row, Col, Carousel } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import type {
   StorefrontPageBlock,
   StorefrontPageBlockType,
@@ -296,11 +297,19 @@ const ProductsBlock: React.FC<{ config: ProductsBlockConfig; pageDetail?: Storef
   );
 };
 
-const FeaturedProductsBlock: React.FC<{ config: FeaturedProductsBlockConfig }> = ({ config }) => (
-  <div style={buildStyle(config.style)}>
-    <FeaturedProductsGrid title={config.title} variants={config.variants} products={config.products} />
-  </div>
-);
+const FeaturedProductsBlock: React.FC<{ config: FeaturedProductsBlockConfig }> = ({ config }) => {
+  const { t } = useTranslation();
+  return (
+    <div style={buildStyle(config.style)}>
+      <FeaturedProductsGrid
+        title={config.title}
+        variants={config.variants}
+        products={config.products}
+        emptyMessage={t('product.noFeaturedProducts')}
+      />
+    </div>
+  );
+};
 
 // ─── Registry ─────────────────────────────────────────────────────────────────
 // Each *Block component above is precisely typed against its own config shape —

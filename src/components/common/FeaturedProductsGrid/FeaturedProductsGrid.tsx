@@ -26,13 +26,18 @@ interface Props {
   title?: string;
   variants?: FeaturedProductItem[];
   products?: FeaturedProductItem[];
+  /** Shown (alongside the title, if any) instead of rendering nothing when there are no
+   *  resolved items — e.g. content-page blocks want this so a misconfigured block (stale/deleted
+   *  product ids) stays visible/debuggable to editors. Home leaves this unset so an intentionally
+   *  empty block still renders nothing. */
+  emptyMessage?: string;
 }
 
 type Item = FeaturedProductItem & { _isVariant: boolean };
 
 /** Card grid for "featured products" blocks — shared by the Home landing page and
  *  content-page blocks, since both resolve to the same variants/products shape. */
-const FeaturedProductsGrid: React.FC<Props> = ({ title, variants = [], products = [] }) => {
+const FeaturedProductsGrid: React.FC<Props> = ({ title, variants = [], products = [], emptyMessage }) => {
   const { t } = useTranslation();
   const { addItem, loading: cartLoading } = useCart();
   const { isAuthenticated } = useAuth();
@@ -44,7 +49,15 @@ const FeaturedProductsGrid: React.FC<Props> = ({ title, variants = [], products 
     ...products.map(p => ({ ...p, _isVariant: false })),
   ];
 
-  if (allItems.length === 0) return null;
+  if (allItems.length === 0) {
+    if (!emptyMessage) return null;
+    return (
+      <Container className="py-4">
+        {title && <h2 className="text-center mb-4 fw-bold">{title}</h2>}
+        <p className="text-muted text-center">{emptyMessage}</p>
+      </Container>
+    );
+  }
 
   const handleAdd = async (e: React.MouseEvent, item: Item) => {
     e.preventDefault();

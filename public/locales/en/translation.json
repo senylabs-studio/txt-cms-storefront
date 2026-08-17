@@ -236,7 +236,8 @@
     "inStockCount": "{{count}} in stock",
     "previousImage": "Previous image",
     "nextImage": "Next image",
-    "goToImage": "Go to image {{count}}"
+    "goToImage": "Go to image {{count}}",
+    "noFeaturedProducts": "No featured products configured."
   },
   "filters": {
     "title": "Filters",
