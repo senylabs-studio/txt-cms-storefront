@@ -6,15 +6,7 @@ import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { getOrders } from '../../services/profileService';
 import type { StorefrontOrder } from '../../types';
-
-const statusVariant: Record<string, string> = {
-  PendingPayment: 'warning',
-  Paid: 'success',
-  Shipped: 'info',
-  Delivered: 'primary',
-  Cancelled: 'danger',
-  Returned: 'secondary',
-};
+import { ORDER_STATUS_VARIANT } from '../../utils/orderStatus';
 
 const OrdersPage: React.FC = () => {
   const { t } = useTranslation();
@@ -67,7 +59,7 @@ const OrdersPage: React.FC = () => {
                     <td className="fw-semibold">#{o.id}</td>
                     <td>{new Date(o.createdAt).toLocaleDateString('es-ES')}</td>
                     <td>
-                      <Badge bg={statusVariant[o.status] ?? 'secondary'}>
+                      <Badge bg={ORDER_STATUS_VARIANT[o.status] ?? 'secondary'}>
                         {t(`orders.statuses.${o.status}`, { defaultValue: o.status })}
                       </Badge>
                     </td>

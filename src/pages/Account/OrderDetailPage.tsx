@@ -6,11 +6,7 @@ import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { getOrderDetail } from '../../services/profileService';
 import type { StorefrontOrderDetail } from '../../types';
-
-const statusVariant: Record<string, string> = {
-  PendingPayment: 'warning', Paid: 'success',
-  Shipped: 'info', Delivered: 'primary', Cancelled: 'danger', Returned: 'secondary',
-};
+import { ORDER_STATUS_VARIANT } from '../../utils/orderStatus';
 
 const OrderDetailPage: React.FC = () => {
   const { t } = useTranslation();
@@ -39,7 +35,7 @@ const OrderDetailPage: React.FC = () => {
 
         <div className="d-flex align-items-center gap-3 mb-4">
           <h2 className="fw-bold mb-0">{t('orderDetail.order', { id: order.id })}</h2>
-          <Badge bg={statusVariant[order.status] ?? 'secondary'} className="fs-6">
+          <Badge bg={ORDER_STATUS_VARIANT[order.status] ?? 'secondary'} className="fs-6">
             {t(`orders.statuses.${order.status}`, { defaultValue: order.status })}
           </Badge>
         </div>
