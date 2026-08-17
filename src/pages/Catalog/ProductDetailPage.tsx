@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Spinner, Alert, Badge } from 'react-bootstrap';
 import { FaArrowLeft } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import VariantCard from '../../components/Product/VariantCard/VariantCard';
 import { getProductBySlug } from '../../services/productService';
@@ -9,6 +10,7 @@ import { formatComposition } from '../../utils/composition';
 import type { StorefrontProduct, StorefrontVariant } from '../../types';
 
 const ProductDetailPage: React.FC = () => {
+  const { t } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
 
@@ -30,7 +32,7 @@ const ProductDetailPage: React.FC = () => {
   }, [slug]);
 
   if (loading) return <MainLayout><div className="text-center py-5"><Spinner animation="border" variant="primary" /></div></MainLayout>;
-  if (notFound) return <MainLayout><Container className="py-5"><Alert variant="warning">Producto no encontrado.</Alert></Container></MainLayout>;
+  if (notFound) return <MainLayout><Container className="py-5"><Alert variant="warning">{t('product.productNotFound')}</Alert></Container></MainLayout>;
   if (!product) return null;
 
   const variants: StorefrontVariant[] = (product.variants ?? []).map(v => ({
@@ -47,7 +49,7 @@ const ProductDetailPage: React.FC = () => {
     <MainLayout>
       <Container className="py-4">
         <button className="btn btn-link p-0 mb-4 text-muted" onClick={() => navigate(-1)}>
-          <FaArrowLeft className="me-1" /> Volver
+          <FaArrowLeft className="me-1" /> {t('product.back')}
         </button>
 
         {/* Product header */}
@@ -57,10 +59,10 @@ const ProductDetailPage: React.FC = () => {
           )}
           <h1 className="h2 fw-bold mb-2">{product.name}</h1>
           <div className="d-flex gap-2 align-items-center mb-3">
-            <Badge bg="secondary">{variants.length} referencias</Badge>
+            <Badge bg="secondary">{t('product.referencesCount', { count: variants.length })}</Badge>
             {inStock > 0
-              ? <Badge bg="success">{inStock} en stock</Badge>
-              : <Badge bg="secondary">Sin stock</Badge>}
+              ? <Badge bg="success">{t('product.inStockCount', { count: inStock })}</Badge>
+              : <Badge bg="secondary">{t('product.outOfStock')}</Badge>}
           </div>
           {product.description && (
             <p className="text-muted" style={{ maxWidth: 700, whiteSpace: 'pre-line' }}>{product.description}</p>
@@ -70,13 +72,13 @@ const ProductDetailPage: React.FC = () => {
               <tbody>
                 {product.width && product.width > 0 && (
                   <tr>
-                    <td className="text-muted fw-semibold" style={{ width: 140 }}>Ancho</td>
-                    <td>{product.width} cm</td>
+                    <td className="text-muted fw-semibold" style={{ width: 140 }}>{t('product.width')}</td>
+                    <td>{product.width} {t('product.widthUnit')}</td>
                   </tr>
                 )}
                 {formatComposition(product.composition) && (
                   <tr>
-                    <td className="text-muted fw-semibold align-top">Composición</td>
+                    <td className="text-muted fw-semibold align-top">{t('product.composition')}</td>
                     <td>{formatComposition(product.composition)}</td>
                   </tr>
                 )}

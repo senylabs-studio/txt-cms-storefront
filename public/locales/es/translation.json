@@ -41,7 +41,8 @@
       "submit": "Entrar",
       "noAccount": "¿No tienes cuenta?",
       "registerLink": "Regístrate aquí",
-      "error": "Credenciales incorrectas"
+      "error": "Credenciales incorrectas",
+      "sessionExpired": "Tu sesión ha expirado. Inicia sesión de nuevo."
     },
     "register": {
       "title": "Crear cuenta",
@@ -200,7 +201,10 @@
     "priceUnit": "€/m",
     "inStock": "En stock",
     "stockWarning": "¡Solo quedan {{count}}m!",
-    "addError": "Error al añadir al carrito"
+    "addError": "Error al añadir al carrito",
+    "productNotFound": "Producto no encontrado.",
+    "referencesCount": "{{count}} referencias",
+    "inStockCount": "{{count}} en stock"
   },
   "filters": {
     "title": "Filtros",
@@ -231,7 +235,15 @@
     "browseCatalog": "Ver catálogo"
   },
   "catalog": {
-    "notFound": "Página no encontrada."
+    "notFound": "Página no encontrada.",
+    "home": {
+      "title": "Nuestros productos",
+      "itemsAvailable": "{{count}} referencias disponibles",
+      "searchPlaceholder": "Buscar productos...",
+      "noResults": "No se encontraron productos.",
+      "noResultsFor": "No se encontraron productos para \"{{search}}\".",
+      "viewAll": "Ver todos"
+    }
   },
   "sitemap": {
     "pages": "Páginas"

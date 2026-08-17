@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { Card, Badge, Button, Form, InputGroup } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { FaShoppingCart, FaCheck, FaTimes } from 'react-icons/fa';
@@ -24,6 +25,7 @@ const VariantCard: React.FC<Props> = ({ variant }) => {
 
   const [showQtyForm, setShowQtyForm] = useState(false);
   const [quantity, setQuantity] = useState(MIN_QTY);
+  const [error, setError] = useState('');
 
   const outOfStock = variant.availableStock <= 0;
   const hasSaleDiscount = variant.originalPrice > variant.price;
@@ -33,13 +35,19 @@ const VariantCard: React.FC<Props> = ({ variant }) => {
   const handleOpenQty = () => {
     if (!isAuthenticated) { navigate('/login'); return; }
     setQuantity(MIN_QTY);
+    setError('');
     setShowQtyForm(true);
   };
 
   const handleConfirm = async () => {
-    await addItem(undefined, variant.id, quantity);
-    setShowQtyForm(false);
-    setQuantity(MIN_QTY);
+    setError('');
+    try {
+      await addItem(undefined, variant.id, quantity);
+      setShowQtyForm(false);
+      setQuantity(MIN_QTY);
+    } catch (e) {
+      setError((axios.isAxiosError(e) && e.response?.data?.message) ?? t('product.addError'));
+    }
   };
 
   const handleCancel = () => {
@@ -121,6 +129,7 @@ const VariantCard: React.FC<Props> = ({ variant }) => {
                   <FaTimes />
                 </Button>
               </div>
+              {error && <div className="text-danger small mt-1">{error}</div>}
             </div>
           ) : (
             <Button

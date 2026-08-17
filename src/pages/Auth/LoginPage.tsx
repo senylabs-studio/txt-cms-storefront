@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Container, Card, Form, Button, Alert, Spinner } from 'react-bootstrap';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { login as loginService } from '../../services/authService';
@@ -13,6 +13,8 @@ const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? '/catalog';
+  const [searchParams] = useSearchParams();
+  const sessionExpired = searchParams.get('expired') === '1';
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -41,6 +43,7 @@ const LoginPage: React.FC = () => {
           <Card.Body className="p-4">
             <h4 className="fw-bold mb-4 text-center">{t('auth.login.title')}</h4>
 
+            {sessionExpired && <Alert variant="warning" className="py-2">{t('auth.login.sessionExpired')}</Alert>}
             {error && <Alert variant="danger" className="py-2">{error}</Alert>}
 
             <Form onSubmit={handleSubmit}>

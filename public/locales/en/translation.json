@@ -41,7 +41,8 @@
       "submit": "Log in",
       "noAccount": "Don't have an account?",
       "registerLink": "Sign up here",
-      "error": "Invalid credentials"
+      "error": "Invalid credentials",
+      "sessionExpired": "Your session has expired. Please log in again."
     },
     "register": {
       "title": "Create account",
@@ -200,7 +201,10 @@
     "priceUnit": "€/m",
     "inStock": "In stock",
     "stockWarning": "Only {{count}}m left!",
-    "addError": "Error adding to cart"
+    "addError": "Error adding to cart",
+    "productNotFound": "Product not found.",
+    "referencesCount": "{{count}} references",
+    "inStockCount": "{{count}} in stock"
   },
   "filters": {
     "title": "Filters",
@@ -231,7 +235,15 @@
     "browseCatalog": "Browse catalog"
   },
   "catalog": {
-    "notFound": "Page not found."
+    "notFound": "Page not found.",
+    "home": {
+      "title": "Our products",
+      "itemsAvailable": "{{count}} items available",
+      "searchPlaceholder": "Search products...",
+      "noResults": "No products found.",
+      "noResultsFor": "No products found for \"{{search}}\".",
+      "viewAll": "View all"
+    }
   },
   "sitemap": {
     "pages": "Pages"

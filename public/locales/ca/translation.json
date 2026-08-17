@@ -41,7 +41,8 @@
       "submit": "Entrar",
       "noAccount": "No tens compte?",
       "registerLink": "Registra't aquí",
-      "error": "Credencials incorrectes"
+      "error": "Credencials incorrectes",
+      "sessionExpired": "La teva sessió ha caducat. Torna a iniciar sessió."
     },
     "register": {
       "title": "Crear compte",
@@ -200,7 +201,10 @@
     "priceUnit": "€/m",
     "inStock": "En estoc",
     "stockWarning": "Només queden {{count}}m!",
-    "addError": "Error en afegir a la cistella"
+    "addError": "Error en afegir a la cistella",
+    "productNotFound": "Producte no trobat.",
+    "referencesCount": "{{count}} referències",
+    "inStockCount": "{{count}} en estoc"
   },
   "filters": {
     "title": "Filtres",
@@ -231,7 +235,15 @@
     "browseCatalog": "Veure catàleg"
   },
   "catalog": {
-    "notFound": "Pàgina no trobada."
+    "notFound": "Pàgina no trobada.",
+    "home": {
+      "title": "Els nostres productes",
+      "itemsAvailable": "{{count}} referències disponibles",
+      "searchPlaceholder": "Cerca productes...",
+      "noResults": "No s'han trobat productes.",
+      "noResultsFor": "No s'han trobat productes per a \"{{search}}\".",
+      "viewAll": "Veure tots"
+    }
   },
   "sitemap": {
     "pages": "Pàgines"

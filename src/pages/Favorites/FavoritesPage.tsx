@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Button, Spinner, Badge } from 'react-bootstrap';
+import axios from 'axios';
+import { Container, Row, Col, Button, Spinner, Badge, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaHeart, FaShoppingCart, FaTrash } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
@@ -14,6 +15,7 @@ const FavoritesPage: React.FC = () => {
   const { t } = useTranslation();
   const [items, setItems] = useState<FavoriteItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const { toggle } = useFavorites();
   const { addItem, loading: cartLoading } = useCart();
   const { isAuthenticated } = useAuth();
@@ -37,9 +39,14 @@ const FavoritesPage: React.FC = () => {
     if (!isAuthenticated) { navigate('/login'); return; }
     const entity = item.variant ?? item.product;
     if (!entity) return;
-    if (item.variantId) await addItem(undefined, item.variantId, 1);
-    else if (item.productId && !entity.hasVariants) await addItem(item.productId, undefined, 1);
-    else if (item.productId) navigate(`/product/${entity.slug}`);
+    setError('');
+    try {
+      if (item.variantId) await addItem(undefined, item.variantId, 1);
+      else if (item.productId && !entity.hasVariants) await addItem(item.productId, undefined, 1);
+      else if (item.productId) navigate(`/product/${entity.slug}`);
+    } catch (e) {
+      setError((axios.isAxiosError(e) && e.response?.data?.message) ?? t('product.addError'));
+    }
   };
 
   if (loading) {
@@ -54,6 +61,8 @@ const FavoritesPage: React.FC = () => {
           <h2 className="mb-0">{t('favorites.title')}</h2>
           {items.length > 0 && <Badge bg="secondary">{items.length}</Badge>}
         </div>
+
+        {error && <Alert variant="danger" className="py-2">{error}</Alert>}
 
         {items.length === 0 ? (
           <div className="text-center py-5 text-muted">
