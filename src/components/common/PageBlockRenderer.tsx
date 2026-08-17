@@ -22,6 +22,7 @@ import type {
 } from '../../types';
 import { pageUrl } from '../../utils/pageUrl';
 import VariantCard from '../Product/VariantCard/VariantCard';
+import FeaturedProductsGrid from './FeaturedProductsGrid/FeaturedProductsGrid';
 import './PageBlockRenderer.css';
 
 // ─── Style helpers ────────────────────────────────────────────────────────────
@@ -295,19 +296,11 @@ const ProductsBlock: React.FC<{ config: ProductsBlockConfig; pageDetail?: Storef
   );
 };
 
-const FeaturedProductsBlock: React.FC<{ config: FeaturedProductsBlockConfig }> = ({ config }) => {
-  // productIds are stored in config; the storefront would need to fetch them.
-  // This renders a placeholder if no data is injected externally.
-  const title = config.title;
-  const ids = config.productIds ?? [];
-  if (ids.length === 0 && !title) return null;
-  return (
-    <div style={buildStyle(config.style)}>
-      {title && <h3 className="pbr-featured-title">{title}</h3>}
-      {ids.length === 0 && <p className="text-muted">No hay productos destacados configurados.</p>}
-    </div>
-  );
-};
+const FeaturedProductsBlock: React.FC<{ config: FeaturedProductsBlockConfig }> = ({ config }) => (
+  <div style={buildStyle(config.style)}>
+    <FeaturedProductsGrid title={config.title} variants={config.variants} products={config.products} />
+  </div>
+);
 
 // ─── Registry ─────────────────────────────────────────────────────────────────
 // Each *Block component above is precisely typed against its own config shape —

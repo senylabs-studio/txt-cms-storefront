@@ -336,6 +336,23 @@ export interface FeaturedProductsBlockConfig {
   title?: string;
   productIds?: number[];
   style?: BlockStyle;
+  /** Resolved server-side from productIds/variantIds — see FeaturedProductItem. */
+  variants?: FeaturedProductGridItem[];
+  products?: FeaturedProductGridItem[];
+}
+
+/** Shape the backend resolves productIds/variantIds into (mirrors HomeFeaturedItem). */
+export interface FeaturedProductGridItem {
+  id: number;
+  name: string;
+  slug?: string;
+  price: number;
+  originalPrice: number;
+  discountPercent?: number;
+  availableStock: number;
+  thumbnailUrl?: string;
+  imageUrls?: string[];
+  hasVariants?: boolean;
 }
 
 export interface PageBlockConfigMap {
