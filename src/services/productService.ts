@@ -1,15 +1,6 @@
 import apiClient from '../apiClient';
 import type { PaginatedResponse, StorefrontProduct, StorefrontVariant, StorefrontVariantDetail } from '../types';
 
-export const getProducts = async (
-  page = 1, pageSize = 12, search = '', productTypeId?: number, orderBy = 'name', orderDir = 'asc'
-): Promise<PaginatedResponse<StorefrontProduct>> => {
-  const res = await apiClient.get('/storefront/products', {
-    params: { page, pageSize, search, productTypeId, orderBy, orderDir }
-  });
-  return res.data;
-};
-
 export const getProductBySlug = async (slug: string): Promise<StorefrontProduct> => {
   const res = await apiClient.get(`/storefront/products/${slug}`);
   return res.data;
