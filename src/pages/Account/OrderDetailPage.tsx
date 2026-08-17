@@ -9,7 +9,7 @@ import type { StorefrontOrderDetail } from '../../types';
 
 const statusVariant: Record<string, string> = {
   PendingPayment: 'warning', Paid: 'success',
-  Shipped: 'info', Cancelled: 'danger', Returned: 'secondary',
+  Shipped: 'info', Delivered: 'primary', Cancelled: 'danger', Returned: 'secondary',
 };
 
 const OrderDetailPage: React.FC = () => {

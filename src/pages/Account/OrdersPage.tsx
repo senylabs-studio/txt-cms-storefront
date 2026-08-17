@@ -11,6 +11,7 @@ const statusVariant: Record<string, string> = {
   PendingPayment: 'warning',
   Paid: 'success',
   Shipped: 'info',
+  Delivered: 'primary',
   Cancelled: 'danger',
   Returned: 'secondary',
 };
