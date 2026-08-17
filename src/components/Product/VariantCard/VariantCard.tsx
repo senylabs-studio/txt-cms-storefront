@@ -10,6 +10,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import FavoriteButton from '../../common/FavoriteButton/FavoriteButton';
 import { formatComposition } from '../../../utils/composition';
+import { getDiscountInfo } from '../../../utils/pricing';
 import '../ProductCard/ProductCard.css';
 
 const MIN_QTY = 0.3;
@@ -28,9 +29,7 @@ const VariantCard: React.FC<Props> = ({ variant }) => {
   const [error, setError] = useState('');
 
   const outOfStock = variant.availableStock <= 0;
-  const hasSaleDiscount = variant.originalPrice > variant.price;
-  const hasGroupDiscount = (variant.discountPercent ?? 0) > 0;
-  const hasDiscount = hasSaleDiscount || hasGroupDiscount;
+  const { hasGroupDiscount, hasDiscount } = getDiscountInfo(variant.price, variant.originalPrice, variant.discountPercent);
 
   const handleOpenQty = () => {
     if (!isAuthenticated) { navigate('/login'); return; }

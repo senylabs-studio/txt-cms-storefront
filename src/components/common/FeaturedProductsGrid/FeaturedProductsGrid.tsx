@@ -6,6 +6,7 @@ import { FaShoppingCart } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '../../../contexts/CartContext';
 import { useAuth } from '../../../contexts/AuthContext';
+import { getDiscountInfo } from '../../../utils/pricing';
 import './FeaturedProductsGrid.css';
 
 /** Shape the backend resolves variantIds/productIds into server-side (see homeService.ts). */
@@ -80,8 +81,7 @@ const FeaturedProductsGrid: React.FC<Props> = ({ title, variants = [], products 
         {allItems.map(item => {
           const slug = item._isVariant ? `/variant/${item.id}` : `/product/${item.slug}`;
           const outOfStock = item.availableStock <= 0;
-          const hasDiscount = item.originalPrice > item.price;
-          const hasGroupDiscount = (item.discountPercent ?? 0) > 0;
+          const { hasGroupDiscount, hasDiscount } = getDiscountInfo(item.price, item.originalPrice, item.discountPercent);
           const thumbnail = item.thumbnailUrl ?? item.imageUrls?.[0];
 
           return (
@@ -91,7 +91,7 @@ const FeaturedProductsGrid: React.FC<Props> = ({ title, variants = [], products 
                   {thumbnail
                     ? <img src={thumbnail} alt={item.name} className="home-featured-img" />
                     : <div className="home-featured-placeholder">📦</div>}
-                  {(hasDiscount || hasGroupDiscount) && (
+                  {hasDiscount && (
                     <Badge bg="danger" className="position-absolute top-0 start-0 m-2" style={{ fontSize: 10 }}>
                       {hasGroupDiscount ? `−${item.discountPercent}%` : t('product.offer')}
                     </Badge>
@@ -102,7 +102,7 @@ const FeaturedProductsGrid: React.FC<Props> = ({ title, variants = [], products 
                   <div className="home-featured-name"><Link to={slug}>{item.name}</Link></div>
                   <div className="d-flex align-items-baseline gap-1 mt-1">
                     <span className="fw-bold text-danger">€{item.price?.toFixed(2)}</span>
-                    {(hasDiscount || hasGroupDiscount) && (
+                    {hasDiscount && (
                       <span className="text-muted text-decoration-line-through small">€{item.originalPrice?.toFixed(2)}</span>
                     )}
                   </div>
