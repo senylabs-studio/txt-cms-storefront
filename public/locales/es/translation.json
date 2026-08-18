@@ -98,6 +98,18 @@
     "success": "¡Gracias! Hemos recibido tu mensaje y te responderemos lo antes posible.",
     "error": "No se pudo enviar el mensaje. Inténtalo de nuevo."
   },
+  "newsletter": {
+    "unsubscribe": {
+      "title": "Darse de baja",
+      "instructions": "¿Seguro que quieres dejar de recibir nuestras comunicaciones por email?",
+      "confirm": "Darme de baja",
+      "loading": "Procesando...",
+      "success": "Te has dado de baja correctamente. Ya no recibirás más comunicaciones por email.",
+      "invalidLink": "Este enlace no es válido.",
+      "error": "No se pudo procesar la solicitud. Inténtalo de nuevo.",
+      "backToHome": "Volver al inicio"
+    }
+  },
   "checkout": {
     "title": "Finalizar compra",
     "cartEmpty": "Tu carrito está vacío.",

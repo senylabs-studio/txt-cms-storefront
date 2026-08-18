@@ -98,6 +98,18 @@
     "success": "Thank you! We've received your message and will get back to you soon.",
     "error": "Could not send the message. Please try again."
   },
+  "newsletter": {
+    "unsubscribe": {
+      "title": "Unsubscribe",
+      "instructions": "Are you sure you want to stop receiving our email communications?",
+      "confirm": "Unsubscribe me",
+      "loading": "Processing...",
+      "success": "You've been unsubscribed. You won't receive any more email communications.",
+      "invalidLink": "This link isn't valid.",
+      "error": "Could not process the request. Please try again.",
+      "backToHome": "Back to home"
+    }
+  },
   "checkout": {
     "title": "Checkout",
     "cartEmpty": "Your cart is empty.",

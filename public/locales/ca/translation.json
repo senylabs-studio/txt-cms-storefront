@@ -98,6 +98,18 @@
     "success": "Gràcies! Hem rebut el teu missatge i et respondrem el més aviat possible.",
     "error": "No s'ha pogut enviar el missatge. Torna-ho a provar."
   },
+  "newsletter": {
+    "unsubscribe": {
+      "title": "Donar-se de baixa",
+      "instructions": "Segur que vols deixar de rebre les nostres comunicacions per email?",
+      "confirm": "Donar-me de baixa",
+      "loading": "Processant...",
+      "success": "T'has donat de baixa correctament. Ja no rebràs més comunicacions per email.",
+      "invalidLink": "Aquest enllaç no és vàlid.",
+      "error": "No s'ha pogut processar la sol·licitud. Torna-ho a provar.",
+      "backToHome": "Tornar a l'inici"
+    }
+  },
   "checkout": {
     "title": "Finalitzar compra",
     "cartEmpty": "La teva cistella està buida.",
