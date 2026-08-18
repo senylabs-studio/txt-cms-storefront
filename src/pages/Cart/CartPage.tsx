@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { Container, Row, Col, Button, Card, Alert, Form } from 'react-bootstrap';
 import { FaTrash, FaArrowRight } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
@@ -13,6 +14,25 @@ const CartPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [timeLeft, setTimeLeft] = useState('');
+  const [itemError, setItemError] = useState('');
+
+  const handleUpdate = async (itemId: number, quantity: number) => {
+    setItemError('');
+    try {
+      await updateItem(itemId, quantity);
+    } catch (e) {
+      setItemError((axios.isAxiosError(e) && e.response?.data?.message) ?? t('cart.updateError'));
+    }
+  };
+
+  const handleRemove = async (itemId: number) => {
+    setItemError('');
+    try {
+      await removeItem(itemId);
+    } catch (e) {
+      setItemError((axios.isAxiosError(e) && e.response?.data?.message) ?? t('cart.removeError'));
+    }
+  };
 
   useEffect(() => { if (isAuthenticated) fetchCart(); }, [isAuthenticated]);
 
@@ -54,6 +74,7 @@ const CartPage: React.FC = () => {
         ) : (
           <Row>
             <Col lg={8}>
+              {itemError && <Alert variant="danger" dismissible onClose={() => setItemError('')}>{itemError}</Alert>}
               {timeLeft && (
                 <Alert variant={timeLeft === t('cart.expired') ? 'danger' : 'warning'} className="d-flex align-items-center gap-2">
                   🕐 {t('cart.reserveExpires')} <strong>{timeLeft}</strong>
@@ -92,7 +113,7 @@ const CartPage: React.FC = () => {
                           value={item.quantity}
                           onChange={(e) => {
                             const v = parseFloat(e.target.value);
-                            if (!isNaN(v) && v >= 0.3) updateItem(item.id, v);
+                            if (!isNaN(v) && v >= 0.3) handleUpdate(item.id, v);
                           }}
                           style={{ width: 90 }}
                           disabled={loading}
@@ -100,7 +121,7 @@ const CartPage: React.FC = () => {
                       </Col>
                       <Col sm={2} className="text-end mt-2 mt-sm-0">
                         <div className="fw-bold">€{item.subtotal.toFixed(2)}</div>
-                        <Button size="sm" variant="link" className="text-danger p-0" onClick={() => removeItem(item.id)} disabled={loading}>
+                        <Button size="sm" variant="link" className="text-danger p-0" onClick={() => handleRemove(item.id)} disabled={loading}>
                           <FaTrash size={12} />
                         </Button>
                       </Col>

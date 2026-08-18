@@ -33,7 +33,9 @@
     "viewFull": "Ver carrito completo",
     "summary": "Resumen",
     "refresh": "Actualizar",
-    "loginRequired": "Inicia sesión para ver tu carrito"
+    "loginRequired": "Inicia sesión para ver tu carrito",
+    "updateError": "Error al actualizar la cantidad",
+    "removeError": "Error al eliminar el producto"
   },
   "auth": {
     "login": {
@@ -183,6 +185,7 @@
     "defaultAddress": "Dirección principal",
     "cancel": "Cancelar",
     "addrSaveError": "Error al guardar dirección",
+    "addrDeleteError": "Error al eliminar dirección",
     "selectCountry": "Selecciona un país"
   },
   "orders": {

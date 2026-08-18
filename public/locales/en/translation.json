@@ -33,7 +33,9 @@
     "viewFull": "View full cart",
     "summary": "Summary",
     "refresh": "Refresh",
-    "loginRequired": "Log in to view your cart"
+    "loginRequired": "Log in to view your cart",
+    "updateError": "Error updating quantity",
+    "removeError": "Error removing item"
   },
   "auth": {
     "login": {
@@ -183,6 +185,7 @@
     "defaultAddress": "Default address",
     "cancel": "Cancel",
     "addrSaveError": "Error saving address",
+    "addrDeleteError": "Error deleting address",
     "selectCountry": "Select a country"
   },
   "orders": {

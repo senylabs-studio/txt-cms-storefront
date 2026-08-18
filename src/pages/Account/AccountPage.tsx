@@ -31,6 +31,7 @@ const AccountPage: React.FC = () => {
   const [editAddrId, setEditAddrId] = useState<number | null>(null);
   const [addrSaving, setAddrSaving] = useState(false);
   const [addrError, setAddrError] = useState('');
+  const [addrListError, setAddrListError] = useState('');
   const [countries, setCountries] = useState<VisibleCountry[]>([]);
 
   useEffect(() => {
@@ -81,11 +82,12 @@ const AccountPage: React.FC = () => {
 
   const handleDeleteAddr = async (id: number) => {
     if (!confirm(t('account.deleteConfirm'))) return;
+    setAddrListError('');
     try {
       await deleteAddress(id);
       setProfile(p => p ? { ...p, addresses: p.addresses.filter(a => a.id !== id) } : p);
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
+      setAddrListError((axios.isAxiosError(e) && e.response?.data?.message) ?? t('account.addrDeleteError'));
     }
   };
 
@@ -143,6 +145,8 @@ const AccountPage: React.FC = () => {
                   <h5 className="fw-semibold mb-0"><FaMapMarkerAlt className="me-2" />{t('account.myAddresses')}</h5>
                   <Button size="sm" variant="primary" onClick={openAddAddr}><FaPlus className="me-1" />{t('account.add')}</Button>
                 </div>
+
+                {addrListError && <Alert variant="danger" dismissible onClose={() => setAddrListError('')} className="py-2">{addrListError}</Alert>}
 
                 {profile.addresses.length === 0 ? (
                   <p className="text-muted text-center py-3">{t('account.noAddresses')}</p>

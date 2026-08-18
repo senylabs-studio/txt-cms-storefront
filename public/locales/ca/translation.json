@@ -33,7 +33,9 @@
     "viewFull": "Veure cistella completa",
     "summary": "Resum",
     "refresh": "Actualitzar",
-    "loginRequired": "Inicia sessió per veure la teva cistella"
+    "loginRequired": "Inicia sessió per veure la teva cistella",
+    "updateError": "Error en actualitzar la quantitat",
+    "removeError": "Error en eliminar el producte"
   },
   "auth": {
     "login": {
@@ -183,6 +185,7 @@
     "defaultAddress": "Adreça principal",
     "cancel": "Cancel·lar",
     "addrSaveError": "Error en desar l'adreça",
+    "addrDeleteError": "Error en eliminar l'adreça",
     "selectCountry": "Selecciona un país"
   },
   "orders": {

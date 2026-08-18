@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Offcanvas, Button } from 'react-bootstrap';
+import axios from 'axios';
+import { Offcanvas, Button, Alert } from 'react-bootstrap';
 import { FaTrash, FaMinus, FaPlus, FaShoppingBag } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +12,25 @@ const CartDrawer: React.FC = () => {
   const { cart, drawerOpen, closeDrawer, updateItem, removeItem, loading } = useCart();
   const navigate = useNavigate();
   const [timeLeft, setTimeLeft] = useState('');
+  const [itemError, setItemError] = useState('');
+
+  const handleUpdate = async (itemId: number, quantity: number) => {
+    setItemError('');
+    try {
+      await updateItem(itemId, quantity);
+    } catch (e) {
+      setItemError((axios.isAxiosError(e) && e.response?.data?.message) ?? t('cart.updateError'));
+    }
+  };
+
+  const handleRemove = async (itemId: number) => {
+    setItemError('');
+    try {
+      await removeItem(itemId);
+    } catch (e) {
+      setItemError((axios.isAxiosError(e) && e.response?.data?.message) ?? t('cart.removeError'));
+    }
+  };
 
   useEffect(() => {
     if (!cart?.expiresAt) { setTimeLeft(''); return; }
@@ -26,6 +46,8 @@ const CartDrawer: React.FC = () => {
     return () => clearInterval(id);
   }, [cart?.expiresAt, t]);
 
+  useEffect(() => { if (drawerOpen) setItemError(''); }, [drawerOpen]);
+
   const isEmpty = !cart?.items?.length;
 
   return (
@@ -38,6 +60,7 @@ const CartDrawer: React.FC = () => {
       </Offcanvas.Header>
 
       <Offcanvas.Body className="d-flex flex-column">
+        {itemError && <Alert variant="danger" dismissible onClose={() => setItemError('')} className="py-2">{itemError}</Alert>}
         {!isEmpty && timeLeft && (
           <div className={`cart-countdown mb-3 ${timeLeft === t('cart.expired') ? 'expired' : ''}`}>
             🕐 {t('cart.reserveExpires')} <strong>{timeLeft}</strong>
@@ -75,18 +98,18 @@ const CartDrawer: React.FC = () => {
                       </span>
                     </div>
                     <div className="cart-item-qty">
-                      <button className="qty-btn" disabled={loading || item.quantity <= 1} onClick={() => updateItem(item.id, item.quantity - 1)}>
+                      <button className="qty-btn" disabled={loading || item.quantity <= 1} onClick={() => handleUpdate(item.id, item.quantity - 1)}>
                         <FaMinus size={10} />
                       </button>
                       <span className="qty-value">{item.quantity}</span>
-                      <button className="qty-btn" disabled={loading || item.quantity >= item.availableStock} onClick={() => updateItem(item.id, item.quantity + 1)}>
+                      <button className="qty-btn" disabled={loading || item.quantity >= item.availableStock} onClick={() => handleUpdate(item.id, item.quantity + 1)}>
                         <FaPlus size={10} />
                       </button>
                     </div>
                   </div>
                   <div className="cart-item-subtotal">
                     <div className="fw-semibold">€{item.subtotal.toFixed(2)}</div>
-                    <button className="remove-btn" onClick={() => removeItem(item.id)} disabled={loading}>
+                    <button className="remove-btn" onClick={() => handleRemove(item.id)} disabled={loading}>
                       <FaTrash size={12} />
                     </button>
                   </div>
