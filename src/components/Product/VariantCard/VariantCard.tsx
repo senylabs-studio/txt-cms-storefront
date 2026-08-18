@@ -45,7 +45,7 @@ const VariantCard: React.FC<Props> = ({ variant }) => {
       setShowQtyForm(false);
       setQuantity(MIN_QTY);
     } catch (e) {
-      setError((axios.isAxiosError(e) && e.response?.data?.message) ?? t('product.addError'));
+      setError((axios.isAxiosError(e) ? e.response?.data?.message : undefined) ?? t('product.addError'));
     }
   };
 

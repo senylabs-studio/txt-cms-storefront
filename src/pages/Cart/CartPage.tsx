@@ -21,7 +21,7 @@ const CartPage: React.FC = () => {
     try {
       await updateItem(itemId, quantity);
     } catch (e) {
-      setItemError((axios.isAxiosError(e) && e.response?.data?.message) ?? t('cart.updateError'));
+      setItemError((axios.isAxiosError(e) ? e.response?.data?.message : undefined) ?? t('cart.updateError'));
     }
   };
 
@@ -30,7 +30,7 @@ const CartPage: React.FC = () => {
     try {
       await removeItem(itemId);
     } catch (e) {
-      setItemError((axios.isAxiosError(e) && e.response?.data?.message) ?? t('cart.removeError'));
+      setItemError((axios.isAxiosError(e) ? e.response?.data?.message : undefined) ?? t('cart.removeError'));
     }
   };
 

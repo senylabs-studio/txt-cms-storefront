@@ -74,7 +74,7 @@ const VariantDetailPage: React.FC = () => {
     if (!isAuthenticated) { navigate('/login'); return; }
     setError('');
     try { await addItem(undefined, variant.id, quantity); }
-    catch (e) { setError((axios.isAxiosError(e) && e.response?.data?.message) ?? t('product.addError')); }
+    catch (e) { setError((axios.isAxiosError(e) ? e.response?.data?.message : undefined) ?? t('product.addError')); }
   };
 
   // Composition

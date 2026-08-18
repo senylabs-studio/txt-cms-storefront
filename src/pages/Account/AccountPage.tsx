@@ -74,7 +74,7 @@ const AccountPage: React.FC = () => {
       setProfile(p);
       setShowAddr(false);
     } catch (e) {
-      setAddrError((axios.isAxiosError(e) && e.response?.data?.message) ?? t('account.addrSaveError'));
+      setAddrError((axios.isAxiosError(e) ? e.response?.data?.message : undefined) ?? t('account.addrSaveError'));
     } finally {
       setAddrSaving(false);
     }
@@ -87,7 +87,7 @@ const AccountPage: React.FC = () => {
       await deleteAddress(id);
       setProfile(p => p ? { ...p, addresses: p.addresses.filter(a => a.id !== id) } : p);
     } catch (e) {
-      setAddrListError((axios.isAxiosError(e) && e.response?.data?.message) ?? t('account.addrDeleteError'));
+      setAddrListError((axios.isAxiosError(e) ? e.response?.data?.message : undefined) ?? t('account.addrDeleteError'));
     }
   };
 

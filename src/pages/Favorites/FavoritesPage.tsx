@@ -45,7 +45,7 @@ const FavoritesPage: React.FC = () => {
       else if (item.productId && !entity.hasVariants) await addItem(item.productId, undefined, 1);
       else if (item.productId) navigate(`/product/${entity.slug}`);
     } catch (e) {
-      setError((axios.isAxiosError(e) && e.response?.data?.message) ?? t('product.addError'));
+      setError((axios.isAxiosError(e) ? e.response?.data?.message : undefined) ?? t('product.addError'));
     }
   };
 

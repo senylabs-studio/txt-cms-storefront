@@ -30,7 +30,7 @@ const LoginPage: React.FC = () => {
       login(data);
       navigate(from, { replace: true });
     } catch (e) {
-      setError((axios.isAxiosError(e) && e.response?.data?.message) ?? t('auth.login.error'));
+      setError((axios.isAxiosError(e) ? e.response?.data?.message : undefined) ?? t('auth.login.error'));
     } finally {
       setLoading(false);
     }
