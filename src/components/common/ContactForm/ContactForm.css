@@ -1,0 +1,17 @@
+.contact-form {
+  max-width: 600px;
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.contact-form-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1.25rem;
+}
+
+.contact-form-success {
+  max-width: 600px;
+  margin-top: 2.5rem;
+}

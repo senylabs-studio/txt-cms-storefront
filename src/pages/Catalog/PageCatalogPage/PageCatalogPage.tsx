@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import './PageCatalogPage.css';
 import MainLayout from '../../../components/Layout/MainLayout';
 import PageBlockRenderer from '../../../components/common/PageBlockRenderer';
+import ContactForm from '../../../components/common/ContactForm/ContactForm';
 import ProductFilters from '../../../components/common/ProductFilters';
 import SitemapContent from '../SitemapPage/SitemapContent';
 import { getPageBySlug, type PageFilters } from '../../../services/pageService';
@@ -122,6 +123,7 @@ const PageCatalogPage: React.FC = () => {
             {pageDetail.blocks?.length > 0 && (
               <PageBlockRenderer blocks={pageDetail.blocks} pageDetail={pageDetail} />
             )}
+            {pageDetail.type === 'Form' && <ContactForm />}
           </div>
         ) : (
           <>
