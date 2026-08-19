@@ -191,7 +191,15 @@
     "cancel": "Cancel",
     "addrSaveError": "Error saving address",
     "addrDeleteError": "Error deleting address",
-    "selectCountry": "Select a country"
+    "selectCountry": "Select a country",
+    "changePasswordTitle": "Password",
+    "changePassword": "Change password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm new password",
+    "passwordMismatch": "Passwords don't match.",
+    "passwordChanged": "Password updated successfully.",
+    "passwordChangeError": "Couldn't change the password."
   },
   "orders": {
     "backToAccount": "Back to my account",

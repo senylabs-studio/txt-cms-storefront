@@ -191,7 +191,15 @@
     "cancel": "Cancelar",
     "addrSaveError": "Error al guardar dirección",
     "addrDeleteError": "Error al eliminar dirección",
-    "selectCountry": "Selecciona un país"
+    "selectCountry": "Selecciona un país",
+    "changePasswordTitle": "Contraseña",
+    "changePassword": "Cambiar contraseña",
+    "currentPassword": "Contraseña actual",
+    "newPassword": "Nueva contraseña",
+    "confirmPassword": "Confirmar nueva contraseña",
+    "passwordMismatch": "Las contraseñas no coinciden.",
+    "passwordChanged": "Contraseña actualizada correctamente.",
+    "passwordChangeError": "No se ha podido cambiar la contraseña."
   },
   "orders": {
     "backToAccount": "Volver a mi cuenta",

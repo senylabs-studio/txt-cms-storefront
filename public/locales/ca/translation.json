@@ -191,7 +191,15 @@
     "cancel": "Cancel·lar",
     "addrSaveError": "Error en desar l'adreça",
     "addrDeleteError": "Error en eliminar l'adreça",
-    "selectCountry": "Selecciona un país"
+    "selectCountry": "Selecciona un país",
+    "changePasswordTitle": "Contrasenya",
+    "changePassword": "Canviar contrasenya",
+    "currentPassword": "Contrasenya actual",
+    "newPassword": "Contrasenya nova",
+    "confirmPassword": "Confirmar contrasenya nova",
+    "passwordMismatch": "Les contrasenyes no coincideixen.",
+    "passwordChanged": "Contrasenya actualitzada correctament.",
+    "passwordChangeError": "No s'ha pogut canviar la contrasenya."
   },
   "orders": {
     "backToAccount": "Tornar al meu compte",

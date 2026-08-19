@@ -13,14 +13,15 @@ vi.mock('../../components/Layout/MainLayout', () => ({
   default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
-const { getProfile, updateProfile, addAddress, updateAddress, deleteAddress } = vi.hoisted(() => ({
+const { getProfile, updateProfile, changePassword, addAddress, updateAddress, deleteAddress } = vi.hoisted(() => ({
   getProfile: vi.fn(),
   updateProfile: vi.fn(),
+  changePassword: vi.fn(),
   addAddress: vi.fn(),
   updateAddress: vi.fn(),
   deleteAddress: vi.fn(),
 }));
-vi.mock('../../services/profileService', () => ({ getProfile, updateProfile, addAddress, updateAddress, deleteAddress }));
+vi.mock('../../services/profileService', () => ({ getProfile, updateProfile, changePassword, addAddress, updateAddress, deleteAddress }));
 
 const { getVisibleCountries } = vi.hoisted(() => ({ getVisibleCountries: vi.fn() }));
 vi.mock('../../services/countryService', () => ({ getVisibleCountries }));
@@ -164,5 +165,59 @@ describe('AccountPage', () => {
     fireEvent.click(deleteBtn);
 
     expect(await screen.findByText('account.addrDeleteError')).toBeInTheDocument();
+  });
+
+  describe('change password', () => {
+    const fillPasswordForm = (current: string, next: string, confirm: string) => {
+      const [currentInput, newInput, confirmInput] = document.querySelectorAll('input[type="password"]');
+      fireEvent.change(currentInput, { target: { value: current } });
+      fireEvent.change(newInput, { target: { value: next } });
+      fireEvent.change(confirmInput, { target: { value: confirm } });
+    };
+
+    it('changes the password and shows a success message', async () => {
+      changePassword.mockResolvedValue(undefined);
+      renderAccount();
+      await screen.findByDisplayValue('Jane');
+
+      fillPasswordForm('OldP@ss1!', 'NewP@ss2!', 'NewP@ss2!');
+      fireEvent.click(screen.getByText('account.changePassword'));
+
+      await waitFor(() => expect(changePassword).toHaveBeenCalledWith('OldP@ss1!', 'NewP@ss2!'));
+      expect(await screen.findByText('account.passwordChanged')).toBeInTheDocument();
+    });
+
+    it('shows a mismatch error and does not call the API when the confirmation differs', async () => {
+      renderAccount();
+      await screen.findByDisplayValue('Jane');
+
+      fillPasswordForm('OldP@ss1!', 'NewP@ss2!', 'Different1!');
+      fireEvent.click(screen.getByText('account.changePassword'));
+
+      expect(await screen.findByText('account.passwordMismatch')).toBeInTheDocument();
+      expect(changePassword).not.toHaveBeenCalled();
+    });
+
+    it('shows the backend error message when changePassword rejects with an axios error', async () => {
+      changePassword.mockRejectedValue({ isAxiosError: true, response: { data: { message: 'La contraseña no es correcta.' } } });
+      renderAccount();
+      await screen.findByDisplayValue('Jane');
+
+      fillPasswordForm('WrongOld1!', 'NewP@ss2!', 'NewP@ss2!');
+      fireEvent.click(screen.getByText('account.changePassword'));
+
+      expect(await screen.findByText('La contraseña no es correcta.')).toBeInTheDocument();
+    });
+
+    it('shows a generic error message when changePassword rejects without axios details', async () => {
+      changePassword.mockRejectedValue(new Error('boom'));
+      renderAccount();
+      await screen.findByDisplayValue('Jane');
+
+      fillPasswordForm('OldP@ss1!', 'NewP@ss2!', 'NewP@ss2!');
+      fireEvent.click(screen.getByText('account.changePassword'));
+
+      expect(await screen.findByText('account.passwordChangeError')).toBeInTheDocument();
+    });
   });
 });

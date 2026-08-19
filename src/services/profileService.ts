@@ -10,6 +10,10 @@ export const updateProfile = async (data: { name: string; phone?: string; taxId?
   await apiClient.put('/storefront/profile', data);
 };
 
+export const changePassword = async (currentPassword: string, newPassword: string): Promise<void> => {
+  await apiClient.put('/storefront/profile/password', { currentPassword, newPassword });
+};
+
 export const addAddress = async (data: Partial<CustomerAddress>): Promise<CustomerAddress> => {
   const res = await apiClient.post('/storefront/profile/addresses', data);
   return res.data;

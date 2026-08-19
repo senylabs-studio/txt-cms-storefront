@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Container, Row, Col, Card, Form, Button, Alert, Spinner, Badge, Modal } from 'react-bootstrap';
-import { FaPlus, FaEdit, FaTrash, FaMapMarkerAlt, FaUser } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaMapMarkerAlt, FaUser, FaLock } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
-import { getProfile, updateProfile, addAddress, updateAddress, deleteAddress } from '../../services/profileService';
+import { getProfile, updateProfile, changePassword, addAddress, updateAddress, deleteAddress } from '../../services/profileService';
 import { getVisibleCountries, type VisibleCountry } from '../../services/countryService';
 import type { StorefrontProfile, CustomerAddress } from '../../types';
 
@@ -24,6 +24,13 @@ const AccountPage: React.FC = () => {
   const [taxId, setTaxId] = useState('');
   const [saving, setSaving] = useState(false);
   const [profileMsg, setProfileMsg] = useState<{ type: 'success' | 'danger'; text: string } | null>(null);
+
+  // Change password form
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [pwdSaving, setPwdSaving] = useState(false);
+  const [pwdMsg, setPwdMsg] = useState<{ type: 'success' | 'danger'; text: string } | null>(null);
 
   // Address modal
   const [showAddr, setShowAddr] = useState(false);
@@ -55,6 +62,25 @@ const AccountPage: React.FC = () => {
       setProfileMsg({ type: 'danger', text: t('account.saveError') });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPwdMsg(null);
+    if (newPassword !== confirmPassword) {
+      setPwdMsg({ type: 'danger', text: t('account.passwordMismatch') });
+      return;
+    }
+    setPwdSaving(true);
+    try {
+      await changePassword(currentPassword, newPassword);
+      setPwdMsg({ type: 'success', text: t('account.passwordChanged') });
+      setCurrentPassword(''); setNewPassword(''); setConfirmPassword('');
+    } catch (e) {
+      setPwdMsg({ type: 'danger', text: (axios.isAxiosError(e) ? e.response?.data?.message : undefined) ?? t('account.passwordChangeError') });
+    } finally {
+      setPwdSaving(false);
     }
   };
 
@@ -133,6 +159,30 @@ const AccountPage: React.FC = () => {
 
                 <hr />
                 <Link to="/account/orders" className="btn btn-outline-secondary btn-sm w-100">{t('account.viewOrders')}</Link>
+              </Card.Body>
+            </Card>
+
+            <Card className="mt-4">
+              <Card.Body>
+                <h5 className="fw-semibold mb-3"><FaLock className="me-2" />{t('account.changePasswordTitle')}</h5>
+                {pwdMsg && <Alert variant={pwdMsg.type} className="py-2">{pwdMsg.text}</Alert>}
+                <Form onSubmit={handleChangePassword}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>{t('account.currentPassword')}</Form.Label>
+                    <Form.Control type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} required autoComplete="current-password" />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>{t('account.newPassword')}</Form.Label>
+                    <Form.Control type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} required autoComplete="new-password" minLength={6} />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>{t('account.confirmPassword')}</Form.Label>
+                    <Form.Control type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required autoComplete="new-password" />
+                  </Form.Group>
+                  <Button type="submit" variant="primary" disabled={pwdSaving}>
+                    {pwdSaving ? <Spinner size="sm" animation="border" /> : t('account.changePassword')}
+                  </Button>
+                </Form>
               </Card.Body>
             </Card>
           </Col>
