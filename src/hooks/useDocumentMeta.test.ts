@@ -30,9 +30,29 @@ describe('useDocumentMeta', () => {
     expect(document.querySelector('meta[name="description"]')?.getAttribute('content')).toBe('new');
   });
 
-  it('does not touch the description tag when none is provided', () => {
+  it('clears a stale description left by a previous page instead of leaving it', () => {
+    const existing = document.createElement('meta');
+    existing.name = 'description';
+    existing.content = 'previous page description';
+    document.head.appendChild(existing);
+
     renderHook(() => useDocumentMeta('Title only'));
-    expect(document.querySelector('meta[name="description"]')).toBeNull();
+
+    expect(document.querySelector('meta[name="description"]')?.getAttribute('content')).toBe('');
+  });
+
+  it('collapses newlines/extra whitespace from CMS free-text descriptions', () => {
+    renderHook(() => useDocumentMeta('Title', 'Line one.\n\nLine two.   Line three.'));
+    expect(document.querySelector('meta[name="description"]')?.getAttribute('content')).toBe('Line one. Line two. Line three.');
+  });
+
+  it('truncates descriptions longer than 160 characters', () => {
+    const long = 'A'.repeat(200);
+    renderHook(() => useDocumentMeta('Title', long));
+
+    const content = document.querySelector('meta[name="description"]')?.getAttribute('content') ?? '';
+    expect(content.length).toBe(160);
+    expect(content.endsWith('…')).toBe(true);
   });
 
   it('updates the title again when the arguments change', () => {

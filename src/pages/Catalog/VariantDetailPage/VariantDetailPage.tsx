@@ -11,6 +11,8 @@ import VariantCard from '../../../components/Product/VariantCard/VariantCard';
 import type { StorefrontVariantDetail } from '../../../types';
 import { useCart } from '../../../contexts/CartContext';
 import { useAuth } from '../../../contexts/AuthContext';
+import { useSiteSettings } from '../../../contexts/SiteSettingsContext';
+import { useDocumentMeta } from '../../../hooks/useDocumentMeta';
 import CareLabels from '../../../components/common/CareLabels';
 import './VariantDetailPage.css';
 
@@ -38,8 +40,13 @@ const VariantDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { addItem, loading: cartLoading } = useCart();
   const { isAuthenticated } = useAuth();
+  const { siteName } = useSiteSettings();
 
   const [variant, setVariant] = useState<StorefrontVariantDetail | null>(null);
+  useDocumentMeta(
+    variant ? `${variant.name} — ${siteName}` : siteName,
+    variant?.description || undefined,
+  );
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);

@@ -6,6 +6,7 @@ import { SiteSettingsProvider } from './contexts/SiteSettingsContext';
 import { PaymentMethodsProvider } from './contexts/PaymentMethodsContext';
 import { PartnersProvider } from './contexts/PartnersContext';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
+import { useSyncDocumentLang } from './hooks/useSyncDocumentLang';
 
 import LandingPage from './pages/Home/LandingPage';
 import HomePage from './pages/Catalog/HomePage';
@@ -27,6 +28,8 @@ import OrderDetailPage from './pages/Account/OrderDetailPage';
 import FavoritesPage from './pages/Favorites/FavoritesPage';
 
 function App() {
+  useSyncDocumentLang();
+
   return (
     <BrowserRouter>
       <SiteSettingsProvider>

@@ -8,9 +8,13 @@ import VariantCard from '../../components/Product/VariantCard/VariantCard';
 import { getVariantsPaged } from '../../services/productService';
 import type { StorefrontVariant } from '../../types';
 import useDebounce from '../../hooks/useDebounce';
+import { useSiteSettings } from '../../contexts/SiteSettingsContext';
+import { useDocumentMeta } from '../../hooks/useDocumentMeta';
 
 const HomePage: React.FC = () => {
   const { t } = useTranslation();
+  const { siteName, siteDescription } = useSiteSettings();
+  useDocumentMeta(`${t('catalog.home.title')} — ${siteName}`, siteDescription || undefined);
   const [searchParams, setSearchParams] = useSearchParams();
   const [variants, setVariants] = useState<StorefrontVariant[]>([]);
   const [totalPages, setTotalPages] = useState(0);
