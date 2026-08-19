@@ -109,7 +109,10 @@ const VariantDetailPage: React.FC = () => {
   const changeReviewsPage = (page: number) => {
     if (!variant?.productSlug) return;
     setReviewsPage(page);
-    getProductReviews(variant.productSlug, page).then(r => setReviews(r.items)).catch(() => {});
+    getProductReviews(variant.productSlug, page).then(r => {
+      setReviews(r.items);
+      setVariant(prev => prev ? { ...prev, averageRating: r.averageRating ?? undefined, reviewCount: r.reviewCount } : prev);
+    }).catch(() => {});
   };
 
   const handleSubmitReview = async () => {
