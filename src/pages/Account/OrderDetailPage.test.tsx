@@ -19,12 +19,13 @@ vi.mock('react-router-dom', async () => {
   return { ...actual, useNavigate: () => navigate };
 });
 
-const { getOrderDetail, downloadOrderInvoice, cancelOrder } = vi.hoisted(() => ({
+const { getOrderDetail, downloadOrderInvoice, cancelOrder, requestReturn } = vi.hoisted(() => ({
   getOrderDetail: vi.fn(),
   downloadOrderInvoice: vi.fn(),
   cancelOrder: vi.fn(),
+  requestReturn: vi.fn(),
 }));
-vi.mock('../../services/profileService', () => ({ getOrderDetail, downloadOrderInvoice, cancelOrder }));
+vi.mock('../../services/profileService', () => ({ getOrderDetail, downloadOrderInvoice, cancelOrder, requestReturn }));
 
 const renderDetail = (id = '42') => render(
   <MemoryRouter initialEntries={[`/account/orders/${id}`]}>
@@ -158,5 +159,48 @@ describe('OrderDetailPage', () => {
     renderDetail();
 
     expect(await screen.findByText(/ES123456789/)).toBeInTheDocument();
+  });
+
+  it('shows a request-return button for a delivered order and submits a reason', async () => {
+    getOrderDetail
+      .mockResolvedValueOnce(order({ status: 'Delivered' }))
+      .mockResolvedValueOnce(order({ status: 'Delivered', returnRequestedAt: '2026-08-20T00:00:00.000Z' }));
+    requestReturn.mockResolvedValue(undefined);
+    renderDetail();
+
+    fireEvent.click(await screen.findByText('orderDetail.requestReturn'));
+    fireEvent.change(screen.getByPlaceholderText('orderDetail.returnReasonPlaceholder'), { target: { value: 'Talla incorrecta' } });
+    fireEvent.click(screen.getByText('orderDetail.confirmReturnButton'));
+
+    await waitFor(() => expect(requestReturn).toHaveBeenCalledWith(42, 'Talla incorrecta'));
+    await waitFor(() => expect(getOrderDetail).toHaveBeenCalledTimes(2));
+  });
+
+  it('hides the request-return button once a return has already been requested, and shows the notice', async () => {
+    getOrderDetail.mockResolvedValue(order({ status: 'Delivered', returnRequestedAt: '2026-08-20T00:00:00.000Z' }));
+    renderDetail();
+
+    await screen.findByText('Tela azul');
+    expect(screen.queryByText('orderDetail.requestReturn')).not.toBeInTheDocument();
+    expect(screen.getByText('orderDetail.returnRequested')).toBeInTheDocument();
+  });
+
+  it('hides the request-return button for a non-delivered order', async () => {
+    getOrderDetail.mockResolvedValue(order({ status: 'Shipped' }));
+    renderDetail();
+
+    await screen.findByText('Tela azul');
+    expect(screen.queryByText('orderDetail.requestReturn')).not.toBeInTheDocument();
+  });
+
+  it('shows an error message when requestReturn fails', async () => {
+    getOrderDetail.mockResolvedValue(order({ status: 'Delivered' }));
+    requestReturn.mockRejectedValue(new Error('boom'));
+    renderDetail();
+
+    fireEvent.click(await screen.findByText('orderDetail.requestReturn'));
+    fireEvent.click(screen.getByText('orderDetail.confirmReturnButton'));
+
+    expect(await screen.findByText('orderDetail.returnError')).toBeInTheDocument();
   });
 });

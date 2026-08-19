@@ -240,7 +240,14 @@
     "confirmCancel": "Segur que vols cancel·lar aquesta comanda? Aquesta acció no es pot desfer.",
     "keepOrder": "No, mantenir comanda",
     "confirmCancelButton": "Sí, cancel·lar comanda",
-    "cancelError": "No s'ha pogut cancel·lar la comanda. Torna-ho a provar."
+    "cancelError": "No s'ha pogut cancel·lar la comanda. Torna-ho a provar.",
+    "requestReturn": "Sol·licitar devolució",
+    "returnPrompt": "Explica'ns per què vols retornar aquesta comanda (opcional). El nostre equip es posarà en contacte amb tu amb els següents passos.",
+    "returnReasonLabel": "Motiu",
+    "returnReasonPlaceholder": "Ex: no és la talla correcta...",
+    "confirmReturnButton": "Enviar sol·licitud",
+    "returnError": "No s'ha pogut enviar la sol·licitud de devolució. Torna-ho a provar.",
+    "returnRequested": "Vas sol·licitar la devolució d'aquesta comanda el {{date}}. Ens posarem en contacte aviat."
   },
   "favorites": {
     "title": "Els meus favorits",

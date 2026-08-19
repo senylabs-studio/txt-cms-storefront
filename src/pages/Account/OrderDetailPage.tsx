@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Card, Table, Badge, Button, Spinner, Modal, Alert } from 'react-bootstrap';
+import { Container, Row, Col, Card, Table, Badge, Button, Spinner, Modal, Alert, Form } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaArrowLeft, FaFileDownload, FaBan } from 'react-icons/fa';
+import { FaArrowLeft, FaFileDownload, FaBan, FaUndo } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
-import { getOrderDetail, downloadOrderInvoice, cancelOrder } from '../../services/profileService';
+import { getOrderDetail, downloadOrderInvoice, cancelOrder, requestReturn } from '../../services/profileService';
 import type { StorefrontOrderDetail } from '../../types';
 import { ORDER_STATUS_VARIANT } from '../../utils/orderStatus';
 
@@ -18,6 +18,10 @@ const OrderDetailPage: React.FC = () => {
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [cancelError, setCancelError] = useState('');
+  const [showReturnModal, setShowReturnModal] = useState(false);
+  const [returnReason, setReturnReason] = useState('');
+  const [requestingReturn, setRequestingReturn] = useState(false);
+  const [returnError, setReturnError] = useState('');
 
   const loadOrder = () => {
     if (!id) return;
@@ -36,6 +40,7 @@ const OrderDetailPage: React.FC = () => {
 
   const canDownloadInvoice = order.status !== 'PendingPayment' && order.status !== 'Cancelled';
   const canCancelOrder = order.status === 'PendingPayment' || order.status === 'Paid';
+  const canRequestReturn = order.status === 'Delivered' && !order.returnRequestedAt;
 
   const handleDownloadInvoice = async () => {
     setDownloadingInvoice(true);
@@ -54,6 +59,21 @@ const OrderDetailPage: React.FC = () => {
       setCancelError(t('orderDetail.cancelError'));
     } finally {
       setCancelling(false);
+    }
+  };
+
+  const handleRequestReturn = async () => {
+    setRequestingReturn(true);
+    setReturnError('');
+    try {
+      await requestReturn(order.id, returnReason.trim() || undefined);
+      await loadOrder();
+      setShowReturnModal(false);
+      setReturnReason('');
+    } catch {
+      setReturnError(t('orderDetail.returnError'));
+    } finally {
+      setRequestingReturn(false);
     }
   };
 
@@ -80,6 +100,16 @@ const OrderDetailPage: React.FC = () => {
                 {t('orderDetail.cancelOrder')}
               </Button>
             )}
+            {canRequestReturn && (
+              <Button
+                variant="outline-secondary"
+                size="sm"
+                onClick={() => setShowReturnModal(true)}
+              >
+                <FaUndo className="me-2" />
+                {t('orderDetail.requestReturn')}
+              </Button>
+            )}
             {canDownloadInvoice && (
               <Button
                 variant="outline-secondary"
@@ -93,6 +123,10 @@ const OrderDetailPage: React.FC = () => {
             )}
           </div>
         </div>
+
+        {order.returnRequestedAt && (
+          <Alert variant="info">{t('orderDetail.returnRequested', { date: new Date(order.returnRequestedAt).toLocaleDateString() })}</Alert>
+        )}
 
         <Row className="mb-4">
           <Col md={6} className="mb-3">
@@ -187,6 +221,34 @@ const OrderDetailPage: React.FC = () => {
           </Button>
           <Button variant="danger" onClick={handleCancelOrder} disabled={cancelling}>
             {t('orderDetail.confirmCancelButton')}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={showReturnModal} onHide={() => setShowReturnModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>{t('orderDetail.requestReturn')}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {returnError && <Alert variant="danger" className="py-2">{returnError}</Alert>}
+          <p>{t('orderDetail.returnPrompt')}</p>
+          <Form.Group>
+            <Form.Label>{t('orderDetail.returnReasonLabel')}</Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={3}
+              value={returnReason}
+              onChange={e => setReturnReason(e.target.value)}
+              placeholder={t('orderDetail.returnReasonPlaceholder')}
+            />
+          </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowReturnModal(false)} disabled={requestingReturn}>
+            {t('orderDetail.keepOrder')}
+          </Button>
+          <Button variant="primary" onClick={handleRequestReturn} disabled={requestingReturn}>
+            {t('orderDetail.confirmReturnButton')}
           </Button>
         </Modal.Footer>
       </Modal>

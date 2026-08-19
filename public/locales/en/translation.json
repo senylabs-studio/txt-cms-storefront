@@ -240,7 +240,14 @@
     "confirmCancel": "Are you sure you want to cancel this order? This action cannot be undone.",
     "keepOrder": "No, keep order",
     "confirmCancelButton": "Yes, cancel order",
-    "cancelError": "Couldn't cancel the order. Please try again."
+    "cancelError": "Couldn't cancel the order. Please try again.",
+    "requestReturn": "Request return",
+    "returnPrompt": "Tell us why you want to return this order (optional). Our team will contact you with next steps.",
+    "returnReasonLabel": "Reason",
+    "returnReasonPlaceholder": "E.g.: wrong size...",
+    "confirmReturnButton": "Send request",
+    "returnError": "Couldn't send the return request. Please try again.",
+    "returnRequested": "You requested a return for this order on {{date}}. We'll be in touch shortly."
   },
   "favorites": {
     "title": "My favourites",

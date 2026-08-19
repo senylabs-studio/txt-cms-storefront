@@ -158,6 +158,8 @@ export interface StorefrontOrderDetail {
   createdAt: string;
   notes?: string;
   trackingNumber?: string;
+  returnRequestedAt?: string;
+  returnRequestReason?: string;
   shippingAddress?: AddressSummary;
   billingAddress?: AddressSummary;
   lines: OrderLine[];
