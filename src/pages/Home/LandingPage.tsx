@@ -3,6 +3,8 @@ import { Container, Spinner, Row, Col, Carousel } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
+import { useSiteSettings } from '../../contexts/SiteSettingsContext';
+import { useDocumentMeta } from '../../hooks/useDocumentMeta';
 import {
   getHomeBlocks,
   type StorefrontHomeBlock,
@@ -145,6 +147,8 @@ const BlockRenderer: React.FC<{ block: StorefrontHomeBlock }> = ({ block }) => {
 // ─── Landing Page ─────────────────────────────────────────────────────────────
 const LandingPage: React.FC = () => {
   const { t } = useTranslation();
+  const { siteName, siteDescription } = useSiteSettings();
+  useDocumentMeta(siteName, siteDescription || undefined);
   const [blocks, setBlocks] = useState<StorefrontHomeBlock[]>([]);
   const [loading, setLoading] = useState(true);
 

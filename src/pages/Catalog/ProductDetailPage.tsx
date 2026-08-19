@@ -7,16 +7,24 @@ import MainLayout from '../../components/Layout/MainLayout';
 import VariantCard from '../../components/Product/VariantCard/VariantCard';
 import { getProductBySlug } from '../../services/productService';
 import { formatComposition } from '../../utils/composition';
+import { useSiteSettings } from '../../contexts/SiteSettingsContext';
+import { useDocumentMeta } from '../../hooks/useDocumentMeta';
 import type { StorefrontProduct, StorefrontVariant } from '../../types';
 
 const ProductDetailPage: React.FC = () => {
   const { t } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const { siteName } = useSiteSettings();
 
   const [product, setProduct] = useState<StorefrontProduct | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+
+  useDocumentMeta(
+    product ? `${product.name} — ${siteName}` : siteName,
+    product?.description || undefined,
+  );
 
   useEffect(() => {
     if (!slug) return;

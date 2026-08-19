@@ -10,6 +10,8 @@ import ContactForm from '../../../components/common/ContactForm/ContactForm';
 import ProductFilters from '../../../components/common/ProductFilters';
 import SitemapContent from '../SitemapPage/SitemapContent';
 import { getPageBySlug, type PageFilters } from '../../../services/pageService';
+import { useSiteSettings } from '../../../contexts/SiteSettingsContext';
+import { useDocumentMeta } from '../../../hooks/useDocumentMeta';
 import type { StorefrontPageDetail } from '../../../types';
 
 const PAGE_SIZE = 12;
@@ -18,8 +20,13 @@ const EMPTY_FACETS = { minPrice: 0, maxPrice: 0, widths: [], materials: [] };
 const PageCatalogPage: React.FC = () => {
   const { t } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
+  const { siteName } = useSiteSettings();
 
   const [pageDetail, setPageDetail] = useState<StorefrontPageDetail | null>(null);
+  useDocumentMeta(
+    pageDetail ? `${pageDetail.name} — ${siteName}` : siteName,
+    pageDetail?.description || undefined,
+  );
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<PageFilters>({});
   const [loading, setLoading] = useState(true);
