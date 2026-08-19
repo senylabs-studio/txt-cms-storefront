@@ -40,7 +40,7 @@ vi.mock('../../services/shippingService', () => ({ getApplicableShippingRate }))
 const cartWithItems = (): Cart => ({
   id: 1,
   expiresAt: '2099-01-01',
-  discountPercent: 0,
+  discountPercent: 0, couponDiscountAmount: 0,
   total: 20,
   items: [
     { id: 1, productName: 'Tela azul', productCode: 'TA1', originalUnitPrice: 10, unitPrice: 10, quantity: 2, subtotal: 20, availableStock: 5 },
@@ -64,6 +64,7 @@ const checkoutResponse: CheckoutResponse = {
   redsysUrl: 'https://redsys.example/pay',
   amount: 2000,
   shippingCost: 0,
+  couponDiscountAmount: 0,
 };
 
 describe('CheckoutPage', () => {
@@ -83,14 +84,14 @@ describe('CheckoutPage', () => {
   });
 
   it('shows an empty-cart message and no redsys form when the cart has no items', () => {
-    mockCart.cart = { id: 1, expiresAt: '2099-01-01', discountPercent: 0, total: 0, items: [] };
+    mockCart.cart = { id: 1, expiresAt: '2099-01-01', discountPercent: 0, couponDiscountAmount: 0, total: 0, items: [] };
     render(<CheckoutPage />);
     expect(screen.getByText('checkout.cartEmpty')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'checkout.proceed' })).not.toBeInTheDocument();
   });
 
   it('navigates to /catalog from the empty-cart state', () => {
-    mockCart.cart = { id: 1, expiresAt: '2099-01-01', discountPercent: 0, total: 0, items: [] };
+    mockCart.cart = { id: 1, expiresAt: '2099-01-01', discountPercent: 0, couponDiscountAmount: 0, total: 0, items: [] };
     render(<CheckoutPage />);
     fireEvent.click(screen.getByText('cart.browseCatalog'));
     expect(navigate).toHaveBeenCalledWith('/catalog');

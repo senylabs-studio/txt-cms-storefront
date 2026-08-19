@@ -35,7 +35,12 @@
     "refresh": "Actualitzar",
     "loginRequired": "Inicia sessió per veure la teva cistella",
     "updateError": "Error en actualitzar la quantitat",
-    "removeError": "Error en eliminar el producte"
+    "removeError": "Error en eliminar el producte",
+    "couponPlaceholder": "Codi de descompte",
+    "applyCoupon": "Aplicar",
+    "removeCoupon": "Treure",
+    "couponDiscount": "Cupó {{code}}",
+    "couponApplyError": "No s'ha pogut aplicar el cupó."
   },
   "auth": {
     "login": {

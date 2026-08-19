@@ -35,7 +35,12 @@
     "refresh": "Actualizar",
     "loginRequired": "Inicia sesión para ver tu carrito",
     "updateError": "Error al actualizar la cantidad",
-    "removeError": "Error al eliminar el producto"
+    "removeError": "Error al eliminar el producto",
+    "couponPlaceholder": "Código de descuento",
+    "applyCoupon": "Aplicar",
+    "removeCoupon": "Quitar",
+    "couponDiscount": "Cupón {{code}}",
+    "couponApplyError": "No se ha podido aplicar el cupón."
   },
   "auth": {
     "login": {

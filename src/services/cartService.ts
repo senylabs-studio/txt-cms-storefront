@@ -21,6 +21,16 @@ export const removeCartItem = async (itemId: number): Promise<Cart> => {
   return res.data;
 };
 
+export const applyCoupon = async (code: string): Promise<Cart> => {
+  const res = await apiClient.post('/storefront/cart/coupon', { code });
+  return res.data;
+};
+
+export const removeCoupon = async (): Promise<Cart> => {
+  const res = await apiClient.delete('/storefront/cart/coupon');
+  return res.data;
+};
+
 export const checkout = async (data: CheckoutRequest): Promise<CheckoutResponse> => {
   const res = await apiClient.post('/storefront/checkout', data);
   return res.data;

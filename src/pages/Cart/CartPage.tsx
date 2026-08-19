@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Container, Row, Col, Button, Card, Alert, Form } from 'react-bootstrap';
-import { FaTrash, FaArrowRight } from 'react-icons/fa';
+import { FaTrash, FaArrowRight, FaTag } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
@@ -10,11 +10,34 @@ import { useAuth } from '../../contexts/AuthContext';
 
 const CartPage: React.FC = () => {
   const { t } = useTranslation();
-  const { cart, loading, fetchCart, updateItem, removeItem } = useCart();
+  const { cart, loading, fetchCart, updateItem, removeItem, applyCoupon, removeCoupon } = useCart();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [timeLeft, setTimeLeft] = useState('');
   const [itemError, setItemError] = useState('');
+  const [couponInput, setCouponInput] = useState('');
+  const [couponError, setCouponError] = useState('');
+  const [couponLoading, setCouponLoading] = useState(false);
+
+  const handleApplyCoupon = async () => {
+    if (!couponInput.trim()) return;
+    setCouponError('');
+    setCouponLoading(true);
+    try {
+      await applyCoupon(couponInput.trim());
+      setCouponInput('');
+    } catch (e) {
+      setCouponError((axios.isAxiosError(e) ? e.response?.data?.message : undefined) ?? t('cart.couponApplyError'));
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const handleRemoveCoupon = async () => {
+    setCouponError('');
+    try { await removeCoupon(); }
+    catch { setCouponError(t('cart.couponApplyError')); }
+  };
 
   const handleUpdate = async (itemId: number, quantity: number) => {
     setItemError('');
@@ -147,7 +170,43 @@ const CartPage: React.FC = () => {
                       <span>−€{(cart!.items.reduce((s, i) => s + (i.originalUnitPrice - i.unitPrice) * i.quantity, 0)).toFixed(2)}</span>
                     </div>
                   )}
+                  {cart!.couponCode && (
+                    <div className="d-flex justify-content-between small text-success mb-1">
+                      <span>{t('cart.couponDiscount', { code: cart!.couponCode })}</span>
+                      <span>−€{cart!.couponDiscountAmount.toFixed(2)}</span>
+                    </div>
+                  )}
                   <hr />
+
+                  {cart!.couponError && (
+                    <Alert variant="warning" className="py-2 small mb-2">{cart!.couponError}</Alert>
+                  )}
+                  {cart!.couponCode ? (
+                    <div className="d-flex justify-content-between align-items-center small mb-3">
+                      <span><FaTag className="me-1" />{cart!.couponCode}</span>
+                      <Button size="sm" variant="link" className="text-danger p-0" onClick={handleRemoveCoupon} disabled={loading}>
+                        {t('cart.removeCoupon')}
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="mb-3">
+                      <div className="d-flex gap-2">
+                        <Form.Control
+                          type="text"
+                          size="sm"
+                          placeholder={t('cart.couponPlaceholder')}
+                          value={couponInput}
+                          onChange={e => setCouponInput(e.target.value)}
+                          onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleApplyCoupon(); } }}
+                          disabled={couponLoading}
+                        />
+                        <Button size="sm" variant="outline-primary" onClick={handleApplyCoupon} disabled={couponLoading || !couponInput.trim()}>
+                          {t('cart.applyCoupon')}
+                        </Button>
+                      </div>
+                      {couponError && <div className="text-danger small mt-1">{couponError}</div>}
+                    </div>
+                  )}
                   <div className="d-flex justify-content-between fw-bold fs-5 mb-3">
                     <span>{t('cart.total')}</span>
                     <span>€{(cart!.total ?? 0).toFixed(2)}</span>

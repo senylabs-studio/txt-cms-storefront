@@ -63,8 +63,9 @@ const CheckoutPage: React.FC = () => {
   }, [redsysData]);
 
   const cartSubtotal = cart?.items.reduce((sum, i) => sum + i.subtotal, 0) ?? 0;
+  const couponDiscount = cart?.couponDiscountAmount ?? 0;
   const estimatedShipping = shippingRate?.shippingCost ?? 0;
-  const estimatedTotal = cartSubtotal + estimatedShipping;
+  const estimatedTotal = Math.max(0, cartSubtotal - couponDiscount) + estimatedShipping;
 
   const handleProceedToPayment = async () => {
     setLoading(true);
@@ -196,6 +197,12 @@ const CheckoutPage: React.FC = () => {
                   <span className="text-muted">{t('checkout.subtotal')}</span>
                   <span>€{cartSubtotal.toFixed(2)}</span>
                 </div>
+                {cart.couponCode && (
+                  <div className="d-flex justify-content-between small text-success mb-1">
+                    <span>{t('cart.couponDiscount', { code: cart.couponCode })}</span>
+                    <span>−€{couponDiscount.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="d-flex justify-content-between small mb-2">
                   <span className="text-muted">{t('checkout.shipping')}</span>
                   <span>

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import type { Cart } from '../types';
-import { getCart, addToCart, updateCartItem, removeCartItem } from '../services/cartService';
+import { getCart, addToCart, updateCartItem, removeCartItem, applyCoupon as applyCouponRequest, removeCoupon as removeCouponRequest } from '../services/cartService';
 import { useAuth } from './AuthContext';
 
 interface CartContextType {
@@ -13,6 +13,8 @@ interface CartContextType {
   addItem: (productId?: number, variantId?: number, quantity?: number) => Promise<void>;
   updateItem: (itemId: number, quantity: number) => Promise<void>;
   removeItem: (itemId: number) => Promise<void>;
+  applyCoupon: (code: string) => Promise<void>;
+  removeCoupon: () => Promise<void>;
   itemCount: number;
 }
 
@@ -65,6 +67,26 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const applyCoupon = async (code: string) => {
+    setLoading(true);
+    try {
+      const updated = await applyCouponRequest(code);
+      setCart(updated);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const removeCoupon = async () => {
+    setLoading(true);
+    try {
+      const updated = await removeCouponRequest();
+      setCart(updated);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const itemCount = cart?.items.length ?? 0;
 
   return (
@@ -72,7 +94,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       cart, loading, drawerOpen,
       openDrawer: () => setDrawerOpen(true),
       closeDrawer: () => setDrawerOpen(false),
-      fetchCart, addItem, updateItem, removeItem, itemCount
+      fetchCart, addItem, updateItem, removeItem, applyCoupon, removeCoupon, itemCount
     }}>
       {children}
     </CartContext.Provider>

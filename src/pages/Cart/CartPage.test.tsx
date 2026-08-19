@@ -29,6 +29,8 @@ const mockCart = vi.hoisted(() => ({
   fetchCart: vi.fn(),
   updateItem: vi.fn(),
   removeItem: vi.fn(),
+  applyCoupon: vi.fn(),
+  removeCoupon: vi.fn(),
 }));
 vi.mock('../../contexts/CartContext', () => ({
   useCart: () => mockCart,
@@ -37,7 +39,7 @@ vi.mock('../../contexts/CartContext', () => ({
 const cartWithItems = (overrides: Partial<Cart> = {}): Cart => ({
   id: 1,
   expiresAt: '2099-01-01T00:00:00.000Z',
-  discountPercent: 0,
+  discountPercent: 0, couponDiscountAmount: 0,
   total: 20,
   items: [
     { id: 1, productName: 'Tela azul', productCode: 'TA1', originalUnitPrice: 10, unitPrice: 10, quantity: 2, subtotal: 20, availableStock: 5 },
@@ -75,7 +77,7 @@ describe('CartPage', () => {
   });
 
   it('shows an empty-cart message and navigates to /catalog from it', () => {
-    mockCart.cart = { id: 1, expiresAt: '2099-01-01T00:00:00.000Z', discountPercent: 0, total: 0, items: [] };
+    mockCart.cart = { id: 1, expiresAt: '2099-01-01T00:00:00.000Z', discountPercent: 0, couponDiscountAmount: 0, total: 0, items: [] };
     render(<CartPage />);
 
     expect(screen.getByText('cart.empty')).toBeInTheDocument();
@@ -149,5 +151,51 @@ describe('CartPage', () => {
     const refreshBtn = await screen.findByText('cart.refresh');
     fireEvent.click(refreshBtn);
     expect(mockCart.fetchCart).toHaveBeenCalledTimes(2);
+  });
+
+  it('applies a coupon code entered in the input', async () => {
+    mockCart.cart = cartWithItems();
+    mockCart.applyCoupon.mockResolvedValue(undefined);
+    render(<CartPage />);
+
+    fireEvent.change(screen.getByPlaceholderText('cart.couponPlaceholder'), { target: { value: 'save10' } });
+    fireEvent.click(screen.getByText('cart.applyCoupon'));
+
+    await waitFor(() => expect(mockCart.applyCoupon).toHaveBeenCalledWith('save10'));
+  });
+
+  it('shows the backend error message when applyCoupon rejects', async () => {
+    mockCart.cart = cartWithItems();
+    mockCart.applyCoupon.mockRejectedValue({ isAxiosError: true, response: { data: { message: 'Código no válido.' } } });
+    render(<CartPage />);
+
+    fireEvent.change(screen.getByPlaceholderText('cart.couponPlaceholder'), { target: { value: 'NOPE' } });
+    fireEvent.click(screen.getByText('cart.applyCoupon'));
+
+    expect(await screen.findByText('Código no válido.')).toBeInTheDocument();
+  });
+
+  it('shows the applied coupon and its discount instead of the input, with a remove button', () => {
+    mockCart.cart = cartWithItems({ couponCode: 'SAVE10', couponDiscountAmount: 2, total: 18 });
+    render(<CartPage />);
+
+    expect(screen.getByText('SAVE10')).toBeInTheDocument();
+    expect(screen.getByText('cart.couponDiscount')).toBeInTheDocument();
+    expect(screen.queryByPlaceholderText('cart.couponPlaceholder')).not.toBeInTheDocument();
+  });
+
+  it('removes the applied coupon when the remove button is clicked', () => {
+    mockCart.cart = cartWithItems({ couponCode: 'SAVE10', couponDiscountAmount: 2, total: 18 });
+    render(<CartPage />);
+
+    fireEvent.click(screen.getByText('cart.removeCoupon'));
+    expect(mockCart.removeCoupon).toHaveBeenCalled();
+  });
+
+  it('shows the couponError surfaced by the cart', () => {
+    mockCart.cart = cartWithItems({ couponError: 'Este código ha caducado.' });
+    render(<CartPage />);
+
+    expect(screen.getByText('Este código ha caducado.')).toBeInTheDocument();
   });
 });

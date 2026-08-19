@@ -81,6 +81,9 @@ export interface Cart {
   expiresAt: string;
   items: CartItem[];
   discountPercent: number;
+  couponCode?: string;
+  couponDiscountAmount: number;
+  couponError?: string;
   total: number;
 }
 
@@ -105,6 +108,7 @@ export interface CheckoutResponse {
   redsysUrl: string;
   amount: number;
   shippingCost: number;
+  couponDiscountAmount: number;
 }
 
 export interface CustomerAddress {

@@ -31,7 +31,7 @@ vi.mock('../../../contexts/CartContext', () => ({
 const cartWithItems = (overrides: Partial<Cart> = {}): Cart => ({
   id: 1,
   expiresAt: '2099-01-01T00:00:00.000Z',
-  discountPercent: 0,
+  discountPercent: 0, couponDiscountAmount: 0,
   total: 20,
   items: [
     { id: 1, productName: 'Tela azul', productCode: 'TA1', originalUnitPrice: 10, unitPrice: 10, quantity: 2, subtotal: 20, availableStock: 5 },
@@ -60,7 +60,7 @@ describe('CartDrawer', () => {
   });
 
   it('shows an empty-cart message and navigates to /catalog while closing the drawer', () => {
-    mockCart.cart = { id: 1, expiresAt: '2099-01-01T00:00:00.000Z', discountPercent: 0, total: 0, items: [] };
+    mockCart.cart = { id: 1, expiresAt: '2099-01-01T00:00:00.000Z', discountPercent: 0, couponDiscountAmount: 0, total: 0, items: [] };
     renderDrawer();
 
     fireEvent.click(screen.getByText('cart.browseCatalog'));
