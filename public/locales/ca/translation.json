@@ -221,7 +221,13 @@
     "shippingCost": "Enviament",
     "free": "Gratuït",
     "total": "Total",
-    "downloadInvoice": "Descarregar factura"
+    "downloadInvoice": "Descarregar factura",
+    "trackingNumber": "Núm. de seguiment:",
+    "cancelOrder": "Cancel·lar comanda",
+    "confirmCancel": "Segur que vols cancel·lar aquesta comanda? Aquesta acció no es pot desfer.",
+    "keepOrder": "No, mantenir comanda",
+    "confirmCancelButton": "Sí, cancel·lar comanda",
+    "cancelError": "No s'ha pogut cancel·lar la comanda. Torna-ho a provar."
   },
   "favorites": {
     "title": "Els meus favorits",

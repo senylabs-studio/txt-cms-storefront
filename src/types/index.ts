@@ -153,6 +153,7 @@ export interface StorefrontOrderDetail {
   shippingCost: number;
   createdAt: string;
   notes?: string;
+  trackingNumber?: string;
   shippingAddress?: AddressSummary;
   billingAddress?: AddressSummary;
   lines: OrderLine[];

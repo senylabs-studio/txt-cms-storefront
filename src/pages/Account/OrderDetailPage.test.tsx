@@ -19,11 +19,12 @@ vi.mock('react-router-dom', async () => {
   return { ...actual, useNavigate: () => navigate };
 });
 
-const { getOrderDetail, downloadOrderInvoice } = vi.hoisted(() => ({
+const { getOrderDetail, downloadOrderInvoice, cancelOrder } = vi.hoisted(() => ({
   getOrderDetail: vi.fn(),
   downloadOrderInvoice: vi.fn(),
+  cancelOrder: vi.fn(),
 }));
-vi.mock('../../services/profileService', () => ({ getOrderDetail, downloadOrderInvoice }));
+vi.mock('../../services/profileService', () => ({ getOrderDetail, downloadOrderInvoice, cancelOrder }));
 
 const renderDetail = (id = '42') => render(
   <MemoryRouter initialEntries={[`/account/orders/${id}`]}>
@@ -130,5 +131,32 @@ describe('OrderDetailPage', () => {
 
     await screen.findByText('Tela azul');
     expect(screen.queryByText('orderDetail.downloadInvoice')).not.toBeInTheDocument();
+  });
+
+  it('shows a cancel button for a paid order and cancels after confirming', async () => {
+    getOrderDetail.mockResolvedValueOnce(order({ status: 'Paid' })).mockResolvedValueOnce(order({ status: 'Cancelled' }));
+    cancelOrder.mockResolvedValue(undefined);
+    renderDetail();
+
+    fireEvent.click(await screen.findByText('orderDetail.cancelOrder'));
+    fireEvent.click(await screen.findByText('orderDetail.confirmCancelButton'));
+
+    await waitFor(() => expect(cancelOrder).toHaveBeenCalledWith(42));
+    await waitFor(() => expect(getOrderDetail).toHaveBeenCalledTimes(2));
+  });
+
+  it('hides the cancel button once the order has shipped', async () => {
+    getOrderDetail.mockResolvedValue(order({ status: 'Shipped' }));
+    renderDetail();
+
+    await screen.findByText('Tela azul');
+    expect(screen.queryByText('orderDetail.cancelOrder')).not.toBeInTheDocument();
+  });
+
+  it('shows the tracking number when present', async () => {
+    getOrderDetail.mockResolvedValue(order({ status: 'Shipped', trackingNumber: 'ES123456789' }));
+    renderDetail();
+
+    expect(await screen.findByText(/ES123456789/)).toBeInTheDocument();
   });
 });

@@ -33,6 +33,10 @@ export const getOrderDetail = async (id: number): Promise<StorefrontOrderDetail>
   return res.data;
 };
 
+export const cancelOrder = async (id: number): Promise<void> => {
+  await apiClient.post(`/storefront/profile/orders/${id}/cancel`);
+};
+
 export const downloadOrderInvoice = async (id: number): Promise<void> => {
   const response = await apiClient.get(`/storefront/profile/orders/${id}/invoice`, { responseType: 'blob' });
   const filename = response.headers['content-disposition']

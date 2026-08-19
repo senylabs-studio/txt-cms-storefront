@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Card, Table, Badge, Button, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Card, Table, Badge, Button, Spinner, Modal, Alert } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaArrowLeft, FaFileDownload } from 'react-icons/fa';
+import { FaArrowLeft, FaFileDownload, FaBan } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
-import { getOrderDetail, downloadOrderInvoice } from '../../services/profileService';
+import { getOrderDetail, downloadOrderInvoice, cancelOrder } from '../../services/profileService';
 import type { StorefrontOrderDetail } from '../../types';
 import { ORDER_STATUS_VARIANT } from '../../utils/orderStatus';
 
@@ -15,24 +15,46 @@ const OrderDetailPage: React.FC = () => {
   const [order, setOrder] = useState<StorefrontOrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [downloadingInvoice, setDownloadingInvoice] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState('');
+
+  const loadOrder = () => {
+    if (!id) return;
+    return getOrderDetail(Number(id))
+      .then(setOrder)
+      .catch(() => navigate('/account/orders'));
+  };
 
   useEffect(() => {
-    if (!id) return;
-    getOrderDetail(Number(id))
-      .then(setOrder)
-      .catch(() => navigate('/account/orders'))
-      .finally(() => setLoading(false));
+    setLoading(true);
+    Promise.resolve(loadOrder()).finally(() => setLoading(false));
   }, [id]);
 
   if (loading) return <MainLayout><div className="text-center py-5"><Spinner animation="border" variant="primary" /></div></MainLayout>;
   if (!order) return null;
 
   const canDownloadInvoice = order.status !== 'PendingPayment' && order.status !== 'Cancelled';
+  const canCancelOrder = order.status === 'PendingPayment' || order.status === 'Paid';
 
   const handleDownloadInvoice = async () => {
     setDownloadingInvoice(true);
     try { await downloadOrderInvoice(order.id); }
     finally { setDownloadingInvoice(false); }
+  };
+
+  const handleCancelOrder = async () => {
+    setCancelling(true);
+    setCancelError('');
+    try {
+      await cancelOrder(order.id);
+      await loadOrder();
+      setShowCancelConfirm(false);
+    } catch {
+      setCancelError(t('orderDetail.cancelError'));
+    } finally {
+      setCancelling(false);
+    }
   };
 
   return (
@@ -47,18 +69,29 @@ const OrderDetailPage: React.FC = () => {
           <Badge bg={ORDER_STATUS_VARIANT[order.status] ?? 'secondary'} className="fs-6">
             {t(`orders.statuses.${order.status}`, { defaultValue: order.status })}
           </Badge>
-          {canDownloadInvoice && (
-            <Button
-              variant="outline-secondary"
-              size="sm"
-              className="ms-auto"
-              disabled={downloadingInvoice}
-              onClick={handleDownloadInvoice}
-            >
-              <FaFileDownload className="me-2" />
-              {t('orderDetail.downloadInvoice')}
-            </Button>
-          )}
+          <div className="ms-auto d-flex gap-2">
+            {canCancelOrder && (
+              <Button
+                variant="outline-danger"
+                size="sm"
+                onClick={() => setShowCancelConfirm(true)}
+              >
+                <FaBan className="me-2" />
+                {t('orderDetail.cancelOrder')}
+              </Button>
+            )}
+            {canDownloadInvoice && (
+              <Button
+                variant="outline-secondary"
+                size="sm"
+                disabled={downloadingInvoice}
+                onClick={handleDownloadInvoice}
+              >
+                <FaFileDownload className="me-2" />
+                {t('orderDetail.downloadInvoice')}
+              </Button>
+            )}
+          </div>
         </div>
 
         <Row className="mb-4">
@@ -67,6 +100,7 @@ const OrderDetailPage: React.FC = () => {
               <Card.Body>
                 <h6 className="fw-semibold mb-2">{t('orderDetail.info')}</h6>
                 <div className="text-muted small">{t('orderDetail.date')} {new Date(order.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}</div>
+                {order.trackingNumber && <div className="text-muted small mt-1">{t('orderDetail.trackingNumber')} {order.trackingNumber}</div>}
                 {order.notes && <div className="text-muted small mt-1">{t('orderDetail.notes')} {order.notes}</div>}
               </Card.Body>
             </Card>
@@ -138,6 +172,24 @@ const OrderDetailPage: React.FC = () => {
           </Card.Body>
         </Card>
       </Container>
+
+      <Modal show={showCancelConfirm} onHide={() => setShowCancelConfirm(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>{t('orderDetail.cancelOrder')}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {cancelError && <Alert variant="danger" className="py-2">{cancelError}</Alert>}
+          {t('orderDetail.confirmCancel')}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowCancelConfirm(false)} disabled={cancelling}>
+            {t('orderDetail.keepOrder')}
+          </Button>
+          <Button variant="danger" onClick={handleCancelOrder} disabled={cancelling}>
+            {t('orderDetail.confirmCancelButton')}
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </MainLayout>
   );
 };

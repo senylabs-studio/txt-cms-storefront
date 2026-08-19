@@ -221,7 +221,13 @@
     "shippingCost": "Shipping",
     "free": "Free",
     "total": "Total",
-    "downloadInvoice": "Download invoice"
+    "downloadInvoice": "Download invoice",
+    "trackingNumber": "Tracking number:",
+    "cancelOrder": "Cancel order",
+    "confirmCancel": "Are you sure you want to cancel this order? This action cannot be undone.",
+    "keepOrder": "No, keep order",
+    "confirmCancelButton": "Yes, cancel order",
+    "cancelError": "Couldn't cancel the order. Please try again."
   },
   "favorites": {
     "title": "My favourites",
