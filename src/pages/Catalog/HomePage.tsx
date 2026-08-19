@@ -12,7 +12,7 @@ import { useSiteSettings } from '../../contexts/SiteSettingsContext';
 import { useDocumentMeta } from '../../hooks/useDocumentMeta';
 
 const HomePage: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { siteName, siteDescription } = useSiteSettings();
   useDocumentMeta(`${t('catalog.home.title')} — ${siteName}`, siteDescription || undefined);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -36,7 +36,7 @@ const HomePage: React.FC = () => {
       .then(r => { setVariants(r.items); setTotalPages(r.totalPages); setTotalItems(r.totalItems); })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [currentPage, debouncedSearch, orderBy]);
+  }, [currentPage, debouncedSearch, orderBy, i18n.language]);
 
   useEffect(() => {
     setCurrentPage(1);

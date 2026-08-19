@@ -12,7 +12,7 @@ import { useDocumentMeta } from '../../hooks/useDocumentMeta';
 import type { StorefrontProduct, StorefrontVariant } from '../../types';
 
 const ProductDetailPage: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { siteName } = useSiteSettings();
@@ -37,7 +37,7 @@ const ProductDetailPage: React.FC = () => {
       })
       .catch(e => { if (e?.response?.status === 404) setNotFound(true); else navigate('/catalog'); })
       .finally(() => setLoading(false));
-  }, [slug]);
+  }, [slug, i18n.language]);
 
   if (loading) return <MainLayout><div className="text-center py-5"><Spinner animation="border" variant="primary" /></div></MainLayout>;
   if (notFound) return <MainLayout><Container className="py-5"><Alert variant="warning">{t('product.productNotFound')}</Alert></Container></MainLayout>;

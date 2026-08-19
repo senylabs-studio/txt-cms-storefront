@@ -6,7 +6,10 @@ import VariantDetailPage from './VariantDetailPage';
 import type { StorefrontVariantDetail, ProductReview, PaginatedResponse } from '../../../types';
 
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string, opts?: { count?: number }) => opts?.count != null ? `${key}(${opts.count})` : key }),
+  useTranslation: () => ({
+    t: (key: string, opts?: { count?: number }) => opts?.count != null ? `${key}(${opts.count})` : key,
+    i18n: { language: 'en' },
+  }),
 }));
 
 vi.mock('../../../components/Layout/MainLayout', () => ({

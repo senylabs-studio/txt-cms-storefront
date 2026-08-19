@@ -146,7 +146,7 @@ const BlockRenderer: React.FC<{ block: StorefrontHomeBlock }> = ({ block }) => {
 
 // ─── Landing Page ─────────────────────────────────────────────────────────────
 const LandingPage: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { siteName, siteDescription } = useSiteSettings();
   useDocumentMeta(siteName, siteDescription || undefined);
   const [blocks, setBlocks] = useState<StorefrontHomeBlock[]>([]);
@@ -157,7 +157,7 @@ const LandingPage: React.FC = () => {
       .then(setBlocks)
       .catch(() => setBlocks([]))
       .finally(() => setLoading(false));
-  }, []);
+  }, [i18n.language]);
 
   if (loading) {
     return <MainLayout><div className="text-center py-5"><Spinner animation="border" variant="primary" /></div></MainLayout>;

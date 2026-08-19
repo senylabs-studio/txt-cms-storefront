@@ -18,7 +18,7 @@ const PAGE_SIZE = 12;
 const EMPTY_FACETS = { minPrice: 0, maxPrice: 0, widths: [], materials: [] };
 
 const PageCatalogPage: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
   const { siteName } = useSiteSettings();
 
@@ -52,7 +52,7 @@ const PageCatalogPage: React.FC = () => {
       })
       .catch(e => { if (e?.response?.status === 404) setNotFound(true); })
       .finally(() => setLoading(false));
-  }, [slug, currentPage, filters]);
+  }, [slug, currentPage, filters, i18n.language]);
 
   const handleFilterChange = (f: PageFilters) => {
     setFilters(f);

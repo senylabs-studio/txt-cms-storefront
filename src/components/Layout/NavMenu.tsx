@@ -87,13 +87,14 @@ const MegaPanel: React.FC<{ item: StorefrontMenuItem; onClose: () => void }> = (
 };
 
 const NavMenu: React.FC = () => {
+  const { i18n } = useTranslation();
   const [items, setItems] = useState<StorefrontMenuItem[]>([]);
   const [activeId, setActiveId] = useState<number | null>(null);
   const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     getMenu().then(setItems).catch(() => {});
-  }, []);
+  }, [i18n.language]);
 
   const handleEnter = (id: number) => {
     if (leaveTimer.current) clearTimeout(leaveTimer.current);

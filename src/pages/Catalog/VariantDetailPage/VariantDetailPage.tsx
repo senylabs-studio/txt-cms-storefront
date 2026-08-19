@@ -48,7 +48,7 @@ const InfoRow: React.FC<{ label: string; value: React.ReactNode }> = ({ label, v
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 const VariantDetailPage: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { addItem, loading: cartLoading } = useCart();
@@ -86,7 +86,7 @@ const VariantDetailPage: React.FC = () => {
       .then(v => setVariant(v))
       .catch((e) => { if (e?.response?.status === 404) setNotFound(true); else navigate('/catalog'); })
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, i18n.language]);
 
   useEffect(() => {
     if (!variant?.productSlug) return;

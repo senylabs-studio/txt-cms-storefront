@@ -12,7 +12,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import './FavoritesPage.css';
 
 const FavoritesPage: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [items, setItems] = useState<FavoriteItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -28,7 +28,7 @@ const FavoritesPage: React.FC = () => {
     finally { setLoading(false); }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [i18n.language]);
 
   const handleRemove = async (item: FavoriteItem) => {
     await toggle(item.productId, item.variantId);
