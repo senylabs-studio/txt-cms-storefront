@@ -32,3 +32,16 @@ export const getOrderDetail = async (id: number): Promise<StorefrontOrderDetail>
   const res = await apiClient.get(`/storefront/profile/orders/${id}`);
   return res.data;
 };
+
+export const downloadOrderInvoice = async (id: number): Promise<void> => {
+  const response = await apiClient.get(`/storefront/profile/orders/${id}/invoice`, { responseType: 'blob' });
+  const filename = response.headers['content-disposition']
+    ?.match(/filename="?([^"]+)"?/)?.[1]
+    ?? `FAC-${id}.pdf`;
+  const url = URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+};

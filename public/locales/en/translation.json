@@ -220,7 +220,8 @@
     "subtotal": "Subtotal",
     "shippingCost": "Shipping",
     "free": "Free",
-    "total": "Total"
+    "total": "Total",
+    "downloadInvoice": "Download invoice"
   },
   "favorites": {
     "title": "My favourites",

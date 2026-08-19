@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Table, Badge, Button, Spinner } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaArrowLeft } from 'react-icons/fa';
+import { FaArrowLeft, FaFileDownload } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
-import { getOrderDetail } from '../../services/profileService';
+import { getOrderDetail, downloadOrderInvoice } from '../../services/profileService';
 import type { StorefrontOrderDetail } from '../../types';
 import { ORDER_STATUS_VARIANT } from '../../utils/orderStatus';
 
@@ -14,6 +14,7 @@ const OrderDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const [order, setOrder] = useState<StorefrontOrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [downloadingInvoice, setDownloadingInvoice] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -26,6 +27,14 @@ const OrderDetailPage: React.FC = () => {
   if (loading) return <MainLayout><div className="text-center py-5"><Spinner animation="border" variant="primary" /></div></MainLayout>;
   if (!order) return null;
 
+  const canDownloadInvoice = order.status !== 'PendingPayment' && order.status !== 'Cancelled';
+
+  const handleDownloadInvoice = async () => {
+    setDownloadingInvoice(true);
+    try { await downloadOrderInvoice(order.id); }
+    finally { setDownloadingInvoice(false); }
+  };
+
   return (
     <MainLayout>
       <Container className="py-4">
@@ -33,11 +42,23 @@ const OrderDetailPage: React.FC = () => {
           <FaArrowLeft className="me-1" /> {t('orderDetail.backToOrders')}
         </Button>
 
-        <div className="d-flex align-items-center gap-3 mb-4">
+        <div className="d-flex align-items-center gap-3 mb-4 flex-wrap">
           <h2 className="fw-bold mb-0">{t('orderDetail.order', { id: order.id })}</h2>
           <Badge bg={ORDER_STATUS_VARIANT[order.status] ?? 'secondary'} className="fs-6">
             {t(`orders.statuses.${order.status}`, { defaultValue: order.status })}
           </Badge>
+          {canDownloadInvoice && (
+            <Button
+              variant="outline-secondary"
+              size="sm"
+              className="ms-auto"
+              disabled={downloadingInvoice}
+              onClick={handleDownloadInvoice}
+            >
+              <FaFileDownload className="me-2" />
+              {t('orderDetail.downloadInvoice')}
+            </Button>
+          )}
         </div>
 
         <Row className="mb-4">

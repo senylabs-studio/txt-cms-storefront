@@ -19,8 +19,11 @@ vi.mock('react-router-dom', async () => {
   return { ...actual, useNavigate: () => navigate };
 });
 
-const { getOrderDetail } = vi.hoisted(() => ({ getOrderDetail: vi.fn() }));
-vi.mock('../../services/profileService', () => ({ getOrderDetail }));
+const { getOrderDetail, downloadOrderInvoice } = vi.hoisted(() => ({
+  getOrderDetail: vi.fn(),
+  downloadOrderInvoice: vi.fn(),
+}));
+vi.mock('../../services/profileService', () => ({ getOrderDetail, downloadOrderInvoice }));
 
 const renderDetail = (id = '42') => render(
   <MemoryRouter initialEntries={[`/account/orders/${id}`]}>
@@ -102,5 +105,30 @@ describe('OrderDetailPage', () => {
 
     fireEvent.click(await screen.findByText('orderDetail.backToOrders'));
     expect(navigate).toHaveBeenCalledWith('/account/orders');
+  });
+
+  it('shows a download-invoice button for a paid order and downloads on click', async () => {
+    getOrderDetail.mockResolvedValue(order({ status: 'Paid' }));
+    downloadOrderInvoice.mockResolvedValue(undefined);
+    renderDetail();
+
+    fireEvent.click(await screen.findByText('orderDetail.downloadInvoice'));
+    await waitFor(() => expect(downloadOrderInvoice).toHaveBeenCalledWith(42));
+  });
+
+  it('hides the download-invoice button for a pending-payment order', async () => {
+    getOrderDetail.mockResolvedValue(order({ status: 'PendingPayment' }));
+    renderDetail();
+
+    await screen.findByText('Tela azul');
+    expect(screen.queryByText('orderDetail.downloadInvoice')).not.toBeInTheDocument();
+  });
+
+  it('hides the download-invoice button for a cancelled order', async () => {
+    getOrderDetail.mockResolvedValue(order({ status: 'Cancelled' }));
+    renderDetail();
+
+    await screen.findByText('Tela azul');
+    expect(screen.queryByText('orderDetail.downloadInvoice')).not.toBeInTheDocument();
   });
 });

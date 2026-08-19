@@ -220,7 +220,8 @@
     "subtotal": "Subtotal",
     "shippingCost": "Envío",
     "free": "Gratis",
-    "total": "Total"
+    "total": "Total",
+    "downloadInvoice": "Descargar factura"
   },
   "favorites": {
     "title": "Mis favoritos",
