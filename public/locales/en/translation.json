@@ -229,6 +229,10 @@
     "remove": "Remove from favourites",
     "add": "Add to favourites"
   },
+  "stockNotifications": {
+    "notifyMe": "Notify me when back in stock",
+    "subscribed": "We'll notify you"
+  },
   "product": {
     "outOfStock": "Out of stock",
     "add": "Add",

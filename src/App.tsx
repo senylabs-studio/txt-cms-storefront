@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { FavoritesProvider } from './contexts/FavoritesContext';
+import { StockNotificationProvider } from './contexts/StockNotificationContext';
 import { SiteSettingsProvider } from './contexts/SiteSettingsContext';
 import { PaymentMethodsProvider } from './contexts/PaymentMethodsContext';
 import { PartnersProvider } from './contexts/PartnersContext';
@@ -38,6 +39,7 @@ function App() {
       <AuthProvider>
         <CartProvider>
           <FavoritesProvider>
+          <StockNotificationProvider>
             <Routes>
               {/* Public */}
               <Route path="/" element={<LandingPage />} />
@@ -67,6 +69,7 @@ function App() {
               {/* Fallback */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
+          </StockNotificationProvider>
           </FavoritesProvider>
         </CartProvider>
       </AuthProvider>

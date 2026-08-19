@@ -5,6 +5,7 @@ import { Container, Row, Col, Button, Badge, Spinner, Alert } from 'react-bootst
 import { FaShoppingCart, FaArrowLeft, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import FavoriteButton from '../../../components/common/FavoriteButton/FavoriteButton';
+import NotifyMeButton from '../../../components/common/NotifyMeButton/NotifyMeButton';
 import MainLayout from '../../../components/Layout/MainLayout';
 import { getVariantById } from '../../../services/productService';
 import VariantCard from '../../../components/Product/VariantCard/VariantCard';
@@ -222,6 +223,11 @@ const VariantDetailPage: React.FC = () => {
               </Button>
               <FavoriteButton variantId={variant.id} size="lg" />
             </div>
+            {outOfStock && (
+              <div className="vdp-notify mt-2">
+                <NotifyMeButton variantId={variant.id} size="lg" className="w-100" />
+              </div>
+            )}
             <div className="vdp-meters">{t('product.meters')}</div>
 
             {error && <Alert variant="danger" className="py-2 mb-3">{error}</Alert>}

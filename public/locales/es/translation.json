@@ -229,6 +229,10 @@
     "remove": "Quitar de favoritos",
     "add": "Añadir a favoritos"
   },
+  "stockNotifications": {
+    "notifyMe": "Avísame cuando esté disponible",
+    "subscribed": "Te avisaremos"
+  },
   "product": {
     "outOfStock": "Sin stock",
     "add": "Añadir",

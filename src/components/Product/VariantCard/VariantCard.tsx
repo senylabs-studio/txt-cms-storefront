@@ -9,6 +9,7 @@ import { useCart } from '../../../contexts/CartContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import FavoriteButton from '../../common/FavoriteButton/FavoriteButton';
+import NotifyMeButton from '../../common/NotifyMeButton/NotifyMeButton';
 import { formatComposition } from '../../../utils/composition';
 import { getDiscountInfo } from '../../../utils/pricing';
 import '../ProductCard/ProductCard.css';
@@ -130,16 +131,18 @@ const VariantCard: React.FC<Props> = ({ variant }) => {
               </div>
               {error && <div className="text-danger small mt-1">{error}</div>}
             </div>
+          ) : outOfStock ? (
+            <NotifyMeButton variantId={variant.id} size="sm" className="w-100 mt-2" />
           ) : (
             <Button
-              variant={outOfStock ? 'outline-secondary' : 'primary'}
+              variant="primary"
               size="sm"
               className="w-100 mt-2"
-              disabled={outOfStock || loading}
+              disabled={loading}
               onClick={handleOpenQty}
             >
               <FaShoppingCart className="me-1" />
-              {outOfStock ? t('product.outOfStock') : t('product.add')}
+              {t('product.add')}
             </Button>
           )}
         </div>

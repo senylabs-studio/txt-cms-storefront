@@ -229,6 +229,10 @@
     "remove": "Treure dels favorits",
     "add": "Afegir a favorits"
   },
+  "stockNotifications": {
+    "notifyMe": "Avisa'm quan estigui disponible",
+    "subscribed": "T'avisarem"
+  },
   "product": {
     "outOfStock": "Sense estoc",
     "add": "Afegir",
