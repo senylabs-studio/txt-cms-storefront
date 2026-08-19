@@ -60,6 +60,21 @@ export interface StorefrontVariantDetail {
   careLabels?: number;
   productTypeName: string;
   siblings: StorefrontVariant[];
+  averageRating?: number;
+  reviewCount: number;
+}
+
+export interface ProductReview {
+  id: number;
+  customerName: string;
+  rating: number;
+  comment?: string;
+  createdAt: string;
+}
+
+export interface MyReviewStatus {
+  hasPurchased: boolean;
+  review: ProductReview | null;
 }
 
 export interface CartItem {

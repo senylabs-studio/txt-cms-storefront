@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Container, Row, Col, Button, Badge, Spinner, Alert } from 'react-bootstrap';
-import { FaShoppingCart, FaArrowLeft, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { Container, Row, Col, Button, Badge, Spinner, Alert, Form } from 'react-bootstrap';
+import { FaShoppingCart, FaArrowLeft, FaChevronLeft, FaChevronRight, FaStar, FaRegStar } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import FavoriteButton from '../../../components/common/FavoriteButton/FavoriteButton';
 import NotifyMeButton from '../../../components/common/NotifyMeButton/NotifyMeButton';
 import MainLayout from '../../../components/Layout/MainLayout';
 import { getVariantById } from '../../../services/productService';
+import { getProductReviews, getMyReview, submitReview } from '../../../services/reviewService';
 import VariantCard from '../../../components/Product/VariantCard/VariantCard';
-import type { StorefrontVariantDetail } from '../../../types';
+import type { StorefrontVariantDetail, ProductReview, MyReviewStatus } from '../../../types';
 import { useCart } from '../../../contexts/CartContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useSiteSettings } from '../../../contexts/SiteSettingsContext';
@@ -24,6 +25,17 @@ const DESC_THRESHOLD = 300;
 // ── Section header ────────────────────────────────────────────────────────────
 const SectionTitle: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div className="vdp-section-title">{children}</div>
+);
+
+// ── Star rating (display, or interactive when onChange is given) ──────────────
+const StarRating: React.FC<{ value: number; onChange?: (v: number) => void; size?: number }> = ({ value, onChange, size = 16 }) => (
+  <span className="text-warning" style={{ cursor: onChange ? 'pointer' : undefined }}>
+    {Array.from({ length: 5 }, (_, i) => {
+      const filled = i < Math.round(value);
+      const Icon = filled ? FaStar : FaRegStar;
+      return <Icon key={i} size={size} onClick={onChange ? () => onChange(i + 1) : undefined} />;
+    })}
+  </span>
 );
 
 // ── Info row ──────────────────────────────────────────────────────────────────
@@ -55,6 +67,16 @@ const VariantDetailPage: React.FC = () => {
   const [descExpanded, setDescExpanded] = useState(false);
   const [error, setError] = useState('');
 
+  // Reviews
+  const [reviews, setReviews] = useState<ProductReview[]>([]);
+  const [reviewsPage, setReviewsPage] = useState(1);
+  const [reviewsTotalPages, setReviewsTotalPages] = useState(0);
+  const [myReview, setMyReview] = useState<MyReviewStatus | null>(null);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [reviewMsg, setReviewMsg] = useState<{ type: 'success' | 'danger'; text: string } | null>(null);
+
   useEffect(() => {
     if (!id) return;
     setLoading(true);
@@ -65,6 +87,46 @@ const VariantDetailPage: React.FC = () => {
       .catch((e) => { if (e?.response?.status === 404) setNotFound(true); else navigate('/catalog'); })
       .finally(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    if (!variant?.productSlug) return;
+    setReviewsPage(1);
+    getProductReviews(variant.productSlug, 1).then(r => {
+      setReviews(r.items);
+      setReviewsTotalPages(r.totalPages);
+    }).catch(() => {});
+
+    if (isAuthenticated) {
+      getMyReview(variant.productSlug).then(status => {
+        setMyReview(status);
+        if (status.review) { setReviewRating(status.review.rating); setReviewComment(status.review.comment ?? ''); }
+      }).catch(() => {});
+    } else {
+      setMyReview(null);
+    }
+  }, [variant?.productSlug, isAuthenticated]);
+
+  const changeReviewsPage = (page: number) => {
+    if (!variant?.productSlug) return;
+    setReviewsPage(page);
+    getProductReviews(variant.productSlug, page).then(r => setReviews(r.items)).catch(() => {});
+  };
+
+  const handleSubmitReview = async () => {
+    if (!variant?.productSlug || reviewRating < 1) return;
+    setSubmittingReview(true);
+    setReviewMsg(null);
+    try {
+      const saved = await submitReview(variant.productSlug, reviewRating, reviewComment.trim() || undefined);
+      setMyReview(prev => prev ? { ...prev, review: saved } : { hasPurchased: true, review: saved });
+      setReviewMsg({ type: 'success', text: t('product.reviewSaved') });
+      changeReviewsPage(1);
+    } catch {
+      setReviewMsg({ type: 'danger', text: t('product.reviewSaveError') });
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
 
   if (loading) return <MainLayout><div className="text-center py-5"><Spinner animation="border" variant="primary" /></div></MainLayout>;
   if (notFound) return <MainLayout><Container className="py-5"><Alert variant="warning">{t('product.notFound')}</Alert></Container></MainLayout>;
@@ -179,6 +241,13 @@ const VariantDetailPage: React.FC = () => {
             )}
             <div className="vdp-ref">{t('product.ref')} {variant.code}</div>
 
+            {variant.reviewCount > 0 && (
+              <div className="d-flex align-items-center gap-2 mb-2">
+                <StarRating value={variant.averageRating ?? 0} />
+                <span className="text-muted small">{t('product.reviewCount', { count: variant.reviewCount })}</span>
+              </div>
+            )}
+
             {/* Price */}
             <div className="vdp-price-row">
               <span className="vdp-price">{variant.price.toFixed(2)} €</span>
@@ -279,6 +348,59 @@ const VariantDetailPage: React.FC = () => {
             </Row>
           </div>
         )}
+
+        {/* Reviews */}
+        <div className="vdp-reviews mt-5">
+          <SectionTitle>{t('product.reviewsTitle')}</SectionTitle>
+
+          {myReview?.hasPurchased && (
+            <div className="border rounded p-3 mb-4 mt-2" style={{ maxWidth: 480 }}>
+              <div className="fw-semibold mb-2">
+                {myReview.review ? t('product.editYourReview') : t('product.writeReview')}
+              </div>
+              {reviewMsg && <Alert variant={reviewMsg.type} className="py-2">{reviewMsg.text}</Alert>}
+              <div className="mb-2"><StarRating value={reviewRating} onChange={setReviewRating} size={22} /></div>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                value={reviewComment}
+                onChange={e => setReviewComment(e.target.value)}
+                placeholder={t('product.reviewCommentPlaceholder')}
+                className="mb-2"
+              />
+              <Button size="sm" variant="dark" disabled={submittingReview || reviewRating < 1} onClick={handleSubmitReview}>
+                {t('product.submitReview')}
+              </Button>
+            </div>
+          )}
+
+          {reviews.length === 0 ? (
+            <p className="text-muted">{t('product.noReviews')}</p>
+          ) : (
+            <>
+              {reviews.map(r => (
+                <div key={r.id} className="border-bottom py-3">
+                  <div className="d-flex align-items-center gap-2">
+                    <StarRating value={r.rating} size={13} />
+                    <span className="fw-semibold small">{r.customerName}</span>
+                    <span className="text-muted small">{new Date(r.createdAt).toLocaleDateString()}</span>
+                  </div>
+                  {r.comment && <p className="mb-0 mt-1 small">{r.comment}</p>}
+                </div>
+              ))}
+              {reviewsTotalPages > 1 && (
+                <div className="d-flex gap-2 mt-3">
+                  <Button size="sm" variant="outline-secondary" disabled={reviewsPage <= 1} onClick={() => changeReviewsPage(reviewsPage - 1)}>
+                    {t('product.previousPage')}
+                  </Button>
+                  <Button size="sm" variant="outline-secondary" disabled={reviewsPage >= reviewsTotalPages} onClick={() => changeReviewsPage(reviewsPage + 1)}>
+                    {t('product.nextPage')}
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </Container>
     </MainLayout>
   );
