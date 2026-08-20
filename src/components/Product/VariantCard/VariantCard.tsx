@@ -14,9 +14,6 @@ import { formatComposition } from '../../../utils/composition';
 import { getDiscountInfo } from '../../../utils/pricing';
 import '../ProductCard/ProductCard.css';
 
-const MIN_QTY = 0.3;
-const STEP_QTY = 0.05;
-
 interface Props { variant: StorefrontVariant; }
 
 const VariantCard: React.FC<Props> = ({ variant }) => {
@@ -25,8 +22,11 @@ const VariantCard: React.FC<Props> = ({ variant }) => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
+  const minQty = variant.minQuantity;
+  const stepQty = variant.quantityStep;
+
   const [showQtyForm, setShowQtyForm] = useState(false);
-  const [quantity, setQuantity] = useState(MIN_QTY);
+  const [quantity, setQuantity] = useState(minQty);
   const [error, setError] = useState('');
 
   const outOfStock = variant.availableStock <= 0;
@@ -34,7 +34,7 @@ const VariantCard: React.FC<Props> = ({ variant }) => {
 
   const handleOpenQty = () => {
     if (!isAuthenticated) { navigate('/login'); return; }
-    setQuantity(MIN_QTY);
+    setQuantity(minQty);
     setError('');
     setShowQtyForm(true);
   };
@@ -44,7 +44,7 @@ const VariantCard: React.FC<Props> = ({ variant }) => {
     try {
       await addItem(undefined, variant.id, quantity);
       setShowQtyForm(false);
-      setQuantity(MIN_QTY);
+      setQuantity(minQty);
     } catch (e) {
       setError((axios.isAxiosError(e) ? e.response?.data?.message : undefined) ?? t('product.addError'));
     }
@@ -52,11 +52,11 @@ const VariantCard: React.FC<Props> = ({ variant }) => {
 
   const handleCancel = () => {
     setShowQtyForm(false);
-    setQuantity(MIN_QTY);
+    setQuantity(minQty);
   };
 
   const adjust = (delta: number) => {
-    setQuantity(prev => Math.max(MIN_QTY, Math.round((prev + delta) * 100) / 100));
+    setQuantity(prev => Math.max(minQty, Math.round((prev + delta) * 100) / 100));
   };
 
   return (
@@ -107,19 +107,19 @@ const VariantCard: React.FC<Props> = ({ variant }) => {
           {showQtyForm ? (
             <div className="variant-qty-form mt-2">
               <InputGroup size="sm" className="mb-1">
-                <Button variant="outline-secondary" onClick={() => adjust(-STEP_QTY)} disabled={quantity <= MIN_QTY}>−</Button>
+                <Button variant="outline-secondary" onClick={() => adjust(-stepQty)} disabled={quantity <= minQty}>−</Button>
                 <Form.Control
                   type="number"
-                  min={MIN_QTY}
-                  step={STEP_QTY}
+                  min={minQty}
+                  step={stepQty}
                   value={quantity}
                   onChange={e => {
                     const v = parseFloat(e.target.value);
-                    if (!isNaN(v) && v >= MIN_QTY) setQuantity(Math.round(v * 100) / 100);
+                    if (!isNaN(v) && v >= minQty) setQuantity(Math.round(v * 100) / 100);
                   }}
                   className="text-center variant-qty-input"
                 />
-                <Button variant="outline-secondary" onClick={() => adjust(STEP_QTY)}>+</Button>
+                <Button variant="outline-secondary" onClick={() => adjust(stepQty)}>+</Button>
               </InputGroup>
               <div className="d-flex gap-1">
                 <Button variant="primary" size="sm" className="flex-grow-1" disabled={loading} onClick={handleConfirm}>

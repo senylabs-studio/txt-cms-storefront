@@ -55,6 +55,7 @@ const variant = (overrides: Partial<StorefrontVariantDetail> = {}): StorefrontVa
   id: 1, code: 'V1', name: 'Tela Azul', description: '', price: 10, originalPrice: 10, discountPercent: 0,
   availableStock: 5, typeValue: 'Azul', imageUrls: [], productId: 1, productName: 'Tela', productSlug: 'tela',
   width: 0, weight: 0, composition: '', productTypeName: '', siblings: [], reviewCount: 0,
+  minQuantity: 0.3, quantityStep: 0.05,
   ...overrides,
 });
 

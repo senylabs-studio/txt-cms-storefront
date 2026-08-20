@@ -18,8 +18,7 @@ import { useDocumentMeta } from '../../../hooks/useDocumentMeta';
 import CareLabels from '../../../components/common/CareLabels';
 import './VariantDetailPage.css';
 
-const MIN_QTY = 0.3;
-const STEP_QTY = 0.05;
+const DEFAULT_MIN_QTY = 0.3;
 const DESC_THRESHOLD = 300;
 
 // ── Section header ────────────────────────────────────────────────────────────
@@ -63,9 +62,12 @@ const VariantDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [quantity, setQuantity] = useState(MIN_QTY);
+  const [quantity, setQuantity] = useState(DEFAULT_MIN_QTY);
   const [descExpanded, setDescExpanded] = useState(false);
   const [error, setError] = useState('');
+
+  const minQty = variant?.minQuantity ?? DEFAULT_MIN_QTY;
+  const stepQty = variant?.quantityStep ?? 0.05;
 
   // Reviews
   const [reviews, setReviews] = useState<ProductReview[]>([]);
@@ -83,7 +85,7 @@ const VariantDetailPage: React.FC = () => {
     setSelectedImage(0);
     setDescExpanded(false);
     getVariantById(Number(id))
-      .then(v => setVariant(v))
+      .then(v => { setVariant(v); setQuantity(v.minQuantity); })
       .catch((e) => { if (e?.response?.status === 404) setNotFound(true); else navigate('/catalog'); })
       .finally(() => setLoading(false));
   }, [id, i18n.language]);
@@ -141,7 +143,7 @@ const VariantDetailPage: React.FC = () => {
   const hasGroupDiscount = (variant.discountPercent ?? 0) > 0;
 
   const adj = (delta: number) =>
-    setQuantity(q => Math.max(MIN_QTY, Math.round((q + delta) * 100) / 100));
+    setQuantity(q => Math.max(minQty, Math.round((q + delta) * 100) / 100));
 
   const handleAddToCart = async () => {
     if (!isAuthenticated) { navigate('/login'); return; }
@@ -275,15 +277,15 @@ const VariantDetailPage: React.FC = () => {
             {/* Quantity stepper + add to cart */}
             <div className="vdp-actions">
               <div className="vdp-stepper">
-                <button className="vdp-stepper-btn" disabled={outOfStock || quantity <= MIN_QTY}
-                  onClick={() => adj(-STEP_QTY)}>−</button>
+                <button className="vdp-stepper-btn" disabled={outOfStock || quantity <= minQty}
+                  onClick={() => adj(-stepQty)}>−</button>
                 <input
                   className="vdp-stepper-input"
-                  type="number" value={quantity} min={MIN_QTY} step={STEP_QTY}
+                  type="number" value={quantity} min={minQty} step={stepQty}
                   disabled={outOfStock}
-                  onChange={e => { const v = parseFloat(e.target.value); if (!isNaN(v) && v >= MIN_QTY) setQuantity(Math.round(v * 100) / 100); }}
+                  onChange={e => { const v = parseFloat(e.target.value); if (!isNaN(v) && v >= minQty) setQuantity(Math.round(v * 100) / 100); }}
                 />
-                <button className="vdp-stepper-btn" disabled={outOfStock} onClick={() => adj(STEP_QTY)}>+</button>
+                <button className="vdp-stepper-btn" disabled={outOfStock} onClick={() => adj(stepQty)}>+</button>
               </div>
               <Button
                 variant="dark" size="lg" className="flex-grow-1 fw-semibold vdp-add-btn"

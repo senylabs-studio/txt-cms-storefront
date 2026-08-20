@@ -15,6 +15,8 @@ export interface StorefrontProduct {
   variants?: StorefrontVariant[];
   width?: number;
   composition?: string;
+  minQuantity: number;
+  quantityStep: number;
 }
 
 export interface StorefrontVariant {
@@ -34,6 +36,8 @@ export interface StorefrontVariant {
   productTypeName?: string;
   width?: number;
   composition?: string;
+  minQuantity: number;
+  quantityStep: number;
 }
 
 export interface StorefrontVariantDetail {
@@ -59,6 +63,8 @@ export interface StorefrontVariantDetail {
   fabricType?: string;
   careLabels?: number;
   productTypeName: string;
+  minQuantity: number;
+  quantityStep: number;
   siblings: StorefrontVariant[];
   averageRating?: number;
   reviewCount: number;
@@ -224,6 +230,8 @@ export interface StorefrontPageItem {
   order: number;
   width?: number;
   composition?: string;
+  minQuantity: number;
+  quantityStep: number;
 }
 
 export interface PageFilterFacets {

@@ -289,6 +289,8 @@ const ProductsBlock: React.FC<{ config: ProductsBlockConfig; pageDetail?: Storef
               productSlug: item.productSlug,
               width: item.width,
               composition: item.composition,
+              minQuantity: item.minQuantity,
+              quantityStep: item.quantityStep,
             }} />
           </Col>
         ))}
