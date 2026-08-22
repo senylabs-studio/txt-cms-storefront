@@ -7,6 +7,7 @@ import { SiteSettingsProvider } from './contexts/SiteSettingsContext';
 import { PaymentMethodsProvider } from './contexts/PaymentMethodsContext';
 import { PartnersProvider } from './contexts/PartnersContext';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
+import ChatWidget from './components/ChatWidget/ChatWidget';
 import { useSyncDocumentLang } from './hooks/useSyncDocumentLang';
 
 import LandingPage from './pages/Home/LandingPage';
@@ -27,6 +28,7 @@ import AccountPage from './pages/Account/AccountPage';
 import OrdersPage from './pages/Account/OrdersPage';
 import OrderDetailPage from './pages/Account/OrderDetailPage';
 import FavoritesPage from './pages/Favorites/FavoritesPage';
+import BoardPage from './pages/Board/BoardPage';
 
 function App() {
   useSyncDocumentLang();
@@ -64,11 +66,13 @@ function App() {
                 <Route path="/account/orders" element={<OrdersPage />} />
                 <Route path="/account/orders/:id" element={<OrderDetailPage />} />
                 <Route path="/favorites" element={<FavoritesPage />} />
+                <Route path="/board" element={<BoardPage />} />
               </Route>
 
               {/* Fallback */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
+            <ChatWidget />
           </StockNotificationProvider>
           </FavoritesProvider>
         </CartProvider>

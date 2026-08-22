@@ -105,6 +105,15 @@
     "success": "Thank you! We've received your message and will get back to you soon.",
     "error": "Could not send the message. Please try again."
   },
+  "chat": {
+    "title": "Virtual assistant",
+    "greeting": "Hi! How can I help? I can help you find a fabric or answer questions about shipping.",
+    "placeholder": "Type your message...",
+    "open": "Open chat",
+    "close": "Close chat",
+    "send": "Send",
+    "error": "Something went wrong. Please try again."
+  },
   "newsletter": {
     "unsubscribe": {
       "title": "Unsubscribe",
@@ -256,6 +265,15 @@
     "remove": "Remove from favourites",
     "add": "Add to favourites"
   },
+  "board": {
+    "title": "My board",
+    "subtitle": "Combine several fabrics to see how they work together. Drag to move them, use the corner to resize.",
+    "empty": "Your board is empty. Add fabrics from their product page to start combining them.",
+    "loadError": "Could not load the board.",
+    "add": "Add to board",
+    "added": "Added to board",
+    "remove": "Remove from board"
+  },
   "stockNotifications": {
     "notifyMe": "Notify me when back in stock",
     "subscribed": "We'll notify you"
@@ -278,6 +296,7 @@
     "careInstructions": "Care instructions",
     "meters": "metres",
     "related": "Related products",
+    "alsoBought": "Customers who bought this also bought",
     "reviewCount": "({{count}} reviews)",
     "reviewsTitle": "Customer reviews",
     "noReviews": "This product has no reviews yet.",

@@ -105,6 +105,15 @@
     "success": "Gràcies! Hem rebut el teu missatge i et respondrem el més aviat possible.",
     "error": "No s'ha pogut enviar el missatge. Torna-ho a provar."
   },
+  "chat": {
+    "title": "Assistent virtual",
+    "greeting": "Hola! En què et puc ajudar? Puc ajudar-te a trobar un teixit o resoldre dubtes sobre enviaments.",
+    "placeholder": "Escriu el teu missatge...",
+    "open": "Obrir xat",
+    "close": "Tancar xat",
+    "send": "Enviar",
+    "error": "S'ha produït un error. Torna-ho a provar."
+  },
   "newsletter": {
     "unsubscribe": {
       "title": "Donar-se de baixa",
@@ -256,6 +265,15 @@
     "remove": "Treure dels favorits",
     "add": "Afegir a favorits"
   },
+  "board": {
+    "title": "El meu tauler",
+    "subtitle": "Combina diverses teles per veure com queden juntes. Arrossega per moure-les, fes servir la cantonada per canviar-ne la mida.",
+    "empty": "El teu tauler està buit. Afegeix teles des de la seva fitxa de producte per començar a combinar-les.",
+    "loadError": "No s'ha pogut carregar el tauler.",
+    "add": "Afegir al tauler",
+    "added": "Afegit al tauler",
+    "remove": "Treure del tauler"
+  },
   "stockNotifications": {
     "notifyMe": "Avisa'm quan estigui disponible",
     "subscribed": "T'avisarem"
@@ -278,6 +296,7 @@
     "careInstructions": "Instruccions de cura",
     "meters": "metres",
     "related": "Productes relacionats",
+    "alsoBought": "Qui va comprar això també va comprar",
     "reviewCount": "({{count}} ressenyes)",
     "reviewsTitle": "Ressenyes de clients",
     "noReviews": "Aquest producte encara no té ressenyes.",

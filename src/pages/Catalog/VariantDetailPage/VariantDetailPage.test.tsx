@@ -17,6 +17,7 @@ vi.mock('../../../components/Layout/MainLayout', () => ({
 }));
 
 vi.mock('../../../components/common/FavoriteButton/FavoriteButton', () => ({ default: () => <div /> }));
+vi.mock('../../../components/common/BoardButton/BoardButton', () => ({ default: () => <div /> }));
 vi.mock('../../../components/common/NotifyMeButton/NotifyMeButton', () => ({ default: () => <div /> }));
 vi.mock('../../../components/common/CareLabels', () => ({ default: () => <div /> }));
 vi.mock('../../../components/Product/VariantCard/VariantCard', () => ({ default: () => <div /> }));
@@ -54,7 +55,7 @@ const renderPage = (variantId = '1') => render(
 const variant = (overrides: Partial<StorefrontVariantDetail> = {}): StorefrontVariantDetail => ({
   id: 1, code: 'V1', name: 'Tela Azul', description: '', price: 10, originalPrice: 10, discountPercent: 0,
   availableStock: 5, typeValue: 'Azul', imageUrls: [], productId: 1, productName: 'Tela', productSlug: 'tela',
-  width: 0, weight: 0, composition: '', productTypeName: '', siblings: [], reviewCount: 0,
+  width: 0, weight: 0, composition: '', productTypeName: '', siblings: [], alsoBought: [], reviewCount: 0,
   minQuantity: 0.3, quantityStep: 0.05,
   ...overrides,
 });

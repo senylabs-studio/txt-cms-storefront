@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Navbar, Nav, Container, Badge, Form, InputGroup, Button, NavDropdown } from 'react-bootstrap';
-import { FaShoppingCart, FaUser, FaSearch, FaBars, FaHeart } from 'react-icons/fa';
+import { FaShoppingCart, FaUser, FaSearch, FaBars, FaHeart, FaPalette } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -102,10 +102,15 @@ const Header: React.FC = () => {
 
             <Nav className="ms-auto align-items-center gap-2">
               {isAuthenticated && (
-                <Link to="/favorites" className="cart-btn text-decoration-none">
-                  <FaHeart size={20} />
-                  {favCount > 0 && <Badge bg="danger" className="cart-badge">{favCount}</Badge>}
-                </Link>
+                <>
+                  <Link to="/favorites" className="cart-btn text-decoration-none">
+                    <FaHeart size={20} />
+                    {favCount > 0 && <Badge bg="danger" className="cart-badge">{favCount}</Badge>}
+                  </Link>
+                  <Link to="/board" className="cart-btn text-decoration-none" title={t('board.title')}>
+                    <FaPalette size={20} />
+                  </Link>
+                </>
               )}
               <button className="cart-btn" onClick={openDrawer}>
                 <FaShoppingCart size={20} />

@@ -5,6 +5,7 @@ import { Container, Row, Col, Button, Badge, Spinner, Alert, Form } from 'react-
 import { FaShoppingCart, FaArrowLeft, FaChevronLeft, FaChevronRight, FaStar, FaRegStar } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import FavoriteButton from '../../../components/common/FavoriteButton/FavoriteButton';
+import BoardButton from '../../../components/common/BoardButton/BoardButton';
 import NotifyMeButton from '../../../components/common/NotifyMeButton/NotifyMeButton';
 import MainLayout from '../../../components/Layout/MainLayout';
 import { getVariantById } from '../../../services/productService';
@@ -296,6 +297,7 @@ const VariantDetailPage: React.FC = () => {
                 {outOfStock ? t('product.outOfStock') : t('product.addToCart')}
               </Button>
               <FavoriteButton variantId={variant.id} size="lg" />
+              <BoardButton variantId={variant.id} size="lg" />
             </div>
             {outOfStock && (
               <div className="vdp-notify mt-2">
@@ -342,12 +344,24 @@ const VariantDetailPage: React.FC = () => {
           </Col>
         </Row>
 
-        {/* Related variants */}
+        {/* Related variants (same product) */}
         {variant.siblings && variant.siblings.length > 0 && (
           <div className="vdp-related">
             <SectionTitle>{t('product.related')}</SectionTitle>
             <Row xs={2} sm={2} md={3} lg={4} className="g-3 mt-1">
               {variant.siblings.map(s => (
+                <Col key={s.id}><VariantCard variant={s} /></Col>
+              ))}
+            </Row>
+          </div>
+        )}
+
+        {/* Frequently bought together (across products) */}
+        {variant.alsoBought && variant.alsoBought.length > 0 && (
+          <div className="vdp-related">
+            <SectionTitle>{t('product.alsoBought')}</SectionTitle>
+            <Row xs={2} sm={2} md={3} lg={4} className="g-3 mt-1">
+              {variant.alsoBought.map(s => (
                 <Col key={s.id}><VariantCard variant={s} /></Col>
               ))}
             </Row>

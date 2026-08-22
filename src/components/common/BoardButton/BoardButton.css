@@ -1,0 +1,27 @@
+.board-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #adb5bd;
+  transition: color 0.2s, transform 0.15s, background 0.2s;
+  line-height: 1;
+  padding: 0;
+}
+
+.board-btn:hover {
+  color: var(--brand-color, #06b773);
+  background: #fff;
+  transform: scale(1.15);
+}
+
+.board-btn--active {
+  color: var(--brand-color, #06b773) !important;
+}
+
+.board-btn--sm { width: 28px; height: 28px; font-size: 13px; }
+.board-btn--md { width: 34px; height: 34px; font-size: 16px; }
+.board-btn--lg { width: 42px; height: 42px; font-size: 20px; }

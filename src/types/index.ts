@@ -66,6 +66,7 @@ export interface StorefrontVariantDetail {
   minQuantity: number;
   quantityStep: number;
   siblings: StorefrontVariant[];
+  alsoBought: StorefrontVariant[];
   averageRating?: number;
   reviewCount: number;
 }

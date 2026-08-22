@@ -105,6 +105,15 @@
     "success": "¡Gracias! Hemos recibido tu mensaje y te responderemos lo antes posible.",
     "error": "No se pudo enviar el mensaje. Inténtalo de nuevo."
   },
+  "chat": {
+    "title": "Asistente virtual",
+    "greeting": "¡Hola! ¿En qué puedo ayudarte? Puedo ayudarte a encontrar un tejido o resolver dudas sobre envíos.",
+    "placeholder": "Escribe tu mensaje...",
+    "open": "Abrir chat",
+    "close": "Cerrar chat",
+    "send": "Enviar",
+    "error": "Ha ocurrido un error. Inténtalo de nuevo."
+  },
   "newsletter": {
     "unsubscribe": {
       "title": "Darse de baja",
@@ -256,6 +265,15 @@
     "remove": "Quitar de favoritos",
     "add": "Añadir a favoritos"
   },
+  "board": {
+    "title": "Mi tablero",
+    "subtitle": "Combina varias telas para ver cómo quedan juntas. Arrastra para moverlas, usa la esquina para cambiar el tamaño.",
+    "empty": "Tu tablero está vacío. Añade telas desde su ficha de producto para empezar a combinarlas.",
+    "loadError": "No se pudo cargar el tablero.",
+    "add": "Añadir al tablero",
+    "added": "Añadido al tablero",
+    "remove": "Quitar del tablero"
+  },
   "stockNotifications": {
     "notifyMe": "Avísame cuando esté disponible",
     "subscribed": "Te avisaremos"
@@ -278,6 +296,7 @@
     "careInstructions": "Instrucciones de cuidado",
     "meters": "metros",
     "related": "Productos relacionados",
+    "alsoBought": "Quienes compraron esto también compraron",
     "reviewCount": "({{count}} reseñas)",
     "reviewsTitle": "Reseñas de clientes",
     "noReviews": "Este producto aún no tiene reseñas.",
