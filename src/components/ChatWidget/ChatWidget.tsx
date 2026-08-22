@@ -5,7 +5,7 @@ import { sendChatMessage, type ChatMessage } from '../../services/chatService';
 import './ChatWidget.css';
 
 const ChatWidget: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -27,7 +27,7 @@ const ChatWidget: React.FC = () => {
     setLoading(true);
 
     try {
-      const reply = await sendChatMessage(nextMessages);
+      const reply = await sendChatMessage(nextMessages, i18n.language);
       setMessages(m => [...m, { role: 'assistant', content: reply }]);
     } catch {
       setMessages(m => [...m, { role: 'assistant', content: t('chat.error') }]);
