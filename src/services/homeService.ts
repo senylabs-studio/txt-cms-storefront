@@ -13,6 +13,7 @@ export interface HomeBannerSlide {
 export interface HomeBannerBlockConfig {
   slides: HomeBannerSlide[];
   height?: number;
+  intervalSeconds?: number;
   backgroundColor?: string;
 }
 

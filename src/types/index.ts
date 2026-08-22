@@ -360,6 +360,7 @@ export interface BannerSlide {
 export interface BannerBlockConfig {
   slides: BannerSlide[];
   height?: number;
+  intervalSeconds?: number;
   style?: BlockStyle;
 }
 

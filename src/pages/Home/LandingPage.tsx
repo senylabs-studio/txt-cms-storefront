@@ -42,7 +42,7 @@ const BannerBlock: React.FC<{ config: HomeBannerBlockConfig }> = ({ config }) =>
   }
 
   return (
-    <Carousel fade interval={5000} className="home-carousel" style={{ minHeight: height }}>
+    <Carousel fade interval={(config.intervalSeconds ?? 5) * 1000} className="home-carousel" style={{ minHeight: height }}>
       {slides.map((slide, i) => (
         <Carousel.Item key={i} style={{ minHeight: height }}>
           <div

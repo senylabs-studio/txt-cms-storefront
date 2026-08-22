@@ -211,7 +211,7 @@ const BannerBlock: React.FC<{ config: BannerBlockConfig }> = ({ config }) => {
 
   const height = config.height ?? 500;
   return (
-    <Carousel style={buildStyle(config.style)}>
+    <Carousel interval={(config.intervalSeconds ?? 5) * 1000} style={buildStyle(config.style)}>
       {slides.map((slide, i) => (
         <Carousel.Item key={i}>
           <div
