@@ -3,14 +3,29 @@
   top: 0;
   z-index: 1000;
   box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  font-family: 'Barlow', 'Inter', system-ui, -apple-system, sans-serif;
+  background: #fff;
 }
 
+/* ── Top bar ──────────────────────────────────────────────────────────── */
 .header-topbar {
-  background: #f8f9fa;
-  border-bottom: 1px solid #e9ecef;
+  background: color-mix(in srgb, var(--brand-color) 10%, white);
+  border-bottom: 1px solid color-mix(in srgb, var(--brand-color) 16%, white);
   padding: 6px 0;
   font-size: 13px;
+  color: color-mix(in srgb, var(--brand-color) 65%, #14171a);
 }
+
+.header-lang-switch { font-size: 0.72rem; }
+.header-lang-btn {
+  background: none;
+  border: none;
+  padding: 0 2px;
+  cursor: pointer;
+  color: inherit;
+  opacity: .6;
+}
+.header-lang-btn.is-active { opacity: 1; font-weight: 700; }
 
 .topbar-link {
   color: #495057;
@@ -28,49 +43,134 @@
 }
 .topbar-dropdown .dropdown-toggle::after { display: none !important; }
 
-.header-main {
-  background: #fff;
-  padding: 12px 0;
+/* ── Main brand row ───────────────────────────────────────────────────── */
+.header-main { background: #fff; padding: 14px 0; }
+
+.header-main-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
 }
 
-.brand { font-size: 1.4rem; font-weight: 800; text-decoration: none; }
+.header-hamburger {
+  display: none;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: transparent;
+  align-items: center;
+  justify-content: center;
+  color: #14171a;
+  cursor: pointer;
+  border-radius: 10px;
+  flex: none;
+}
+.header-hamburger:hover { background: #f4f6f4; }
+.header-hamburger--inline { width: 40px; height: 40px; }
+
+.brand { display: flex; align-items: center; font-size: 1.4rem; font-weight: 800; flex: none; }
 .brand-txt { color: #212529; }
 .brand-cms { color: var(--brand-color); }
-.brand-logo { height: 80px; width: auto; max-width: 160px; object-fit: contain; }
+.brand-logo { height: 64px; width: auto; max-width: 160px; object-fit: contain; }
 
-.header-search { max-width: 460px; width: 100%; }
-
-.cart-btn {
-  position: relative;
-  background: none;
-  border: none;
-  padding: 6px 10px;
-  color: #212529;
-  cursor: pointer;
-  transition: color .2s;
+.brand-mini { display: flex; align-items: center; flex: none; }
+.brand-mini-logo { height: 34px; width: auto; max-width: 100px; object-fit: contain; border-radius: 50%; }
+.brand-mini-txt {
+  width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid #14171a;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600;
 }
-.cart-btn:hover { color: var(--brand-color); }
 
-.cart-badge {
-  position: absolute;
-  top: 0;
-  right: 0;
-  font-size: 10px;
-  min-width: 17px;
-  height: 17px;
+.header-search { flex: 1; max-width: 560px; }
+.header-search--condensed { max-width: 260px; }
+
+/* ── Action icons (favorites / board / cart) ─────────────────────────── */
+.header-icons {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: none;
+  margin-left: auto;
+}
+
+.header-icon-btn {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  border: 0;
+  background: transparent;
+  color: #14171a;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: background .15s;
+}
+.header-icon-btn:hover { background: #f4f6f4; color: #14171a; }
+
+.header-icons--labeled .header-icon-btn {
+  flex-direction: column;
+  gap: 3px;
+  width: 64px;
+  height: auto;
+  padding: 6px 0;
 }
 
-/* ── Mega Menu ─────────────────────────────────────────── */
+.header-icon-label { font-size: 11px; color: #4b5563; }
+
+.header-icon-badge {
+  position: absolute;
+  top: 2px;
+  right: 6px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 600;
+  box-shadow: 0 0 0 2px #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.header-icons--labeled .header-icon-badge { top: 2px; right: 12px; }
+.header-icon-badge--cart { background: var(--brand-color, #06b773) !important; }
+
+/* ── Mobile-only search row ──────────────────────────────────────────── */
+.header-mobile-search-row {
+  display: none;
+  background: #fff;
+  border-bottom: 1px solid #e6e8e6;
+  padding: 8px 0;
+}
+
+/* ── Condensed (scrolled) search + icons, rendered inside NavMenu ───────── */
+.header-condensed-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* ── Mega Menu / nav row ──────────────────────────────────────────────── */
 .nav-menu-bar {
   position: relative;
   background: #fff;
   border-top: 1px solid #e9ecef;
   border-bottom: 1px solid #e9ecef;
   z-index: 999;
+}
+
+.nav-menu-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.nav-menu-trailing {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
 }
 
 .nav-menu-list {
@@ -189,7 +289,6 @@
   border-bottom-color: var(--brand-color);
 }
 
-/* Mega panel body layout */
 .mega-body {
   display: flex;
   align-items: flex-start;
@@ -201,7 +300,6 @@
   min-width: 0;
 }
 
-/* Right image */
 .mega-image-wrap {
   flex-shrink: 0;
   width: 220px;
@@ -229,3 +327,118 @@
   transition: color .15s;
 }
 .mega-image-wrap:hover .mega-image-label { color: var(--brand-color); }
+
+/* ── Mobile menu bottom sheet ─────────────────────────────────────────── */
+.mobile-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(20,23,26,.35);
+  z-index: 1100;
+  display: flex;
+  align-items: flex-end;
+}
+
+.mobile-menu-sheet {
+  width: 100%;
+  max-height: 82vh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 20px 20px 0 0;
+  padding: 14px 0 max(20px, env(safe-area-inset-bottom));
+  animation: mobileMenuSlideUp .2s ease;
+}
+
+@keyframes mobileMenuSlideUp {
+  from { transform: translateY(24px); opacity: .6; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+.mobile-menu-handle {
+  width: 44px;
+  height: 4px;
+  border-radius: 2px;
+  background: #dcdedc;
+  margin: 0 auto 12px;
+}
+
+.mobile-menu-list { display: flex; flex-direction: column; }
+
+.mobile-menu-item {
+  padding: 14px 20px;
+  font-size: 16px;
+  color: #14171a;
+  border-top: 1px solid #f0f2f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-decoration: none;
+}
+.mobile-menu-item:hover { color: var(--brand-color); }
+.mobile-menu-item svg { color: #c9cdc9; flex: none; }
+
+.mobile-menu-footer {
+  padding: 14px 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 1px solid #f0f2f0;
+  margin-top: 4px;
+}
+
+.mobile-menu-langs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #6b7280;
+  flex-wrap: wrap;
+}
+
+.mobile-menu-lang,
+.mobile-menu-account,
+.mobile-menu-logout {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 14px;
+  color: #6b7280;
+  cursor: pointer;
+}
+.mobile-menu-lang.is-active { color: #14171a; font-weight: 700; }
+.mobile-menu-account { color: var(--brand-color); font-weight: 600; }
+.mobile-menu-lang-sep { color: #c9cdc9; }
+
+.mobile-menu-logout,
+.mobile-menu-close {
+  text-align: left;
+  padding: 6px 0;
+}
+.mobile-menu-close { color: var(--brand-color); font-weight: 600; }
+
+/* ── Responsive rules ─────────────────────────────────────────────────── */
+
+/* < 768px (mobile): hamburger + mobile search row take over, nav row hides */
+@media (max-width: 767.98px) {
+  .header-hamburger { display: flex; }
+  .header-mobile-search-row { display: block; }
+  .header-search { max-width: none; }
+  /* Mobile has its own always-visible search row (.header-mobile-search-row);
+     the brand row's copy would otherwise duplicate it. */
+  .header-main-row .header-search { display: none; }
+  .header-icons--labeled .header-icon-btn { width: 42px; padding: 0; flex-direction: row; }
+  .header-icons--labeled .header-icon-badge { top: 2px; right: 6px; }
+  .header-icon-label { display: none; }
+  .nav-menu-bar { display: none; }
+  .brand-logo { height: 48px; }
+}
+
+/* >= 768px (tablet/desktop): action icon labels only show at desktop width */
+@media (min-width: 768px) {
+  .header-mobile-search-row { display: none; }
+}
+
+@media (min-width: 768px) and (max-width: 1199.98px) {
+  .header-icons--labeled .header-icon-btn { flex-direction: row; width: 42px; padding: 0; }
+  .header-icon-label { display: none; }
+  .header-icons--labeled .header-icon-badge { top: 2px; right: 6px; }
+}

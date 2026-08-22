@@ -86,7 +86,16 @@ const MegaPanel: React.FC<{ item: StorefrontMenuItem; onClose: () => void }> = (
   );
 };
 
-const NavMenu: React.FC = () => {
+interface NavMenuProps {
+  /** Rendered before the nav item list — used for the small logo shown once the
+   *  header has collapsed on scroll (desktop/tablet). */
+  leading?: React.ReactNode;
+  /** Rendered after the nav item list, pushed to the right — the condensed
+   *  search field + action icons shown once the header has collapsed on scroll. */
+  trailing?: React.ReactNode;
+}
+
+const NavMenu: React.FC<NavMenuProps> = ({ leading, trailing }) => {
   const { i18n } = useTranslation();
   const [items, setItems] = useState<StorefrontMenuItem[]>([]);
   const [activeId, setActiveId] = useState<number | null>(null);
@@ -110,7 +119,9 @@ const NavMenu: React.FC = () => {
     setActiveId(null);
   };
 
-  if (items.length === 0) return null;
+  // Still render when there are no CMS-configured menu items, as long as the
+  // header wants the collapsed-state logo/search/icons slot rendered here.
+  if (items.length === 0 && !leading && !trailing) return null;
 
   const activeItem = items.find(i => i.id === activeId);
 
@@ -121,6 +132,8 @@ const NavMenu: React.FC = () => {
     >
       {/* Top strip — the actual nav items */}
       <Container>
+        <div className="nav-menu-row">
+        {leading}
         <ul className="nav-menu-list">
           {items.map(item => {
             const href = resolveHref(item);
@@ -148,6 +161,8 @@ const NavMenu: React.FC = () => {
             );
           })}
         </ul>
+        {trailing && <div className="nav-menu-trailing">{trailing}</div>}
+        </div>
       </Container>
 
       {/* Mega panel */}

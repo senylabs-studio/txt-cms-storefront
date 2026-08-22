@@ -6,7 +6,12 @@
     "logout": "Tancar sessió",
     "login": "Iniciar sessió",
     "register": "Registrar-se",
-    "search": "Cercar productes..."
+    "search": "Cercar productes...",
+    "searchShort": "Cerca teixits, colors...",
+    "menu": "Menú",
+    "closeMenu": "Tancar",
+    "favorites": "Favorits",
+    "cart": "Cistella"
   },
   "nav": {
     "viewAll": "Veure-ho tot →",

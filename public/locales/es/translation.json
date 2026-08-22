@@ -6,7 +6,12 @@
     "logout": "Cerrar sesión",
     "login": "Iniciar sesión",
     "register": "Registrarse",
-    "search": "Buscar productos..."
+    "search": "Buscar productos...",
+    "searchShort": "Buscar tejidos, colores...",
+    "menu": "Menú",
+    "closeMenu": "Cerrar",
+    "favorites": "Favoritos",
+    "cart": "Carrito"
   },
   "nav": {
     "viewAll": "Ver todo →",

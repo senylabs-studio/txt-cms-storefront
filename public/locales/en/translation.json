@@ -6,7 +6,12 @@
     "logout": "Log out",
     "login": "Log in",
     "register": "Sign up",
-    "search": "Search products..."
+    "search": "Search products...",
+    "searchShort": "Search fabrics, colors...",
+    "menu": "Menu",
+    "closeMenu": "Close",
+    "favorites": "Favorites",
+    "cart": "Cart"
   },
   "nav": {
     "viewAll": "View all →",
