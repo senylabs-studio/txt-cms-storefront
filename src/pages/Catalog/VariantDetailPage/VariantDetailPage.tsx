@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Container, Row, Col, Button, Badge, Spinner, Alert, Form } from 'react-bootstrap';
-import { FaShoppingCart, FaArrowLeft, FaChevronLeft, FaChevronRight, FaStar, FaRegStar } from 'react-icons/fa';
+import { FaShoppingCart, FaArrowLeft, FaChevronLeft, FaChevronRight, FaStar, FaRegStar, FaRulerHorizontal } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import FavoriteButton from '../../../components/common/FavoriteButton/FavoriteButton';
 import BoardButton from '../../../components/common/BoardButton/BoardButton';
 import NotifyMeButton from '../../../components/common/NotifyMeButton/NotifyMeButton';
+import RulerOverlay from '../../../components/common/RulerOverlay/RulerOverlay';
 import MainLayout from '../../../components/Layout/MainLayout';
 import { getVariantById } from '../../../services/productService';
 import { getProductReviews, getMyReview, submitReview } from '../../../services/reviewService';
@@ -63,6 +64,9 @@ const VariantDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [rulerActive, setRulerActive] = useState(false);
+  const imgContainerRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
   const [quantity, setQuantity] = useState(DEFAULT_MIN_QTY);
   const [descExpanded, setDescExpanded] = useState(false);
   const [error, setError] = useState('');
@@ -138,7 +142,11 @@ const VariantDetailPage: React.FC = () => {
   if (notFound) return <MainLayout><Container className="py-5"><Alert variant="warning">{t('product.notFound')}</Alert></Container></MainLayout>;
   if (!variant) return null;
 
-  const images = variant.imageUrls.length ? variant.imageUrls : variant.thumbnailUrl ? [variant.thumbnailUrl] : [];
+  const images = variant.images.length
+    ? variant.images
+    : variant.thumbnailUrl ? [{ url: variant.thumbnailUrl, isRealScale: false }] : [];
+  const currentImage = images[selectedImage];
+  const canMeasure = !!(currentImage?.isRealScale && currentImage.realWidthCm);
   const outOfStock = variant.availableStock <= 0;
   const hasDiscount = variant.originalPrice > variant.price;
   const hasGroupDiscount = (variant.discountPercent ?? 0) > 0;
@@ -179,10 +187,14 @@ const VariantDetailPage: React.FC = () => {
           {/* ── Images ── */}
           <Col md={6}>
             {/* Main image */}
-            <div className="vdp-img-container">
-              {images[selectedImage]
-                ? <img src={images[selectedImage]} alt={variant.name} />
+            <div className="vdp-img-container" ref={imgContainerRef}>
+              {currentImage
+                ? <img ref={imgRef} src={currentImage.url} alt={variant.name} />
                 : <span className="vdp-img-placeholder">📦</span>}
+
+              {canMeasure && rulerActive && (
+                <RulerOverlay containerRef={imgContainerRef} imgRef={imgRef} realWidthCm={currentImage!.realWidthCm!} />
+              )}
 
               {images.length > 1 && (
                 <>
@@ -218,16 +230,28 @@ const VariantDetailPage: React.FC = () => {
             {/* Thumbnails */}
             {images.length > 1 && (
               <div className="vdp-thumb-strip">
-                {images.map((url, i) => (
+                {images.map((img, i) => (
                   <div
                     key={i}
                     className={`vdp-thumb${i === selectedImage ? ' vdp-thumb--active' : ''}`}
                     onClick={() => setSelectedImage(i)}
                   >
-                    <img src={url} alt="" />
+                    <img src={img.url} alt="" />
                   </div>
                 ))}
               </div>
+            )}
+
+            {canMeasure && (
+              <Button
+                variant={rulerActive ? 'dark' : 'outline-dark'}
+                size="sm"
+                className="vdp-measure-btn"
+                onClick={() => setRulerActive(a => !a)}
+              >
+                <FaRulerHorizontal className="me-2" />
+                {rulerActive ? t('product.measureHide') : t('product.measure')}
+              </Button>
             )}
           </Col>
 

@@ -40,6 +40,12 @@ export interface StorefrontVariant {
   quantityStep: number;
 }
 
+export interface StorefrontImage {
+  url: string;
+  isRealScale: boolean;
+  realWidthCm?: number;
+}
+
 export interface StorefrontVariantDetail {
   id: number;
   code: string;
@@ -51,7 +57,7 @@ export interface StorefrontVariantDetail {
   availableStock: number;
   typeValue: string;
   thumbnailUrl?: string;
-  imageUrls: string[];
+  images: StorefrontImage[];
   productId: number;
   productName: string;
   productSlug: string;

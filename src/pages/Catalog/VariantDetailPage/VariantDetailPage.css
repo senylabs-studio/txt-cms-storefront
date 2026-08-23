@@ -83,6 +83,10 @@
   flex-wrap: wrap;
 }
 
+.vdp-measure-btn {
+  margin-top: 10px;
+}
+
 .vdp-thumb {
   width: 72px;
   height: 72px;

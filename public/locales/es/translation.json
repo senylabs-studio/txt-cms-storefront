@@ -329,6 +329,8 @@
     "inStockCount": "{{count}} en stock",
     "previousImage": "Imagen anterior",
     "nextImage": "Imagen siguiente",
+    "measure": "Medir con cinta métrica",
+    "measureHide": "Ocultar cinta métrica",
     "goToImage": "Ir a imagen {{count}}",
     "noFeaturedProducts": "No hay productos destacados configurados."
   },

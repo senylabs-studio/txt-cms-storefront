@@ -329,6 +329,8 @@
     "inStockCount": "{{count}} in stock",
     "previousImage": "Previous image",
     "nextImage": "Next image",
+    "measure": "Measure with tape",
+    "measureHide": "Hide measuring tape",
     "goToImage": "Go to image {{count}}",
     "noFeaturedProducts": "No featured products configured."
   },

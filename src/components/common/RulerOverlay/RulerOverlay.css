@@ -1,0 +1,54 @@
+.ruler-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.ruler-axis--h {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.85);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.35);
+}
+
+.ruler-axis--v {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 22px;
+  background: rgba(255, 255, 255, 0.85);
+  border-right: 1px solid rgba(0, 0, 0, 0.35);
+}
+
+.ruler-tick--h {
+  position: absolute;
+  top: 0;
+  width: 1px;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.55);
+}
+.ruler-tick--h.ruler-tick--major { height: 14px; background: rgba(0, 0, 0, 0.8); }
+
+.ruler-tick--v {
+  position: absolute;
+  left: 0;
+  height: 1px;
+  width: 8px;
+  background: rgba(0, 0, 0, 0.55);
+}
+.ruler-tick--v.ruler-tick--major { width: 14px; background: rgba(0, 0, 0, 0.8); }
+
+.ruler-label {
+  position: absolute;
+  font-size: 9px;
+  font-weight: 600;
+  color: #212529;
+  line-height: 1;
+}
+.ruler-label--h { top: 15px; left: 2px; }
+.ruler-label--v { left: 15px; top: 2px; writing-mode: vertical-rl; }

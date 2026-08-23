@@ -329,6 +329,8 @@
     "inStockCount": "{{count}} en estoc",
     "previousImage": "Imatge anterior",
     "nextImage": "Imatge següent",
+    "measure": "Mesura amb cinta mètrica",
+    "measureHide": "Amaga la cinta mètrica",
     "goToImage": "Anar a la imatge {{count}}",
     "noFeaturedProducts": "No hi ha productes destacats configurats."
   },
