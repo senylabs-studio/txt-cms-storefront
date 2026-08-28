@@ -55,7 +55,7 @@ const renderPage = (variantId = '1') => render(
 const variant = (overrides: Partial<StorefrontVariantDetail> = {}): StorefrontVariantDetail => ({
   id: 1, code: 'V1', name: 'Tela Azul', description: '', price: 10, originalPrice: 10, discountPercent: 0,
   availableStock: 5, typeValue: 'Azul', images: [], productId: 1, productName: 'Tela', productSlug: 'tela',
-  width: 0, weight: 0, composition: '', productTypeName: '', siblings: [], alsoBought: [], reviewCount: 0,
+  width: 0, weight: 0, composition: '', productTypeName: '', siblings: [], alsoBought: [], alsoBoughtIsFallback: false, reviewCount: 0,
   minQuantity: 0.3, quantityStep: 0.05,
   ...overrides,
 });
@@ -172,5 +172,41 @@ describe('VariantDetailPage reviews', () => {
 
     expect(await screen.findByText('Bob')).toBeInTheDocument();
     expect(getProductReviews).toHaveBeenCalledWith('tela', 2);
+  });
+});
+
+describe('VariantDetailPage alsoBought', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockAuth.isAuthenticated = true;
+    getProductReviews.mockResolvedValue(reviewsPage([]));
+    getMyReview.mockResolvedValue({ hasPurchased: false, review: null });
+  });
+
+  const relatedVariant = { id: 2, name: 'Otra tela', code: 'V2', price: 5, originalPrice: 5, availableStock: 3 };
+
+  it('shows the real co-purchase heading when alsoBought is not a fallback', async () => {
+    getVariantById.mockResolvedValue(variant({ alsoBought: [relatedVariant], alsoBoughtIsFallback: false }));
+    renderPage();
+
+    expect(await screen.findByText('product.alsoBought')).toBeInTheDocument();
+    expect(screen.queryByText('product.youMightAlsoLike')).not.toBeInTheDocument();
+  });
+
+  it('shows the "you might also like" heading when alsoBought is a fallback', async () => {
+    getVariantById.mockResolvedValue(variant({ alsoBought: [relatedVariant], alsoBoughtIsFallback: true }));
+    renderPage();
+
+    expect(await screen.findByText('product.youMightAlsoLike')).toBeInTheDocument();
+    expect(screen.queryByText('product.alsoBought')).not.toBeInTheDocument();
+  });
+
+  it('renders neither heading when alsoBought is empty', async () => {
+    getVariantById.mockResolvedValue(variant({ alsoBought: [], alsoBoughtIsFallback: true }));
+    renderPage();
+
+    await screen.findByText('Tela Azul');
+    expect(screen.queryByText('product.alsoBought')).not.toBeInTheDocument();
+    expect(screen.queryByText('product.youMightAlsoLike')).not.toBeInTheDocument();
   });
 });

@@ -305,6 +305,7 @@
     "meters": "metros",
     "related": "Productos relacionados",
     "alsoBought": "Quienes compraron esto también compraron",
+    "youMightAlsoLike": "También te puede interesar",
     "reviewCount": "({{count}} reseñas)",
     "reviewsTitle": "Reseñas de clientes",
     "noReviews": "Este producto aún no tiene reseñas.",

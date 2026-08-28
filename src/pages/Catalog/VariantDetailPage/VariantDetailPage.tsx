@@ -380,10 +380,11 @@ const VariantDetailPage: React.FC = () => {
           </div>
         )}
 
-        {/* Frequently bought together (across products) */}
+        {/* Frequently bought together (across products) — falls back to same-category
+            suggestions when there's no real co-purchase data yet, see alsoBoughtIsFallback. */}
         {variant.alsoBought && variant.alsoBought.length > 0 && (
           <div className="vdp-related">
-            <SectionTitle>{t('product.alsoBought')}</SectionTitle>
+            <SectionTitle>{variant.alsoBoughtIsFallback ? t('product.youMightAlsoLike') : t('product.alsoBought')}</SectionTitle>
             <Row xs={2} sm={2} md={3} lg={4} className="g-3 mt-1">
               {variant.alsoBought.map(s => (
                 <Col key={s.id}><VariantCard variant={s} /></Col>

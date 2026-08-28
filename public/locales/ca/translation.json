@@ -305,6 +305,7 @@
     "meters": "metres",
     "related": "Productes relacionats",
     "alsoBought": "Qui va comprar això també va comprar",
+    "youMightAlsoLike": "També et pot interessar",
     "reviewCount": "({{count}} ressenyes)",
     "reviewsTitle": "Ressenyes de clients",
     "noReviews": "Aquest producte encara no té ressenyes.",

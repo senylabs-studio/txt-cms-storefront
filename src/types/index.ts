@@ -73,6 +73,9 @@ export interface StorefrontVariantDetail {
   quantityStep: number;
   siblings: StorefrontVariant[];
   alsoBought: StorefrontVariant[];
+  /** True when alsoBought came from the same-category fallback rather than real co-purchase
+   *  data — use this to show "you might also like" instead of "customers also bought". */
+  alsoBoughtIsFallback: boolean;
   averageRating?: number;
   reviewCount: number;
 }
