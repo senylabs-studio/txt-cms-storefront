@@ -261,7 +261,8 @@
     "returnReasonPlaceholder": "Ex: no és la talla correcta...",
     "confirmReturnButton": "Enviar sol·licitud",
     "returnError": "No s'ha pogut enviar la sol·licitud de devolució. Torna-ho a provar.",
-    "returnRequested": "Vas sol·licitar la devolució d'aquesta comanda el {{date}}. Ens posarem en contacte aviat."
+    "returnRequested": "Vas sol·licitar la devolució d'aquesta comanda el {{date}}. Ens posarem en contacte aviat.",
+    "leaveReview": "Deixar una ressenya"
   },
   "favorites": {
     "title": "Els meus favorits",

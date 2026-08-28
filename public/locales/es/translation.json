@@ -261,7 +261,8 @@
     "returnReasonPlaceholder": "Ej: no es la talla correcta...",
     "confirmReturnButton": "Enviar solicitud",
     "returnError": "No se ha podido enviar la solicitud de devolución. Inténtalo de nuevo.",
-    "returnRequested": "Solicitaste la devolución de este pedido el {{date}}. Te contactaremos en breve."
+    "returnRequested": "Solicitaste la devolución de este pedido el {{date}}. Te contactaremos en breve.",
+    "leaveReview": "Dejar una reseña"
   },
   "favorites": {
     "title": "Mis favoritos",

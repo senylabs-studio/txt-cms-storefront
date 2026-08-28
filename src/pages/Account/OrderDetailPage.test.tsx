@@ -203,4 +203,34 @@ describe('OrderDetailPage', () => {
 
     expect(await screen.findByText('orderDetail.returnError')).toBeInTheDocument();
   });
+
+  it('shows a leave-a-review link for a delivered order line with a variant', async () => {
+    getOrderDetail.mockResolvedValue(order({
+      status: 'Delivered',
+      lines: [{ productName: 'Tela azul', productCode: 'TA1', unitPrice: 10, discountPercent: 0, quantity: 2, subtotal: 20, variantId: 7 }],
+    }));
+    renderDetail();
+
+    const link = await screen.findByText('orderDetail.leaveReview');
+    expect(link.closest('a')).toHaveAttribute('href', '/variant/7#reviews');
+  });
+
+  it('hides the leave-a-review link for a non-delivered order', async () => {
+    getOrderDetail.mockResolvedValue(order({
+      status: 'Shipped',
+      lines: [{ productName: 'Tela azul', productCode: 'TA1', unitPrice: 10, discountPercent: 0, quantity: 2, subtotal: 20, variantId: 7 }],
+    }));
+    renderDetail();
+
+    await screen.findByText('Tela azul');
+    expect(screen.queryByText('orderDetail.leaveReview')).not.toBeInTheDocument();
+  });
+
+  it('hides the leave-a-review link for a line with no variant (synthetic or non-variant purchase)', async () => {
+    getOrderDetail.mockResolvedValue(order({ status: 'Delivered' })); // default line has no variantId
+    renderDetail();
+
+    await screen.findByText('Tela azul');
+    expect(screen.queryByText('orderDetail.leaveReview')).not.toBeInTheDocument();
+  });
 });

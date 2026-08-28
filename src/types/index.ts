@@ -209,6 +209,9 @@ export interface OrderLine {
   quantity: number;
   subtotal: number;
   thumbnailUrl?: string;
+  /** Null for synthetic lines (shipping/discount adjustments) or a non-variant product purchase —
+   *  reviews are only reachable from a variant's own detail page. */
+  variantId?: number;
 }
 
 export interface StorefrontMenuItem {

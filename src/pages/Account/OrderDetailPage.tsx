@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Table, Badge, Button, Spinner, Modal, Alert, Form } from 'react-bootstrap';
-import { useParams, useNavigate } from 'react-router-dom';
-import { FaArrowLeft, FaFileDownload, FaBan, FaUndo } from 'react-icons/fa';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { FaArrowLeft, FaFileDownload, FaBan, FaUndo, FaStar } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { getOrderDetail, downloadOrderInvoice, cancelOrder, requestReturn } from '../../services/profileService';
@@ -41,6 +41,7 @@ const OrderDetailPage: React.FC = () => {
   const canDownloadInvoice = order.status !== 'PendingPayment' && order.status !== 'Cancelled';
   const canCancelOrder = order.status === 'PendingPayment' || order.status === 'Paid';
   const canRequestReturn = order.status === 'Delivered' && !order.returnRequestedAt;
+  const canReview = order.status === 'Delivered';
 
   const handleDownloadInvoice = async () => {
     setDownloadingInvoice(true);
@@ -182,6 +183,11 @@ const OrderDetailPage: React.FC = () => {
                     <td>
                       <div className="fw-semibold small">{line.productName}</div>
                       <div className="text-muted" style={{ fontSize: 11 }}>{line.productCode}</div>
+                      {canReview && line.variantId && (
+                        <Link to={`/variant/${line.variantId}#reviews`} className="d-inline-flex align-items-center gap-1 mt-1" style={{ fontSize: 12 }}>
+                          <FaStar className="text-warning" /> {t('orderDetail.leaveReview')}
+                        </Link>
+                      )}
                     </td>
                     <td className="text-center">{line.quantity} m</td>
                     <td className="text-end">€{line.unitPrice.toFixed(2)}</td>

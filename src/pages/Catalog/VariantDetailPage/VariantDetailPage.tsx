@@ -393,7 +393,7 @@ const VariantDetailPage: React.FC = () => {
         )}
 
         {/* Reviews */}
-        <div className="vdp-reviews mt-5">
+        <div id="reviews" className="vdp-reviews mt-5">
           <SectionTitle>{t('product.reviewsTitle')}</SectionTitle>
 
           {myReview?.hasPurchased && (

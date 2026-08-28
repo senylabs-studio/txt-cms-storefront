@@ -261,7 +261,8 @@
     "returnReasonPlaceholder": "E.g.: wrong size...",
     "confirmReturnButton": "Send request",
     "returnError": "Couldn't send the return request. Please try again.",
-    "returnRequested": "You requested a return for this order on {{date}}. We'll be in touch shortly."
+    "returnRequested": "You requested a return for this order on {{date}}. We'll be in touch shortly.",
+    "leaveReview": "Leave a review"
   },
   "favorites": {
     "title": "My favourites",
