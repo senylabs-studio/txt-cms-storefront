@@ -259,6 +259,8 @@
     "returnPrompt": "Cuéntanos por qué quieres devolver este pedido (opcional). Nuestro equipo se pondrá en contacto contigo con los siguientes pasos.",
     "returnReasonLabel": "Motivo",
     "returnReasonPlaceholder": "Ej: no es la talla correcta...",
+    "cancelReasonLabel": "Motivo (opcional)",
+    "cancelReasonPlaceholder": "Ej: encontré mejor precio, pedido duplicado...",
     "confirmReturnButton": "Enviar solicitud",
     "returnError": "No se ha podido enviar la solicitud de devolución. Inténtalo de nuevo.",
     "returnRequested": "Solicitaste la devolución de este pedido el {{date}}. Te contactaremos en breve.",

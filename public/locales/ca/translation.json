@@ -259,6 +259,8 @@
     "returnPrompt": "Explica'ns per què vols retornar aquesta comanda (opcional). El nostre equip es posarà en contacte amb tu amb els següents passos.",
     "returnReasonLabel": "Motiu",
     "returnReasonPlaceholder": "Ex: no és la talla correcta...",
+    "cancelReasonLabel": "Motiu (opcional)",
+    "cancelReasonPlaceholder": "Ex: he trobat un preu millor, comanda duplicada...",
     "confirmReturnButton": "Enviar sol·licitud",
     "returnError": "No s'ha pogut enviar la sol·licitud de devolució. Torna-ho a provar.",
     "returnRequested": "Vas sol·licitar la devolució d'aquesta comanda el {{date}}. Ens posarem en contacte aviat.",

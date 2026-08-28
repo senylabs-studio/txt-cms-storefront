@@ -259,6 +259,8 @@
     "returnPrompt": "Tell us why you want to return this order (optional). Our team will contact you with next steps.",
     "returnReasonLabel": "Reason",
     "returnReasonPlaceholder": "E.g.: wrong size...",
+    "cancelReasonLabel": "Reason (optional)",
+    "cancelReasonPlaceholder": "E.g.: found a better price, duplicate order...",
     "confirmReturnButton": "Send request",
     "returnError": "Couldn't send the return request. Please try again.",
     "returnRequested": "You requested a return for this order on {{date}}. We'll be in touch shortly.",

@@ -37,8 +37,8 @@ export const getOrderDetail = async (id: number): Promise<StorefrontOrderDetail>
   return res.data;
 };
 
-export const cancelOrder = async (id: number): Promise<void> => {
-  await apiClient.post(`/storefront/profile/orders/${id}/cancel`);
+export const cancelOrder = async (id: number, reason?: string): Promise<void> => {
+  await apiClient.post(`/storefront/profile/orders/${id}/cancel`, { reason });
 };
 
 export const requestReturn = async (id: number, reason?: string): Promise<void> => {

@@ -16,6 +16,7 @@ const OrderDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [downloadingInvoice, setDownloadingInvoice] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
   const [cancelling, setCancelling] = useState(false);
   const [cancelError, setCancelError] = useState('');
   const [showReturnModal, setShowReturnModal] = useState(false);
@@ -53,9 +54,10 @@ const OrderDetailPage: React.FC = () => {
     setCancelling(true);
     setCancelError('');
     try {
-      await cancelOrder(order.id);
+      await cancelOrder(order.id, cancelReason.trim() || undefined);
       await loadOrder();
       setShowCancelConfirm(false);
+      setCancelReason('');
     } catch {
       setCancelError(t('orderDetail.cancelError'));
     } finally {
@@ -213,16 +215,26 @@ const OrderDetailPage: React.FC = () => {
         </Card>
       </Container>
 
-      <Modal show={showCancelConfirm} onHide={() => setShowCancelConfirm(false)}>
+      <Modal show={showCancelConfirm} onHide={() => { setShowCancelConfirm(false); setCancelReason(''); }}>
         <Modal.Header closeButton>
           <Modal.Title>{t('orderDetail.cancelOrder')}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {cancelError && <Alert variant="danger" className="py-2">{cancelError}</Alert>}
-          {t('orderDetail.confirmCancel')}
+          <p>{t('orderDetail.confirmCancel')}</p>
+          <Form.Group>
+            <Form.Label>{t('orderDetail.cancelReasonLabel')}</Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={3}
+              value={cancelReason}
+              onChange={e => setCancelReason(e.target.value)}
+              placeholder={t('orderDetail.cancelReasonPlaceholder')}
+            />
+          </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowCancelConfirm(false)} disabled={cancelling}>
+          <Button variant="secondary" onClick={() => { setShowCancelConfirm(false); setCancelReason(''); }} disabled={cancelling}>
             {t('orderDetail.keepOrder')}
           </Button>
           <Button variant="danger" onClick={handleCancelOrder} disabled={cancelling}>

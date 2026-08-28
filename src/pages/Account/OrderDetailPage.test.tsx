@@ -134,7 +134,7 @@ describe('OrderDetailPage', () => {
     expect(screen.queryByText('orderDetail.downloadInvoice')).not.toBeInTheDocument();
   });
 
-  it('shows a cancel button for a paid order and cancels after confirming', async () => {
+  it('shows a cancel button for a paid order and cancels after confirming with no reason', async () => {
     getOrderDetail.mockResolvedValueOnce(order({ status: 'Paid' })).mockResolvedValueOnce(order({ status: 'Cancelled' }));
     cancelOrder.mockResolvedValue(undefined);
     renderDetail();
@@ -142,8 +142,20 @@ describe('OrderDetailPage', () => {
     fireEvent.click(await screen.findByText('orderDetail.cancelOrder'));
     fireEvent.click(await screen.findByText('orderDetail.confirmCancelButton'));
 
-    await waitFor(() => expect(cancelOrder).toHaveBeenCalledWith(42));
+    await waitFor(() => expect(cancelOrder).toHaveBeenCalledWith(42, undefined));
     await waitFor(() => expect(getOrderDetail).toHaveBeenCalledTimes(2));
+  });
+
+  it('passes the typed reason through when cancelling', async () => {
+    getOrderDetail.mockResolvedValueOnce(order({ status: 'Paid' })).mockResolvedValueOnce(order({ status: 'Cancelled' }));
+    cancelOrder.mockResolvedValue(undefined);
+    renderDetail();
+
+    fireEvent.click(await screen.findByText('orderDetail.cancelOrder'));
+    fireEvent.change(screen.getByPlaceholderText('orderDetail.cancelReasonPlaceholder'), { target: { value: 'Encontré mejor precio' } });
+    fireEvent.click(screen.getByText('orderDetail.confirmCancelButton'));
+
+    await waitFor(() => expect(cancelOrder).toHaveBeenCalledWith(42, 'Encontré mejor precio'));
   });
 
   it('hides the cancel button once the order has shipped', async () => {
