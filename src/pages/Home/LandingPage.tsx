@@ -82,9 +82,11 @@ const ImageGridBlock: React.FC<{ config: HomeImageGridBlockConfig }> = ({ config
   const images = config.images ?? [];
   if (images.length === 0) return null;
   const colSize = Math.max(2, Math.floor(12 / images.length)) as 2 | 3 | 4 | 6 | 12;
+  const titleStyle: React.CSSProperties = { textAlign: config.textAlign ?? 'center' };
+  if (config.textColor) titleStyle.color = config.textColor;
   return (
     <Container className="py-4">
-      {config.title && <h2 className="text-center mb-4 fw-bold">{config.title}</h2>}
+      {config.title && <h2 className="mb-4 fw-bold" style={titleStyle}>{config.title}</h2>}
       <Row className="g-3">
         {images.map((img, i) => (
           <Col key={i} xs={6} sm={4} md={colSize}>
@@ -110,12 +112,20 @@ const ImageGridBlock: React.FC<{ config: HomeImageGridBlockConfig }> = ({ config
 
 // ─── Featured Products ────────────────────────────────────────────────────────
 const FeaturedProductsBlock: React.FC<{ config: HomeFeaturedProductsBlockConfig }> = ({ config }) => (
-  <FeaturedProductsGrid title={config.title} variants={config.variants} products={config.products} />
+  <FeaturedProductsGrid
+    title={config.title}
+    variants={config.variants}
+    products={config.products}
+    titleAlign={config.textAlign}
+    titleColor={config.textColor}
+  />
 );
 
 // ─── Image + Text ─────────────────────────────────────────────────────────────
 const ImageTextBlock: React.FC<{ config: HomeImageTextBlockConfig }> = ({ config }) => {
   const imageLeft = (config.imagePosition ?? 'left') === 'left';
+  const textStyle: React.CSSProperties = { textAlign: config.textAlign ?? 'left' };
+  if (config.textColor) textStyle.color = config.textColor;
   return (
     <Container className="py-5">
       <Row className="align-items-center g-4">
@@ -124,7 +134,7 @@ const ImageTextBlock: React.FC<{ config: HomeImageTextBlockConfig }> = ({ config
             <img src={config.imageUrl} alt="" className="w-100 rounded shadow-sm" style={{ objectFit: 'cover', maxHeight: 360 }} />
           </Col>
         )}
-        <Col md={config.imageUrl ? 7 : 12}>
+        <Col md={config.imageUrl ? 7 : 12} style={textStyle}>
           {config.title && <h2 className="fw-bold mb-3">{config.title}</h2>}
           <p style={{ whiteSpace: 'pre-line', lineHeight: 1.8 }}>{config.text}</p>
           {config.buttonText && config.buttonUrl && (

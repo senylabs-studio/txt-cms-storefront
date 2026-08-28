@@ -32,13 +32,16 @@ interface Props {
    *  product ids) stays visible/debuggable to editors. Home leaves this unset so an intentionally
    *  empty block still renders nothing. */
   emptyMessage?: string;
+  /** Defaults to 'center' when unset. */
+  titleAlign?: 'left' | 'center' | 'right';
+  titleColor?: string;
 }
 
 type Item = FeaturedProductItem & { _isVariant: boolean };
 
 /** Card grid for "featured products" blocks — shared by the Home landing page and
  *  content-page blocks, since both resolve to the same variants/products shape. */
-const FeaturedProductsGrid: React.FC<Props> = ({ title, variants = [], products = [], emptyMessage }) => {
+const FeaturedProductsGrid: React.FC<Props> = ({ title, variants = [], products = [], emptyMessage, titleAlign, titleColor }) => {
   const { t } = useTranslation();
   const { addItem, loading: cartLoading } = useCart();
   const { isAuthenticated } = useAuth();
@@ -50,11 +53,14 @@ const FeaturedProductsGrid: React.FC<Props> = ({ title, variants = [], products 
     ...products.map(p => ({ ...p, _isVariant: false })),
   ];
 
+  const titleStyle: React.CSSProperties = { textAlign: titleAlign ?? 'center' };
+  if (titleColor) titleStyle.color = titleColor;
+
   if (allItems.length === 0) {
     if (!emptyMessage) return null;
     return (
       <Container className="py-4">
-        {title && <h2 className="text-center mb-4 fw-bold">{title}</h2>}
+        {title && <h2 className="mb-4 fw-bold" style={titleStyle}>{title}</h2>}
         <p className="text-muted text-center">{emptyMessage}</p>
       </Container>
     );
@@ -75,7 +81,7 @@ const FeaturedProductsGrid: React.FC<Props> = ({ title, variants = [], products 
 
   return (
     <Container className="py-4">
-      {title && <h2 className="text-center mb-4 fw-bold">{title}</h2>}
+      {title && <h2 className="mb-4 fw-bold" style={titleStyle}>{title}</h2>}
       {error && <Alert variant="danger" className="py-2">{error}</Alert>}
       <Row className="g-3 justify-content-center">
         {allItems.map(item => {

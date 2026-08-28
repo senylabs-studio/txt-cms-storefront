@@ -29,6 +29,8 @@ export interface HomeImageGridBlockConfig {
   title?: string;
   images: HomeImageGridImage[];
   backgroundColor?: string;
+  textAlign?: 'left' | 'center' | 'right';
+  textColor?: string;
 }
 
 /** The storefront's home-blocks endpoint resolves variantIds/productIds server-side
@@ -51,6 +53,8 @@ export interface HomeFeaturedProductsBlockConfig {
   variants?: HomeFeaturedItem[];
   products?: HomeFeaturedItem[];
   backgroundColor?: string;
+  textAlign?: 'left' | 'center' | 'right';
+  textColor?: string;
 }
 
 export interface HomeImageTextBlockConfig {
@@ -61,6 +65,8 @@ export interface HomeImageTextBlockConfig {
   buttonText?: string;
   buttonUrl?: string;
   backgroundColor?: string;
+  textAlign?: 'left' | 'center' | 'right';
+  textColor?: string;
 }
 
 export interface HomeBlockConfigMap {
