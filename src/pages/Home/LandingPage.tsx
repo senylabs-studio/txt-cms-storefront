@@ -9,6 +9,7 @@ import {
   getHomeBlocks,
   type StorefrontHomeBlock,
   type HomeBannerBlockConfig,
+  type HomeBannerSlide,
   type HomeImageGridBlockConfig,
   type HomeFeaturedProductsBlockConfig,
   type HomeImageTextBlockConfig,
@@ -17,6 +18,31 @@ import FeaturedProductsGrid from '../../components/common/FeaturedProductsGrid/F
 import './LandingPage.css';
 
 // ─── Banner (carousel) ────────────────────────────────────────────────────────
+// The subtitle has its own fixed max-width + auto margins (see LandingPage.css) so it reads as a
+// narrow, centered paragraph under the title -- that only looks right when the alignment is
+// 'center'. For 'left'/'right' the block itself needs to hug that same side instead of staying
+// centered, so the margin follows the alignment rather than always being auto/auto.
+const subtitleMarginForAlign = (align: HomeBannerSlide['textAlign']): React.CSSProperties => {
+  if (align === 'left') return { marginLeft: 0, marginRight: 'auto' };
+  if (align === 'right') return { marginLeft: 'auto', marginRight: 0 };
+  return { marginLeft: 'auto', marginRight: 'auto' };
+};
+
+const BannerSlideContent: React.FC<{ slide: HomeBannerSlide }> = ({ slide }) => {
+  const overlayStyle: React.CSSProperties = { textAlign: slide.textAlign ?? 'center' };
+  if (slide.textColor) overlayStyle.color = slide.textColor;
+
+  return (
+    <div className="home-banner-overlay" style={overlayStyle}>
+      {slide.title && <h1 className="home-banner-title">{slide.title}</h1>}
+      {slide.subtitle && <p className="home-banner-subtitle" style={subtitleMarginForAlign(slide.textAlign)}>{slide.subtitle}</p>}
+      {slide.buttonText && slide.buttonUrl && (
+        <Link to={slide.buttonUrl} className="btn btn-light btn-lg px-4">{slide.buttonText}</Link>
+      )}
+    </div>
+  );
+};
+
 const BannerBlock: React.FC<{ config: HomeBannerBlockConfig }> = ({ config }) => {
   const slides = config.slides ?? [];
   const height = config.height ?? 500;
@@ -30,13 +56,7 @@ const BannerBlock: React.FC<{ config: HomeBannerBlockConfig }> = ({ config }) =>
         className="home-banner"
         style={{ backgroundImage: slide.imageUrl ? `url(${slide.imageUrl})` : undefined, minHeight: height }}
       >
-        <div className="home-banner-overlay">
-          {slide.title && <h1 className="home-banner-title">{slide.title}</h1>}
-          {slide.subtitle && <p className="home-banner-subtitle">{slide.subtitle}</p>}
-          {slide.buttonText && slide.buttonUrl && (
-            <Link to={slide.buttonUrl} className="btn btn-light btn-lg px-4">{slide.buttonText}</Link>
-          )}
-        </div>
+        <BannerSlideContent slide={slide} />
       </div>
     );
   }
@@ -49,13 +69,7 @@ const BannerBlock: React.FC<{ config: HomeBannerBlockConfig }> = ({ config }) =>
             className="home-banner"
             style={{ backgroundImage: slide.imageUrl ? `url(${slide.imageUrl})` : undefined, minHeight: height }}
           >
-            <div className="home-banner-overlay">
-              {slide.title && <h1 className="home-banner-title">{slide.title}</h1>}
-              {slide.subtitle && <p className="home-banner-subtitle">{slide.subtitle}</p>}
-              {slide.buttonText && slide.buttonUrl && (
-                <Link to={slide.buttonUrl} className="btn btn-light btn-lg px-4">{slide.buttonText}</Link>
-              )}
-            </div>
+            <BannerSlideContent slide={slide} />
           </div>
         </Carousel.Item>
       ))}

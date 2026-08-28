@@ -8,6 +8,8 @@ export interface HomeBannerSlide {
   subtitle?: string;
   buttonText?: string;
   buttonUrl?: string;
+  textAlign?: 'left' | 'center' | 'right';
+  textColor?: string;
 }
 
 export interface HomeBannerBlockConfig {
