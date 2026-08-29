@@ -21,6 +21,12 @@ i18n
     react: {
       useSuspense: false,
     },
+    // React already escapes text content when rendering, so i18next's own escaping (meant for
+    // raw-HTML templating without React) only causes a double-escape — e.g. an interpolated
+    // date like "8/29/2026" rendering literally as "8&#x2F;29&#x2F;2026" on screen.
+    interpolation: {
+      escapeValue: false,
+    },
   });
 
 export default i18n;

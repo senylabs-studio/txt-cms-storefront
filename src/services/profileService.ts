@@ -57,3 +57,20 @@ export const downloadOrderInvoice = async (id: number): Promise<void> => {
   a.click();
   URL.revokeObjectURL(url);
 };
+
+export const downloadMyDataExport = async (): Promise<void> => {
+  const response = await apiClient.get('/storefront/profile/data-export', { responseType: 'blob' });
+  const filename = response.headers['content-disposition']
+    ?.match(/filename="?([^"]+)"?/)?.[1]
+    ?? 'mis-datos.json';
+  const url = URL.createObjectURL(new Blob([response.data], { type: 'application/json' }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+export const requestAccountDeletion = async (reason?: string): Promise<void> => {
+  await apiClient.post('/storefront/profile/deletion-request', { reason });
+};

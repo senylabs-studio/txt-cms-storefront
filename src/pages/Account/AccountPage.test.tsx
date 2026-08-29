@@ -13,15 +13,19 @@ vi.mock('../../components/Layout/MainLayout', () => ({
   default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
-const { getProfile, updateProfile, changePassword, addAddress, updateAddress, deleteAddress } = vi.hoisted(() => ({
+const { getProfile, updateProfile, changePassword, addAddress, updateAddress, deleteAddress, downloadMyDataExport, requestAccountDeletion } = vi.hoisted(() => ({
   getProfile: vi.fn(),
   updateProfile: vi.fn(),
   changePassword: vi.fn(),
   addAddress: vi.fn(),
   updateAddress: vi.fn(),
   deleteAddress: vi.fn(),
+  downloadMyDataExport: vi.fn(),
+  requestAccountDeletion: vi.fn(),
 }));
-vi.mock('../../services/profileService', () => ({ getProfile, updateProfile, changePassword, addAddress, updateAddress, deleteAddress }));
+vi.mock('../../services/profileService', () => ({
+  getProfile, updateProfile, changePassword, addAddress, updateAddress, deleteAddress, downloadMyDataExport, requestAccountDeletion,
+}));
 
 const { getVisibleCountries } = vi.hoisted(() => ({ getVisibleCountries: vi.fn() }));
 vi.mock('../../services/countryService', () => ({ getVisibleCountries }));
@@ -33,6 +37,7 @@ const profile = (overrides: Partial<StorefrontProfile> = {}): StorefrontProfile 
   name: 'Jane',
   email: 'jane@example.com',
   isGuest: false,
+  deletionRequested: false,
   addresses: [
     { id: 1, alias: 'Casa', recipientName: 'Jane', street: 'Calle 1', city: 'Madrid', postalCode: '28001', country: 'ES', isDefault: true },
   ],
@@ -219,6 +224,50 @@ describe('AccountPage', () => {
       fireEvent.click(screen.getByText('account.changePassword'));
 
       expect(await screen.findByText('account.passwordChangeError')).toBeInTheDocument();
+    });
+  });
+
+  describe('privacy (GDPR)', () => {
+    it('downloads the data export when clicked', async () => {
+      downloadMyDataExport.mockResolvedValue(undefined);
+      renderAccount();
+      await screen.findByDisplayValue('Jane');
+
+      fireEvent.click(screen.getByText('account.exportData'));
+
+      await waitFor(() => expect(downloadMyDataExport).toHaveBeenCalled());
+    });
+
+    it('shows an error when the data export fails', async () => {
+      downloadMyDataExport.mockRejectedValue(new Error('boom'));
+      renderAccount();
+      await screen.findByDisplayValue('Jane');
+
+      fireEvent.click(screen.getByText('account.exportData'));
+
+      expect(await screen.findByText('account.exportDataError')).toBeInTheDocument();
+    });
+
+    it('submits a deletion request with the given reason and shows the pending state', async () => {
+      requestAccountDeletion.mockResolvedValue(undefined);
+      renderAccount();
+      await screen.findByDisplayValue('Jane');
+
+      fireEvent.click(screen.getByText('account.deleteAccount'));
+      fireEvent.change(await screen.findByPlaceholderText('account.deleteReasonPlaceholder'), { target: { value: 'Moving away' } });
+      fireEvent.click(screen.getByText('account.confirmDeleteAccount'));
+
+      await waitFor(() => expect(requestAccountDeletion).toHaveBeenCalledWith('Moving away'));
+      expect(await screen.findByText('account.deletionPending')).toBeInTheDocument();
+      expect(screen.queryByText('account.deleteAccount')).not.toBeInTheDocument();
+    });
+
+    it('shows the pending message instead of the delete button when a request is already pending', async () => {
+      getProfile.mockResolvedValue(profile({ deletionRequested: true }));
+      renderAccount();
+
+      expect(await screen.findByText('account.deletionPending')).toBeInTheDocument();
+      expect(screen.queryByText('account.deleteAccount')).not.toBeInTheDocument();
     });
   });
 });

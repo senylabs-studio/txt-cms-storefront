@@ -228,7 +228,19 @@
     "confirmPassword": "Confirm new password",
     "passwordMismatch": "Passwords don't match.",
     "passwordChanged": "Password updated successfully.",
-    "passwordChangeError": "Couldn't change the password."
+    "passwordChangeError": "Couldn't change the password.",
+    "privacyTitle": "Privacy and data",
+    "exportDataSubtitle": "Download a copy of all your personal data (profile, addresses, orders, reviews and favorites).",
+    "exportData": "Download my data",
+    "exportDataError": "Couldn't download your data.",
+    "deleteAccountSubtitle": "Request the deletion of your account and personal data.",
+    "deleteAccount": "Delete my account",
+    "deleteAccountWarning": "A member of our team will review your request. Your order and invoice history will be kept for legal reasons, but will no longer be linked to your identity.",
+    "deleteReasonLabel": "Reason (optional)",
+    "deleteReasonPlaceholder": "Tell us why you're leaving, it helps us improve...",
+    "confirmDeleteAccount": "Request deletion",
+    "deletionRequestError": "Couldn't submit the request.",
+    "deletionPending": "We've received your account deletion request. Our team will review it shortly."
   },
   "orders": {
     "backToAccount": "Back to my account",

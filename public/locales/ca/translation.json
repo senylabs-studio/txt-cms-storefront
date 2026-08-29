@@ -228,7 +228,19 @@
     "confirmPassword": "Confirmar contrasenya nova",
     "passwordMismatch": "Les contrasenyes no coincideixen.",
     "passwordChanged": "Contrasenya actualitzada correctament.",
-    "passwordChangeError": "No s'ha pogut canviar la contrasenya."
+    "passwordChangeError": "No s'ha pogut canviar la contrasenya.",
+    "privacyTitle": "Privacitat i dades",
+    "exportDataSubtitle": "Descarrega una còpia de totes les teves dades personals (perfil, adreces, comandes, ressenyes i preferits).",
+    "exportData": "Descarregar les meves dades",
+    "exportDataError": "No s'han pogut descarregar les teves dades.",
+    "deleteAccountSubtitle": "Sol·licita l'eliminació del teu compte i les teves dades personals.",
+    "deleteAccount": "Eliminar el meu compte",
+    "deleteAccountWarning": "Un membre del nostre equip revisarà la teva sol·licitud. L'historial de comandes i factures es conservarà per obligació legal, però deixarà d'estar associat a la teva identitat.",
+    "deleteReasonLabel": "Motiu (opcional)",
+    "deleteReasonPlaceholder": "Explica'ns per què marxes, ens ajuda a millorar...",
+    "confirmDeleteAccount": "Sol·licitar eliminació",
+    "deletionRequestError": "No s'ha pogut enviar la sol·licitud.",
+    "deletionPending": "Hem rebut la teva sol·licitud d'eliminació de compte. El nostre equip la revisarà aviat."
   },
   "orders": {
     "backToAccount": "Tornar al meu compte",

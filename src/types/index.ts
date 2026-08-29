@@ -162,6 +162,7 @@ export interface StorefrontProfile {
   phone?: string;
   taxId?: string;
   isGuest: boolean;
+  deletionRequested: boolean;
   customerGroupName?: string;
   addresses: CustomerAddress[];
   paymentMethods: PaymentMethod[];

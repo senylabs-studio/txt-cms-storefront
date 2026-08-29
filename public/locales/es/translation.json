@@ -228,7 +228,19 @@
     "confirmPassword": "Confirmar nueva contraseña",
     "passwordMismatch": "Las contraseñas no coinciden.",
     "passwordChanged": "Contraseña actualizada correctamente.",
-    "passwordChangeError": "No se ha podido cambiar la contraseña."
+    "passwordChangeError": "No se ha podido cambiar la contraseña.",
+    "privacyTitle": "Privacidad y datos",
+    "exportDataSubtitle": "Descarga una copia de todos tus datos personales (perfil, direcciones, pedidos, reseñas y favoritos).",
+    "exportData": "Descargar mis datos",
+    "exportDataError": "No se ha podido descargar tus datos.",
+    "deleteAccountSubtitle": "Solicita la eliminación de tu cuenta y tus datos personales.",
+    "deleteAccount": "Eliminar mi cuenta",
+    "deleteAccountWarning": "Un miembro de nuestro equipo revisará tu solicitud. Tu historial de pedidos y facturas se conservará por obligación legal, pero dejará de estar asociado a tu identidad.",
+    "deleteReasonLabel": "Motivo (opcional)",
+    "deleteReasonPlaceholder": "Cuéntanos por qué te vas, nos ayuda a mejorar...",
+    "confirmDeleteAccount": "Solicitar eliminación",
+    "deletionRequestError": "No se ha podido enviar la solicitud.",
+    "deletionPending": "Hemos recibido tu solicitud de eliminación de cuenta. Nuestro equipo la revisará en breve."
   },
   "orders": {
     "backToAccount": "Volver a mi cuenta",

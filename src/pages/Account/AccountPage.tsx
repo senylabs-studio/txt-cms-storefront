@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Container, Row, Col, Card, Form, Button, Alert, Spinner, Badge, Modal } from 'react-bootstrap';
-import { FaPlus, FaEdit, FaTrash, FaMapMarkerAlt, FaUser, FaLock } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaMapMarkerAlt, FaUser, FaLock, FaShieldAlt } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
-import { getProfile, updateProfile, changePassword, addAddress, updateAddress, deleteAddress } from '../../services/profileService';
+import {
+  getProfile, updateProfile, changePassword, addAddress, updateAddress, deleteAddress,
+  downloadMyDataExport, requestAccountDeletion,
+} from '../../services/profileService';
 import { getVisibleCountries, type VisibleCountry } from '../../services/countryService';
 import type { StorefrontProfile, CustomerAddress } from '../../types';
 
@@ -40,6 +43,14 @@ const AccountPage: React.FC = () => {
   const [addrError, setAddrError] = useState('');
   const [addrListError, setAddrListError] = useState('');
   const [countries, setCountries] = useState<VisibleCountry[]>([]);
+
+  // Privacy (GDPR)
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteReason, setDeleteReason] = useState('');
+  const [deleteSaving, setDeleteSaving] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   useEffect(() => {
     Promise.all([
@@ -117,6 +128,34 @@ const AccountPage: React.FC = () => {
     }
   };
 
+  const handleExportData = async () => {
+    setExporting(true);
+    setExportError('');
+    try {
+      await downloadMyDataExport();
+    } catch {
+      setExportError(t('account.exportDataError'));
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleRequestDeletion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setDeleteSaving(true);
+    setDeleteError('');
+    try {
+      await requestAccountDeletion(deleteReason || undefined);
+      setProfile(p => p ? { ...p, deletionRequested: true } : p);
+      setShowDeleteModal(false);
+      setDeleteReason('');
+    } catch (e) {
+      setDeleteError((axios.isAxiosError(e) ? e.response?.data?.message : undefined) ?? t('account.deletionRequestError'));
+    } finally {
+      setDeleteSaving(false);
+    }
+  };
+
   if (loading) return <MainLayout><div className="text-center py-5"><Spinner animation="border" variant="primary" /></div></MainLayout>;
   if (!profile) return null;
 
@@ -183,6 +222,31 @@ const AccountPage: React.FC = () => {
                     {pwdSaving ? <Spinner size="sm" animation="border" /> : t('account.changePassword')}
                   </Button>
                 </Form>
+              </Card.Body>
+            </Card>
+
+            <Card className="mt-4">
+              <Card.Body>
+                <h5 className="fw-semibold mb-3"><FaShieldAlt className="me-2" />{t('account.privacyTitle')}</h5>
+
+                {exportError && <Alert variant="danger" className="py-2">{exportError}</Alert>}
+                <p className="text-muted small mb-2">{t('account.exportDataSubtitle')}</p>
+                <Button variant="outline-secondary" size="sm" className="w-100 mb-4" onClick={handleExportData} disabled={exporting}>
+                  {exporting ? <Spinner size="sm" animation="border" /> : t('account.exportData')}
+                </Button>
+
+                <hr />
+
+                {profile.deletionRequested ? (
+                  <Alert variant="info" className="mb-0">{t('account.deletionPending')}</Alert>
+                ) : (
+                  <>
+                    <p className="text-muted small mb-2">{t('account.deleteAccountSubtitle')}</p>
+                    <Button variant="outline-danger" size="sm" className="w-100" onClick={() => setShowDeleteModal(true)}>
+                      {t('account.deleteAccount')}
+                    </Button>
+                  </>
+                )}
               </Card.Body>
             </Card>
           </Col>
@@ -301,6 +365,34 @@ const AccountPage: React.FC = () => {
             {addrSaving ? <Spinner size="sm" animation="border" /> : t('account.save')}
           </Button>
         </Modal.Footer>
+      </Modal>
+
+      <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>{t('account.deleteAccount')}</Modal.Title>
+        </Modal.Header>
+        <Form onSubmit={handleRequestDeletion}>
+          <Modal.Body>
+            <p>{t('account.deleteAccountWarning')}</p>
+            {deleteError && <Alert variant="danger" className="py-2">{deleteError}</Alert>}
+            <Form.Group>
+              <Form.Label>{t('account.deleteReasonLabel')}</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={2}
+                value={deleteReason}
+                onChange={e => setDeleteReason(e.target.value)}
+                placeholder={t('account.deleteReasonPlaceholder')}
+              />
+            </Form.Group>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>{t('account.cancel')}</Button>
+            <Button type="submit" variant="danger" disabled={deleteSaving}>
+              {deleteSaving ? <Spinner size="sm" animation="border" /> : t('account.confirmDeleteAccount')}
+            </Button>
+          </Modal.Footer>
+        </Form>
       </Modal>
     </MainLayout>
   );
