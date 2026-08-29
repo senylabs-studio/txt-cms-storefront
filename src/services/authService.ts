@@ -30,3 +30,13 @@ export const resetPassword = async (data: { email: string; token: string; newPas
   const res = await apiClient.post('/storefront/auth/reset-password', data);
   return res.data;
 };
+
+export const requestGuestAccessLink = async (data: { email: string; orderNumber: number }): Promise<{ message: string }> => {
+  const res = await apiClient.post('/storefront/auth/guest/access-link', data);
+  return res.data;
+};
+
+export const verifyGuestAccessLink = async (token: string): Promise<AuthResponse> => {
+  const res = await apiClient.post('/storefront/auth/guest/access-link/verify', { token });
+  return res.data;
+};

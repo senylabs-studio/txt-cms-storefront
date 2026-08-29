@@ -59,7 +59,8 @@
       "noAccount": "¿No tienes cuenta?",
       "registerLink": "Regístrate aquí",
       "error": "Credenciales incorrectas",
-      "sessionExpired": "Tu sesión ha expirado. Inicia sesión de nuevo."
+      "sessionExpired": "Tu sesión ha expirado. Inicia sesión de nuevo.",
+      "guestAccessLink": "¿Compraste como invitado y perdiste el acceso?"
     },
     "register": {
       "title": "Crear cuenta",
@@ -96,6 +97,19 @@
       "goToLogin": "Ir a iniciar sesión",
       "invalidLink": "El enlace no es válido o ha expirado.",
       "error": "No se pudo restablecer la contraseña."
+    },
+    "guestAccess": {
+      "title": "Recuperar acceso a mi pedido",
+      "instructions": "Introduce el email y el número de pedido que usaste al comprar como invitado, y te enviaremos un enlace para volver a acceder.",
+      "orderNumber": "Número de pedido",
+      "orderNumberPlaceholder": "Ej. 1234",
+      "submit": "Enviar enlace de acceso",
+      "loading": "Enviando...",
+      "success": "Si los datos coinciden con un pedido de invitado, recibirás un enlace de acceso por email.",
+      "error": "No se pudo procesar la solicitud. Inténtalo de nuevo.",
+      "verifying": "Verificando tu enlace de acceso...",
+      "verifyError": "El enlace no es válido o ha caducado.",
+      "tryAgain": "Solicitar un nuevo enlace"
     }
   },
   "contact": {

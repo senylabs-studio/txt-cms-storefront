@@ -59,7 +59,8 @@
       "noAccount": "Don't have an account?",
       "registerLink": "Sign up here",
       "error": "Invalid credentials",
-      "sessionExpired": "Your session has expired. Please log in again."
+      "sessionExpired": "Your session has expired. Please log in again.",
+      "guestAccessLink": "Checked out as a guest and lost access?"
     },
     "register": {
       "title": "Create account",
@@ -96,6 +97,19 @@
       "goToLogin": "Go to login",
       "invalidLink": "The link is invalid or has expired.",
       "error": "Could not reset the password."
+    },
+    "guestAccess": {
+      "title": "Recover access to my order",
+      "instructions": "Enter the email and order number you used when checking out as a guest, and we'll send you a link to get back in.",
+      "orderNumber": "Order number",
+      "orderNumberPlaceholder": "e.g. 1234",
+      "submit": "Send access link",
+      "loading": "Sending...",
+      "success": "If the details match a guest order, you'll receive an access link by email.",
+      "error": "Could not process the request. Please try again.",
+      "verifying": "Verifying your access link...",
+      "verifyError": "The link is invalid or has expired.",
+      "tryAgain": "Request a new link"
     }
   },
   "contact": {

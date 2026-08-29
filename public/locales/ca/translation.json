@@ -59,7 +59,8 @@
       "noAccount": "No tens compte?",
       "registerLink": "Registra't aquí",
       "error": "Credencials incorrectes",
-      "sessionExpired": "La teva sessió ha caducat. Torna a iniciar sessió."
+      "sessionExpired": "La teva sessió ha caducat. Torna a iniciar sessió.",
+      "guestAccessLink": "Vas comprar com a convidat i has perdut l'accés?"
     },
     "register": {
       "title": "Crear compte",
@@ -96,6 +97,19 @@
       "goToLogin": "Anar a iniciar sessió",
       "invalidLink": "L'enllaç no és vàlid o ha caducat.",
       "error": "No s'ha pogut restablir la contrasenya."
+    },
+    "guestAccess": {
+      "title": "Recuperar accés a la meva comanda",
+      "instructions": "Introdueix el correu i el número de comanda que vas fer servir en comprar com a convidat, i t'enviarem un enllaç per tornar a entrar.",
+      "orderNumber": "Número de comanda",
+      "orderNumberPlaceholder": "Ex. 1234",
+      "submit": "Enviar enllaç d'accés",
+      "loading": "Enviant...",
+      "success": "Si les dades coincideixen amb una comanda de convidat, rebràs un enllaç d'accés per correu.",
+      "error": "No s'ha pogut processar la sol·licitud. Torna-ho a intentar.",
+      "verifying": "Verificant el teu enllaç d'accés...",
+      "verifyError": "L'enllaç no és vàlid o ha caducat.",
+      "tryAgain": "Sol·licitar un nou enllaç"
     }
   },
   "contact": {

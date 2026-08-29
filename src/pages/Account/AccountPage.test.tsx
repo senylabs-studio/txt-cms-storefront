@@ -259,7 +259,9 @@ describe('AccountPage', () => {
 
       await waitFor(() => expect(requestAccountDeletion).toHaveBeenCalledWith('Moving away'));
       expect(await screen.findByText('account.deletionPending')).toBeInTheDocument();
-      expect(screen.queryByText('account.deleteAccount')).not.toBeInTheDocument();
+      // The modal (whose title reuses the same "account.deleteAccount" text as the now-hidden
+      // button) can briefly linger mid-close-transition — wait rather than assert synchronously.
+      await waitFor(() => expect(screen.queryByText('account.deleteAccount')).not.toBeInTheDocument());
     });
 
     it('shows the pending message instead of the delete button when a request is already pending', async () => {

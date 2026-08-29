@@ -24,6 +24,8 @@ import LoginPage from './pages/Auth/LoginPage';
 import RegisterPage from './pages/Auth/RegisterPage';
 import ForgotPasswordPage from './pages/Auth/ForgotPasswordPage';
 import ResetPasswordPage from './pages/Auth/ResetPasswordPage';
+import GuestAccessRequestPage from './pages/Auth/GuestAccessRequestPage';
+import GuestAccessVerifyPage from './pages/Auth/GuestAccessVerifyPage';
 import UnsubscribePage from './pages/Auth/UnsubscribePage';
 import AccountPage from './pages/Account/AccountPage';
 import OrdersPage from './pages/Account/OrdersPage';
@@ -57,6 +59,8 @@ function App() {
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/guest-access" element={<GuestAccessRequestPage />} />
+              <Route path="/guest-access/verify" element={<GuestAccessVerifyPage />} />
               <Route path="/unsubscribe" element={<UnsubscribePage />} />
 
               {/* Protected (Customer) */}

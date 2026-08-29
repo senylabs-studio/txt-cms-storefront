@@ -84,6 +84,9 @@ const LoginPage: React.FC = () => {
               {t('auth.login.noAccount')}{' '}
               <Link to="/register">{t('auth.login.registerLink')}</Link>
             </p>
+            <p className="text-center text-muted small mb-0 mt-2">
+              <Link to="/guest-access">{t('auth.login.guestAccessLink')}</Link>
+            </p>
           </Card.Body>
         </Card>
       </Container>
