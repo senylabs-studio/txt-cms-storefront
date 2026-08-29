@@ -170,7 +170,7 @@ const CheckoutPage: React.FC = () => {
                   size="lg"
                   className="w-100"
                   onClick={handleProceedToPayment}
-                  disabled={loading || !shippingId}
+                  disabled={loading || !shippingId || shippingLoading || shippingRate === null}
                 >
                   {loading
                     ? <><Spinner size="sm" animation="border" className="me-2" />{t('checkout.processing')}</>

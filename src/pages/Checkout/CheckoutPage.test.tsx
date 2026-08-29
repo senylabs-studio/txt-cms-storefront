@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import CheckoutPage from './CheckoutPage';
 import type { Cart, CheckoutResponse, StorefrontProfile } from '../../types';
+import type { ApplicableShippingRate } from '../../services/shippingService';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -59,6 +60,10 @@ const profile = (): StorefrontProfile => ({
   paymentMethods: [],
 });
 
+const validShippingRate: ApplicableShippingRate = {
+  name: 'Standard', price: 5, shippingCost: 5, isFree: false,
+};
+
 const checkoutResponse: CheckoutResponse = {
   merchantParameters: 'params',
   signature: 'sig',
@@ -75,7 +80,7 @@ describe('CheckoutPage', () => {
     mockAuth.isAuthenticated = true;
     mockCart.cart = null;
     getProfile.mockResolvedValue(profile());
-    getApplicableShippingRate.mockResolvedValue(null);
+    getApplicableShippingRate.mockResolvedValue(validShippingRate);
     HTMLFormElement.prototype.submit = vi.fn();
   });
 
@@ -131,5 +136,18 @@ describe('CheckoutPage', () => {
 
     expect(await screen.findByText('Stock insuficiente')).toBeInTheDocument();
     expect(HTMLFormElement.prototype.submit).not.toHaveBeenCalled();
+  });
+
+  it('disables "proceed to payment" when no shipping rate covers the address', async () => {
+    // Regression test: the backend now blocks this case rather than silently shipping for
+    // free, and the button must not let the customer click through the warning either.
+    mockCart.cart = cartWithItems();
+    getApplicableShippingRate.mockResolvedValue(null);
+    render(<CheckoutPage />);
+
+    await waitFor(() => expect(getApplicableShippingRate).toHaveBeenCalled());
+    const proceedBtn = await screen.findByRole('button', { name: 'checkout.proceed' });
+    expect(proceedBtn).toBeDisabled();
+    expect(screen.getByText('checkout.noShippingRate')).toBeInTheDocument();
   });
 });
