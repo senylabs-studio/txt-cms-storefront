@@ -52,7 +52,7 @@ describe('AuthContext', () => {
     const state = JSON.parse(screen.getByTestId('state').textContent!);
     expect(state).toEqual({ isAuthenticated: true, token: 'abc123', customerId: 7, name: 'Jane Doe', email: 'jane@example.com' });
     expect(localStorage.getItem('storefront_token')).toBe('abc123');
-    expect(JSON.parse(localStorage.getItem('storefront_user')!)).toEqual({ customerId: 7, name: 'Jane Doe', email: 'jane@example.com' });
+    expect(JSON.parse(localStorage.getItem('storefront_user')!)).toEqual({ customerId: 7, name: 'Jane Doe', email: 'jane@example.com', isGuest: false });
   });
 
   it('logout() clears localStorage and resets state', () => {

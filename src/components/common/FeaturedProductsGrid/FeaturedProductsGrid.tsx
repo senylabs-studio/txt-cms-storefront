@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FaShoppingCart } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '../../../contexts/CartContext';
-import { useAuth } from '../../../contexts/AuthContext';
+import { useAuthGate } from '../../../contexts/AuthGateContext';
 import { getDiscountInfo } from '../../../utils/pricing';
 import './FeaturedProductsGrid.css';
 
@@ -44,7 +44,7 @@ type Item = FeaturedProductItem & { _isVariant: boolean };
 const FeaturedProductsGrid: React.FC<Props> = ({ title, variants = [], products = [], emptyMessage, titleAlign, titleColor }) => {
   const { t } = useTranslation();
   const { addItem, loading: cartLoading } = useCart();
-  const { isAuthenticated } = useAuth();
+  const { requireAuth } = useAuthGate();
   const navigate = useNavigate();
   const [error, setError] = useState('');
 
@@ -68,7 +68,8 @@ const FeaturedProductsGrid: React.FC<Props> = ({ title, variants = [], products 
 
   const handleAdd = async (e: React.MouseEvent, item: Item) => {
     e.preventDefault();
-    if (!isAuthenticated) { navigate('/login'); return; }
+    const ok = await requireAuth();
+    if (!ok) return;
     setError('');
     try {
       if (item._isVariant) await addItem(undefined, item.id, 1);

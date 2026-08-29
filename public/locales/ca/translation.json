@@ -166,7 +166,22 @@
     "title": "Comanda rebuda!",
     "message": "Gràcies per la teva compra. Rebràs un correu de confirmació en breu. Pots seguir l'estat de la teva comanda des del teu compte.",
     "viewOrders": "Veure les meves comandes",
-    "continueShopping": "Continuar comprant"
+    "continueShopping": "Continuar comprant",
+    "setPasswordTitle": "Desa el teu compte",
+    "setPasswordSubtitle": "Crea una contrasenya per poder iniciar sessió més endavant i seguir aquesta i futures comandes.",
+    "setPasswordSubmit": "Desar",
+    "setPasswordSuccess": "Contrasenya desada. Ja pots iniciar sessió amb el teu correu quan vulguis."
+  },
+  "authGate": {
+    "title": "Continuar amb la compra",
+    "subtitle": "Introdueix les teves dades per continuar com a convidat, o inicia sessió si ja tens un compte.",
+    "name": "Nom",
+    "email": "Correu electrònic",
+    "password": "Contrasenya",
+    "continueAsGuest": "Continuar com a convidat",
+    "haveAccount": "Ja tinc un compte, iniciar sessió",
+    "submitting": "Un moment...",
+    "error": "No s'ha pogut continuar. Torna-ho a provar."
   },
   "checkoutError": {
     "title": "Pagament no completat",

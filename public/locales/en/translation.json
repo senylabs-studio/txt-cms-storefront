@@ -166,7 +166,22 @@
     "title": "Order received!",
     "message": "Thank you for your purchase. You will receive a confirmation email shortly. You can track your order status from your account.",
     "viewOrders": "View my orders",
-    "continueShopping": "Continue shopping"
+    "continueShopping": "Continue shopping",
+    "setPasswordTitle": "Save your account",
+    "setPasswordSubtitle": "Create a password so you can log back in later and track this and future orders.",
+    "setPasswordSubmit": "Save",
+    "setPasswordSuccess": "Password saved. You can now log in with your email whenever you like."
+  },
+  "authGate": {
+    "title": "Continue with your purchase",
+    "subtitle": "Enter your details to continue as a guest, or log in if you already have an account.",
+    "name": "Name",
+    "email": "Email",
+    "password": "Password",
+    "continueAsGuest": "Continue as guest",
+    "haveAccount": "I already have an account, log in",
+    "submitting": "One moment...",
+    "error": "Couldn't continue. Please try again."
   },
   "checkoutError": {
     "title": "Payment not completed",

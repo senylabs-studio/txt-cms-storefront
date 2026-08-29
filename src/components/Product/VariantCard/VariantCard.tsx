@@ -6,8 +6,7 @@ import { FaShoppingCart, FaCheck, FaTimes } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import type { StorefrontVariant } from '../../../types';
 import { useCart } from '../../../contexts/CartContext';
-import { useAuth } from '../../../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useAuthGate } from '../../../contexts/AuthGateContext';
 import FavoriteButton from '../../common/FavoriteButton/FavoriteButton';
 import NotifyMeButton from '../../common/NotifyMeButton/NotifyMeButton';
 import { formatComposition } from '../../../utils/composition';
@@ -19,8 +18,7 @@ interface Props { variant: StorefrontVariant; }
 const VariantCard: React.FC<Props> = ({ variant }) => {
   const { t } = useTranslation();
   const { addItem, loading } = useCart();
-  const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
+  const { requireAuth } = useAuthGate();
 
   const minQty = variant.minQuantity;
   const stepQty = variant.quantityStep;
@@ -32,8 +30,9 @@ const VariantCard: React.FC<Props> = ({ variant }) => {
   const outOfStock = variant.availableStock <= 0;
   const { hasGroupDiscount, hasDiscount } = getDiscountInfo(variant.price, variant.originalPrice, variant.discountPercent);
 
-  const handleOpenQty = () => {
-    if (!isAuthenticated) { navigate('/login'); return; }
+  const handleOpenQty = async () => {
+    const ok = await requireAuth();
+    if (!ok) return;
     setQuantity(minQty);
     setError('');
     setShowQtyForm(true);

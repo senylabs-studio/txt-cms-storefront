@@ -30,6 +30,7 @@ vi.mock('react-router-dom', async () => {
 
 const mockAuth = vi.hoisted(() => ({ isAuthenticated: true }));
 vi.mock('../../../contexts/AuthContext', () => ({ useAuth: () => mockAuth }));
+vi.mock('../../../contexts/AuthGateContext', () => ({ useAuthGate: () => ({ requireAuth: vi.fn().mockResolvedValue(true) }) }));
 
 const mockCart = vi.hoisted(() => ({ addItem: vi.fn(), loading: false }));
 vi.mock('../../../contexts/CartContext', () => ({ useCart: () => mockCart }));
@@ -183,7 +184,10 @@ describe('VariantDetailPage alsoBought', () => {
     getMyReview.mockResolvedValue({ hasPurchased: false, review: null });
   });
 
-  const relatedVariant = { id: 2, name: 'Otra tela', code: 'V2', price: 5, originalPrice: 5, availableStock: 3 };
+  const relatedVariant = {
+    id: 2, name: 'Otra tela', code: 'V2', price: 5, originalPrice: 5, discountPercent: 0, availableStock: 3,
+    productId: 2, productName: 'Otra tela', productSlug: 'otra-tela', minQuantity: 0.3, quantityStep: 0.05,
+  };
 
   it('shows the real co-purchase heading when alsoBought is not a fallback', async () => {
     getVariantById.mockResolvedValue(variant({ alsoBought: [relatedVariant], alsoBoughtIsFallback: false }));

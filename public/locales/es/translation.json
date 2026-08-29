@@ -166,7 +166,22 @@
     "title": "¡Pedido recibido!",
     "message": "Gracias por tu compra. Recibirás un email de confirmación en breve. Puedes seguir el estado de tu pedido desde tu cuenta.",
     "viewOrders": "Ver mis pedidos",
-    "continueShopping": "Seguir comprando"
+    "continueShopping": "Seguir comprando",
+    "setPasswordTitle": "Guarda tu cuenta",
+    "setPasswordSubtitle": "Crea una contraseña para poder iniciar sesión más adelante y seguir este y futuros pedidos.",
+    "setPasswordSubmit": "Guardar",
+    "setPasswordSuccess": "Contraseña guardada. Ya puedes iniciar sesión con tu email cuando quieras."
+  },
+  "authGate": {
+    "title": "Continuar con la compra",
+    "subtitle": "Introduce tus datos para continuar como invitado, o inicia sesión si ya tienes una cuenta.",
+    "name": "Nombre",
+    "email": "Email",
+    "password": "Contraseña",
+    "continueAsGuest": "Continuar como invitado",
+    "haveAccount": "Ya tengo una cuenta, iniciar sesión",
+    "submitting": "Un momento...",
+    "error": "No se ha podido continuar. Inténtalo de nuevo."
   },
   "checkoutError": {
     "title": "Pago no completado",

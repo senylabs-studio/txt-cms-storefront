@@ -161,6 +161,7 @@ export interface StorefrontProfile {
   email: string;
   phone?: string;
   taxId?: string;
+  isGuest: boolean;
   customerGroupName?: string;
   addresses: CustomerAddress[];
   paymentMethods: PaymentMethod[];
@@ -467,4 +468,5 @@ export interface AuthResponse {
   customerId: number;
   name: string;
   email: string;
+  isGuest?: boolean;
 }

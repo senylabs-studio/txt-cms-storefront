@@ -15,6 +15,7 @@ import VariantCard from '../../../components/Product/VariantCard/VariantCard';
 import type { StorefrontVariantDetail, ProductReview, MyReviewStatus } from '../../../types';
 import { useCart } from '../../../contexts/CartContext';
 import { useAuth } from '../../../contexts/AuthContext';
+import { useAuthGate } from '../../../contexts/AuthGateContext';
 import { useSiteSettings } from '../../../contexts/SiteSettingsContext';
 import { useDocumentMeta } from '../../../hooks/useDocumentMeta';
 import CareLabels from '../../../components/common/CareLabels';
@@ -54,6 +55,7 @@ const VariantDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { addItem, loading: cartLoading } = useCart();
   const { isAuthenticated } = useAuth();
+  const { requireAuth } = useAuthGate();
   const { siteName } = useSiteSettings();
 
   const [variant, setVariant] = useState<StorefrontVariantDetail | null>(null);
@@ -155,7 +157,8 @@ const VariantDetailPage: React.FC = () => {
     setQuantity(q => Math.max(minQty, Math.round((q + delta) * 100) / 100));
 
   const handleAddToCart = async () => {
-    if (!isAuthenticated) { navigate('/login'); return; }
+    const ok = await requireAuth();
+    if (!ok) return;
     setError('');
     try { await addItem(undefined, variant.id, quantity); }
     catch (e) { setError((axios.isAxiosError(e) ? e.response?.data?.message : undefined) ?? t('product.addError')); }

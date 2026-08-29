@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { AuthGateProvider } from './contexts/AuthGateContext';
 import { CartProvider } from './contexts/CartContext';
 import { FavoritesProvider } from './contexts/FavoritesContext';
 import { StockNotificationProvider } from './contexts/StockNotificationContext';
@@ -39,6 +40,7 @@ function App() {
       <PaymentMethodsProvider>
       <PartnersProvider>
       <AuthProvider>
+        <AuthGateProvider>
         <CartProvider>
           <FavoritesProvider>
           <StockNotificationProvider>
@@ -76,6 +78,7 @@ function App() {
           </StockNotificationProvider>
           </FavoritesProvider>
         </CartProvider>
+        </AuthGateProvider>
       </AuthProvider>
       </PartnersProvider>
       </PaymentMethodsProvider>

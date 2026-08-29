@@ -11,6 +11,16 @@ export const login = async (data: { email: string; password: string }): Promise<
   return res.data;
 };
 
+export const guestCheckout = async (data: { name: string; email: string }): Promise<AuthResponse> => {
+  const res = await apiClient.post('/storefront/auth/guest', data);
+  return res.data;
+};
+
+export const convertGuestAccount = async (password: string): Promise<AuthResponse> => {
+  const res = await apiClient.post('/storefront/auth/guest/convert', { password });
+  return res.data;
+};
+
 export const forgotPassword = async (email: string): Promise<{ message: string }> => {
   const res = await apiClient.post('/storefront/auth/forgot-password', { email });
   return res.data;

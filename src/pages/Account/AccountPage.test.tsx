@@ -32,6 +32,7 @@ const profile = (overrides: Partial<StorefrontProfile> = {}): StorefrontProfile 
   id: 1,
   name: 'Jane',
   email: 'jane@example.com',
+  isGuest: false,
   addresses: [
     { id: 1, alias: 'Casa', recipientName: 'Jane', street: 'Calle 1', city: 'Madrid', postalCode: '28001', country: 'ES', isDefault: true },
   ],
