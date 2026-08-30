@@ -44,7 +44,7 @@ const cartWithItems = (): Cart => ({
   discountPercent: 0, couponDiscountAmount: 0,
   total: 20,
   items: [
-    { id: 1, productName: 'Tela azul', productCode: 'TA1', originalUnitPrice: 10, unitPrice: 10, quantity: 2, subtotal: 20, availableStock: 5 },
+    { id: 1, productName: 'Tela azul', productCode: 'TA1', originalUnitPrice: 10, unitPrice: 10, quantity: 2, subtotal: 20, availableStock: 5, minQuantity: 0.3, quantityStep: 0.05 },
   ],
 });
 

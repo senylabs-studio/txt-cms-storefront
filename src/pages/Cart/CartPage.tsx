@@ -131,12 +131,12 @@ const CartPage: React.FC = () => {
                       <Col sm={3} className="d-flex align-items-center mt-2 mt-sm-0">
                         <Form.Control
                           type="number"
-                          min={0.3}
-                          step={0.05}
+                          min={item.minQuantity}
+                          step={item.quantityStep}
                           value={item.quantity}
                           onChange={(e) => {
                             const v = parseFloat(e.target.value);
-                            if (!isNaN(v) && v >= 0.3) handleUpdate(item.id, v);
+                            if (!isNaN(v) && v >= item.minQuantity) handleUpdate(item.id, v);
                           }}
                           style={{ width: 90 }}
                           disabled={loading}

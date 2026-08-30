@@ -45,7 +45,7 @@ describe('CartContext', () => {
   });
 
   it('fetchCart() populates the cart when authenticated', async () => {
-    getCart.mockResolvedValue(cart([{ id: 1, productName: 'X', productCode: 'X1', originalUnitPrice: 1, unitPrice: 1, quantity: 1, subtotal: 1, availableStock: 5 }]));
+    getCart.mockResolvedValue(cart([{ id: 1, productName: 'X', productCode: 'X1', originalUnitPrice: 1, unitPrice: 1, quantity: 1, subtotal: 1, availableStock: 5, minQuantity: 0.3, quantityStep: 0.05 }]));
     render(<CartProvider><Probe /></CartProvider>);
 
     fireEvent.click(screen.getByText('fetch'));
@@ -78,7 +78,7 @@ describe('CartContext', () => {
   });
 
   it('addItem() updates the cart on success', async () => {
-    addToCart.mockResolvedValue(cart([{ id: 9, productName: 'Y', productCode: 'Y1', originalUnitPrice: 2, unitPrice: 2, quantity: 1, subtotal: 2, availableStock: 3 }]));
+    addToCart.mockResolvedValue(cart([{ id: 9, productName: 'Y', productCode: 'Y1', originalUnitPrice: 2, unitPrice: 2, quantity: 1, subtotal: 2, availableStock: 3, minQuantity: 0.3, quantityStep: 0.05 }]));
     render(<CartProvider><Probe /></CartProvider>);
 
     fireEvent.click(screen.getByText('add'));
@@ -103,7 +103,7 @@ describe('CartContext', () => {
   });
 
   it('updateItem() and removeItem() replace the cart with the service response', async () => {
-    updateCartItem.mockResolvedValue(cart([{ id: 1, productName: 'Z', productCode: 'Z1', originalUnitPrice: 1, unitPrice: 1, quantity: 2, subtotal: 2, availableStock: 5 }]));
+    updateCartItem.mockResolvedValue(cart([{ id: 1, productName: 'Z', productCode: 'Z1', originalUnitPrice: 1, unitPrice: 1, quantity: 2, subtotal: 2, availableStock: 5, minQuantity: 0.3, quantityStep: 0.05 }]));
     removeCartItem.mockResolvedValue(cart([]));
     render(<CartProvider><Probe /></CartProvider>);
 

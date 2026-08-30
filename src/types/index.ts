@@ -107,6 +107,8 @@ export interface CartItem {
   subtotal: number;
   thumbnailUrl?: string;
   availableStock: number;
+  minQuantity: number;
+  quantityStep: number;
 }
 
 export interface Cart {
