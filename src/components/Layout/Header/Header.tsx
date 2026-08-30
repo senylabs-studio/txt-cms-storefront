@@ -11,10 +11,10 @@ import NavMenu from '../NavMenu';
 import MobileMenuSheet from './MobileMenuSheet';
 import useDebounce from '../../../hooks/useDebounce';
 import { getVariantsPaged } from '../../../services/productService';
+import { getLanguages, type StorefrontLanguage } from '../../../services/languageService';
 import type { StorefrontVariant } from '../../../types';
 import './Header.css';
 
-const LANGS = ['es', 'ca', 'en'] as const;
 const COLLAPSE_THRESHOLD = 48;
 
 const Header: React.FC = () => {
@@ -35,6 +35,11 @@ const Header: React.FC = () => {
   const [suggestionsLoading, setSuggestionsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const debouncedSearch = useDebounce(search, 300);
+  const [languages, setLanguages] = useState<StorefrontLanguage[]>([]);
+
+  useEffect(() => {
+    getLanguages().then(setLanguages).catch(() => {});
+  }, []);
 
   useEffect(() => {
     const query = debouncedSearch.trim();
@@ -178,11 +183,11 @@ const Header: React.FC = () => {
               <small className="text-muted">{t('header.freeShipping')}</small>
               <div className="d-flex align-items-center gap-3">
                 <div className="d-flex gap-1 header-lang-switch">
-                  {LANGS.map((lng, i) => (
-                    <React.Fragment key={lng}>
+                  {languages.map((lng, i) => (
+                    <React.Fragment key={lng.code}>
                       {i > 0 && <span className="text-muted">·</span>}
-                      <button onClick={() => changeLang(lng)} className={`header-lang-btn${i18n.language === lng ? ' is-active' : ''}`}>
-                        {t(`lang.${lng}`)}
+                      <button onClick={() => changeLang(lng.code)} className={`header-lang-btn${i18n.language === lng.code ? ' is-active' : ''}`}>
+                        {t(`lang.${lng.code}`, { defaultValue: lng.code.toUpperCase() })}
                       </button>
                     </React.Fragment>
                   ))}

@@ -4,10 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { FaChevronRight } from 'react-icons/fa';
 import { useAuth } from '../../../contexts/AuthContext';
 import { getMenu } from '../../../services/pageService';
+import { getLanguages, type StorefrontLanguage } from '../../../services/languageService';
 import type { StorefrontMenuItem } from '../../../types';
 import { pageUrl } from '../../../utils/pageUrl';
-
-const LANGS = ['es', 'ca', 'en'] as const;
 
 function resolveHref(item: StorefrontMenuItem): string {
   if (item.externalUrl) return item.externalUrl;
@@ -24,10 +23,15 @@ const MobileMenuSheet: React.FC<MobileMenuSheetProps> = ({ open, onClose }) => {
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const [items, setItems] = useState<StorefrontMenuItem[]>([]);
+  const [languages, setLanguages] = useState<StorefrontLanguage[]>([]);
 
   useEffect(() => {
     getMenu().then(setItems).catch(() => {});
   }, [i18n.language]);
+
+  useEffect(() => {
+    getLanguages().then(setLanguages).catch(() => {});
+  }, []);
 
   if (!open) return null;
 
@@ -56,14 +60,14 @@ const MobileMenuSheet: React.FC<MobileMenuSheetProps> = ({ open, onClose }) => {
 
         <div className="mobile-menu-footer">
           <div className="mobile-menu-langs">
-            {LANGS.map((lng, i) => (
-              <React.Fragment key={lng}>
+            {languages.map((lng, i) => (
+              <React.Fragment key={lng.code}>
                 {i > 0 && <span className="mobile-menu-lang-sep">·</span>}
                 <button
-                  className={`mobile-menu-lang${i18n.language === lng ? ' is-active' : ''}`}
-                  onClick={() => changeLang(lng)}
+                  className={`mobile-menu-lang${i18n.language === lng.code ? ' is-active' : ''}`}
+                  onClick={() => changeLang(lng.code)}
                 >
-                  {t(`lang.${lng}`)}
+                  {t(`lang.${lng.code}`, { defaultValue: lng.code.toUpperCase() })}
                 </button>
               </React.Fragment>
             ))}
