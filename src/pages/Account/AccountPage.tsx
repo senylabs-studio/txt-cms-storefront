@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import {
-  getProfile, updateProfile, changePassword, addAddress, updateAddress, deleteAddress,
+  getProfile, updateProfile, changePassword, updateEmail, addAddress, updateAddress, deleteAddress,
   downloadMyDataExport, requestAccountDeletion,
 } from '../../services/profileService';
 import { getVisibleCountries, type VisibleCountry } from '../../services/countryService';
@@ -34,6 +34,13 @@ const AccountPage: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [pwdSaving, setPwdSaving] = useState(false);
   const [pwdMsg, setPwdMsg] = useState<{ type: 'success' | 'danger'; text: string } | null>(null);
+
+  // Change email modal
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [newEmail, setNewEmail] = useState('');
+  const [emailPassword, setEmailPassword] = useState('');
+  const [emailSaving, setEmailSaving] = useState(false);
+  const [emailError, setEmailError] = useState('');
 
   // Address modal
   const [showAddr, setShowAddr] = useState(false);
@@ -73,6 +80,28 @@ const AccountPage: React.FC = () => {
       setProfileMsg({ type: 'danger', text: t('account.saveError') });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const openEmailModal = () => {
+    setNewEmail(profile?.email ?? '');
+    setEmailPassword('');
+    setEmailError('');
+    setShowEmailModal(true);
+  };
+
+  const handleUpdateEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEmailError('');
+    setEmailSaving(true);
+    try {
+      await updateEmail(newEmail, profile?.isGuest ? undefined : emailPassword);
+      setProfile(p => p ? { ...p, email: newEmail } : p);
+      setShowEmailModal(false);
+    } catch (e) {
+      setEmailError((axios.isAxiosError(e) ? e.response?.data?.message : undefined) ?? t('account.emailChangeError'));
+    } finally {
+      setEmailSaving(false);
     }
   };
 
@@ -178,7 +207,12 @@ const AccountPage: React.FC = () => {
                   </Form.Group>
                   <Form.Group className="mb-3">
                     <Form.Label>{t('account.email')}</Form.Label>
-                    <Form.Control value={profile.email} disabled />
+                    <div className="d-flex gap-2">
+                      <Form.Control value={profile.email} disabled />
+                      <Button variant="outline-secondary" onClick={openEmailModal} title={t('account.changeEmailTitle')}>
+                        <FaEdit />
+                      </Button>
+                    </div>
                   </Form.Group>
                   <Form.Group className="mb-3">
                     <Form.Label>{t('account.phone')}</Form.Label>
@@ -288,6 +322,46 @@ const AccountPage: React.FC = () => {
           </Col>
         </Row>
       </Container>
+
+      {/* Change Email Modal */}
+      <Modal show={showEmailModal} onHide={() => setShowEmailModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>{t('account.changeEmailTitle')}</Modal.Title>
+        </Modal.Header>
+        <Form onSubmit={handleUpdateEmail}>
+          <Modal.Body>
+            {emailError && <Alert variant="danger" className="py-2">{emailError}</Alert>}
+            <Form.Group className="mb-3">
+              <Form.Label>{t('account.newEmail')}</Form.Label>
+              <Form.Control
+                type="email"
+                value={newEmail}
+                onChange={e => setNewEmail(e.target.value)}
+                required
+                autoComplete="email"
+              />
+            </Form.Group>
+            {!profile.isGuest && (
+              <Form.Group className="mb-2">
+                <Form.Label>{t('account.currentPasswordForEmail')}</Form.Label>
+                <Form.Control
+                  type="password"
+                  value={emailPassword}
+                  onChange={e => setEmailPassword(e.target.value)}
+                  required
+                  autoComplete="current-password"
+                />
+              </Form.Group>
+            )}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowEmailModal(false)}>{t('account.cancel')}</Button>
+            <Button type="submit" variant="primary" disabled={emailSaving}>
+              {emailSaving ? <Spinner size="sm" animation="border" /> : t('account.save')}
+            </Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
 
       {/* Address Modal */}
       <Modal show={showAddr} onHide={() => setShowAddr(false)} centered>
