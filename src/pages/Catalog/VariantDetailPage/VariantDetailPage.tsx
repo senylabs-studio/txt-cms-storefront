@@ -204,7 +204,7 @@ const VariantDetailPage: React.FC = () => {
             {/* Main image */}
             <div className="vdp-img-container" ref={imgContainerRef}>
               {currentImage
-                ? <img ref={imgRef} src={currentImage.url} alt={variant.name} />
+                ? <img ref={imgRef} src={currentImage.url} alt={currentImage.altText || variant.name} />
                 : <span className="vdp-img-placeholder">📦</span>}
 
               {canMeasure && rulerActive && (
@@ -251,7 +251,7 @@ const VariantDetailPage: React.FC = () => {
                     className={`vdp-thumb${i === selectedImage ? ' vdp-thumb--active' : ''}`}
                     onClick={() => setSelectedImage(i)}
                   >
-                    <img src={img.url} alt="" />
+                    <img src={img.url} alt={img.altText || `${variant.name} ${i + 1}`} />
                   </div>
                 ))}
               </div>

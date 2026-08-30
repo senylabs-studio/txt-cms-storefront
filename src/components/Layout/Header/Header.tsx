@@ -105,7 +105,7 @@ const Header: React.FC = () => {
                 onClick={() => handleSelectSuggestion(v)}
               >
                 <span className="header-search-suggestion-thumb">
-                  {v.thumbnailUrl ? <img src={v.thumbnailUrl} alt="" /> : <span>📦</span>}
+                  {v.thumbnailUrl ? <img src={v.thumbnailUrl} alt={v.thumbnailAltText || v.name} /> : <span>📦</span>}
                 </span>
                 <span className="header-search-suggestion-info">
                   <span className="header-search-suggestion-name">{v.productName} · {v.name}</span>

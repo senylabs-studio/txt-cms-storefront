@@ -64,7 +64,7 @@ const VariantCard: React.FC<Props> = ({ variant }) => {
       <div className="product-card-img-wrapper">
         <Link to={`/variant/${variant.id}`} className="product-card-img-link">
           {variant.thumbnailUrl
-            ? <Card.Img variant="top" src={variant.thumbnailUrl} className="product-card-img" />
+            ? <Card.Img variant="top" src={variant.thumbnailUrl} alt={variant.thumbnailAltText || variant.name} className="product-card-img" />
             : <div className="product-card-placeholder">📦</div>}
           {hasDiscount && (
             <Badge bg="danger" className="discount-badge">

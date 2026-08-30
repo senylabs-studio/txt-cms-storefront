@@ -28,6 +28,7 @@ export interface StorefrontVariant {
   discountPercent: number;
   availableStock: number;
   thumbnailUrl?: string;
+  thumbnailAltText?: string;
   imageUrls?: string[];
   typeValue?: string;
   productId: number;
@@ -44,6 +45,7 @@ export interface StorefrontImage {
   url: string;
   isRealScale: boolean;
   realWidthCm?: number;
+  altText?: string;
 }
 
 export interface StorefrontVariantDetail {
