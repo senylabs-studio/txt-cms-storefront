@@ -174,7 +174,9 @@
     "missingForFree": "(et falten €{{missing}})",
     "noShippingRate": "No hi ha tarifa d'enviament disponible per a aquest país. Contacta amb nosaltres.",
     "paymentError": "Error processant el pagament",
-    "initError": "Error en iniciar el pagament"
+    "initError": "Error en iniciar el pagament",
+    "estimatedDeliveryRange": "Lliurament estimat: {{min}}–{{max}} dies feiners",
+    "estimatedDeliveryExact": "Lliurament estimat: {{days}} dies feiners"
   },
   "checkoutSuccess": {
     "title": "Comanda rebuda!",

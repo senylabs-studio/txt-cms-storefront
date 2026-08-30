@@ -174,7 +174,9 @@
     "missingForFree": "(€{{missing}} more for free shipping)",
     "noShippingRate": "No shipping rate available for this country. Please contact us.",
     "paymentError": "Payment processing error",
-    "initError": "Error initiating payment"
+    "initError": "Error initiating payment",
+    "estimatedDeliveryRange": "Estimated delivery: {{min}}–{{max}} business days",
+    "estimatedDeliveryExact": "Estimated delivery: {{days}} business days"
   },
   "checkoutSuccess": {
     "title": "Order received!",

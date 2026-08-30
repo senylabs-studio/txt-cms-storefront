@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Container, Row, Col, Form, Button, Card, Alert, Spinner, Badge } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { FaTruck } from 'react-icons/fa';
 import MainLayout from '../../components/Layout/MainLayout';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -240,6 +241,14 @@ const CheckoutPage: React.FC = () => {
 
                 {shippingRate && (
                   <div className="small text-muted mt-1">{shippingRate.name}</div>
+                )}
+                {shippingRate && (shippingRate.estimatedDaysMin != null || shippingRate.estimatedDaysMax != null) && (
+                  <div className="small text-success mt-1">
+                    <FaTruck className="me-1" />
+                    {shippingRate.estimatedDaysMin != null && shippingRate.estimatedDaysMax != null && shippingRate.estimatedDaysMin !== shippingRate.estimatedDaysMax
+                      ? t('checkout.estimatedDeliveryRange', { min: shippingRate.estimatedDaysMin, max: shippingRate.estimatedDaysMax })
+                      : t('checkout.estimatedDeliveryExact', { days: shippingRate.estimatedDaysMin ?? shippingRate.estimatedDaysMax })}
+                  </div>
                 )}
               </Card.Body>
             </Card>

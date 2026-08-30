@@ -174,7 +174,9 @@
     "missingForFree": "(te faltan €{{missing}})",
     "noShippingRate": "No hay tarifa de envío disponible para este país. Contacta con nosotros.",
     "paymentError": "Error procesando el pago",
-    "initError": "Error al iniciar el pago"
+    "initError": "Error al iniciar el pago",
+    "estimatedDeliveryRange": "Entrega estimada: {{min}}–{{max}} días laborables",
+    "estimatedDeliveryExact": "Entrega estimada: {{days}} días laborables"
   },
   "checkoutSuccess": {
     "title": "¡Pedido recibido!",

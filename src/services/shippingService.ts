@@ -6,6 +6,8 @@ export interface ApplicableShippingRate {
   freeShippingThreshold?: number;
   shippingCost: number;
   isFree: boolean;
+  estimatedDaysMin?: number;
+  estimatedDaysMax?: number;
 }
 
 export const getApplicableShippingRate = async (
