@@ -191,6 +191,8 @@ export interface StorefrontOrderDetail {
   createdAt: string;
   notes?: string;
   trackingNumber?: string;
+  carrier?: string;
+  trackingUrl?: string;
   returnRequestedAt?: string;
   returnRequestReason?: string;
   shippingAddress?: AddressSummary;

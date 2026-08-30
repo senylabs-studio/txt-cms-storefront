@@ -137,7 +137,18 @@ const OrderDetailPage: React.FC = () => {
               <Card.Body>
                 <h6 className="fw-semibold mb-2">{t('orderDetail.info')}</h6>
                 <div className="text-muted small">{t('orderDetail.date')} {new Date(order.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}</div>
-                {order.trackingNumber && <div className="text-muted small mt-1">{t('orderDetail.trackingNumber')} {order.trackingNumber}</div>}
+                {order.trackingNumber && (
+                  <div className="text-muted small mt-1">
+                    {t('orderDetail.trackingNumber')}{' '}
+                    {order.trackingUrl && /^https?:\/\//i.test(order.trackingUrl) ? (
+                      <a href={order.trackingUrl} target="_blank" rel="noopener noreferrer">
+                        {order.trackingNumber}{order.carrier ? ` (${order.carrier})` : ''}
+                      </a>
+                    ) : (
+                      <>{order.trackingNumber}{order.carrier ? ` (${order.carrier})` : ''}</>
+                    )}
+                  </div>
+                )}
                 {order.notes && <div className="text-muted small mt-1">{t('orderDetail.notes')} {order.notes}</div>}
               </Card.Body>
             </Card>
