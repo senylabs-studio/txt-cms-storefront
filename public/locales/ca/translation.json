@@ -326,7 +326,8 @@
     "loadError": "No s'ha pogut carregar el tauler.",
     "add": "Afegir al tauler",
     "added": "Afegit al tauler",
-    "remove": "Treure del tauler"
+    "remove": "Treure del tauler",
+    "viewProduct": "Veure producte"
   },
   "stockNotifications": {
     "notifyMe": "Avisa'm quan estigui disponible",

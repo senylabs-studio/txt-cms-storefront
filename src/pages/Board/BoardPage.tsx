@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Container, Spinner, Alert } from 'react-bootstrap';
-import { FaTimes } from 'react-icons/fa';
+import { FaTimes, FaExternalLinkAlt } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import MainLayout from '../../components/Layout/MainLayout';
 import { getBoard, updateBoardItem, removeBoardItem, type BoardItem } from '../../services/boardService';
 import './BoardPage.css';
@@ -22,6 +23,7 @@ interface DragState {
 
 const BoardPage: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [items, setItems] = useState<BoardItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -133,6 +135,16 @@ const BoardPage: React.FC = () => {
                     aria-label={t('board.remove')}
                   >
                     <FaTimes size={11} />
+                  </button>
+                  <button
+                    type="button"
+                    className="board-tile-view"
+                    onClick={() => navigate(`/variant/${item.variantId}`)}
+                    onPointerDown={e => e.stopPropagation()}
+                    aria-label={t('board.viewProduct')}
+                    title={t('board.viewProduct')}
+                  >
+                    <FaExternalLinkAlt size={10} />
                   </button>
                   {item.thumbnailUrl
                     ? <img src={item.thumbnailUrl} alt={item.variantName} draggable={false} />

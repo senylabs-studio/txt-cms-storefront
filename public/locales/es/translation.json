@@ -326,7 +326,8 @@
     "loadError": "No se pudo cargar el tablero.",
     "add": "Añadir al tablero",
     "added": "Añadido al tablero",
-    "remove": "Quitar del tablero"
+    "remove": "Quitar del tablero",
+    "viewProduct": "Ver producto"
   },
   "stockNotifications": {
     "notifyMe": "Avísame cuando esté disponible",

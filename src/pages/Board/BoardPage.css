@@ -78,6 +78,23 @@
   z-index: 2;
 }
 
+.board-tile-view {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+}
+
 .board-tile-resize {
   position: absolute;
   right: 0;
