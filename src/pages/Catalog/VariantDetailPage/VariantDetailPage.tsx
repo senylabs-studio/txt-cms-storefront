@@ -9,10 +9,11 @@ import BoardButton from '../../../components/common/BoardButton/BoardButton';
 import NotifyMeButton from '../../../components/common/NotifyMeButton/NotifyMeButton';
 import RulerOverlay from '../../../components/common/RulerOverlay/RulerOverlay';
 import MainLayout from '../../../components/Layout/MainLayout';
-import { getVariantById } from '../../../services/productService';
+import { getVariantById, getVariantsBatch } from '../../../services/productService';
 import { getProductReviews, getMyReview, submitReview } from '../../../services/reviewService';
 import VariantCard from '../../../components/Product/VariantCard/VariantCard';
-import type { StorefrontVariantDetail, ProductReview, MyReviewStatus } from '../../../types';
+import type { StorefrontVariantDetail, StorefrontVariant, ProductReview, MyReviewStatus } from '../../../types';
+import { recordVariantView, getRecentlyViewedIds } from '../../../utils/recentlyViewed';
 import { useCart } from '../../../contexts/CartContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useAuthGate } from '../../../contexts/AuthGateContext';
@@ -86,6 +87,9 @@ const VariantDetailPage: React.FC = () => {
   const [submittingReview, setSubmittingReview] = useState(false);
   const [reviewMsg, setReviewMsg] = useState<{ type: 'success' | 'danger'; text: string } | null>(null);
 
+  // Recently viewed
+  const [recentlyViewed, setRecentlyViewed] = useState<StorefrontVariant[]>([]);
+
   useEffect(() => {
     if (!id) return;
     setLoading(true);
@@ -114,6 +118,14 @@ const VariantDetailPage: React.FC = () => {
       setMyReview(null);
     }
   }, [variant?.productSlug, isAuthenticated]);
+
+  useEffect(() => {
+    if (!variant) return;
+    recordVariantView(variant.id);
+    const ids = getRecentlyViewedIds(variant.id);
+    if (ids.length === 0) { setRecentlyViewed([]); return; }
+    getVariantsBatch(ids).then(setRecentlyViewed).catch(() => setRecentlyViewed([]));
+  }, [variant?.id]);
 
   const changeReviewsPage = (page: number) => {
     if (!variant?.productSlug) return;
@@ -390,6 +402,18 @@ const VariantDetailPage: React.FC = () => {
             <SectionTitle>{variant.alsoBoughtIsFallback ? t('product.youMightAlsoLike') : t('product.alsoBought')}</SectionTitle>
             <Row xs={2} sm={2} md={3} lg={4} className="g-3 mt-1">
               {variant.alsoBought.map(s => (
+                <Col key={s.id}><VariantCard variant={s} /></Col>
+              ))}
+            </Row>
+          </div>
+        )}
+
+        {/* Recently viewed */}
+        {recentlyViewed.length > 0 && (
+          <div className="vdp-related">
+            <SectionTitle>{t('product.recentlyViewed')}</SectionTitle>
+            <Row xs={2} sm={2} md={3} lg={4} className="g-3 mt-1">
+              {recentlyViewed.map(s => (
                 <Col key={s.id}><VariantCard variant={s} /></Col>
               ))}
             </Row>

@@ -19,3 +19,11 @@ export const getVariantById = async (variantId: number): Promise<StorefrontVaria
   const res = await apiClient.get(`/storefront/products/variants/${variantId}`);
   return res.data;
 };
+
+export const getVariantsBatch = async (variantIds: number[]): Promise<StorefrontVariant[]> => {
+  if (variantIds.length === 0) return [];
+  const res = await apiClient.get('/storefront/products/variants/batch', {
+    params: { ids: variantIds.join(',') },
+  });
+  return res.data;
+};
