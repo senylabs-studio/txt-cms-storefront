@@ -9,6 +9,9 @@ import { useFavorites } from '../../../contexts/FavoritesContext';
 import { useSiteSettings } from '../../../contexts/SiteSettingsContext';
 import NavMenu from '../NavMenu';
 import MobileMenuSheet from './MobileMenuSheet';
+import useDebounce from '../../../hooks/useDebounce';
+import { getVariantsPaged } from '../../../services/productService';
+import type { StorefrontVariant } from '../../../types';
 import './Header.css';
 
 const LANGS = ['es', 'ca', 'en'] as const;
@@ -25,6 +28,26 @@ const Header: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
 
+  // Search autocomplete — shared across the 3 renderSearchForm() instances (desktop/mobile/
+  // condensed) since they're all mounted at once and just hidden via CSS media queries; one
+  // fetch here covers whichever copy is actually visible.
+  const [suggestions, setSuggestions] = useState<StorefrontVariant[]>([]);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const debouncedSearch = useDebounce(search, 300);
+
+  useEffect(() => {
+    const query = debouncedSearch.trim();
+    if (query.length < 2) { setSuggestions([]); setSuggestionsLoading(false); return; }
+    let cancelled = false;
+    setSuggestionsLoading(true);
+    getVariantsPaged(1, 6, query)
+      .then(res => { if (!cancelled) setSuggestions(res.items); })
+      .catch(() => { if (!cancelled) setSuggestions([]); })
+      .finally(() => { if (!cancelled) setSuggestionsLoading(false); });
+    return () => { cancelled = true; };
+  }, [debouncedSearch]);
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > COLLAPSE_THRESHOLD);
     onScroll();
@@ -32,25 +55,75 @@ const Header: React.FC = () => {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  const submitSearch = (query: string) => {
+    if (!query.trim()) return;
+    setShowSuggestions(false);
+    navigate(`/catalog?search=${encodeURIComponent(query.trim())}`);
+    setSearch('');
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!search.trim()) return;
-    navigate(`/catalog?search=${encodeURIComponent(search.trim())}`);
+    submitSearch(search);
+  };
+
+  const handleSelectSuggestion = (variant: StorefrontVariant) => {
+    setShowSuggestions(false);
     setSearch('');
+    navigate(`/variant/${variant.id}`);
   };
 
   const changeLang = (lng: string) => i18n.changeLanguage(lng);
 
   const renderSearchForm = (condensed?: boolean) => (
-    <Form className={`header-search ${condensed ? 'header-search--condensed' : ''}`} onSubmit={handleSearch}>
+    <Form className={`header-search ${condensed ? 'header-search--condensed' : ''}`} onSubmit={handleSearch} autoComplete="off">
       <InputGroup>
         <Form.Control
           placeholder={condensed ? t('header.searchShort') : t('header.search')}
           value={search}
           onChange={e => setSearch(e.target.value)}
+          onFocus={() => setShowSuggestions(true)}
+          onBlur={() => setShowSuggestions(false)}
+          onKeyDown={e => { if (e.key === 'Escape') setShowSuggestions(false); }}
         />
         <Button variant="primary" type="submit" aria-label={t('header.search')}><FaSearch /></Button>
       </InputGroup>
+
+      {showSuggestions && search.trim().length >= 2 && (
+        <div className="header-search-suggestions">
+          {suggestionsLoading ? (
+            <div className="header-search-suggestion-empty">{t('header.searching')}</div>
+          ) : suggestions.length === 0 ? (
+            <div className="header-search-suggestion-empty">{t('header.noSuggestions')}</div>
+          ) : (
+            suggestions.map(v => (
+              <button
+                key={v.id}
+                type="button"
+                className="header-search-suggestion"
+                onMouseDown={e => e.preventDefault()}
+                onClick={() => handleSelectSuggestion(v)}
+              >
+                <span className="header-search-suggestion-thumb">
+                  {v.thumbnailUrl ? <img src={v.thumbnailUrl} alt="" /> : <span>📦</span>}
+                </span>
+                <span className="header-search-suggestion-info">
+                  <span className="header-search-suggestion-name">{v.productName} · {v.name}</span>
+                  <span className="header-search-suggestion-price">{v.price.toFixed(2)} €</span>
+                </span>
+              </button>
+            ))
+          )}
+          <button
+            type="button"
+            className="header-search-suggestion header-search-suggestion--all"
+            onMouseDown={e => e.preventDefault()}
+            onClick={() => submitSearch(search)}
+          >
+            {t('header.seeAllResults', { query: search.trim() })}
+          </button>
+        </div>
+      )}
     </Form>
   );
 

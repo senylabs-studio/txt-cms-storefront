@@ -11,7 +11,10 @@
     "menu": "Menu",
     "closeMenu": "Close",
     "favorites": "Favorites",
-    "cart": "Cart"
+    "cart": "Cart",
+    "searching": "Searching...",
+    "noSuggestions": "No results",
+    "seeAllResults": "See all results for \"{{query}}\""
   },
   "nav": {
     "viewAll": "View all →",

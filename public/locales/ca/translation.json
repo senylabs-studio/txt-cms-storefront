@@ -11,7 +11,10 @@
     "menu": "Menú",
     "closeMenu": "Tancar",
     "favorites": "Favorits",
-    "cart": "Cistella"
+    "cart": "Cistella",
+    "searching": "Cercant...",
+    "noSuggestions": "Sense resultats",
+    "seeAllResults": "Veure tots els resultats per a \"{{query}}\""
   },
   "nav": {
     "viewAll": "Veure-ho tot →",

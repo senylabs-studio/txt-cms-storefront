@@ -11,7 +11,10 @@
     "menu": "Menú",
     "closeMenu": "Cerrar",
     "favorites": "Favoritos",
-    "cart": "Carrito"
+    "cart": "Carrito",
+    "searching": "Buscando...",
+    "noSuggestions": "Sin resultados",
+    "seeAllResults": "Ver todos los resultados para \"{{query}}\""
   },
   "nav": {
     "viewAll": "Ver todo →",
