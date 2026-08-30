@@ -76,16 +76,36 @@ describe('CartDrawer', () => {
     expect(screen.getAllByText('€20.00')).toHaveLength(2);
   });
 
-  it('the plus/minus buttons call updateItem with quantity +/- 1', () => {
+  it('the plus/minus buttons call updateItem with quantity +/- the item\'s own quantityStep', () => {
     mockCart.cart = cartWithItems();
     renderDrawer();
 
     const [minusBtn, plusBtn] = screen.getAllByRole('button', { name: '' }).slice(0, 2);
     fireEvent.click(plusBtn);
-    expect(mockCart.updateItem).toHaveBeenCalledWith(1, 3);
+    expect(mockCart.updateItem).toHaveBeenCalledWith(1, 2.05);
 
     fireEvent.click(minusBtn);
-    expect(mockCart.updateItem).toHaveBeenCalledWith(1, 1);
+    expect(mockCart.updateItem).toHaveBeenCalledWith(1, 1.95);
+  });
+
+  it('uses a non-default quantityStep instead of always stepping by 1', () => {
+    mockCart.cart = cartWithItems({ items: [{ id: 1, productName: 'Tela azul', productCode: 'TA1', originalUnitPrice: 10, unitPrice: 10, quantity: 4, subtotal: 40, availableStock: 20, minQuantity: 2, quantityStep: 2 }] });
+    renderDrawer();
+
+    const [minusBtn, plusBtn] = screen.getAllByRole('button', { name: '' }).slice(0, 2);
+    fireEvent.click(plusBtn);
+    expect(mockCart.updateItem).toHaveBeenCalledWith(1, 6);
+
+    fireEvent.click(minusBtn);
+    expect(mockCart.updateItem).toHaveBeenCalledWith(1, 2);
+  });
+
+  it('disables the minus button once quantity reaches the item\'s own minQuantity', () => {
+    mockCart.cart = cartWithItems({ items: [{ id: 1, productName: 'Tela azul', productCode: 'TA1', originalUnitPrice: 10, unitPrice: 10, quantity: 2, subtotal: 20, availableStock: 20, minQuantity: 2, quantityStep: 2 }] });
+    renderDrawer();
+
+    const [minusBtn] = screen.getAllByRole('button', { name: '' });
+    expect(minusBtn).toBeDisabled();
   });
 
   it('disables the plus button once quantity reaches availableStock', () => {

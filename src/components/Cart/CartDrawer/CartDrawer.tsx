@@ -7,6 +7,10 @@ import { useTranslation } from 'react-i18next';
 import { useCart } from '../../../contexts/CartContext';
 import './CartDrawer.css';
 
+// Avoids floating-point artifacts from repeated +/- quantityStep arithmetic (e.g. 0.5 - 0.05
+// would otherwise become 0.44999999999999996 in JS).
+const roundToStep = (n: number) => Math.round(n * 100) / 100;
+
 const CartDrawer: React.FC = () => {
   const { t } = useTranslation();
   const { cart, drawerOpen, closeDrawer, updateItem, removeItem, loading } = useCart();
@@ -98,11 +102,11 @@ const CartDrawer: React.FC = () => {
                       </span>
                     </div>
                     <div className="cart-item-qty">
-                      <button className="qty-btn" disabled={loading || item.quantity <= 1} onClick={() => handleUpdate(item.id, item.quantity - 1)}>
+                      <button className="qty-btn" disabled={loading || item.quantity <= item.minQuantity} onClick={() => handleUpdate(item.id, roundToStep(item.quantity - item.quantityStep))}>
                         <FaMinus size={10} />
                       </button>
                       <span className="qty-value">{item.quantity}</span>
-                      <button className="qty-btn" disabled={loading || item.quantity >= item.availableStock} onClick={() => handleUpdate(item.id, item.quantity + 1)}>
+                      <button className="qty-btn" disabled={loading || item.quantity + item.quantityStep > item.availableStock} onClick={() => handleUpdate(item.id, roundToStep(item.quantity + item.quantityStep))}>
                         <FaPlus size={10} />
                       </button>
                     </div>
