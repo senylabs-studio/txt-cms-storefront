@@ -1,5 +1,6 @@
 import apiClient from '../apiClient';
 import type { PaginatedResponse, StorefrontProduct, StorefrontVariant, StorefrontVariantDetail } from '../types';
+import type { PageFilters } from './pageService';
 
 export const getProductBySlug = async (slug: string): Promise<StorefrontProduct> => {
   const res = await apiClient.get(`/storefront/products/${slug}`);
@@ -7,10 +8,14 @@ export const getProductBySlug = async (slug: string): Promise<StorefrontProduct>
 };
 
 export const getVariantsPaged = async (
-  page = 1, pageSize = 12, search = '', productTypeId?: number, orderBy = 'name', orderDir = 'asc'
+  page = 1, pageSize = 12, search = '', productTypeId?: number, orderBy = 'name', orderDir = 'asc',
+  filters: PageFilters = {}
 ): Promise<PaginatedResponse<StorefrontVariant>> => {
   const res = await apiClient.get('/storefront/products/variants', {
-    params: { page, pageSize, search, productTypeId, orderBy, orderDir }
+    params: {
+      page, pageSize, search, productTypeId, orderBy, orderDir,
+      minPrice: filters.minPrice, maxPrice: filters.maxPrice, width: filters.width, material: filters.material,
+    }
   });
   return res.data;
 };

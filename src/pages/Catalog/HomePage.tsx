@@ -1,15 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Form, InputGroup, Button, Spinner, Pagination } from 'react-bootstrap';
-import { FaSearch } from 'react-icons/fa';
+import { Container, Row, Col, Form, InputGroup, Button, Spinner, Pagination, Badge } from 'react-bootstrap';
+import { FaSearch, FaFilter, FaTimes } from 'react-icons/fa';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import VariantCard from '../../components/Product/VariantCard/VariantCard';
+import ProductFilters from '../../components/common/ProductFilters';
 import { getVariantsPaged } from '../../services/productService';
-import type { StorefrontVariant } from '../../types';
+import type { PageFilters } from '../../services/pageService';
+import type { StorefrontVariant, PageFilterFacets } from '../../types';
 import useDebounce from '../../hooks/useDebounce';
 import { useSiteSettings } from '../../contexts/SiteSettingsContext';
 import { useDocumentMeta } from '../../hooks/useDocumentMeta';
+import './PageCatalogPage/PageCatalogPage.css';
+
+const EMPTY_FACETS: PageFilterFacets = { minPrice: 0, maxPrice: 0, widths: [], materials: [] };
 
 const HomePage: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -19,24 +24,26 @@ const HomePage: React.FC = () => {
   const [variants, setVariants] = useState<StorefrontVariant[]>([]);
   const [totalPages, setTotalPages] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
+  const [facets, setFacets] = useState<PageFilterFacets>(EMPTY_FACETS);
   const [loading, setLoading] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [search, setSearch] = useState(searchParams.get('search') ?? '');
 
   useEffect(() => {
     setSearch(searchParams.get('search') ?? '');
   }, [searchParams]);
-  const [orderBy, setOrderBy] = useState('name');
+  const [filters, setFilters] = useState<PageFilters>({});
   const [currentPage, setCurrentPage] = useState(1);
   const debouncedSearch = useDebounce(search, 400);
 
   useEffect(() => {
     setLoading(true);
-    getVariantsPaged(currentPage, 12, debouncedSearch, undefined, orderBy, 'asc')
-      .then(r => { setVariants(r.items); setTotalPages(r.totalPages); setTotalItems(r.totalItems); })
+    getVariantsPaged(currentPage, 12, debouncedSearch, undefined, filters.orderBy || 'name', 'asc', filters)
+      .then(r => { setVariants(r.items); setTotalPages(r.totalPages); setTotalItems(r.totalItems); setFacets(r.facets ?? EMPTY_FACETS); })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [currentPage, debouncedSearch, orderBy, i18n.language]);
+  }, [currentPage, debouncedSearch, filters, i18n.language]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -44,8 +51,39 @@ const HomePage: React.FC = () => {
     else setSearchParams({});
   }, [debouncedSearch]);
 
+  const handleFilterChange = (f: PageFilters) => {
+    setFilters(f);
+    setCurrentPage(1);
+  };
+
+  const activeCount = [
+    filters.minPrice !== undefined || filters.maxPrice !== undefined,
+    filters.width !== undefined,
+    !!filters.material,
+    !!filters.orderBy,
+  ].filter(Boolean).length;
+
   return (
     <MainLayout>
+      {/* ── Floating filter sidebar ── */}
+      <div className={`filter-backdrop${sidebarOpen ? ' is-open' : ''}`} onClick={() => setSidebarOpen(false)} />
+      <div className={`filter-panel${sidebarOpen ? ' is-open' : ''}`}>
+        <div className="filter-panel-header">
+          <span className="filter-panel-title">{t('filters.title')}</span>
+          <button className="filter-panel-close" onClick={() => setSidebarOpen(false)}>
+            <FaTimes size={16} />
+          </button>
+        </div>
+        <div className="filter-panel-body">
+          <ProductFilters
+            facets={facets}
+            filters={filters}
+            onChange={handleFilterChange}
+            onClose={() => setSidebarOpen(false)}
+          />
+        </div>
+      </div>
+
       <Container className="py-4">
         <div className="catalog-hero mb-4">
           <h1 className="catalog-title">{t('catalog.home.title')}</h1>
@@ -63,12 +101,18 @@ const HomePage: React.FC = () => {
               <InputGroup.Text><FaSearch /></InputGroup.Text>
             </InputGroup>
           </Col>
-          <Col md={3} className="ms-auto">
-            <Form.Select value={orderBy} onChange={e => { setOrderBy(e.target.value); setCurrentPage(1); }}>
-              <option value="name">{t('filters.nameAsc')}</option>
-              <option value="price">{t('filters.priceAsc')}</option>
-              <option value="price_desc">{t('filters.priceDesc')}</option>
-            </Form.Select>
+          <Col md="auto" className="ms-auto">
+            <Button
+              variant={activeCount > 0 ? 'primary' : 'outline-secondary'}
+              className="d-flex align-items-center gap-2"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <FaFilter />
+              {t('filters.title')}
+              {activeCount > 0 && (
+                <Badge bg="light" text="dark" pill>{activeCount}</Badge>
+              )}
+            </Button>
           </Col>
         </Row>
 

@@ -468,6 +468,7 @@ export interface PaginatedResponse<T> {
   totalPages: number;
   currentPage: number;
   pageSize: number;
+  facets?: PageFilterFacets;
 }
 
 export interface AuthResponse {
