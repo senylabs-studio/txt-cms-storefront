@@ -96,12 +96,16 @@ const ProductFilters: React.FC<Props> = ({ facets, filters, onChange, onClose })
   const [localMin, setLocalMin] = useState(filters.minPrice ?? absMin);
   const [localMax, setLocalMax] = useState(filters.maxPrice ?? absMax);
 
-  // Sync draft when committed filters change from outside (e.g. slug change resets to {})
+  // Sync draft when committed filters change from outside (e.g. slug change resets to {}), and
+  // also when facets arrive — this panel is always mounted (just CSS-hidden until opened), so on
+  // first render facets is still the {0,0,[],[]} placeholder the parent seeds before its async
+  // fetch resolves; without absMin/absMax here, localMin/localMax would permanently stick at the
+  // 0/0 they were lazily initialized to, showing "€0 – €0" even once real prices are in.
   useEffect(() => {
     setDraft(filters);
     setLocalMin(filters.minPrice ?? absMin);
     setLocalMax(filters.maxPrice ?? absMax);
-  }, [filters]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [filters, absMin, absMax]);
 
   const handleSlider = (newMin: number, newMax: number) => {
     setLocalMin(newMin);
