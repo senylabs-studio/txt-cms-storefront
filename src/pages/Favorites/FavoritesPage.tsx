@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Container, Row, Col, Button, Spinner, Badge, Alert } from 'react-bootstrap';
+import { Container, Row, Col, Button, Spinner, Badge } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaHeart, FaShoppingCart, FaTrash } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
@@ -9,16 +8,18 @@ import { getFavorites, type FavoriteItem } from '../../services/favoriteService'
 import { useFavorites } from '../../contexts/FavoritesContext';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
+import { getApiErrorMessage } from '../../utils/apiError';
 import './FavoritesPage.css';
 
 const FavoritesPage: React.FC = () => {
   const { t, i18n } = useTranslation();
   const [items, setItems] = useState<FavoriteItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const { toggle } = useFavorites();
   const { addItem, loading: cartLoading } = useCart();
   const { isAuthenticated } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
 
   const load = async () => {
@@ -31,21 +32,24 @@ const FavoritesPage: React.FC = () => {
   useEffect(() => { load(); }, [i18n.language]);
 
   const handleRemove = async (item: FavoriteItem) => {
-    await toggle(item.productId, item.variantId);
-    setItems(prev => prev.filter(i => i.id !== item.id));
+    try {
+      await toggle(item.productId, item.variantId);
+      setItems(prev => prev.filter(i => i.id !== item.id));
+    } catch (e) {
+      showToast('danger', getApiErrorMessage(e, t('favorites.removeError')));
+    }
   };
 
   const handleAddToCart = async (item: FavoriteItem) => {
     if (!isAuthenticated) { navigate('/login'); return; }
     const entity = item.variant ?? item.product;
     if (!entity) return;
-    setError('');
     try {
       if (item.variantId) await addItem(undefined, item.variantId, 1);
       else if (item.productId && !entity.hasVariants) await addItem(item.productId, undefined, 1);
       else if (item.productId) navigate(`/product/${entity.slug}`);
     } catch (e) {
-      setError((axios.isAxiosError(e) ? e.response?.data?.message : undefined) ?? t('product.addError'));
+      showToast('danger', getApiErrorMessage(e, t('product.addError')));
     }
   };
 
@@ -61,8 +65,6 @@ const FavoritesPage: React.FC = () => {
           <h2 className="mb-0">{t('favorites.title')}</h2>
           {items.length > 0 && <Badge bg="secondary">{items.length}</Badge>}
         </div>
-
-        {error && <Alert variant="danger" className="py-2">{error}</Alert>}
 
         {items.length === 0 ? (
           <div className="text-center py-5 text-muted">

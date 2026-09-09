@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { Container, Card, Alert, Spinner } from 'react-bootstrap';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { verifyGuestAccessLink } from '../../services/authService';
 import { useAuth } from '../../contexts/AuthContext';
+import { getApiErrorMessage } from '../../utils/apiError';
 
 const GuestAccessVerifyPage: React.FC = () => {
   const { t } = useTranslation();
@@ -25,7 +25,7 @@ const GuestAccessVerifyPage: React.FC = () => {
         navigate('/account/orders', { replace: true });
       })
       .catch(e => {
-        setError((axios.isAxiosError(e) ? e.response?.data?.message : undefined) ?? t('auth.guestAccess.verifyError'));
+        setError(getApiErrorMessage(e, t('auth.guestAccess.verifyError')));
         setStatus('error');
       });
     // Only ever run once per token — re-running would try to consume an already-used token.

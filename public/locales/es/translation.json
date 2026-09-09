@@ -48,7 +48,8 @@
     "applyCoupon": "Aplicar",
     "removeCoupon": "Quitar",
     "couponDiscount": "Cupón {{code}}",
-    "couponApplyError": "No se ha podido aplicar el cupón."
+    "couponApplyError": "No se ha podido aplicar el cupón.",
+    "couponApplySuccess": "Cupón aplicado correctamente."
   },
   "auth": {
     "login": {
@@ -263,7 +264,12 @@
     "deleteReasonPlaceholder": "Cuéntanos por qué te vas, nos ayuda a mejorar...",
     "confirmDeleteAccount": "Solicitar eliminación",
     "deletionRequestError": "No se ha podido enviar la solicitud.",
-    "deletionPending": "Hemos recibido tu solicitud de eliminación de cuenta. Nuestro equipo la revisará en breve."
+    "deletionPending": "Hemos recibido tu solicitud de eliminación de cuenta. Nuestro equipo la revisará en breve.",
+    "emailChangeSuccess": "Email actualizado correctamente.",
+    "addrSaveSuccess": "Dirección guardada correctamente.",
+    "addrDeleteSuccess": "Dirección eliminada correctamente.",
+    "deletionRequestSuccess": "Solicitud de eliminación de cuenta enviada.",
+    "exportDataSuccess": "Tus datos se han descargado correctamente."
   },
   "orders": {
     "backToAccount": "Volver a mi cuenta",
@@ -314,14 +320,19 @@
     "confirmReturnButton": "Enviar solicitud",
     "returnError": "No se ha podido enviar la solicitud de devolución. Inténtalo de nuevo.",
     "returnRequested": "Solicitaste la devolución de este pedido el {{date}}. Te contactaremos en breve.",
-    "leaveReview": "Dejar una reseña"
+    "leaveReview": "Dejar una reseña",
+    "downloadError": "No se pudo descargar la factura.",
+    "cancelSuccess": "Pedido cancelado correctamente.",
+    "returnSuccess": "Solicitud de devolución enviada."
   },
   "favorites": {
     "title": "Mis favoritos",
     "empty": "No tienes productos favoritos aún.",
     "explore": "Explorar catálogo",
     "remove": "Quitar de favoritos",
-    "add": "Añadir a favoritos"
+    "add": "Añadir a favoritos",
+    "removeError": "No se pudo eliminar de favoritos.",
+    "toggleError": "No se pudo actualizar favoritos."
   },
   "board": {
     "title": "Mi tablero",
@@ -335,7 +346,8 @@
   },
   "stockNotifications": {
     "notifyMe": "Avísame cuando esté disponible",
-    "subscribed": "Te avisaremos"
+    "subscribed": "Te avisaremos",
+    "toggleError": "No se pudo actualizar la notificación de stock."
   },
   "product": {
     "outOfStock": "Sin stock",
@@ -453,5 +465,8 @@
     "personalizationDesc": "Recuerdan tus preferencias para ofrecerte una mejor experiencia.",
     "alwaysActive": "Siempre activas",
     "savePreferences": "Guardar configuración"
+  },
+  "common": {
+    "fieldRequired": "Este campo es obligatorio."
   }
 }

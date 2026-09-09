@@ -7,11 +7,14 @@ import MainLayout from '../../components/Layout/MainLayout';
 import { getOrderDetail, downloadOrderInvoice, cancelOrder, requestReturn } from '../../services/profileService';
 import type { StorefrontOrderDetail } from '../../types';
 import { ORDER_STATUS_VARIANT } from '../../utils/orderStatus';
+import { useToast } from '../../contexts/ToastContext';
+import { getApiErrorMessage } from '../../utils/apiError';
 
 const OrderDetailPage: React.FC = () => {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [order, setOrder] = useState<StorefrontOrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [downloadingInvoice, setDownloadingInvoice] = useState(false);
@@ -47,6 +50,7 @@ const OrderDetailPage: React.FC = () => {
   const handleDownloadInvoice = async () => {
     setDownloadingInvoice(true);
     try { await downloadOrderInvoice(order.id); }
+    catch (err) { showToast('danger', getApiErrorMessage(err, t('orderDetail.downloadError'))); }
     finally { setDownloadingInvoice(false); }
   };
 
@@ -58,8 +62,9 @@ const OrderDetailPage: React.FC = () => {
       await loadOrder();
       setShowCancelConfirm(false);
       setCancelReason('');
-    } catch {
-      setCancelError(t('orderDetail.cancelError'));
+      showToast('success', t('orderDetail.cancelSuccess'));
+    } catch (err) {
+      setCancelError(getApiErrorMessage(err, t('orderDetail.cancelError')));
     } finally {
       setCancelling(false);
     }
@@ -73,8 +78,9 @@ const OrderDetailPage: React.FC = () => {
       await loadOrder();
       setShowReturnModal(false);
       setReturnReason('');
-    } catch {
-      setReturnError(t('orderDetail.returnError'));
+      showToast('success', t('orderDetail.returnSuccess'));
+    } catch (err) {
+      setReturnError(getApiErrorMessage(err, t('orderDetail.returnError')));
     } finally {
       setRequestingReturn(false);
     }

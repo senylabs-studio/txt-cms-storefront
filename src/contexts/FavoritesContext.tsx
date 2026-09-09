@@ -1,6 +1,9 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getFavoriteIds, toggleFavorite } from '../services/favoriteService';
 import { useAuth } from './AuthContext';
+import { useToast } from './ToastContext';
+import { getApiErrorMessage } from '../utils/apiError';
 
 interface FavoritesContextType {
   favoriteProductIds: Set<number>;
@@ -13,7 +16,9 @@ interface FavoritesContextType {
 const FavoritesContext = createContext<FavoritesContextType | null>(null);
 
 export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { t } = useTranslation();
   const { isAuthenticated } = useAuth();
+  const { showToast } = useToast();
   const [productIds, setProductIds] = useState<Set<number>>(new Set());
   const [variantIds, setVariantIds] = useState<Set<number>>(new Set());
 
@@ -71,9 +76,10 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           return next;
         });
       }
-    } catch {
+    } catch (err) {
       // Revert optimistic update on error
       load();
+      showToast('danger', getApiErrorMessage(err, t('favorites.toggleError')));
     }
   };
 

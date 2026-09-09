@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { Container, Card, Form, Button, Alert, Spinner } from 'react-bootstrap';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { resetPassword } from '../../services/authService';
+import { getApiErrorMessage, parseFieldErrors, type FieldErrors } from '../../utils/apiError';
 
 const ResetPasswordPage: React.FC = () => {
   const { t } = useTranslation();
@@ -16,6 +16,7 @@ const ResetPasswordPage: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [success, setSuccess] = useState(false);
 
   const linkInvalid = !email || !token;
@@ -23,18 +24,19 @@ const ResetPasswordPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      setError(t('auth.resetPassword.passwordMismatch'));
+      setFieldErrors({ confirmPassword: t('auth.resetPassword.passwordMismatch') });
       return;
     }
     setLoading(true);
     setError('');
+    setFieldErrors({});
     try {
       await resetPassword({ email, token, newPassword });
       setSuccess(true);
     } catch (e) {
-      const data = axios.isAxiosError(e) ? e.response?.data : undefined;
-      const msg = data?.message ?? (Array.isArray(data?.errors) ? data.errors.join(' ') : undefined);
-      setError(msg ?? t('auth.resetPassword.error'));
+      const fe = parseFieldErrors(e);
+      if (fe) setFieldErrors(fe);
+      else setError(getApiErrorMessage(e, t('auth.resetPassword.error')));
     } finally {
       setLoading(false);
     }
@@ -67,9 +69,11 @@ const ResetPasswordPage: React.FC = () => {
                       value={newPassword}
                       onChange={e => setNewPassword(e.target.value)}
                       minLength={6}
+                      isInvalid={!!fieldErrors.newPassword}
                       required
                       autoFocus
                     />
+                    <Form.Control.Feedback type="invalid">{fieldErrors.newPassword}</Form.Control.Feedback>
                   </Form.Group>
 
                   <Form.Group className="mb-4">
@@ -79,8 +83,10 @@ const ResetPasswordPage: React.FC = () => {
                       value={confirmPassword}
                       onChange={e => setConfirmPassword(e.target.value)}
                       minLength={6}
+                      isInvalid={!!fieldErrors.confirmPassword}
                       required
                     />
+                    <Form.Control.Feedback type="invalid">{fieldErrors.confirmPassword}</Form.Control.Feedback>
                   </Form.Group>
 
                   <Button type="submit" variant="primary" className="w-100" disabled={loading}>

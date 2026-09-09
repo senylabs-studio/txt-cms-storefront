@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { Container, Button, Card, Form, Alert } from 'react-bootstrap';
 import { FaCheckCircle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +7,7 @@ import MainLayout from '../../components/Layout/MainLayout';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { convertGuestAccount } from '../../services/authService';
+import { getApiErrorMessage } from '../../utils/apiError';
 
 const CheckoutSuccessPage: React.FC = () => {
   const { t } = useTranslation();
@@ -33,7 +33,7 @@ const CheckoutSuccessPage: React.FC = () => {
       login(data);
       setSaved(true);
     } catch (err) {
-      setError((axios.isAxiosError(err) ? err.response?.data?.message : undefined) ?? t('authGate.error'));
+      setError(getApiErrorMessage(err, t('authGate.error')));
     } finally {
       setSaving(false);
     }

@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { requestGuestAccessLink } from '../../services/authService';
+import { getApiErrorMessage } from '../../utils/apiError';
 
 const GuestAccessRequestPage: React.FC = () => {
   const { t } = useTranslation();
@@ -21,8 +22,8 @@ const GuestAccessRequestPage: React.FC = () => {
     try {
       await requestGuestAccessLink({ email, orderNumber: Number(orderNumber) });
       setSent(true);
-    } catch {
-      setError(t('auth.guestAccess.error'));
+    } catch (err) {
+      setError(getApiErrorMessage(err, t('auth.guestAccess.error')));
     } finally {
       setLoading(false);
     }

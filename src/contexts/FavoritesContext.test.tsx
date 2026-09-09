@@ -2,6 +2,10 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { FavoritesProvider, useFavorites } from './FavoritesContext';
+import { ToastProvider } from './ToastContext';
+
+const renderWithProviders = (ui: React.ReactElement) =>
+  render(<ToastProvider>{ui}</ToastProvider>);
 
 const mockIsAuthenticated = vi.hoisted(() => ({ value: true }));
 vi.mock('./AuthContext', () => ({
@@ -36,7 +40,7 @@ describe('FavoritesContext', () => {
 
   it('loads favorite ids on mount when authenticated', async () => {
     getFavoriteIds.mockResolvedValue({ productIds: [9], variantIds: [5] });
-    render(<FavoritesProvider><Probe /></FavoritesProvider>);
+    renderWithProviders(<FavoritesProvider><Probe /></FavoritesProvider>);
 
     await waitFor(() => {
       expect(screen.getByTestId('fav-variant-5')).toHaveTextContent('yes');
@@ -47,7 +51,7 @@ describe('FavoritesContext', () => {
 
   it('does not load favorites and stays empty when not authenticated', async () => {
     mockIsAuthenticated.value = false;
-    render(<FavoritesProvider><Probe /></FavoritesProvider>);
+    renderWithProviders(<FavoritesProvider><Probe /></FavoritesProvider>);
 
     await waitFor(() => expect(screen.getByTestId('count')).toHaveTextContent('0'));
     expect(getFavoriteIds).not.toHaveBeenCalled();
@@ -56,7 +60,7 @@ describe('FavoritesContext', () => {
   it('toggle() optimistically flips state before the server responds', async () => {
     let resolveToggle: (v: { isFavorite: boolean }) => void = () => {};
     toggleFavorite.mockImplementation(() => new Promise(res => { resolveToggle = res; }));
-    render(<FavoritesProvider><Probe /></FavoritesProvider>);
+    renderWithProviders(<FavoritesProvider><Probe /></FavoritesProvider>);
     await waitFor(() => expect(screen.getByTestId('fav-variant-5')).toHaveTextContent('no'));
 
     fireEvent.click(screen.getByText('toggle-variant'));
@@ -69,7 +73,7 @@ describe('FavoritesContext', () => {
 
   it('toggle() corrects the optimistic update to match the server response', async () => {
     toggleFavorite.mockResolvedValue({ isFavorite: false });
-    render(<FavoritesProvider><Probe /></FavoritesProvider>);
+    renderWithProviders(<FavoritesProvider><Probe /></FavoritesProvider>);
     await waitFor(() => expect(screen.getByTestId('fav-product-9')).toHaveTextContent('no'));
 
     fireEvent.click(screen.getByText('toggle-product'));
@@ -80,7 +84,7 @@ describe('FavoritesContext', () => {
 
   it('toggle() reverts the optimistic update and reloads on failure', async () => {
     toggleFavorite.mockRejectedValue(new Error('network error'));
-    render(<FavoritesProvider><Probe /></FavoritesProvider>);
+    renderWithProviders(<FavoritesProvider><Probe /></FavoritesProvider>);
     await waitFor(() => expect(getFavoriteIds).toHaveBeenCalledTimes(1));
 
     fireEvent.click(screen.getByText('toggle-variant'));

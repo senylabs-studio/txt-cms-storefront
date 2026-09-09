@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import OrderDetailPage from './OrderDetailPage';
+import { ToastProvider } from '../../contexts/ToastContext';
 import type { StorefrontOrderDetail } from '../../types';
 
 vi.mock('react-i18next', () => ({
@@ -29,9 +30,11 @@ vi.mock('../../services/profileService', () => ({ getOrderDetail, downloadOrderI
 
 const renderDetail = (id = '42') => render(
   <MemoryRouter initialEntries={[`/account/orders/${id}`]}>
-    <Routes>
-      <Route path="/account/orders/:id" element={<OrderDetailPage />} />
-    </Routes>
+    <ToastProvider>
+      <Routes>
+        <Route path="/account/orders/:id" element={<OrderDetailPage />} />
+      </Routes>
+    </ToastProvider>
   </MemoryRouter>,
 );
 

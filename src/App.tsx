@@ -7,8 +7,10 @@ import { StockNotificationProvider } from './contexts/StockNotificationContext';
 import { SiteSettingsProvider } from './contexts/SiteSettingsContext';
 import { PaymentMethodsProvider } from './contexts/PaymentMethodsContext';
 import { PartnersProvider } from './contexts/PartnersContext';
+import { ToastProvider } from './contexts/ToastContext';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 import ChatWidget from './components/ChatWidget/ChatWidget';
+import GlobalToast from './components/common/GlobalToast/GlobalToast';
 import { useSyncDocumentLang } from './hooks/useSyncDocumentLang';
 
 import LandingPage from './pages/Home/LandingPage';
@@ -38,6 +40,7 @@ function App() {
 
   return (
     <BrowserRouter>
+      <ToastProvider>
       <SiteSettingsProvider>
       <PaymentMethodsProvider>
       <PartnersProvider>
@@ -79,6 +82,7 @@ function App() {
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
             <ChatWidget />
+            <GlobalToast />
           </StockNotificationProvider>
           </FavoritesProvider>
         </CartProvider>
@@ -87,6 +91,7 @@ function App() {
       </PartnersProvider>
       </PaymentMethodsProvider>
       </SiteSettingsProvider>
+      </ToastProvider>
     </BrowserRouter>
   );
 }

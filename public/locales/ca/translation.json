@@ -48,7 +48,8 @@
     "applyCoupon": "Aplicar",
     "removeCoupon": "Treure",
     "couponDiscount": "Cupó {{code}}",
-    "couponApplyError": "No s'ha pogut aplicar el cupó."
+    "couponApplyError": "No s'ha pogut aplicar el cupó.",
+    "couponApplySuccess": "Cupó aplicat correctament."
   },
   "auth": {
     "login": {
@@ -263,7 +264,12 @@
     "deleteReasonPlaceholder": "Explica'ns per què marxes, ens ajuda a millorar...",
     "confirmDeleteAccount": "Sol·licitar eliminació",
     "deletionRequestError": "No s'ha pogut enviar la sol·licitud.",
-    "deletionPending": "Hem rebut la teva sol·licitud d'eliminació de compte. El nostre equip la revisarà aviat."
+    "deletionPending": "Hem rebut la teva sol·licitud d'eliminació de compte. El nostre equip la revisarà aviat.",
+    "emailChangeSuccess": "Email actualitzat correctament.",
+    "addrSaveSuccess": "Adreça desada correctament.",
+    "addrDeleteSuccess": "Adreça eliminada correctament.",
+    "deletionRequestSuccess": "Sol·licitud d'eliminació de compte enviada.",
+    "exportDataSuccess": "Les teves dades s'han descarregat correctament."
   },
   "orders": {
     "backToAccount": "Tornar al meu compte",
@@ -314,14 +320,19 @@
     "confirmReturnButton": "Enviar sol·licitud",
     "returnError": "No s'ha pogut enviar la sol·licitud de devolució. Torna-ho a provar.",
     "returnRequested": "Vas sol·licitar la devolució d'aquesta comanda el {{date}}. Ens posarem en contacte aviat.",
-    "leaveReview": "Deixar una ressenya"
+    "leaveReview": "Deixar una ressenya",
+    "downloadError": "No s'ha pogut descarregar la factura.",
+    "cancelSuccess": "Comanda cancel·lada correctament.",
+    "returnSuccess": "Sol·licitud de devolució enviada."
   },
   "favorites": {
     "title": "Els meus favorits",
     "empty": "Encara no tens productes favorits.",
     "explore": "Explorar catàleg",
     "remove": "Treure dels favorits",
-    "add": "Afegir a favorits"
+    "add": "Afegir a favorits",
+    "removeError": "No s'ha pogut eliminar de preferits.",
+    "toggleError": "No s'ha pogut actualitzar preferits."
   },
   "board": {
     "title": "El meu tauler",
@@ -335,7 +346,8 @@
   },
   "stockNotifications": {
     "notifyMe": "Avisa'm quan estigui disponible",
-    "subscribed": "T'avisarem"
+    "subscribed": "T'avisarem",
+    "toggleError": "No s'ha pogut actualitzar la notificació d'estoc."
   },
   "product": {
     "outOfStock": "Sense estoc",
@@ -453,5 +465,8 @@
     "personalizationDesc": "Recorden les teves preferències per oferir-te una millor experiència.",
     "alwaysActive": "Sempre actives",
     "savePreferences": "Desar configuració"
+  },
+  "common": {
+    "fieldRequired": "Aquest camp és obligatori."
   }
 }

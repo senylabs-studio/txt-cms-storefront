@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Form, Button, Alert, Spinner, Row, Col } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { submitContactForm } from '../../../services/contactService';
+import { getApiErrorMessage } from '../../../utils/apiError';
 import './ContactForm.css';
 
 const ContactForm: React.FC = () => {
@@ -26,8 +27,8 @@ const ContactForm: React.FC = () => {
       setEmail('');
       setPhone('');
       setMessage('');
-    } catch {
-      setError(t('contact.error'));
+    } catch (err) {
+      setError(getApiErrorMessage(err, t('contact.error')));
     } finally {
       setLoading(false);
     }

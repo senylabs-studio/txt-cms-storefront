@@ -1,6 +1,9 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getStockNotificationIds, toggleStockNotification } from '../services/stockNotificationService';
 import { useAuth } from './AuthContext';
+import { useToast } from './ToastContext';
+import { getApiErrorMessage } from '../utils/apiError';
 
 interface StockNotificationContextType {
   isRequested: (productId?: number, variantId?: number) => boolean;
@@ -10,7 +13,9 @@ interface StockNotificationContextType {
 const StockNotificationContext = createContext<StockNotificationContextType | null>(null);
 
 export const StockNotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { t } = useTranslation();
   const { isAuthenticated } = useAuth();
+  const { showToast } = useToast();
   const [productIds, setProductIds] = useState<Set<number>>(new Set());
   const [variantIds, setVariantIds] = useState<Set<number>>(new Set());
 
@@ -68,9 +73,10 @@ export const StockNotificationProvider: React.FC<{ children: React.ReactNode }> 
           return next;
         });
       }
-    } catch {
+    } catch (err) {
       // Revert optimistic update on error
       load();
+      showToast('danger', getApiErrorMessage(err, t('stockNotifications.toggleError')));
     }
   };
 

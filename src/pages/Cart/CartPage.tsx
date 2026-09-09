@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { Container, Row, Col, Button, Card, Alert, Form } from 'react-bootstrap';
 import { FaTrash, FaArrowRight, FaTag } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
@@ -7,11 +6,14 @@ import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
+import { getApiErrorMessage } from '../../utils/apiError';
 
 const CartPage: React.FC = () => {
   const { t } = useTranslation();
   const { cart, loading, fetchCart, updateItem, removeItem, applyCoupon, removeCoupon } = useCart();
   const { isAuthenticated } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const [timeLeft, setTimeLeft] = useState('');
   const [itemError, setItemError] = useState('');
@@ -26,8 +28,9 @@ const CartPage: React.FC = () => {
     try {
       await applyCoupon(couponInput.trim());
       setCouponInput('');
+      showToast('success', t('cart.couponApplySuccess'));
     } catch (e) {
-      setCouponError((axios.isAxiosError(e) ? e.response?.data?.message : undefined) ?? t('cart.couponApplyError'));
+      setCouponError(getApiErrorMessage(e, t('cart.couponApplyError')));
     } finally {
       setCouponLoading(false);
     }
@@ -36,7 +39,7 @@ const CartPage: React.FC = () => {
   const handleRemoveCoupon = async () => {
     setCouponError('');
     try { await removeCoupon(); }
-    catch { setCouponError(t('cart.couponApplyError')); }
+    catch (e) { setCouponError(getApiErrorMessage(e, t('cart.couponApplyError'))); }
   };
 
   const handleUpdate = async (itemId: number, quantity: number) => {
@@ -44,7 +47,7 @@ const CartPage: React.FC = () => {
     try {
       await updateItem(itemId, quantity);
     } catch (e) {
-      setItemError((axios.isAxiosError(e) ? e.response?.data?.message : undefined) ?? t('cart.updateError'));
+      setItemError(getApiErrorMessage(e, t('cart.updateError')));
     }
   };
 
@@ -53,7 +56,7 @@ const CartPage: React.FC = () => {
     try {
       await removeItem(itemId);
     } catch (e) {
-      setItemError((axios.isAxiosError(e) ? e.response?.data?.message : undefined) ?? t('cart.removeError'));
+      setItemError(getApiErrorMessage(e, t('cart.removeError')));
     }
   };
 

@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import axios from 'axios';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Container, Row, Col, Button, Badge, Spinner, Alert, Form } from 'react-bootstrap';
 import { FaShoppingCart, FaArrowLeft, FaChevronLeft, FaChevronRight, FaStar, FaRegStar, FaRulerHorizontal } from 'react-icons/fa';
@@ -20,6 +19,7 @@ import { useAuthGate } from '../../../contexts/AuthGateContext';
 import { useSiteSettings } from '../../../contexts/SiteSettingsContext';
 import { useDocumentMeta } from '../../../hooks/useDocumentMeta';
 import CareLabels from '../../../components/common/CareLabels';
+import { getApiErrorMessage } from '../../../utils/apiError';
 import './VariantDetailPage.css';
 
 const DEFAULT_MIN_QTY = 0.3;
@@ -145,8 +145,8 @@ const VariantDetailPage: React.FC = () => {
       setMyReview(prev => prev ? { ...prev, review: saved } : { hasPurchased: true, review: saved });
       setReviewMsg({ type: 'success', text: t('product.reviewSaved') });
       changeReviewsPage(1);
-    } catch {
-      setReviewMsg({ type: 'danger', text: t('product.reviewSaveError') });
+    } catch (err) {
+      setReviewMsg({ type: 'danger', text: getApiErrorMessage(err, t('product.reviewSaveError')) });
     } finally {
       setSubmittingReview(false);
     }
@@ -173,7 +173,7 @@ const VariantDetailPage: React.FC = () => {
     if (!ok) return;
     setError('');
     try { await addItem(undefined, variant.id, quantity); }
-    catch (e) { setError((axios.isAxiosError(e) ? e.response?.data?.message : undefined) ?? t('product.addError')); }
+    catch (e) { setError(getApiErrorMessage(e, t('product.addError'))); }
   };
 
   // Composition

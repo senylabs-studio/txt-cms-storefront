@@ -9,6 +9,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { checkout } from '../../services/cartService';
 import { getProfile } from '../../services/profileService';
 import { getApplicableShippingRate, type ApplicableShippingRate } from '../../services/shippingService';
+import { getApiErrorMessage } from '../../utils/apiError';
 import type { CustomerAddress, CheckoutResponse } from '../../types';
 
 const CheckoutPage: React.FC = () => {
@@ -87,8 +88,7 @@ const CheckoutPage: React.FC = () => {
       });
       setRedsysData(res);
     } catch (e: unknown) {
-      const err = e as { response?: { data?: { message?: string } } };
-      setError(err?.response?.data?.message ?? t('checkout.initError'));
+      setError(getApiErrorMessage(e, t('checkout.initError')));
       setLoading(false);
     }
   };

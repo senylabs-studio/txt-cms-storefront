@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { Container, Card, Form, Button, Alert, Spinner } from 'react-bootstrap';
 import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { login as loginService } from '../../services/authService';
 import { useAuth } from '../../contexts/AuthContext';
+import { getApiErrorMessage } from '../../utils/apiError';
 
 const LoginPage: React.FC = () => {
   const { t } = useTranslation();
@@ -30,7 +30,7 @@ const LoginPage: React.FC = () => {
       login(data);
       navigate(from, { replace: true });
     } catch (e) {
-      setError((axios.isAxiosError(e) ? e.response?.data?.message : undefined) ?? t('auth.login.error'));
+      setError(getApiErrorMessage(e, t('auth.login.error')));
     } finally {
       setLoading(false);
     }

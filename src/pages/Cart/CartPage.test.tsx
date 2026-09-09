@@ -2,7 +2,10 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import CartPage from './CartPage';
+import { ToastProvider } from '../../contexts/ToastContext';
 import type { Cart } from '../../types';
+
+const renderCartPage = () => render(<ToastProvider><CartPage /></ToastProvider>);
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -57,7 +60,7 @@ describe('CartPage', () => {
 
   it('shows a login prompt and does not fetch the cart when not authenticated', () => {
     mockAuth.isAuthenticated = false;
-    render(<CartPage />);
+    renderCartPage();
 
     expect(screen.getByText('cart.loginRequired')).toBeInTheDocument();
     expect(mockCart.fetchCart).not.toHaveBeenCalled();
@@ -65,20 +68,20 @@ describe('CartPage', () => {
 
   it('navigates to /login from the login prompt', () => {
     mockAuth.isAuthenticated = false;
-    render(<CartPage />);
+    renderCartPage();
 
     fireEvent.click(screen.getByText('header.login'));
     expect(navigate).toHaveBeenCalledWith('/login');
   });
 
   it('fetches the cart on mount when authenticated', () => {
-    render(<CartPage />);
+    renderCartPage();
     expect(mockCart.fetchCart).toHaveBeenCalled();
   });
 
   it('shows an empty-cart message and navigates to /catalog from it', () => {
     mockCart.cart = { id: 1, expiresAt: '2099-01-01T00:00:00.000Z', discountPercent: 0, couponDiscountAmount: 0, total: 0, items: [] };
-    render(<CartPage />);
+    renderCartPage();
 
     expect(screen.getByText('cart.empty')).toBeInTheDocument();
     fireEvent.click(screen.getByText('cart.browseCatalog'));
@@ -87,7 +90,7 @@ describe('CartPage', () => {
 
   it('renders cart items, the discount line, and the total', () => {
     mockCart.cart = cartWithItems({ discountPercent: 10, total: 18 });
-    render(<CartPage />);
+    renderCartPage();
 
     expect(screen.getByText('Tela azul')).toBeInTheDocument();
     expect(screen.getByText('cart.discount')).toBeInTheDocument();
@@ -96,7 +99,7 @@ describe('CartPage', () => {
 
   it('navigates to /checkout when the checkout button is clicked', () => {
     mockCart.cart = cartWithItems();
-    render(<CartPage />);
+    renderCartPage();
 
     fireEvent.click(screen.getByText('cart.checkout'));
     expect(navigate).toHaveBeenCalledWith('/checkout');
@@ -104,7 +107,7 @@ describe('CartPage', () => {
 
   it('changing the quantity input calls updateItem with the parsed value', () => {
     mockCart.cart = cartWithItems();
-    render(<CartPage />);
+    renderCartPage();
 
     fireEvent.change(screen.getByDisplayValue('2'), { target: { value: '3' } });
     expect(mockCart.updateItem).toHaveBeenCalledWith(1, 3);
@@ -113,7 +116,7 @@ describe('CartPage', () => {
   it('shows the backend error message when updateItem rejects with an axios error', async () => {
     mockCart.cart = cartWithItems();
     mockCart.updateItem.mockRejectedValue({ isAxiosError: true, response: { data: { message: 'Stock insuficiente' } } });
-    render(<CartPage />);
+    renderCartPage();
 
     fireEvent.change(screen.getByDisplayValue('2'), { target: { value: '3' } });
 
@@ -123,7 +126,7 @@ describe('CartPage', () => {
   it('shows a generic error message when updateItem rejects without axios details', async () => {
     mockCart.cart = cartWithItems();
     mockCart.updateItem.mockRejectedValue(new Error('boom'));
-    render(<CartPage />);
+    renderCartPage();
 
     fireEvent.change(screen.getByDisplayValue('2'), { target: { value: '3' } });
 
@@ -133,7 +136,7 @@ describe('CartPage', () => {
   it('shows an error message when removeItem rejects, and it can be dismissed', async () => {
     mockCart.cart = cartWithItems();
     mockCart.removeItem.mockRejectedValue({ isAxiosError: true, response: { data: { message: 'No se pudo eliminar' } } });
-    render(<CartPage />);
+    renderCartPage();
 
     fireEvent.click(screen.getByRole('button', { name: '' }));
 
@@ -146,7 +149,7 @@ describe('CartPage', () => {
 
   it('shows an expired countdown with a refresh button that calls fetchCart', async () => {
     mockCart.cart = cartWithItems({ expiresAt: '2000-01-01T00:00:00.000Z' });
-    render(<CartPage />);
+    renderCartPage();
 
     const refreshBtn = await screen.findByText('cart.refresh');
     fireEvent.click(refreshBtn);
@@ -156,7 +159,7 @@ describe('CartPage', () => {
   it('applies a coupon code entered in the input', async () => {
     mockCart.cart = cartWithItems();
     mockCart.applyCoupon.mockResolvedValue(undefined);
-    render(<CartPage />);
+    renderCartPage();
 
     fireEvent.change(screen.getByPlaceholderText('cart.couponPlaceholder'), { target: { value: 'save10' } });
     fireEvent.click(screen.getByText('cart.applyCoupon'));
@@ -167,7 +170,7 @@ describe('CartPage', () => {
   it('shows the backend error message when applyCoupon rejects', async () => {
     mockCart.cart = cartWithItems();
     mockCart.applyCoupon.mockRejectedValue({ isAxiosError: true, response: { data: { message: 'Código no válido.' } } });
-    render(<CartPage />);
+    renderCartPage();
 
     fireEvent.change(screen.getByPlaceholderText('cart.couponPlaceholder'), { target: { value: 'NOPE' } });
     fireEvent.click(screen.getByText('cart.applyCoupon'));
@@ -177,7 +180,7 @@ describe('CartPage', () => {
 
   it('shows the applied coupon and its discount instead of the input, with a remove button', () => {
     mockCart.cart = cartWithItems({ couponCode: 'SAVE10', couponDiscountAmount: 2, total: 18 });
-    render(<CartPage />);
+    renderCartPage();
 
     expect(screen.getByText('SAVE10')).toBeInTheDocument();
     expect(screen.getByText('cart.couponDiscount')).toBeInTheDocument();
@@ -186,7 +189,7 @@ describe('CartPage', () => {
 
   it('removes the applied coupon when the remove button is clicked', () => {
     mockCart.cart = cartWithItems({ couponCode: 'SAVE10', couponDiscountAmount: 2, total: 18 });
-    render(<CartPage />);
+    renderCartPage();
 
     fireEvent.click(screen.getByText('cart.removeCoupon'));
     expect(mockCart.removeCoupon).toHaveBeenCalled();
@@ -194,7 +197,7 @@ describe('CartPage', () => {
 
   it('shows the couponError surfaced by the cart', () => {
     mockCart.cart = cartWithItems({ couponError: 'Este código ha caducado.' });
-    render(<CartPage />);
+    renderCartPage();
 
     expect(screen.getByText('Este código ha caducado.')).toBeInTheDocument();
   });

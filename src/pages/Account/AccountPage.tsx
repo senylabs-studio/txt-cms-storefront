@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { Container, Row, Col, Card, Form, Button, Alert, Spinner, Badge, Modal } from 'react-bootstrap';
 import { FaPlus, FaEdit, FaTrash, FaMapMarkerAlt, FaUser, FaLock, FaShieldAlt } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
@@ -10,6 +9,8 @@ import {
   downloadMyDataExport, requestAccountDeletion,
 } from '../../services/profileService';
 import { getVisibleCountries, type VisibleCountry } from '../../services/countryService';
+import { useToast } from '../../contexts/ToastContext';
+import { getApiErrorMessage, parseFieldErrors, type FieldErrors } from '../../utils/apiError';
 import type { StorefrontProfile, CustomerAddress } from '../../types';
 
 const emptyAddress: Partial<CustomerAddress> = {
@@ -18,6 +19,7 @@ const emptyAddress: Partial<CustomerAddress> = {
 
 const AccountPage: React.FC = () => {
   const { t } = useTranslation();
+  const { showToast } = useToast();
   const [profile, setProfile] = useState<StorefrontProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -34,6 +36,7 @@ const AccountPage: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [pwdSaving, setPwdSaving] = useState(false);
   const [pwdMsg, setPwdMsg] = useState<{ type: 'success' | 'danger'; text: string } | null>(null);
+  const [pwdFieldErrors, setPwdFieldErrors] = useState<FieldErrors>({});
 
   // Change email modal
   const [showEmailModal, setShowEmailModal] = useState(false);
@@ -41,6 +44,7 @@ const AccountPage: React.FC = () => {
   const [emailPassword, setEmailPassword] = useState('');
   const [emailSaving, setEmailSaving] = useState(false);
   const [emailError, setEmailError] = useState('');
+  const [emailFieldErrors, setEmailFieldErrors] = useState<FieldErrors>({});
 
   // Address modal
   const [showAddr, setShowAddr] = useState(false);
@@ -48,6 +52,7 @@ const AccountPage: React.FC = () => {
   const [editAddrId, setEditAddrId] = useState<number | null>(null);
   const [addrSaving, setAddrSaving] = useState(false);
   const [addrError, setAddrError] = useState('');
+  const [addrFieldErrors, setAddrFieldErrors] = useState<FieldErrors>({});
   const [addrListError, setAddrListError] = useState('');
   const [countries, setCountries] = useState<VisibleCountry[]>([]);
 
@@ -76,8 +81,8 @@ const AccountPage: React.FC = () => {
     try {
       await updateProfile({ name, phone: phone || undefined, taxId: taxId || undefined });
       setProfileMsg({ type: 'success', text: t('account.saved') });
-    } catch {
-      setProfileMsg({ type: 'danger', text: t('account.saveError') });
+    } catch (err) {
+      setProfileMsg({ type: 'danger', text: getApiErrorMessage(err, t('account.saveError')) });
     } finally {
       setSaving(false);
     }
@@ -87,19 +92,24 @@ const AccountPage: React.FC = () => {
     setNewEmail(profile?.email ?? '');
     setEmailPassword('');
     setEmailError('');
+    setEmailFieldErrors({});
     setShowEmailModal(true);
   };
 
   const handleUpdateEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     setEmailError('');
+    setEmailFieldErrors({});
     setEmailSaving(true);
     try {
       await updateEmail(newEmail, profile?.isGuest ? undefined : emailPassword);
       setProfile(p => p ? { ...p, email: newEmail } : p);
       setShowEmailModal(false);
+      showToast('success', t('account.emailChangeSuccess'));
     } catch (e) {
-      setEmailError((axios.isAxiosError(e) ? e.response?.data?.message : undefined) ?? t('account.emailChangeError'));
+      const fe = parseFieldErrors(e);
+      if (fe) setEmailFieldErrors(fe);
+      else setEmailError(getApiErrorMessage(e, t('account.emailChangeError')));
     } finally {
       setEmailSaving(false);
     }
@@ -108,8 +118,9 @@ const AccountPage: React.FC = () => {
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setPwdMsg(null);
+    setPwdFieldErrors({});
     if (newPassword !== confirmPassword) {
-      setPwdMsg({ type: 'danger', text: t('account.passwordMismatch') });
+      setPwdFieldErrors({ confirmPassword: t('account.passwordMismatch') });
       return;
     }
     setPwdSaving(true);
@@ -118,18 +129,32 @@ const AccountPage: React.FC = () => {
       setPwdMsg({ type: 'success', text: t('account.passwordChanged') });
       setCurrentPassword(''); setNewPassword(''); setConfirmPassword('');
     } catch (e) {
-      setPwdMsg({ type: 'danger', text: (axios.isAxiosError(e) ? e.response?.data?.message : undefined) ?? t('account.passwordChangeError') });
+      const fe = parseFieldErrors(e);
+      if (fe) setPwdFieldErrors(fe);
+      else setPwdMsg({ type: 'danger', text: getApiErrorMessage(e, t('account.passwordChangeError')) });
     } finally {
       setPwdSaving(false);
     }
   };
 
-  const openAddAddr = () => { setAddrForm(emptyAddress); setEditAddrId(null); setAddrError(''); setShowAddr(true); };
-  const openEditAddr = (a: CustomerAddress) => { setAddrForm({ ...a }); setEditAddrId(a.id); setAddrError(''); setShowAddr(true); };
+  const openAddAddr = () => { setAddrForm(emptyAddress); setEditAddrId(null); setAddrError(''); setAddrFieldErrors({}); setShowAddr(true); };
+  const openEditAddr = (a: CustomerAddress) => { setAddrForm({ ...a }); setEditAddrId(a.id); setAddrError(''); setAddrFieldErrors({}); setShowAddr(true); };
 
   const handleSaveAddr = async () => {
+    const errs: FieldErrors = {};
+    if (!addrForm.alias?.trim()) errs.alias = t('common.fieldRequired');
+    if (!addrForm.recipientName?.trim()) errs.recipientName = t('common.fieldRequired');
+    if (!addrForm.street?.trim()) errs.street = t('common.fieldRequired');
+    if (!addrForm.city?.trim()) errs.city = t('common.fieldRequired');
+    if (!addrForm.postalCode?.trim()) errs.postalCode = t('common.fieldRequired');
+    if (!addrForm.country?.trim()) errs.country = t('common.fieldRequired');
+    if (Object.keys(errs).length > 0) {
+      setAddrFieldErrors(errs);
+      return;
+    }
     setAddrSaving(true);
     setAddrError('');
+    setAddrFieldErrors({});
     try {
       if (editAddrId) {
         await updateAddress(editAddrId, addrForm);
@@ -139,8 +164,11 @@ const AccountPage: React.FC = () => {
       const p = await getProfile();
       setProfile(p);
       setShowAddr(false);
+      showToast('success', t('account.addrSaveSuccess'));
     } catch (e) {
-      setAddrError((axios.isAxiosError(e) ? e.response?.data?.message : undefined) ?? t('account.addrSaveError'));
+      const fe = parseFieldErrors(e);
+      if (fe) setAddrFieldErrors(fe);
+      else setAddrError(getApiErrorMessage(e, t('account.addrSaveError')));
     } finally {
       setAddrSaving(false);
     }
@@ -152,8 +180,9 @@ const AccountPage: React.FC = () => {
     try {
       await deleteAddress(id);
       setProfile(p => p ? { ...p, addresses: p.addresses.filter(a => a.id !== id) } : p);
+      showToast('success', t('account.addrDeleteSuccess'));
     } catch (e) {
-      setAddrListError((axios.isAxiosError(e) ? e.response?.data?.message : undefined) ?? t('account.addrDeleteError'));
+      setAddrListError(getApiErrorMessage(e, t('account.addrDeleteError')));
     }
   };
 
@@ -162,8 +191,9 @@ const AccountPage: React.FC = () => {
     setExportError('');
     try {
       await downloadMyDataExport();
-    } catch {
-      setExportError(t('account.exportDataError'));
+      showToast('success', t('account.exportDataSuccess'));
+    } catch (err) {
+      setExportError(getApiErrorMessage(err, t('account.exportDataError')));
     } finally {
       setExporting(false);
     }
@@ -178,8 +208,9 @@ const AccountPage: React.FC = () => {
       setProfile(p => p ? { ...p, deletionRequested: true } : p);
       setShowDeleteModal(false);
       setDeleteReason('');
+      showToast('success', t('account.deletionRequestSuccess'));
     } catch (e) {
-      setDeleteError((axios.isAxiosError(e) ? e.response?.data?.message : undefined) ?? t('account.deletionRequestError'));
+      setDeleteError(getApiErrorMessage(e, t('account.deletionRequestError')));
     } finally {
       setDeleteSaving(false);
     }
@@ -242,15 +273,27 @@ const AccountPage: React.FC = () => {
                 <Form onSubmit={handleChangePassword}>
                   <Form.Group className="mb-3">
                     <Form.Label>{t('account.currentPassword')}</Form.Label>
-                    <Form.Control type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} required autoComplete="current-password" />
+                    <Form.Control
+                      type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)}
+                      required autoComplete="current-password" isInvalid={!!pwdFieldErrors.currentPassword}
+                    />
+                    <Form.Control.Feedback type="invalid">{pwdFieldErrors.currentPassword}</Form.Control.Feedback>
                   </Form.Group>
                   <Form.Group className="mb-3">
                     <Form.Label>{t('account.newPassword')}</Form.Label>
-                    <Form.Control type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} required autoComplete="new-password" minLength={6} />
+                    <Form.Control
+                      type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)}
+                      required autoComplete="new-password" minLength={6} isInvalid={!!pwdFieldErrors.newPassword}
+                    />
+                    <Form.Control.Feedback type="invalid">{pwdFieldErrors.newPassword}</Form.Control.Feedback>
                   </Form.Group>
                   <Form.Group className="mb-3">
                     <Form.Label>{t('account.confirmPassword')}</Form.Label>
-                    <Form.Control type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required autoComplete="new-password" />
+                    <Form.Control
+                      type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
+                      required autoComplete="new-password" isInvalid={!!pwdFieldErrors.confirmPassword}
+                    />
+                    <Form.Control.Feedback type="invalid">{pwdFieldErrors.confirmPassword}</Form.Control.Feedback>
                   </Form.Group>
                   <Button type="submit" variant="primary" disabled={pwdSaving}>
                     {pwdSaving ? <Spinner size="sm" animation="border" /> : t('account.changePassword')}
@@ -339,7 +382,9 @@ const AccountPage: React.FC = () => {
                 onChange={e => setNewEmail(e.target.value)}
                 required
                 autoComplete="email"
+                isInvalid={!!emailFieldErrors.newEmail}
               />
+              <Form.Control.Feedback type="invalid">{emailFieldErrors.newEmail}</Form.Control.Feedback>
             </Form.Group>
             {!profile.isGuest && (
               <Form.Group className="mb-2">
@@ -350,7 +395,9 @@ const AccountPage: React.FC = () => {
                   onChange={e => setEmailPassword(e.target.value)}
                   required
                   autoComplete="current-password"
+                  isInvalid={!!emailFieldErrors.currentPassword}
                 />
+                <Form.Control.Feedback type="invalid">{emailFieldErrors.currentPassword}</Form.Control.Feedback>
               </Form.Group>
             )}
           </Modal.Body>
@@ -374,31 +421,57 @@ const AccountPage: React.FC = () => {
             <Col sm={6}>
               <Form.Group className="mb-2">
                 <Form.Label>{t('account.alias')}</Form.Label>
-                <Form.Control value={addrForm.alias ?? ''} onChange={e => setAddrForm(f => ({ ...f, alias: e.target.value }))} placeholder={t('account.aliasPlaceholder')} />
+                <Form.Control
+                  value={addrForm.alias ?? ''}
+                  onChange={e => setAddrForm(f => ({ ...f, alias: e.target.value }))}
+                  placeholder={t('account.aliasPlaceholder')}
+                  isInvalid={!!addrFieldErrors.alias}
+                />
+                <Form.Control.Feedback type="invalid">{addrFieldErrors.alias}</Form.Control.Feedback>
               </Form.Group>
             </Col>
             <Col sm={6}>
               <Form.Group className="mb-2">
                 <Form.Label>{t('account.recipient')}</Form.Label>
-                <Form.Control value={addrForm.recipientName ?? ''} onChange={e => setAddrForm(f => ({ ...f, recipientName: e.target.value }))} />
+                <Form.Control
+                  value={addrForm.recipientName ?? ''}
+                  onChange={e => setAddrForm(f => ({ ...f, recipientName: e.target.value }))}
+                  isInvalid={!!addrFieldErrors.recipientName}
+                />
+                <Form.Control.Feedback type="invalid">{addrFieldErrors.recipientName}</Form.Control.Feedback>
               </Form.Group>
             </Col>
           </Row>
           <Form.Group className="mb-2">
             <Form.Label>{t('account.street')}</Form.Label>
-            <Form.Control value={addrForm.street ?? ''} onChange={e => setAddrForm(f => ({ ...f, street: e.target.value }))} />
+            <Form.Control
+              value={addrForm.street ?? ''}
+              onChange={e => setAddrForm(f => ({ ...f, street: e.target.value }))}
+              isInvalid={!!addrFieldErrors.street}
+            />
+            <Form.Control.Feedback type="invalid">{addrFieldErrors.street}</Form.Control.Feedback>
           </Form.Group>
           <Row>
             <Col sm={4}>
               <Form.Group className="mb-2">
                 <Form.Label>{t('account.postalCode')}</Form.Label>
-                <Form.Control value={addrForm.postalCode ?? ''} onChange={e => setAddrForm(f => ({ ...f, postalCode: e.target.value }))} />
+                <Form.Control
+                  value={addrForm.postalCode ?? ''}
+                  onChange={e => setAddrForm(f => ({ ...f, postalCode: e.target.value }))}
+                  isInvalid={!!addrFieldErrors.postalCode}
+                />
+                <Form.Control.Feedback type="invalid">{addrFieldErrors.postalCode}</Form.Control.Feedback>
               </Form.Group>
             </Col>
             <Col sm={8}>
               <Form.Group className="mb-2">
                 <Form.Label>{t('account.city')}</Form.Label>
-                <Form.Control value={addrForm.city ?? ''} onChange={e => setAddrForm(f => ({ ...f, city: e.target.value }))} />
+                <Form.Control
+                  value={addrForm.city ?? ''}
+                  onChange={e => setAddrForm(f => ({ ...f, city: e.target.value }))}
+                  isInvalid={!!addrFieldErrors.city}
+                />
+                <Form.Control.Feedback type="invalid">{addrFieldErrors.city}</Form.Control.Feedback>
               </Form.Group>
             </Col>
           </Row>
@@ -412,12 +485,17 @@ const AccountPage: React.FC = () => {
             <Col sm={6}>
               <Form.Group className="mb-2">
                 <Form.Label>{t('account.country')}</Form.Label>
-                <Form.Select value={addrForm.country ?? 'ES'} onChange={e => setAddrForm(f => ({ ...f, country: e.target.value }))}>
+                <Form.Select
+                  value={addrForm.country ?? 'ES'}
+                  onChange={e => setAddrForm(f => ({ ...f, country: e.target.value }))}
+                  isInvalid={!!addrFieldErrors.country}
+                >
                   <option value="">{t('account.selectCountry')}</option>
                   {countries.map(c => (
                     <option key={c.isoCode} value={c.isoCode}>{c.name}</option>
                   ))}
                 </Form.Select>
+                <Form.Control.Feedback type="invalid">{addrFieldErrors.country}</Form.Control.Feedback>
               </Form.Group>
             </Col>
           </Row>

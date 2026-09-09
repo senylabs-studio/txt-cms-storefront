@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { forgotPassword } from '../../services/authService';
+import { getApiErrorMessage } from '../../utils/apiError';
 
 const ForgotPasswordPage: React.FC = () => {
   const { t } = useTranslation();
@@ -20,8 +21,8 @@ const ForgotPasswordPage: React.FC = () => {
     try {
       await forgotPassword(email);
       setSent(true);
-    } catch {
-      setError(t('auth.forgotPassword.error'));
+    } catch (err) {
+      setError(getApiErrorMessage(err, t('auth.forgotPassword.error')));
     } finally {
       setLoading(false);
     }

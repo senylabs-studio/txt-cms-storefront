@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { Container, Card, Form, Button, Alert, Spinner } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { register as registerService } from '../../services/authService';
 import { useAuth } from '../../contexts/AuthContext';
+import { getApiErrorMessage, parseFieldErrors, type FieldErrors } from '../../utils/apiError';
 
 const RegisterPage: React.FC = () => {
   const { t } = useTranslation();
@@ -18,18 +18,21 @@ const RegisterPage: React.FC = () => {
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setFieldErrors({});
     try {
       const data = await registerService({ name, email, password, phone: phone || undefined });
       login(data);
       navigate('/catalog', { replace: true });
     } catch (e) {
-      const msg = axios.isAxiosError(e) ? (e.response?.data?.message ?? e.response?.data?.errors) : undefined;
-      setError(typeof msg === 'string' ? msg : t('auth.register.error'));
+      const fe = parseFieldErrors(e);
+      if (fe) setFieldErrors(fe);
+      else setError(getApiErrorMessage(e, t('auth.register.error')));
     } finally {
       setLoading(false);
     }
@@ -52,9 +55,11 @@ const RegisterPage: React.FC = () => {
                   value={name}
                   onChange={e => setName(e.target.value)}
                   placeholder={t('auth.register.namePlaceholder')}
+                  isInvalid={!!fieldErrors.name}
                   required
                   autoFocus
                 />
+                <Form.Control.Feedback type="invalid">{fieldErrors.name}</Form.Control.Feedback>
               </Form.Group>
 
               <Form.Group className="mb-3">
@@ -64,8 +69,10 @@ const RegisterPage: React.FC = () => {
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   placeholder={t('auth.login.emailPlaceholder')}
+                  isInvalid={!!fieldErrors.email}
                   required
                 />
+                <Form.Control.Feedback type="invalid">{fieldErrors.email}</Form.Control.Feedback>
               </Form.Group>
 
               <Form.Group className="mb-3">
@@ -76,8 +83,10 @@ const RegisterPage: React.FC = () => {
                   onChange={e => setPassword(e.target.value)}
                   placeholder={t('auth.register.passwordHint')}
                   minLength={6}
+                  isInvalid={!!fieldErrors.password}
                   required
                 />
+                <Form.Control.Feedback type="invalid">{fieldErrors.password}</Form.Control.Feedback>
               </Form.Group>
 
               <Form.Group className="mb-4">

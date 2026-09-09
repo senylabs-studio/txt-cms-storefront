@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { Offcanvas, Button, Alert } from 'react-bootstrap';
 import { FaTrash, FaMinus, FaPlus, FaShoppingBag } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '../../../contexts/CartContext';
+import { getApiErrorMessage } from '../../../utils/apiError';
 import './CartDrawer.css';
 
 // Avoids floating-point artifacts from repeated +/- quantityStep arithmetic (e.g. 0.5 - 0.05
@@ -23,7 +23,7 @@ const CartDrawer: React.FC = () => {
     try {
       await updateItem(itemId, quantity);
     } catch (e) {
-      setItemError((axios.isAxiosError(e) ? e.response?.data?.message : undefined) ?? t('cart.updateError'));
+      setItemError(getApiErrorMessage(e, t('cart.updateError')));
     }
   };
 
@@ -32,7 +32,7 @@ const CartDrawer: React.FC = () => {
     try {
       await removeItem(itemId);
     } catch (e) {
-      setItemError((axios.isAxiosError(e) ? e.response?.data?.message : undefined) ?? t('cart.removeError'));
+      setItemError(getApiErrorMessage(e, t('cart.removeError')));
     }
   };
 

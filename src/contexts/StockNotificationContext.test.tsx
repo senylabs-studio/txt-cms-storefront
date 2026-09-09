@@ -2,6 +2,10 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { StockNotificationProvider, useStockNotifications } from './StockNotificationContext';
+import { ToastProvider } from './ToastContext';
+
+const renderWithProviders = (ui: React.ReactElement) =>
+  render(<ToastProvider>{ui}</ToastProvider>);
 
 const mockIsAuthenticated = vi.hoisted(() => ({ value: true }));
 vi.mock('./AuthContext', () => ({
@@ -35,7 +39,7 @@ describe('StockNotificationContext', () => {
 
   it('loads pending request ids on mount when authenticated', async () => {
     getStockNotificationIds.mockResolvedValue({ productIds: [9], variantIds: [5] });
-    render(<StockNotificationProvider><Probe /></StockNotificationProvider>);
+    renderWithProviders(<StockNotificationProvider><Probe /></StockNotificationProvider>);
 
     await waitFor(() => {
       expect(screen.getByTestId('req-variant-5')).toHaveTextContent('yes');
@@ -45,7 +49,7 @@ describe('StockNotificationContext', () => {
 
   it('does not load requests and stays empty when not authenticated', async () => {
     mockIsAuthenticated.value = false;
-    render(<StockNotificationProvider><Probe /></StockNotificationProvider>);
+    renderWithProviders(<StockNotificationProvider><Probe /></StockNotificationProvider>);
 
     await waitFor(() => expect(screen.getByTestId('req-variant-5')).toHaveTextContent('no'));
     expect(getStockNotificationIds).not.toHaveBeenCalled();
@@ -54,7 +58,7 @@ describe('StockNotificationContext', () => {
   it('toggle() optimistically flips state before the server responds', async () => {
     let resolveToggle: (v: { isRequested: boolean }) => void = () => {};
     toggleStockNotification.mockImplementation(() => new Promise(res => { resolveToggle = res; }));
-    render(<StockNotificationProvider><Probe /></StockNotificationProvider>);
+    renderWithProviders(<StockNotificationProvider><Probe /></StockNotificationProvider>);
     await waitFor(() => expect(screen.getByTestId('req-variant-5')).toHaveTextContent('no'));
 
     fireEvent.click(screen.getByText('toggle-variant'));
@@ -67,7 +71,7 @@ describe('StockNotificationContext', () => {
 
   it('toggle() corrects the optimistic update to match the server response', async () => {
     toggleStockNotification.mockResolvedValue({ isRequested: false });
-    render(<StockNotificationProvider><Probe /></StockNotificationProvider>);
+    renderWithProviders(<StockNotificationProvider><Probe /></StockNotificationProvider>);
     await waitFor(() => expect(screen.getByTestId('req-product-9')).toHaveTextContent('no'));
 
     fireEvent.click(screen.getByText('toggle-product'));
@@ -78,7 +82,7 @@ describe('StockNotificationContext', () => {
 
   it('toggle() reverts the optimistic update and reloads on failure', async () => {
     toggleStockNotification.mockRejectedValue(new Error('network error'));
-    render(<StockNotificationProvider><Probe /></StockNotificationProvider>);
+    renderWithProviders(<StockNotificationProvider><Probe /></StockNotificationProvider>);
     await waitFor(() => expect(getStockNotificationIds).toHaveBeenCalledTimes(1));
 
     fireEvent.click(screen.getByText('toggle-variant'));

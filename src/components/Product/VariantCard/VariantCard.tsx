@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { Card, Badge, Button, Form, InputGroup } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { FaShoppingCart, FaCheck, FaTimes } from 'react-icons/fa';
@@ -11,6 +10,7 @@ import FavoriteButton from '../../common/FavoriteButton/FavoriteButton';
 import NotifyMeButton from '../../common/NotifyMeButton/NotifyMeButton';
 import { formatComposition } from '../../../utils/composition';
 import { getDiscountInfo } from '../../../utils/pricing';
+import { getApiErrorMessage } from '../../../utils/apiError';
 import '../ProductCard/ProductCard.css';
 
 interface Props { variant: StorefrontVariant; }
@@ -45,7 +45,7 @@ const VariantCard: React.FC<Props> = ({ variant }) => {
       setShowQtyForm(false);
       setQuantity(minQty);
     } catch (e) {
-      setError((axios.isAxiosError(e) ? e.response?.data?.message : undefined) ?? t('product.addError'));
+      setError(getApiErrorMessage(e, t('product.addError')));
     }
   };
 

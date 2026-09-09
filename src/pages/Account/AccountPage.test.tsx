@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import AccountPage from './AccountPage';
+import { ToastProvider } from '../../contexts/ToastContext';
 import type { StorefrontProfile } from '../../types';
 
 vi.mock('react-i18next', () => ({
@@ -30,7 +31,24 @@ vi.mock('../../services/profileService', () => ({
 const { getVisibleCountries } = vi.hoisted(() => ({ getVisibleCountries: vi.fn() }));
 vi.mock('../../services/countryService', () => ({ getVisibleCountries }));
 
-const renderAccount = () => render(<AccountPage />, { wrapper: MemoryRouter });
+const AllProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <MemoryRouter><ToastProvider>{children}</ToastProvider></MemoryRouter>
+);
+const renderAccount = () => render(<AccountPage />, { wrapper: AllProviders });
+
+// The address modal's required fields (alias, recipientName, street, postalCode, city) have no
+// placeholders/labelled-for association to query by — fill them positionally in the order they're
+// rendered in the JSX. Country defaults to 'ES' already, so it's left untouched.
+const fillRequiredAddressFields = () => {
+  const dialog = screen.getByRole('dialog');
+  const textboxes = within(dialog).getAllByRole('textbox');
+  const [alias, recipientName, street, postalCode, city] = textboxes;
+  fireEvent.change(alias, { target: { value: 'Oficina' } });
+  fireEvent.change(recipientName, { target: { value: 'Jane' } });
+  fireEvent.change(street, { target: { value: 'Calle 2' } });
+  fireEvent.change(postalCode, { target: { value: '28002' } });
+  fireEvent.change(city, { target: { value: 'Madrid' } });
+};
 
 const profile = (overrides: Partial<StorefrontProfile> = {}): StorefrontProfile => ({
   id: 1,
@@ -93,7 +111,7 @@ describe('AccountPage', () => {
     await screen.findByDisplayValue('Jane');
 
     fireEvent.click(screen.getByText('account.add'));
-    fireEvent.change(screen.getByPlaceholderText('account.aliasPlaceholder'), { target: { value: 'Oficina' } });
+    fillRequiredAddressFields();
     fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'account.save' }));
 
     await waitFor(() => expect(addAddress).toHaveBeenCalled());
@@ -121,6 +139,7 @@ describe('AccountPage', () => {
     await screen.findByDisplayValue('Jane');
 
     fireEvent.click(screen.getByText('account.add'));
+    fillRequiredAddressFields();
     fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'account.save' }));
 
     expect(await screen.findByText('account.addrSaveError')).toBeInTheDocument();
@@ -132,6 +151,7 @@ describe('AccountPage', () => {
     await screen.findByDisplayValue('Jane');
 
     fireEvent.click(screen.getByText('account.add'));
+    fillRequiredAddressFields();
     fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'account.save' }));
 
     expect(await screen.findByText('Código postal inválido')).toBeInTheDocument();

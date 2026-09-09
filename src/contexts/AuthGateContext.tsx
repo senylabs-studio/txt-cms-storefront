@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useRef, useState } from 'react';
-import axios from 'axios';
 import { Modal, Form, Button, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from './AuthContext';
 import { guestCheckout } from '../services/authService';
+import { getApiErrorMessage, parseFieldErrors, type FieldErrors } from '../utils/apiError';
 
 interface AuthGateContextType {
   // Opens a "continue as guest or log in" prompt when the visitor isn't authenticated yet.
@@ -23,6 +23,7 @@ export const AuthGateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [loading, setLoading] = useState(false);
   const resolveRef = useRef<((value: boolean) => void) | null>(null);
 
@@ -31,6 +32,7 @@ export const AuthGateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setName('');
     setEmail('');
     setError('');
+    setFieldErrors({});
     setShow(true);
     return new Promise<boolean>(resolve => { resolveRef.current = resolve; });
   };
@@ -44,13 +46,16 @@ export const AuthGateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const handleGuestSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setFieldErrors({});
     setLoading(true);
     try {
       const data = await guestCheckout({ name: name.trim(), email: email.trim() });
       login(data);
       close(true);
     } catch (err) {
-      setError((axios.isAxiosError(err) ? err.response?.data?.message : undefined) ?? t('authGate.error'));
+      const fe = parseFieldErrors(err);
+      if (fe) setFieldErrors(fe);
+      else setError(getApiErrorMessage(err, t('authGate.error')));
     } finally {
       setLoading(false);
     }
@@ -74,11 +79,13 @@ export const AuthGateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             {error && <Alert variant="danger" className="py-2">{error}</Alert>}
             <Form.Group className="mb-3" controlId="authGateName">
               <Form.Label>{t('authGate.name')}</Form.Label>
-              <Form.Control value={name} onChange={e => setName(e.target.value)} required />
+              <Form.Control value={name} onChange={e => setName(e.target.value)} required isInvalid={!!fieldErrors.name} />
+              <Form.Control.Feedback type="invalid">{fieldErrors.name}</Form.Control.Feedback>
             </Form.Group>
             <Form.Group className="mb-3" controlId="authGateEmail">
               <Form.Label>{t('authGate.email')}</Form.Label>
-              <Form.Control type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+              <Form.Control type="email" value={email} onChange={e => setEmail(e.target.value)} required isInvalid={!!fieldErrors.email} />
+              <Form.Control.Feedback type="invalid">{fieldErrors.email}</Form.Control.Feedback>
             </Form.Group>
             <Button type="submit" variant="primary" className="w-100" disabled={loading}>
               {loading ? t('authGate.submitting') : t('authGate.continueAsGuest')}

@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { Container, Row, Col, Button, Badge, Alert } from 'react-bootstrap';
+import React from 'react';
+import { Container, Row, Col, Button, Badge } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaShoppingCart } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '../../../contexts/CartContext';
 import { useAuthGate } from '../../../contexts/AuthGateContext';
+import { useToast } from '../../../contexts/ToastContext';
+import { getApiErrorMessage } from '../../../utils/apiError';
 import { getDiscountInfo } from '../../../utils/pricing';
 import './FeaturedProductsGrid.css';
 
@@ -45,8 +46,8 @@ const FeaturedProductsGrid: React.FC<Props> = ({ title, variants = [], products 
   const { t } = useTranslation();
   const { addItem, loading: cartLoading } = useCart();
   const { requireAuth } = useAuthGate();
+  const { showToast } = useToast();
   const navigate = useNavigate();
-  const [error, setError] = useState('');
 
   const allItems: Item[] = [
     ...variants.map(v => ({ ...v, _isVariant: true })),
@@ -70,20 +71,18 @@ const FeaturedProductsGrid: React.FC<Props> = ({ title, variants = [], products 
     e.preventDefault();
     const ok = await requireAuth();
     if (!ok) return;
-    setError('');
     try {
       if (item._isVariant) await addItem(undefined, item.id, 1);
       else if (!item.hasVariants) await addItem(item.id, undefined, 1);
       else navigate(`/product/${item.slug}`);
     } catch (err) {
-      setError((axios.isAxiosError(err) && err.response?.data?.message) ?? t('product.addError'));
+      showToast('danger', getApiErrorMessage(err, t('product.addError')));
     }
   };
 
   return (
     <Container className="py-4">
       {title && <h2 className="mb-4 fw-bold" style={titleStyle}>{title}</h2>}
-      {error && <Alert variant="danger" className="py-2">{error}</Alert>}
       <Row className="g-3 justify-content-center">
         {allItems.map(item => {
           const slug = item._isVariant ? `/variant/${item.id}` : `/product/${item.slug}`;

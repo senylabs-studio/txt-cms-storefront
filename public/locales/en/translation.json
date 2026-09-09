@@ -48,7 +48,8 @@
     "applyCoupon": "Apply",
     "removeCoupon": "Remove",
     "couponDiscount": "Coupon {{code}}",
-    "couponApplyError": "Couldn't apply the coupon."
+    "couponApplyError": "Couldn't apply the coupon.",
+    "couponApplySuccess": "Coupon applied successfully."
   },
   "auth": {
     "login": {
@@ -263,7 +264,12 @@
     "deleteReasonPlaceholder": "Tell us why you're leaving, it helps us improve...",
     "confirmDeleteAccount": "Request deletion",
     "deletionRequestError": "Couldn't submit the request.",
-    "deletionPending": "We've received your account deletion request. Our team will review it shortly."
+    "deletionPending": "We've received your account deletion request. Our team will review it shortly.",
+    "emailChangeSuccess": "Email updated successfully.",
+    "addrSaveSuccess": "Address saved successfully.",
+    "addrDeleteSuccess": "Address deleted successfully.",
+    "deletionRequestSuccess": "Account deletion request sent.",
+    "exportDataSuccess": "Your data has been downloaded successfully."
   },
   "orders": {
     "backToAccount": "Back to my account",
@@ -314,14 +320,19 @@
     "confirmReturnButton": "Send request",
     "returnError": "Couldn't send the return request. Please try again.",
     "returnRequested": "You requested a return for this order on {{date}}. We'll be in touch shortly.",
-    "leaveReview": "Leave a review"
+    "leaveReview": "Leave a review",
+    "downloadError": "Failed to download the invoice.",
+    "cancelSuccess": "Order cancelled successfully.",
+    "returnSuccess": "Return request sent."
   },
   "favorites": {
     "title": "My favourites",
     "empty": "You have no favourite products yet.",
     "explore": "Explore catalog",
     "remove": "Remove from favourites",
-    "add": "Add to favourites"
+    "add": "Add to favourites",
+    "removeError": "Failed to remove from favorites.",
+    "toggleError": "Failed to update favorites."
   },
   "board": {
     "title": "My board",
@@ -335,7 +346,8 @@
   },
   "stockNotifications": {
     "notifyMe": "Notify me when back in stock",
-    "subscribed": "We'll notify you"
+    "subscribed": "We'll notify you",
+    "toggleError": "Failed to update the stock notification."
   },
   "product": {
     "outOfStock": "Out of stock",
@@ -453,5 +465,8 @@
     "personalizationDesc": "Remember your preferences for a better experience.",
     "alwaysActive": "Always active",
     "savePreferences": "Save preferences"
+  },
+  "common": {
+    "fieldRequired": "This field is required."
   }
 }

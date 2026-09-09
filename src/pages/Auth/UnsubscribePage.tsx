@@ -4,6 +4,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { unsubscribeFromNewsletter } from '../../services/newsletterService';
+import { getApiErrorMessage } from '../../utils/apiError';
 
 const UnsubscribePage: React.FC = () => {
   const { t } = useTranslation();
@@ -20,8 +21,8 @@ const UnsubscribePage: React.FC = () => {
     try {
       await unsubscribeFromNewsletter(token);
       setDone(true);
-    } catch {
-      setError(t('newsletter.unsubscribe.error'));
+    } catch (err) {
+      setError(getApiErrorMessage(err, t('newsletter.unsubscribe.error')));
     } finally {
       setLoading(false);
     }
