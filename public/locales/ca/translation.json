@@ -180,7 +180,8 @@
     "paymentError": "Error processant el pagament",
     "initError": "Error en iniciar el pagament",
     "estimatedDeliveryRange": "Lliurament estimat: {{min}}–{{max}} dies feiners",
-    "estimatedDeliveryExact": "Lliurament estimat: {{days}} dies feiners"
+    "estimatedDeliveryExact": "Lliurament estimat: {{days}} dies feiners",
+    "loadAddressesError": "No s'han pogut carregar les teves adreces."
   },
   "checkoutSuccess": {
     "title": "Comanda rebuda!",
@@ -269,7 +270,9 @@
     "addrSaveSuccess": "Adreça desada correctament.",
     "addrDeleteSuccess": "Adreça eliminada correctament.",
     "deletionRequestSuccess": "Sol·licitud d'eliminació de compte enviada.",
-    "exportDataSuccess": "Les teves dades s'han descarregat correctament."
+    "exportDataSuccess": "Les teves dades s'han descarregat correctament.",
+    "loadError": "No s'ha pogut carregar el teu compte.",
+    "retry": "Reintentar"
   },
   "orders": {
     "backToAccount": "Tornar al meu compte",
@@ -287,7 +290,8 @@
       "Delivered": "Entregat",
       "Cancelled": "Cancel·lat",
       "Returned": "Retornat"
-    }
+    },
+    "loadError": "No s'han pogut carregar les teves comandes."
   },
   "orderDetail": {
     "backToOrders": "Tornar a comandes",
@@ -400,7 +404,8 @@
     "measure": "Mesura amb cinta mètrica",
     "measureHide": "Amaga la cinta mètrica",
     "goToImage": "Anar a la imatge {{count}}",
-    "noFeaturedProducts": "No hi ha productes destacats configurats."
+    "noFeaturedProducts": "No hi ha productes destacats configurats.",
+    "reviewsLoadError": "No s'han pogut carregar les ressenyes."
   },
   "filters": {
     "title": "Filtres",
@@ -438,7 +443,8 @@
       "searchPlaceholder": "Cerca productes...",
       "noResults": "No s'han trobat productes.",
       "noResultsFor": "No s'han trobat productes per a \"{{search}}\".",
-      "viewAll": "Veure tots"
+      "viewAll": "Veure tots",
+      "loadError": "No s'han pogut carregar els productes."
     }
   },
   "sitemap": {

@@ -180,7 +180,8 @@
     "paymentError": "Payment processing error",
     "initError": "Error initiating payment",
     "estimatedDeliveryRange": "Estimated delivery: {{min}}–{{max}} business days",
-    "estimatedDeliveryExact": "Estimated delivery: {{days}} business days"
+    "estimatedDeliveryExact": "Estimated delivery: {{days}} business days",
+    "loadAddressesError": "Failed to load your addresses."
   },
   "checkoutSuccess": {
     "title": "Order received!",
@@ -269,7 +270,9 @@
     "addrSaveSuccess": "Address saved successfully.",
     "addrDeleteSuccess": "Address deleted successfully.",
     "deletionRequestSuccess": "Account deletion request sent.",
-    "exportDataSuccess": "Your data has been downloaded successfully."
+    "exportDataSuccess": "Your data has been downloaded successfully.",
+    "loadError": "Failed to load your account.",
+    "retry": "Retry"
   },
   "orders": {
     "backToAccount": "Back to my account",
@@ -287,7 +290,8 @@
       "Delivered": "Delivered",
       "Cancelled": "Cancelled",
       "Returned": "Returned"
-    }
+    },
+    "loadError": "Failed to load your orders."
   },
   "orderDetail": {
     "backToOrders": "Back to orders",
@@ -400,7 +404,8 @@
     "measure": "Measure with tape",
     "measureHide": "Hide measuring tape",
     "goToImage": "Go to image {{count}}",
-    "noFeaturedProducts": "No featured products configured."
+    "noFeaturedProducts": "No featured products configured.",
+    "reviewsLoadError": "Failed to load the reviews."
   },
   "filters": {
     "title": "Filters",
@@ -438,7 +443,8 @@
       "searchPlaceholder": "Search products...",
       "noResults": "No products found.",
       "noResultsFor": "No products found for \"{{search}}\".",
-      "viewAll": "View all"
+      "viewAll": "View all",
+      "loadError": "Failed to load the products."
     }
   },
   "sitemap": {

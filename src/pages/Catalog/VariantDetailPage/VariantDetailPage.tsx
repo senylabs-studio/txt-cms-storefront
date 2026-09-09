@@ -79,6 +79,7 @@ const VariantDetailPage: React.FC = () => {
 
   // Reviews
   const [reviews, setReviews] = useState<ProductReview[]>([]);
+  const [reviewsError, setReviewsError] = useState('');
   const [reviewsPage, setReviewsPage] = useState(1);
   const [reviewsTotalPages, setReviewsTotalPages] = useState(0);
   const [myReview, setMyReview] = useState<MyReviewStatus | null>(null);
@@ -104,10 +105,11 @@ const VariantDetailPage: React.FC = () => {
   useEffect(() => {
     if (!variant?.productSlug) return;
     setReviewsPage(1);
+    setReviewsError('');
     getProductReviews(variant.productSlug, 1).then(r => {
       setReviews(r.items);
       setReviewsTotalPages(r.totalPages);
-    }).catch(() => {});
+    }).catch(err => setReviewsError(getApiErrorMessage(err, t('product.reviewsLoadError'))));
 
     if (isAuthenticated) {
       getMyReview(variant.productSlug).then(status => {
@@ -130,10 +132,11 @@ const VariantDetailPage: React.FC = () => {
   const changeReviewsPage = (page: number) => {
     if (!variant?.productSlug) return;
     setReviewsPage(page);
+    setReviewsError('');
     getProductReviews(variant.productSlug, page).then(r => {
       setReviews(r.items);
       setVariant(prev => prev ? { ...prev, averageRating: r.averageRating ?? undefined, reviewCount: r.reviewCount } : prev);
-    }).catch(() => {});
+    }).catch(err => setReviewsError(getApiErrorMessage(err, t('product.reviewsLoadError'))));
   };
 
   const handleSubmitReview = async () => {
@@ -445,7 +448,9 @@ const VariantDetailPage: React.FC = () => {
             </div>
           )}
 
-          {reviews.length === 0 ? (
+          {reviewsError ? (
+            <Alert variant="danger" className="py-2">{reviewsError}</Alert>
+          ) : reviews.length === 0 ? (
             <p className="text-muted">{t('product.noReviews')}</p>
           ) : (
             <>

@@ -180,7 +180,8 @@
     "paymentError": "Error procesando el pago",
     "initError": "Error al iniciar el pago",
     "estimatedDeliveryRange": "Entrega estimada: {{min}}–{{max}} días laborables",
-    "estimatedDeliveryExact": "Entrega estimada: {{days}} días laborables"
+    "estimatedDeliveryExact": "Entrega estimada: {{days}} días laborables",
+    "loadAddressesError": "No se pudieron cargar tus direcciones."
   },
   "checkoutSuccess": {
     "title": "¡Pedido recibido!",
@@ -269,7 +270,9 @@
     "addrSaveSuccess": "Dirección guardada correctamente.",
     "addrDeleteSuccess": "Dirección eliminada correctamente.",
     "deletionRequestSuccess": "Solicitud de eliminación de cuenta enviada.",
-    "exportDataSuccess": "Tus datos se han descargado correctamente."
+    "exportDataSuccess": "Tus datos se han descargado correctamente.",
+    "loadError": "No se pudo cargar tu cuenta.",
+    "retry": "Reintentar"
   },
   "orders": {
     "backToAccount": "Volver a mi cuenta",
@@ -287,7 +290,8 @@
       "Delivered": "Entregado",
       "Cancelled": "Cancelado",
       "Returned": "Devuelto"
-    }
+    },
+    "loadError": "No se pudieron cargar tus pedidos."
   },
   "orderDetail": {
     "backToOrders": "Volver a pedidos",
@@ -400,7 +404,8 @@
     "measure": "Medir con cinta métrica",
     "measureHide": "Ocultar cinta métrica",
     "goToImage": "Ir a imagen {{count}}",
-    "noFeaturedProducts": "No hay productos destacados configurados."
+    "noFeaturedProducts": "No hay productos destacados configurados.",
+    "reviewsLoadError": "No se pudieron cargar las reseñas."
   },
   "filters": {
     "title": "Filtros",
@@ -438,7 +443,8 @@
       "searchPlaceholder": "Buscar productos...",
       "noResults": "No se encontraron productos.",
       "noResultsFor": "No se encontraron productos para \"{{search}}\".",
-      "viewAll": "Ver todos"
+      "viewAll": "Ver todos",
+      "loadError": "No se pudieron cargar los productos."
     }
   },
   "sitemap": {

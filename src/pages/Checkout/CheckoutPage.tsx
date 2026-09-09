@@ -19,6 +19,7 @@ const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [addresses, setAddresses] = useState<CustomerAddress[]>([]);
+  const [addressesError, setAddressesError] = useState('');
   const [shippingId, setShippingId] = useState<number | undefined>();
   const [billingId, setBillingId] = useState<number | undefined>();
   const [notes, setNotes] = useState('');
@@ -38,7 +39,7 @@ const CheckoutPage: React.FC = () => {
       setAddresses(p.addresses);
       const def = p.addresses.find(a => a.isDefault);
       if (def) { setShippingId(def.id); setBillingId(def.id); }
-    }).catch(() => {});
+    }).catch(err => setAddressesError(getApiErrorMessage(err, t('checkout.loadAddressesError'))));
   }, [isAuthenticated]);
 
   // Fetch shipping rate whenever shipping address or cart changes
@@ -124,7 +125,9 @@ const CheckoutPage: React.FC = () => {
               <Card.Body>
                 <h5 className="fw-bold mb-3">{t('checkout.shippingBilling')}</h5>
 
-                {addresses.length === 0 ? (
+                {addressesError ? (
+                  <Alert variant="danger">{addressesError}</Alert>
+                ) : addresses.length === 0 ? (
                   <Alert variant="info">
                     {t('checkout.noAddresses')}{' '}
                     <Button variant="link" className="p-0" onClick={() => navigate('/account')}>{t('checkout.addAddress')}</Button>

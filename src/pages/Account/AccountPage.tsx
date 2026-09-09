@@ -22,6 +22,7 @@ const AccountPage: React.FC = () => {
   const { showToast } = useToast();
   const [profile, setProfile] = useState<StorefrontProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
 
   // Profile form
   const [name, setName] = useState('');
@@ -64,15 +65,19 @@ const AccountPage: React.FC = () => {
   const [deleteSaving, setDeleteSaving] = useState(false);
   const [deleteError, setDeleteError] = useState('');
 
-  useEffect(() => {
+  const loadInitialData = () => {
+    setLoading(true);
+    setLoadError('');
     Promise.all([
       getProfile(),
       getVisibleCountries(),
     ])
       .then(([p, c]) => { setProfile(p); setName(p.name); setPhone(p.phone ?? ''); setTaxId(p.taxId ?? ''); setCountries(c); })
-      .catch(() => {})
+      .catch(err => setLoadError(getApiErrorMessage(err, t('account.loadError'))))
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(() => { loadInitialData(); }, []);
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -217,7 +222,14 @@ const AccountPage: React.FC = () => {
   };
 
   if (loading) return <MainLayout><div className="text-center py-5"><Spinner animation="border" variant="primary" /></div></MainLayout>;
-  if (!profile) return null;
+  if (!profile) return (
+    <MainLayout>
+      <Container className="py-5 text-center">
+        <Alert variant="danger">{loadError}</Alert>
+        <Button variant="primary" onClick={loadInitialData}>{t('account.retry')}</Button>
+      </Container>
+    </MainLayout>
+  );
 
   return (
     <MainLayout>

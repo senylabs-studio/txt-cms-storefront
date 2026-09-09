@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Table, Badge, Button, Spinner, Pagination } from 'react-bootstrap';
+import { Container, Table, Badge, Button, Spinner, Pagination, Alert } from 'react-bootstrap';
 import { useNavigate, Link } from 'react-router-dom';
 import { FaArrowLeft, FaEye } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { getOrders } from '../../services/profileService';
+import { getApiErrorMessage } from '../../utils/apiError';
 import type { StorefrontOrder } from '../../types';
 import { ORDER_STATUS_VARIANT } from '../../utils/orderStatus';
 
@@ -15,12 +16,14 @@ const OrdersPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     setLoading(true);
+    setError('');
     getOrders(currentPage, 10)
       .then(r => { setOrders(r.items); setTotalPages(r.totalPages); })
-      .catch(() => {})
+      .catch(err => setError(getApiErrorMessage(err, t('orders.loadError'))))
       .finally(() => setLoading(false));
   }, [currentPage]);
 
@@ -36,6 +39,8 @@ const OrdersPage: React.FC = () => {
 
         {loading ? (
           <div className="text-center py-5"><Spinner animation="border" variant="primary" /></div>
+        ) : error ? (
+          <Alert variant="danger">{error}</Alert>
         ) : orders.length === 0 ? (
           <div className="text-center py-5 text-muted">
             <p>{t('orders.noOrders')}</p>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Form, InputGroup, Button, Spinner, Pagination, Badge } from 'react-bootstrap';
+import { Container, Row, Col, Form, InputGroup, Button, Spinner, Pagination, Badge, Alert } from 'react-bootstrap';
 import { FaSearch, FaFilter, FaTimes } from 'react-icons/fa';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -7,6 +7,7 @@ import MainLayout from '../../components/Layout/MainLayout';
 import VariantCard from '../../components/Product/VariantCard/VariantCard';
 import ProductFilters from '../../components/common/ProductFilters';
 import { getVariantsPaged } from '../../services/productService';
+import { getApiErrorMessage } from '../../utils/apiError';
 import type { PageFilters } from '../../services/pageService';
 import type { StorefrontVariant, PageFilterFacets } from '../../types';
 import useDebounce from '../../hooks/useDebounce';
@@ -26,6 +27,7 @@ const HomePage: React.FC = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [facets, setFacets] = useState<PageFilterFacets>(EMPTY_FACETS);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [search, setSearch] = useState(searchParams.get('search') ?? '');
@@ -39,9 +41,10 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     setLoading(true);
+    setError('');
     getVariantsPaged(currentPage, 12, debouncedSearch, undefined, filters.orderBy || 'name', 'asc', filters)
       .then(r => { setVariants(r.items); setTotalPages(r.totalPages); setTotalItems(r.totalItems); setFacets(r.facets ?? EMPTY_FACETS); })
-      .catch(() => {})
+      .catch(err => setError(getApiErrorMessage(err, t('catalog.home.loadError'))))
       .finally(() => setLoading(false));
   }, [currentPage, debouncedSearch, filters, i18n.language]);
 
@@ -118,6 +121,8 @@ const HomePage: React.FC = () => {
 
         {loading ? (
           <div className="text-center py-5"><Spinner animation="border" variant="primary" /></div>
+        ) : error ? (
+          <Alert variant="danger">{error}</Alert>
         ) : variants.length === 0 ? (
           <div className="text-center py-5 text-muted">
             <p>{search ? t('catalog.home.noResultsFor', { search }) : t('catalog.home.noResults')}</p>
