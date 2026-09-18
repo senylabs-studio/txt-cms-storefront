@@ -346,7 +346,8 @@
     "add": "Añadir al tablero",
     "added": "Añadido al tablero",
     "remove": "Quitar del tablero",
-    "viewProduct": "Ver producto"
+    "viewProduct": "Ver producto",
+    "noLongerAvailable": "Ya no disponible"
   },
   "stockNotifications": {
     "notifyMe": "Avísame cuando esté disponible",

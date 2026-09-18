@@ -346,7 +346,8 @@
     "add": "Add to board",
     "added": "Added to board",
     "remove": "Remove from board",
-    "viewProduct": "View product"
+    "viewProduct": "View product",
+    "noLongerAvailable": "No longer available"
   },
   "stockNotifications": {
     "notifyMe": "Notify me when back in stock",

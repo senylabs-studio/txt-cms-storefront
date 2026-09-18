@@ -346,7 +346,8 @@
     "add": "Afegir al tauler",
     "added": "Afegit al tauler",
     "remove": "Treure del tauler",
-    "viewProduct": "Veure producte"
+    "viewProduct": "Veure producte",
+    "noLongerAvailable": "Ja no disponible"
   },
   "stockNotifications": {
     "notifyMe": "Avisa'm quan estigui disponible",

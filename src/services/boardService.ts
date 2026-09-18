@@ -10,6 +10,9 @@ export interface BoardItem {
   width: number;
   height: number;
   zIndex: number;
+  /** False when staff unpublished this variant after it was pinned — the tile stays (it's the
+   *  customer's own arrangement) but shouldn't behave like a normal, clickable product tile. */
+  isAvailable: boolean;
 }
 
 export interface UpdateBoardItemData {

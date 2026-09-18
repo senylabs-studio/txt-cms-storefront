@@ -123,7 +123,7 @@ const BoardPage: React.FC = () => {
               {items.map(item => (
                 <div
                   key={item.id}
-                  className="board-tile"
+                  className={`board-tile${item.isAvailable ? '' : ' board-tile-unavailable'}`}
                   style={{ left: item.x, top: item.y, width: item.width, height: item.height, zIndex: item.zIndex }}
                   onPointerDown={e => handlePointerDown(e, item, 'move')}
                 >
@@ -136,20 +136,25 @@ const BoardPage: React.FC = () => {
                   >
                     <FaTimes size={11} />
                   </button>
-                  <button
-                    type="button"
-                    className="board-tile-view"
-                    onClick={() => navigate(`/variant/${item.variantId}`)}
-                    onPointerDown={e => e.stopPropagation()}
-                    aria-label={t('board.viewProduct')}
-                    title={t('board.viewProduct')}
-                  >
-                    <FaExternalLinkAlt size={10} />
-                  </button>
+                  {item.isAvailable && (
+                    <button
+                      type="button"
+                      className="board-tile-view"
+                      onClick={() => navigate(`/variant/${item.variantId}`)}
+                      onPointerDown={e => e.stopPropagation()}
+                      aria-label={t('board.viewProduct')}
+                      title={t('board.viewProduct')}
+                    >
+                      <FaExternalLinkAlt size={10} />
+                    </button>
+                  )}
                   {item.thumbnailUrl
                     ? <img src={item.thumbnailUrl} alt={item.variantName} draggable={false} />
                     : <div className="board-tile-placeholder">📦</div>}
-                  <div className="board-tile-label">{item.variantName}</div>
+                  <div className="board-tile-label">
+                    {item.variantName}
+                    {!item.isAvailable && <span className="board-tile-unavailable-badge">{t('board.noLongerAvailable')}</span>}
+                  </div>
                   <div
                     className="board-tile-resize"
                     onPointerDown={e => handlePointerDown(e, item, 'resize')}
