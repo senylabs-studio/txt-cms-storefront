@@ -29,7 +29,10 @@ const SitemapContent: React.FC<Props> = ({ pageName }) => {
   );
 
   const renderLink = (item: StorefrontMenuItem, className = 'sitemap-link') => {
-    if (item.type === 'ExternalLink' && item.externalUrl) {
+    // externalUrl is an override independent of Type (NavMenu/MobileMenuSheet honor it the same
+    // way) — PageType has no "ExternalLink" member, so gating on item.type here could never
+    // actually match, leaving this branch permanently unreachable.
+    if (item.externalUrl) {
       return (
         <a
           key={item.id}

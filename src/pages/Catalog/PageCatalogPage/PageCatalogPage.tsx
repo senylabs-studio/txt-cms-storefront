@@ -44,7 +44,10 @@ const PageCatalogPage: React.FC = () => {
     setNotFound(false);
     getPageBySlug(slug, currentPage, PAGE_SIZE, filters)
       .then(data => {
-        if (data.type === 'ExternalLink' && data.externalUrl) {
+        // externalUrl is an override independent of Type (NavMenu/MobileMenuSheet honor it the
+        // same way) — PageType has no "ExternalLink" member, so gating on data.type here could
+        // never actually match, leaving this redirect permanently unreachable.
+        if (data.externalUrl) {
           window.location.href = data.externalUrl;
           return;
         }
