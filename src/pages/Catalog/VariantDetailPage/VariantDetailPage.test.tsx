@@ -20,7 +20,9 @@ vi.mock('../../../components/common/FavoriteButton/FavoriteButton', () => ({ def
 vi.mock('../../../components/common/BoardButton/BoardButton', () => ({ default: () => <div /> }));
 vi.mock('../../../components/common/NotifyMeButton/NotifyMeButton', () => ({ default: () => <div /> }));
 vi.mock('../../../components/common/CareLabels', () => ({ default: () => <div /> }));
-vi.mock('../../../components/Product/VariantCard/VariantCard', () => ({ default: () => <div /> }));
+vi.mock('../../../components/Product/VariantCard/VariantCard', () => ({
+  default: ({ variant }: { variant: { name: string } }) => <div>{variant.name}</div>,
+}));
 
 const navigate = vi.fn();
 vi.mock('react-router-dom', async () => {
@@ -224,6 +226,7 @@ describe('VariantDetailPage alsoBought', () => {
 describe('VariantDetailPage stale-response guard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.clear();
     mockAuth.isAuthenticated = true;
     getProductReviews.mockResolvedValue(reviewsPage([]));
     getMyReview.mockResolvedValue({ hasPurchased: false, review: null });
@@ -258,5 +261,42 @@ describe('VariantDetailPage stale-response guard', () => {
 
     expect(screen.getByText('Tela Verde')).toBeInTheDocument();
     expect(screen.queryByText('Tela Azul')).not.toBeInTheDocument();
+  });
+
+  // Regression test: a SECOND effect in this same component (populating the "recently viewed"
+  // rail via getVariantsBatch) had no stale-response guard of its own, unlike the main
+  // variant-fetch effect above — a genuinely new, previously-unchecked instance of this bug class.
+  it('ignores a stale "recently viewed" batch response for a variant id no longer current', async () => {
+    localStorage.setItem('recently_viewed_variants', JSON.stringify([99]));
+    getVariantById.mockImplementation((id: number) =>
+      Promise.resolve(variant({ id, name: id === 1 ? 'Tela Azul' : 'Tela Verde' })));
+
+    const batch1 = deferred<{ id: number; name: string }[]>();
+    const batch2 = deferred<{ id: number; name: string }[]>();
+    // recordVariantView(id) runs before getRecentlyViewedIds(id) in the effect, so variant 1's
+    // batch excludes only [1] (-> ids [99], length 1) and variant 2's excludes only [2]
+    // (-> ids [1, 99], length 2) — distinguishable by the ids array length.
+    getVariantsBatch.mockImplementation((ids: number[]) => (ids.length === 1 ? batch1.promise : batch2.promise));
+
+    const router = createMemoryRouter(
+      [{ path: '/variant/:id', element: <VariantDetailPage /> }],
+      { initialEntries: ['/variant/1'] },
+    );
+    render(<RouterProvider router={router} />);
+    await screen.findByText('Tela Azul');
+
+    router.navigate('/variant/2');
+    await screen.findByText('Tela Verde');
+
+    // The newer "recently viewed" batch (triggered by variant 2's mount) resolves first.
+    batch2.resolve([{ id: 10, name: 'Reciente Nuevo' }]);
+    await screen.findByText('Reciente Nuevo');
+
+    // The stale, slower batch from variant 1 resolves afterward — must be ignored.
+    batch1.resolve([{ id: 11, name: 'Reciente Viejo' }]);
+    await new Promise(r => setTimeout(r, 0));
+
+    expect(screen.getByText('Reciente Nuevo')).toBeInTheDocument();
+    expect(screen.queryByText('Reciente Viejo')).not.toBeInTheDocument();
   });
 });

@@ -130,10 +130,18 @@ const VariantDetailPage: React.FC = () => {
 
   useEffect(() => {
     if (!variant) return;
+    let cancelled = false;
     recordVariantView(variant.id);
     const ids = getRecentlyViewedIds(variant.id);
     if (ids.length === 0) { setRecentlyViewed([]); return; }
-    getVariantsBatch(ids).then(setRecentlyViewed).catch(() => setRecentlyViewed([]));
+    getVariantsBatch(ids)
+      .then(v => { if (!cancelled) setRecentlyViewed(v); })
+      .catch(() => { if (!cancelled) setRecentlyViewed([]); });
+    // Same stale-response concern as the main variant-fetch effect above: following an in-page
+    // link to another variant doesn't unmount this component, so an older variant's slower
+    // "recently viewed" batch could resolve after a newer one's and overwrite the rail with a
+    // stale list (missing the variant the customer is now actually viewing).
+    return () => { cancelled = true; };
   }, [variant?.id]);
 
   const changeReviewsPage = (page: number) => {
