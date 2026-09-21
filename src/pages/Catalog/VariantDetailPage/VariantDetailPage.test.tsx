@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, createMemoryRouter, RouterProvider } from 'react-router-dom';
 import VariantDetailPage from './VariantDetailPage';
 import type { StorefrontVariantDetail, ProductReview, PaginatedResponse } from '../../../types';
 
@@ -37,8 +37,8 @@ vi.mock('../../../contexts/CartContext', () => ({ useCart: () => mockCart }));
 
 vi.mock('../../../contexts/SiteSettingsContext', () => ({ useSiteSettings: () => ({ siteName: 'TXT Shop' }) }));
 
-const { getVariantById } = vi.hoisted(() => ({ getVariantById: vi.fn() }));
-vi.mock('../../../services/productService', () => ({ getVariantById }));
+const { getVariantById, getVariantsBatch } = vi.hoisted(() => ({ getVariantById: vi.fn(), getVariantsBatch: vi.fn().mockResolvedValue([]) }));
+vi.mock('../../../services/productService', () => ({ getVariantById, getVariantsBatch }));
 
 const { getProductReviews, getMyReview, submitReview } = vi.hoisted(() => ({
   getProductReviews: vi.fn(),
@@ -212,5 +212,51 @@ describe('VariantDetailPage alsoBought', () => {
     await screen.findByText('Tela Azul');
     expect(screen.queryByText('product.alsoBought')).not.toBeInTheDocument();
     expect(screen.queryByText('product.youMightAlsoLike')).not.toBeInTheDocument();
+  });
+});
+
+// Regression test: the data-fetching effect had no stale-response guard — in-app navigation
+// between two /variant/:id routes (siblings/alsoBought/recentlyViewed links, or browser Back/
+// Forward) doesn't unmount this component, so an older id's slower response resolving after a
+// newer id's could silently overwrite the page with the wrong variant's data while the URL still
+// showed the new id. Same bug class already fixed elsewhere this session (block-translation
+// editors, useEntityTranslations).
+describe('VariantDetailPage stale-response guard', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockAuth.isAuthenticated = true;
+    getProductReviews.mockResolvedValue(reviewsPage([]));
+    getMyReview.mockResolvedValue({ hasPurchased: false, review: null });
+  });
+
+  function deferred<T>() {
+    let resolve!: (value: T) => void;
+    const promise = new Promise<T>(res => { resolve = res; });
+    return { promise, resolve };
+  }
+
+  it('ignores a stale response for a variant id no longer current after in-app navigation (no unmount)', async () => {
+    const v1 = deferred<StorefrontVariantDetail>();
+    const v2 = deferred<StorefrontVariantDetail>();
+    getVariantById.mockImplementation((id: number) => (id === 1 ? v1.promise : v2.promise));
+
+    const router = createMemoryRouter(
+      [{ path: '/variant/:id', element: <VariantDetailPage /> }],
+      { initialEntries: ['/variant/1'] },
+    );
+    render(<RouterProvider router={router} />);
+
+    // Navigate to variant 2 before variant 1's fetch resolves — mirrors clicking a related-
+    // variant link, or Back/Forward, on the same mounted route.
+    router.navigate('/variant/2');
+    v2.resolve(variant({ id: 2, name: 'Tela Verde' }));
+    await screen.findByText('Tela Verde');
+
+    // The stale, slower response for variant 1 resolves afterward — must be ignored.
+    v1.resolve(variant({ id: 1, name: 'Tela Azul' }));
+    await new Promise(r => setTimeout(r, 0));
+
+    expect(screen.getByText('Tela Verde')).toBeInTheDocument();
+    expect(screen.queryByText('Tela Azul')).not.toBeInTheDocument();
   });
 });

@@ -28,16 +28,23 @@ const ProductDetailPage: React.FC = () => {
 
   useEffect(() => {
     if (!slug) return;
+    let cancelled = false;
     setLoading(true);
     getProductBySlug(slug)
       .then(p => {
+        if (cancelled) return;
         setProduct(p);
         // If product has no variants, redirect to catalog
         if (!p.variants || p.variants.length === 0) navigate('/catalog', { replace: true });
       })
-      .catch(e => { if (e?.response?.status === 404) setNotFound(true); else navigate('/catalog'); })
-      .finally(() => setLoading(false));
-  }, [slug, i18n.language]);
+      .catch(e => { if (cancelled) return; if (e?.response?.status === 404) setNotFound(true); else navigate('/catalog'); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    // Back/forward navigation between two visited product URLs doesn't unmount this component —
+    // without this guard, an older slug's slower response could resolve after a newer slug's and
+    // silently overwrite the page with the wrong product's data while the URL still shows the
+    // new slug.
+    return () => { cancelled = true; };
+  }, [slug, i18n.language, navigate]);
 
   if (loading) return <MainLayout><div className="text-center py-5"><Spinner animation="border" variant="primary" /></div></MainLayout>;
   if (notFound) return <MainLayout><Container className="py-5"><Alert variant="warning">{t('product.productNotFound')}</Alert></Container></MainLayout>;

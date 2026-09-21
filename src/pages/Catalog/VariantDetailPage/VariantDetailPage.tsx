@@ -93,13 +93,20 @@ const VariantDetailPage: React.FC = () => {
 
   useEffect(() => {
     if (!id) return;
+    let cancelled = false;
     setLoading(true);
     setSelectedImage(0);
     setDescExpanded(false);
     getVariantById(Number(id))
-      .then(v => { setVariant(v); setQuantity(v.minQuantity); })
-      .catch((e) => { if (e?.response?.status === 404) setNotFound(true); else navigate('/catalog'); })
-      .finally(() => setLoading(false));
+      .then(v => { if (!cancelled) { setVariant(v); setQuantity(v.minQuantity); } })
+      .catch((e) => { if (!cancelled) { if (e?.response?.status === 404) setNotFound(true); else navigate('/catalog'); } })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    // In-page "siblings"/"also bought"/"recently viewed" links navigate to another
+    // /variant/:id without unmounting this component, and the browser Back/Forward buttons can
+    // do the same — without this guard, an older id's slower response could resolve after a
+    // newer id's and silently overwrite the page with the wrong variant's data while the URL
+    // still shows the new id.
+    return () => { cancelled = true; };
   }, [id, i18n.language]);
 
   useEffect(() => {
