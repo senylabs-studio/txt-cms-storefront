@@ -65,6 +65,23 @@ const CheckoutPage: React.FC = () => {
     }
   }, [redsysData]);
 
+  // handleProceedToPayment never resets `loading` on success — it's mid-navigation to the
+  // Redsys-hosted page, expecting the browser to leave. If the customer hits Back before
+  // completing payment, most browsers restore this exact page (including its JS state) from the
+  // back/forward cache instead of reloading, which would otherwise leave the button stuck on
+  // "Procesando…" forever with no way to retry. `pageshow`'s `persisted` flag is the standard way
+  // to detect that restoration and reset the stale in-flight state.
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        setLoading(false);
+        setRedsysData(null);
+      }
+    };
+    window.addEventListener('pageshow', handlePageShow);
+    return () => window.removeEventListener('pageshow', handlePageShow);
+  }, []);
+
   const cartSubtotal = cart?.items.reduce((sum, i) => sum + i.subtotal, 0) ?? 0;
   const couponDiscount = cart?.couponDiscountAmount ?? 0;
   const estimatedShipping = shippingRate?.shippingCost ?? 0;

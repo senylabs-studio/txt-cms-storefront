@@ -138,6 +138,28 @@ describe('CheckoutPage', () => {
     expect(HTMLFormElement.prototype.submit).not.toHaveBeenCalled();
   });
 
+  // Regression test: handleProceedToPayment never reset `loading` on success (it expects the
+  // browser to navigate away to Redsys) — if the customer hits Back before completing payment,
+  // most browsers restore this exact page (including its JS state) from the back/forward cache
+  // instead of reloading, which used to leave the button stuck on "Procesando…" forever with no
+  // way to retry.
+  it('resets the stuck "processing" state when the page is restored from the back/forward cache', async () => {
+    mockCart.cart = cartWithItems();
+    checkout.mockResolvedValue(checkoutResponse);
+    render(<CheckoutPage />);
+
+    await waitFor(() => expect(getProfile).toHaveBeenCalled());
+    const proceedBtn = await screen.findByRole('button', { name: 'checkout.proceed' });
+    fireEvent.click(proceedBtn);
+
+    await waitFor(() => expect(HTMLFormElement.prototype.submit).toHaveBeenCalled());
+    expect(proceedBtn).toBeDisabled();
+
+    window.dispatchEvent(Object.assign(new Event('pageshow'), { persisted: true }));
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'checkout.proceed' })).not.toBeDisabled());
+  });
+
   it('disables "proceed to payment" when no shipping rate covers the address', async () => {
     // Regression test: the backend now blocks this case rather than silently shipping for
     // free, and the button must not let the customer click through the warning either.
