@@ -40,10 +40,12 @@ const PageCatalogPage: React.FC = () => {
 
   useEffect(() => {
     if (!slug) return;
+    let cancelled = false;
     setLoading(true);
     setNotFound(false);
     getPageBySlug(slug, currentPage, PAGE_SIZE, filters)
       .then(data => {
+        if (cancelled) return;
         // externalUrl is an override independent of Type (NavMenu/MobileMenuSheet honor it the
         // same way) — PageType has no "ExternalLink" member, so gating on data.type here could
         // never actually match, leaving this redirect permanently unreachable.
@@ -53,8 +55,13 @@ const PageCatalogPage: React.FC = () => {
         }
         setPageDetail(data);
       })
-      .catch(e => { if (e?.response?.status === 404) setNotFound(true); })
-      .finally(() => setLoading(false));
+      .catch(e => { if (cancelled) return; if (e?.response?.status === 404) setNotFound(true); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    // Clicking a different category link (or rapidly toggling filters) before the previous
+    // request resolves doesn't unmount this component — without this guard, an older slug's/
+    // filter-state's slower response could resolve after a newer one's and silently overwrite the
+    // page with the wrong category's products while the URL/filters still show the new state.
+    return () => { cancelled = true; };
   }, [slug, currentPage, filters, i18n.language]);
 
   const handleFilterChange = (f: PageFilters) => {
