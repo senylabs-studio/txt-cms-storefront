@@ -36,6 +36,20 @@ const renderGate = () => render(
   </MemoryRouter>,
 );
 
+// Simulates two concurrently-rendered "Add to cart" buttons (e.g. two different VariantCards)
+// both calling requireAuth() against the one shared AuthGateProvider instance.
+const DoubleConsumer: React.FC = () => {
+  const { requireAuth } = useAuthGate();
+  const [resultA, setResultA] = React.useState('');
+  const [resultB, setResultB] = React.useState('');
+  return (
+    <div>
+      <button data-testid="btn-a" onClick={async () => setResultA(String(await requireAuth()))}>{resultA || 'trigger-a'}</button>
+      <button data-testid="btn-b" onClick={async () => setResultB(String(await requireAuth()))}>{resultB || 'trigger-b'}</button>
+    </div>
+  );
+};
+
 describe('AuthGateContext', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -76,5 +90,31 @@ describe('AuthGateContext', () => {
 
     expect(navigate).toHaveBeenCalledWith('/login');
     await waitFor(() => expect(screen.getByText('false')).toBeInTheDocument());
+  });
+
+  // Regression test: requireAuth() used to store its resolver in a single ref, so a second call
+  // made before the first one's prompt was answered (e.g. clicking "Add to cart" on a different
+  // product) silently overwrote the first caller's resolver — leaving that first await stuck
+  // forever, with no error, while a later caller's action proceeded normally.
+  it('resolves every pending requireAuth() call when the gate closes, not just the most recent one', async () => {
+    guestCheckout.mockResolvedValue({ token: 't', customerId: 5, name: 'Gary', email: 'gary@example.com', isGuest: true });
+    render(
+      <MemoryRouter>
+        <AuthGateProvider><DoubleConsumer /></AuthGateProvider>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByTestId('btn-a'));
+    expect(await screen.findByText('authGate.title')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('btn-b'));
+
+    fireEvent.change(screen.getByLabelText('authGate.name'), { target: { value: 'Gary' } });
+    fireEvent.change(screen.getByLabelText('authGate.email'), { target: { value: 'gary@example.com' } });
+    fireEvent.click(screen.getByText('authGate.continueAsGuest'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('btn-a')).toHaveTextContent('true');
+      expect(screen.getByTestId('btn-b')).toHaveTextContent('true');
+    });
   });
 });
