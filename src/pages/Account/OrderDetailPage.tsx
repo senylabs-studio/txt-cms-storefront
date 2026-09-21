@@ -35,8 +35,20 @@ const OrderDetailPage: React.FC = () => {
   };
 
   useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
     setLoading(true);
-    Promise.resolve(loadOrder()).finally(() => setLoading(false));
+    getOrderDetail(Number(id))
+      .then(o => { if (!cancelled) setOrder(o); })
+      .catch(() => { if (!cancelled) navigate('/account/orders'); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    // Cancel/return/invoice-download all act on `order.id` from state, not the route `id` — the
+    // account orders list links between different orders on the same /account/orders/:id route,
+    // so navigating there again doesn't unmount this component. Without this guard, an older
+    // order's slower response resolving after a newer one's would silently leave `order` (and
+    // therefore every action button) pointing at the WRONG order while the URL showed the new one.
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   if (loading) return <MainLayout><div className="text-center py-5"><Spinner animation="border" variant="primary" /></div></MainLayout>;
