@@ -1,6 +1,7 @@
 import React, { type JSX } from 'react';
 import { Row, Col, Carousel } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
+import DOMPurify from 'dompurify';
 import type {
   StorefrontPageBlock,
   StorefrontPageBlockType,
@@ -40,6 +41,18 @@ const PADDING: Record<string, string> = {
   none: '0', sm: '0.5rem 0', md: '1.25rem 0', lg: '2.5rem 0',
 };
 
+// Defense-in-depth only — the backend (PageBlockContentSanitizer) is the actual trust boundary
+// and already strips this before it's ever stored, since a direct API call bypasses the CMS's
+// TipTap editor UI entirely. This just means a bug or a future backend regression can't turn
+// into a live XSS against every storefront visitor on its own; the allow-list mirrors exactly
+// what RichTextEditor.tsx's TipTap extensions can produce.
+function sanitizeRichText(html: string): string {
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['p', 'br', 'strong', 'b', 'em', 'i', 's', 'strike', 'u', 'ul', 'ol', 'li', 'a'],
+    ALLOWED_ATTR: ['href', 'target', 'rel'],
+  });
+}
+
 function buildStyle(style?: BlockStyle): React.CSSProperties {
   if (!style) return {};
   return {
@@ -65,7 +78,7 @@ const ParagraphBlock: React.FC<{ config: ParagraphBlockConfig }> = ({ config }) 
   <div
     className="rich-text"
     style={buildStyle(config.style)}
-    dangerouslySetInnerHTML={{ __html: config.text ?? '' }}
+    dangerouslySetInnerHTML={{ __html: sanitizeRichText(config.text ?? '') }}
   />
 );
 
@@ -84,7 +97,7 @@ const HeaderParagraphBlock: React.FC<{ config: HeaderParagraphBlockConfig }> = (
   return (
     <div style={buildStyle(config.style)}>
       <Tag>{headerText}</Tag>
-      {paragraphText && <div className="rich-text pbr-header-paragraph-text" dangerouslySetInnerHTML={{ __html: paragraphText }} />}
+      {paragraphText && <div className="rich-text pbr-header-paragraph-text" dangerouslySetInnerHTML={{ __html: sanitizeRichText(paragraphText) }} />}
     </div>
   );
 };
@@ -128,7 +141,7 @@ const ImageTextBlock: React.FC<{ config: ImageTextBlockConfig }> = ({ config }) 
   const textCol = (
     <Col md={config.imageUrl ? 7 : 12} style={buildStyle(config.style)}>
       {config.title && <h3>{config.title}</h3>}
-      {config.text && <div className="rich-text" dangerouslySetInnerHTML={{ __html: config.text }} />}
+      {config.text && <div className="rich-text" dangerouslySetInnerHTML={{ __html: sanitizeRichText(config.text) }} />}
       {config.buttonText && config.buttonUrl && (
         <a href={config.buttonUrl} className="btn btn-primary btn-sm" target="_blank" rel="noopener noreferrer">
           {config.buttonText}
