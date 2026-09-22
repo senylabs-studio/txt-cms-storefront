@@ -144,6 +144,7 @@ export interface CheckoutResponse {
   amount: number;
   shippingCost: number;
   couponDiscountAmount: number;
+  recargoEquivalenciaAmount: number;
 }
 
 export interface CustomerAddress {

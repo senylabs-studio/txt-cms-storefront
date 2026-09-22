@@ -72,6 +72,7 @@ const checkoutResponse: CheckoutResponse = {
   amount: 2000,
   shippingCost: 0,
   couponDiscountAmount: 0,
+  recargoEquivalenciaAmount: 0,
 };
 
 describe('CheckoutPage', () => {
