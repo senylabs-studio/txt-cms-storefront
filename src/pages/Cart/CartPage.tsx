@@ -179,6 +179,12 @@ const CartPage: React.FC = () => {
                       <span>−€{cart!.couponDiscountAmount.toFixed(2)}</span>
                     </div>
                   )}
+                  {cart!.recargoEquivalenciaAmount > 0 && (
+                    <div className="d-flex justify-content-between small text-muted mb-1">
+                      <span>{t('cart.recargoEquivalencia', { percent: cart!.recargoEquivalenciaPercent })}</span>
+                      <span>€{cart!.recargoEquivalenciaAmount.toFixed(2)}</span>
+                    </div>
+                  )}
                   <hr />
 
                   {cart!.couponError && (

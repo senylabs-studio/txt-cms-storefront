@@ -85,7 +85,12 @@ const CheckoutPage: React.FC = () => {
   const cartSubtotal = cart?.items.reduce((sum, i) => sum + i.subtotal, 0) ?? 0;
   const couponDiscount = cart?.couponDiscountAmount ?? 0;
   const estimatedShipping = shippingRate?.shippingCost ?? 0;
-  const estimatedTotal = Math.max(0, cartSubtotal - couponDiscount) + estimatedShipping;
+  // The cart's own recargo estimate excludes shipping (unknown until an address is picked here) —
+  // this undercounts the real, shipping-inclusive recargo CheckoutService.InitiatePaymentAsync
+  // actually charges by a few cents at most, and this page never shows a final confirm step
+  // before redirecting to Redsys anyway (Redsys' own page shows the real, exact amount charged).
+  const estimatedRecargo = cart?.recargoEquivalenciaAmount ?? 0;
+  const estimatedTotal = Math.max(0, cartSubtotal - couponDiscount) + estimatedShipping + estimatedRecargo;
 
   const handleProceedToPayment = async () => {
     setLoading(true);
@@ -251,6 +256,13 @@ const CheckoutPage: React.FC = () => {
                   <Alert variant="warning" className="py-2 small">
                     {t('checkout.noShippingRate')}
                   </Alert>
+                )}
+
+                {estimatedRecargo > 0 && (
+                  <div className="d-flex justify-content-between small text-muted mb-2">
+                    <span>{t('cart.recargoEquivalencia', { percent: cart?.recargoEquivalenciaPercent ?? 0 })}</span>
+                    <span>€{estimatedRecargo.toFixed(2)}</span>
+                  </div>
                 )}
 
                 <hr className="my-2" />

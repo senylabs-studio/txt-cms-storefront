@@ -49,7 +49,8 @@
     "removeCoupon": "Remove",
     "couponDiscount": "Coupon {{code}}",
     "couponApplyError": "Couldn't apply the coupon.",
-    "couponApplySuccess": "Coupon applied successfully."
+    "couponApplySuccess": "Coupon applied successfully.",
+    "recargoEquivalencia": "Equivalence surcharge ({{percent}}%)"
   },
   "auth": {
     "login": {

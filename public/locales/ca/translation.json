@@ -49,7 +49,8 @@
     "removeCoupon": "Treure",
     "couponDiscount": "Cupó {{code}}",
     "couponApplyError": "No s'ha pogut aplicar el cupó.",
-    "couponApplySuccess": "Cupó aplicat correctament."
+    "couponApplySuccess": "Cupó aplicat correctament.",
+    "recargoEquivalencia": "Recàrrec d'equivalència ({{percent}}%)"
   },
   "auth": {
     "login": {

@@ -49,7 +49,8 @@
     "removeCoupon": "Quitar",
     "couponDiscount": "Cupón {{code}}",
     "couponApplyError": "No se ha podido aplicar el cupón.",
-    "couponApplySuccess": "Cupón aplicado correctamente."
+    "couponApplySuccess": "Cupón aplicado correctamente.",
+    "recargoEquivalencia": "Recargo de equivalencia ({{percent}}%)"
   },
   "auth": {
     "login": {

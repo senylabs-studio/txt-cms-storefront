@@ -19,7 +19,7 @@ const { getCart, addToCart, updateCartItem, removeCartItem, applyCoupon, removeC
 }));
 vi.mock('../services/cartService', () => ({ getCart, addToCart, updateCartItem, removeCartItem, applyCoupon, removeCoupon }));
 
-const cart = (items: Cart['items'] = []): Cart => ({ id: 1, expiresAt: '2099-01-01', items, discountPercent: 0, couponDiscountAmount: 0, total: 0 });
+const cart = (items: Cart['items'] = []): Cart => ({ id: 1, expiresAt: '2099-01-01', items, discountPercent: 0, couponDiscountAmount: 0, recargoEquivalenciaPercent: 0, recargoEquivalenciaAmount: 0, total: 0 });
 
 const Probe: React.FC = () => {
   const { cart: current, loading, drawerOpen, openDrawer, itemCount, fetchCart, addItem, updateItem, removeItem, applyCoupon: applyCouponFn, removeCoupon: removeCouponFn } = useCart();

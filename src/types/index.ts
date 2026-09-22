@@ -119,6 +119,8 @@ export interface Cart {
   couponCode?: string;
   couponDiscountAmount: number;
   couponError?: string;
+  recargoEquivalenciaPercent: number;
+  recargoEquivalenciaAmount: number;
   total: number;
 }
 
