@@ -51,11 +51,16 @@ const CheckoutPage: React.FC = () => {
     const addr = addresses.find(a => a.id === shippingId);
     if (!addr?.country) { setShippingRate(undefined); return; }
 
+    let cancelled = false;
     const cartSubtotal = cart.items.reduce((sum, i) => sum + i.subtotal, 0);
     setShippingLoading(true);
-    getApplicableShippingRate(addr.country, cartSubtotal).then(rate => {
-      setShippingRate(rate);
-    }).finally(() => setShippingLoading(false));
+    getApplicableShippingRate(addr.country, cartSubtotal)
+      .then(rate => { if (!cancelled) setShippingRate(rate); })
+      .finally(() => { if (!cancelled) setShippingLoading(false); });
+    // Switching the shipping address twice in quick succession (before the first lookup
+    // resolves) must not let the slower, now-stale response overwrite the rate for the address
+    // actually selected now — same class of stale-response bug this codebase has hit before.
+    return () => { cancelled = true; };
   }, [shippingId, addresses, cart]);
 
   // Auto-submit the Redsys form once we have the data
@@ -85,12 +90,20 @@ const CheckoutPage: React.FC = () => {
   const cartSubtotal = cart?.items.reduce((sum, i) => sum + i.subtotal, 0) ?? 0;
   const couponDiscount = cart?.couponDiscountAmount ?? 0;
   const estimatedShipping = shippingRate?.shippingCost ?? 0;
-  // The cart's own recargo estimate excludes shipping (unknown until an address is picked here) —
-  // this undercounts the real, shipping-inclusive recargo CheckoutService.InitiatePaymentAsync
-  // actually charges by a few cents at most, and this page never shows a final confirm step
-  // before redirecting to Redsys anyway (Redsys' own page shows the real, exact amount charged).
-  const estimatedRecargo = cart?.recargoEquivalenciaAmount ?? 0;
-  const estimatedTotal = Math.max(0, cartSubtotal - couponDiscount) + estimatedShipping + estimatedRecargo;
+  const netAfterDiscount = Math.max(0, cartSubtotal - couponDiscount);
+  // The cart's own recargo estimate (cart.recargoEquivalenciaAmount) is computed on
+  // subtotal-coupon only, since shipping is unknown until an address is picked here — but
+  // CheckoutService.InitiatePaymentAsync actually charges recargo on subtotal-coupon+shipping,
+  // so using the cart's figure as-is understates this page's Total by however much recargo
+  // applies to the shipping cost (grows with pricier shipping rates, not just "a few cents").
+  // The frontend has no VAT rate to redo the exact base/recargo split itself, so instead of
+  // omitting shipping from the estimate, scale the cart's own recargo proportionally to the
+  // shipping-inclusive base — closer to the real charge without needing a new VAT-rate lookup.
+  // The real, authoritative amount is always computed server-side regardless; this only affects
+  // what's shown here before redirecting to Redsys.
+  const recargoRatio = netAfterDiscount > 0 ? (cart?.recargoEquivalenciaAmount ?? 0) / netAfterDiscount : 0;
+  const estimatedRecargo = Math.round((netAfterDiscount + estimatedShipping) * recargoRatio * 100) / 100;
+  const estimatedTotal = netAfterDiscount + estimatedShipping + estimatedRecargo;
 
   const handleProceedToPayment = async () => {
     setLoading(true);

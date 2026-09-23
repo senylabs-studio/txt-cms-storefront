@@ -128,6 +128,12 @@ const CartDrawer: React.FC = () => {
                   <span>−€{cart!.items.reduce((s, i) => s + (i.originalUnitPrice - i.unitPrice) * i.quantity, 0).toFixed(2)}</span>
                 </div>
               )}
+              {cart!.recargoEquivalenciaAmount > 0 && (
+                <div className="d-flex justify-content-between small text-muted mb-1">
+                  <span>{t('cart.recargoEquivalencia', { percent: cart!.recargoEquivalenciaPercent })}</span>
+                  <span>€{cart!.recargoEquivalenciaAmount.toFixed(2)}</span>
+                </div>
+              )}
               <div className="d-flex justify-content-between fw-bold fs-5 mb-3">
                 <span>{t('cart.total')}</span>
                 <span>€{(cart!.total ?? 0).toFixed(2)}</span>

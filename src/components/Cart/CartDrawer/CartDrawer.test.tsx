@@ -157,6 +157,16 @@ describe('CartDrawer', () => {
     await waitFor(() => expect(screen.queryByText('cart.removeError')).not.toBeInTheDocument());
   });
 
+  // Regression test: the drawer's total already correctly includes recargo (via cart.total),
+  // but never broke it out as its own line the way CartPage does, so a recargo-liable customer
+  // checking out straight from the drawer never saw why the total was higher.
+  it('shows the recargo de equivalencia line when the cart has one', () => {
+    mockCart.cart = cartWithItems({ recargoEquivalenciaPercent: 5.2, recargoEquivalenciaAmount: 1.04, total: 21.04 });
+    renderDrawer();
+
+    expect(screen.getByText('€1.04')).toBeInTheDocument();
+  });
+
   it('navigates to /checkout while closing the drawer', () => {
     mockCart.cart = cartWithItems();
     renderDrawer();
