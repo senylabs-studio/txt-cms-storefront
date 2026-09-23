@@ -19,7 +19,7 @@ const COLLAPSE_THRESHOLD = 48;
 
 const Header: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const { isAuthenticated, name, logout } = useAuth();
+  const { isAuthenticated, isGuest, name, logout } = useAuth();
   const { itemCount, openDrawer } = useCart();
   const { count: favCount } = useFavorites();
   const { logoUrl, siteName } = useSiteSettings();
@@ -197,6 +197,17 @@ const Header: React.FC = () => {
                   <NavDropdown title={<><FaUser size={13} className="me-1" />{name}</>} align="end" className="topbar-dropdown">
                     <NavDropdown.Item as={Link} to="/account">{t('header.myAccount')}</NavDropdown.Item>
                     <NavDropdown.Item as={Link} to="/account/orders">{t('header.myOrders')}</NavDropdown.Item>
+                    {isGuest && (
+                      <>
+                        <NavDropdown.Divider />
+                        {/* Deliberately just a navigation, NOT logout()+navigate — logout would
+                            clear the guest token before the login form ever submits, and the
+                            backend's guest→real-account cart merge (StorefrontAuthController.
+                            MergeGuestCartIfAnyAsync) only has anything to read because apiClient
+                            still attaches this same guest token to that Login call. */}
+                        <NavDropdown.Item as={Link} to="/login">{t('header.loginToExistingAccount')}</NavDropdown.Item>
+                      </>
+                    )}
                     <NavDropdown.Divider />
                     <NavDropdown.Item onClick={() => { logout(); navigate('/'); }}>{t('header.logout')}</NavDropdown.Item>
                   </NavDropdown>
