@@ -299,4 +299,31 @@ describe('VariantDetailPage stale-response guard', () => {
     expect(screen.getByText('Reciente Nuevo')).toBeInTheDocument();
     expect(screen.queryByText('Reciente Viejo')).not.toBeInTheDocument();
   });
+
+  // Regression test: following an "also bought"/"recently viewed" link to a DIFFERENT product
+  // doesn't unmount the page. The customer's own rating/comment for the previous product stayed
+  // in the form whenever the new product had no review of theirs yet, ready to be submitted as a
+  // review of the wrong product.
+  it('does not carry the previous product\'s own review into the form after navigating to another product', async () => {
+    getVariantById.mockImplementation((id: number) => Promise.resolve(id === 1
+      ? variant()
+      : variant({ id: 2, name: 'Lino Verde', productId: 2, productSlug: 'lino' })));
+    getMyReview.mockImplementation((slug: string) => Promise.resolve(slug === 'tela'
+      ? { hasPurchased: true, review: { id: 1, customerName: 'Jane', rating: 5, comment: 'Genial', createdAt: '2026-01-01T00:00:00.000Z' } }
+      : { hasPurchased: true, review: null }));
+    const router = createMemoryRouter(
+      [{ path: '/variant/:id', element: <VariantDetailPage /> }],
+      { initialEntries: ['/variant/1'] },
+    );
+    render(<RouterProvider router={router} />);
+    expect(await screen.findByDisplayValue('Genial')).toBeInTheDocument();
+
+    router.navigate('/variant/2');
+    await screen.findByText('Lino Verde');
+    await waitFor(() => expect(getMyReview).toHaveBeenCalledWith('lino'));
+    await new Promise(r => setTimeout(r, 0));
+
+    expect(screen.queryByDisplayValue('Genial')).not.toBeInTheDocument();
+    expect(screen.queryByText('product.editYourReview')).not.toBeInTheDocument();
+  });
 });

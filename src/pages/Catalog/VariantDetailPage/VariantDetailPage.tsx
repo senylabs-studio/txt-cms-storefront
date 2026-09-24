@@ -111,21 +111,33 @@ const VariantDetailPage: React.FC = () => {
 
   useEffect(() => {
     if (!variant?.productSlug) return;
+    let cancelled = false;
+    // "Also bought"/"recently viewed" links switch to another product without unmounting this
+    // page — everything review-related must start clean, or the previous product's reviews and
+    // (worse) the customer's own rating/comment for it would stay in the form and could be
+    // submitted as a review of this product.
+    setReviews([]);
     setReviewsPage(1);
+    setReviewsTotalPages(0);
     setReviewsError('');
+    setMyReview(null);
+    setReviewRating(0);
+    setReviewComment('');
+    setReviewMsg(null);
     getProductReviews(variant.productSlug, 1).then(r => {
+      if (cancelled) return;
       setReviews(r.items);
       setReviewsTotalPages(r.totalPages);
-    }).catch(err => setReviewsError(getApiErrorMessage(err, t('product.reviewsLoadError'))));
+    }).catch(err => { if (!cancelled) setReviewsError(getApiErrorMessage(err, t('product.reviewsLoadError'))); });
 
     if (isAuthenticated) {
       getMyReview(variant.productSlug).then(status => {
+        if (cancelled) return;
         setMyReview(status);
         if (status.review) { setReviewRating(status.review.rating); setReviewComment(status.review.comment ?? ''); }
       }).catch(() => {});
-    } else {
-      setMyReview(null);
     }
+    return () => { cancelled = true; };
   }, [variant?.productSlug, isAuthenticated]);
 
   useEffect(() => {
