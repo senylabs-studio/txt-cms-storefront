@@ -10,6 +10,9 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }));
 
+const mockAuth = vi.hoisted(() => ({ login: vi.fn(), updateUser: vi.fn() }));
+vi.mock('../../contexts/AuthContext', () => ({ useAuth: () => mockAuth }));
+
 vi.mock('../../components/Layout/MainLayout', () => ({
   default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
@@ -160,6 +163,7 @@ describe('AccountPage', () => {
   it('deletes an address after confirming, and removes it from the list', async () => {
     vi.spyOn(window, 'confirm').mockReturnValue(true);
     deleteAddress.mockResolvedValue(undefined);
+    getProfile.mockResolvedValueOnce(profile()).mockResolvedValueOnce(profile({ addresses: [] }));
     renderAccount();
     await screen.findByDisplayValue('Jane');
 
@@ -201,8 +205,12 @@ describe('AccountPage', () => {
       fireEvent.change(confirmInput, { target: { value: confirm } });
     };
 
-    it('changes the password and shows a success message', async () => {
-      changePassword.mockResolvedValue(undefined);
+    // Regression (50th audit batch): the change rotates the security stamp, invalidating the
+    // current token — the session must switch to the fresh token the backend returns, or the
+    // next request logs the customer out as "session expired".
+    it('changes the password, keeps the session with the returned token, and shows a success message', async () => {
+      const fresh = { token: 'fresh-token', customerId: 1, name: 'Jane', email: 'jane@example.com' };
+      changePassword.mockResolvedValue(fresh);
       renderAccount();
       await screen.findByDisplayValue('Jane');
 
@@ -211,6 +219,20 @@ describe('AccountPage', () => {
 
       await waitFor(() => expect(changePassword).toHaveBeenCalledWith('OldP@ss1!', 'NewP@ss2!'));
       expect(await screen.findByText('account.passwordChanged')).toBeInTheDocument();
+      expect(mockAuth.login).toHaveBeenCalledWith(fresh);
+    });
+
+    // Regression: only the length was checked, so e.g. "password1" reached the backend and came
+    // back rejected in Spanish only.
+    it('rejects a password that misses the backend rules without calling the API', async () => {
+      renderAccount();
+      await screen.findByDisplayValue('Jane');
+
+      fillPasswordForm('OldP@ss1!', 'password1', 'password1');
+      fireEvent.click(screen.getByText('account.changePassword'));
+
+      expect(await screen.findByText('auth.register.passwordHint')).toBeInTheDocument();
+      expect(changePassword).not.toHaveBeenCalled();
     });
 
     it('shows a mismatch error and does not call the API when the confirmation differs', async () => {
@@ -291,5 +313,43 @@ describe('AccountPage', () => {
       expect(await screen.findByText('account.deletionPending')).toBeInTheDocument();
       expect(screen.queryByText('account.deleteAccount')).not.toBeInTheDocument();
     });
+  });
+
+  // ── 50th audit batch regressions ─────────────────────────────────────────
+
+  it('shows the promoted default address after deleting the default one', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    deleteAddress.mockResolvedValue(undefined);
+    const second = { id: 2, alias: 'Oficina', recipientName: 'Jane', street: 'Calle 2', city: 'Madrid', postalCode: '28002', country: 'ES', isDefault: false };
+    getProfile
+      .mockResolvedValueOnce(profile({ addresses: [profile().addresses[0], second] }))
+      .mockResolvedValueOnce(profile({ addresses: [{ ...second, isDefault: true }] }));
+    renderAccount();
+    await screen.findByText('Oficina');
+
+    fireEvent.click(document.querySelectorAll('.border.rounded button')[1]);
+
+    await waitFor(() => expect(screen.queryByText('Casa')).not.toBeInTheDocument());
+    expect(getProfile).toHaveBeenCalledTimes(2);
+    expect(screen.getByText('account.defaultBadge')).toBeInTheDocument();
+  });
+
+  it('updates the signed-in name (shown in the header) after saving the profile', async () => {
+    updateProfile.mockResolvedValue(undefined);
+    renderAccount();
+    const nameInput = await screen.findByDisplayValue('Jane');
+
+    fireEvent.change(nameInput, { target: { value: 'Jane Doe' } });
+    fireEvent.click(screen.getByText('account.save'));
+
+    await waitFor(() => expect(mockAuth.updateUser).toHaveBeenCalledWith({ name: 'Jane Doe' }));
+  });
+
+  it('does not offer a password change to a guest, who has no password', async () => {
+    getProfile.mockResolvedValue(profile({ isGuest: true }));
+    renderAccount();
+    await screen.findByDisplayValue('Jane');
+
+    expect(screen.queryByText('account.changePasswordTitle')).not.toBeInTheDocument();
   });
 });

@@ -8,6 +8,7 @@ import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { convertGuestAccount } from '../../services/authService';
 import { getApiErrorMessage } from '../../utils/apiError';
+import { meetsPasswordRules } from '../../utils/password';
 
 const CheckoutSuccessPage: React.FC = () => {
   const { t } = useTranslation();
@@ -28,6 +29,10 @@ const CheckoutSuccessPage: React.FC = () => {
   const handleSetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    if (!meetsPasswordRules(password)) {
+      setError(t('auth.register.passwordHint'));
+      return;
+    }
     setSaving(true);
     try {
       const data = await convertGuestAccount(password);

@@ -75,7 +75,7 @@
       "phone": "Telèfon",
       "phoneOptional": "(opcional)",
       "phonePlaceholder": "+34 600 000 000",
-      "passwordHint": "Mínim 6 caràcters",
+      "passwordHint": "Mínim 6 caràcters, amb majúscula, minúscula, número i símbol",
       "loading": "Creant compte...",
       "submit": "Crear compte",
       "hasAccount": "Ja tens compte?",

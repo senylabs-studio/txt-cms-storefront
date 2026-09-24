@@ -75,7 +75,7 @@
       "phone": "Teléfono",
       "phoneOptional": "(opcional)",
       "phonePlaceholder": "+34 600 000 000",
-      "passwordHint": "Mínimo 6 caracteres",
+      "passwordHint": "Mínimo 6 caracteres, con mayúscula, minúscula, número y símbolo",
       "loading": "Creando cuenta...",
       "submit": "Crear cuenta",
       "hasAccount": "¿Ya tienes cuenta?",

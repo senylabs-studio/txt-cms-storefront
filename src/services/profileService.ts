@@ -1,5 +1,5 @@
 import apiClient from '../apiClient';
-import type { CustomerAddress, PaginatedResponse, StorefrontOrder, StorefrontOrderDetail, StorefrontProfile } from '../types';
+import type { AuthResponse, CustomerAddress, PaginatedResponse, StorefrontOrder, StorefrontOrderDetail, StorefrontProfile } from '../types';
 
 export const getProfile = async (): Promise<StorefrontProfile> => {
   const res = await apiClient.get('/storefront/profile');
@@ -10,12 +10,20 @@ export const updateProfile = async (data: { name: string; phone?: string; taxId?
   await apiClient.put('/storefront/profile', data);
 };
 
-export const changePassword = async (currentPassword: string, newPassword: string): Promise<void> => {
-  await apiClient.put('/storefront/profile/password', { currentPassword, newPassword });
+// Both rotate the account's security stamp on the backend, which invalidates the current token —
+// so they return a fresh one to keep this session signed in (none for a guest's email change).
+export const changePassword = async (currentPassword: string, newPassword: string): Promise<AuthResponse> => {
+  const res = await apiClient.put('/storefront/profile/password', { currentPassword, newPassword });
+  return res.data;
 };
 
-export const updateEmail = async (newEmail: string, currentPassword?: string): Promise<void> => {
-  await apiClient.put('/storefront/profile/email', { newEmail, currentPassword });
+export const updateEmail = async (newEmail: string, currentPassword?: string): Promise<AuthResponse | null> => {
+  const res = await apiClient.put('/storefront/profile/email', { newEmail, currentPassword });
+  return res.data || null;
+};
+
+export const updatePreferredLanguage = async (languageCode: string): Promise<void> => {
+  await apiClient.put('/storefront/profile/language', { languageCode });
 };
 
 export const addAddress = async (data: Partial<CustomerAddress>): Promise<CustomerAddress> => {

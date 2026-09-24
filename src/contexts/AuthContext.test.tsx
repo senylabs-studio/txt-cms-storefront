@@ -1,7 +1,11 @@
 import React from 'react';
-import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { AuthProvider, useAuth } from './AuthContext';
+import i18n from '../i18n';
+
+const { updatePreferredLanguage } = vi.hoisted(() => ({ updatePreferredLanguage: vi.fn().mockResolvedValue(undefined) }));
+vi.mock('../services/profileService', () => ({ updatePreferredLanguage }));
 import type { AuthResponse } from '../types';
 
 const authResponse: AuthResponse = {
@@ -71,5 +75,19 @@ describe('AuthContext', () => {
     console.error = () => {};
     expect(() => render(<Probe />)).toThrow('useAuth must be used inside AuthProvider');
     console.error = consoleError;
+  });
+
+  // Regression (50th audit batch): emails use the customer's saved preferred language, which was
+  // only set at login/register — switching language while signed in didn't change it.
+  it('saves the new language on the account when it changes while signed in', () => {
+    updatePreferredLanguage.mockClear();
+    render(<AuthProvider><Probe /></AuthProvider>);
+    act(() => { i18n.emit('languageChanged', 'ca'); });
+    expect(updatePreferredLanguage).not.toHaveBeenCalled(); // signed out: nothing to save
+
+    fireEvent.click(screen.getByText('login'));
+    act(() => { i18n.emit('languageChanged', 'en'); });
+
+    expect(updatePreferredLanguage).toHaveBeenCalledWith('en');
   });
 });

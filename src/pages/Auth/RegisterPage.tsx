@@ -6,6 +6,7 @@ import MainLayout from '../../components/Layout/MainLayout';
 import { register as registerService } from '../../services/authService';
 import { useAuth } from '../../contexts/AuthContext';
 import { getApiErrorMessage, parseFieldErrors, type FieldErrors } from '../../utils/apiError';
+import { meetsPasswordRules } from '../../utils/password';
 
 const RegisterPage: React.FC = () => {
   const { t } = useTranslation();
@@ -22,6 +23,10 @@ const RegisterPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!meetsPasswordRules(password)) {
+      setError(t('auth.register.passwordHint'));
+      return;
+    }
     setLoading(true);
     setError('');
     setFieldErrors({});

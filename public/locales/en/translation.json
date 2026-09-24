@@ -75,7 +75,7 @@
       "phone": "Phone",
       "phoneOptional": "(optional)",
       "phonePlaceholder": "+1 600 000 000",
-      "passwordHint": "At least 6 characters",
+      "passwordHint": "At least 6 characters, with an uppercase letter, a lowercase letter, a number and a symbol",
       "loading": "Creating account...",
       "submit": "Create account",
       "hasAccount": "Already have an account?",
