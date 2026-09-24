@@ -13,6 +13,7 @@ import { getPageBySlug, type PageFilters } from '../../../services/pageService';
 import { useSiteSettings } from '../../../contexts/SiteSettingsContext';
 import { useDocumentMeta } from '../../../hooks/useDocumentMeta';
 import type { StorefrontPageDetail } from '../../../types';
+import { isSafeHttpUrl } from '../../../utils/safeUrl';
 
 const PAGE_SIZE = 12;
 const EMPTY_FACETS = { minPrice: 0, maxPrice: 0, widths: [], materials: [] };
@@ -51,7 +52,10 @@ const PageCatalogPage: React.FC = () => {
         // externalUrl is an override independent of Type (NavMenu/MobileMenuSheet honor it the
         // same way) — PageType has no "ExternalLink" member, so gating on data.type here could
         // never actually match, leaving this redirect permanently unreachable.
-        if (data.externalUrl) {
+        // Only http(s): location.href isn't covered by React's javascript: blocking, so a stored
+        // javascript: URL here would run in every visitor's session (the backend now rejects it
+        // too — PageDto.ExternalUrl).
+        if (isSafeHttpUrl(data.externalUrl)) {
           window.location.href = data.externalUrl;
           return;
         }

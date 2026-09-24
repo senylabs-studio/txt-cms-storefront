@@ -74,3 +74,19 @@ describe('PageCatalogPage stale-response guard', () => {
     expect(screen.queryByText('Telas de lino')).not.toBeInTheDocument();
   });
 });
+
+// Regression test: externalUrl was assigned to window.location.href unchecked, so a stored
+// javascript: URL ran as XSS for every visitor of the page. It must be ignored instead.
+describe('PageCatalogPage externalUrl', () => {
+  it('does not navigate to a javascript: externalUrl and renders the page instead', async () => {
+    getPageBySlug.mockResolvedValue(pageDetail({ externalUrl: 'javascript:window.__pwned=true' }));
+    const router = createMemoryRouter(
+      [{ path: '/pages/:slug', element: <PageCatalogPage /> }],
+      { initialEntries: ['/pages/telas-lino'] },
+    );
+    render(<RouterProvider router={router} />);
+
+    expect(await screen.findByText('Telas de lino')).toBeInTheDocument();
+    expect((window as unknown as { __pwned?: boolean }).__pwned).toBeUndefined();
+  });
+});
