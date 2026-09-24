@@ -29,6 +29,7 @@ const ProductDetailPage: React.FC = () => {
   useEffect(() => {
     if (!slug) return;
     let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- data load: setState here is the loading/reset step of an external fetch
     setLoading(true);
     getProductBySlug(slug)
       .then(p => {

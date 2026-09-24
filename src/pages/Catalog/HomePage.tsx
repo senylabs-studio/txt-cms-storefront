@@ -50,12 +50,14 @@ const HomePage: React.FC = () => {
     // Search, filters and page change in quick succession — without this, a slower response for
     // an older search/filter could land last and show results that don't match what's selected.
     return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- t only formats the load-error message; i18n.language is already a dep
   }, [currentPage, debouncedSearch, filters, i18n.language]);
 
   useEffect(() => {
     setCurrentPage(1);
     if (debouncedSearch) setSearchParams({ search: debouncedSearch });
     else setSearchParams({});
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- setSearchParams changes identity on every navigation, so listing it would loop; sync only when the debounced search changes
   }, [debouncedSearch]);
 
   const handleFilterChange = (f: PageFilters) => {

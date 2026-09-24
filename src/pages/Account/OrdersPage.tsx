@@ -28,6 +28,7 @@ const OrdersPage: React.FC = () => {
       .finally(() => { if (!cancelled) setLoading(false); });
     // Clicking through pages quickly: a slower response for an earlier page must not land last.
     return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- t only formats the load-error message; refetch only on page change
   }, [currentPage]);
 
   return (

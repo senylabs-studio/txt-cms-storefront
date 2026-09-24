@@ -40,6 +40,7 @@ const CheckoutPage: React.FC = () => {
       const def = p.addresses.find(a => a.isDefault);
       if (def) { setShippingId(def.id); setBillingId(def.id); }
     }).catch(err => setAddressesError(getApiErrorMessage(err, t('checkout.loadAddressesError'))));
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- one-off checkout bootstrap per auth state; fetchCart/navigate/t don't change what's loaded
   }, [isAuthenticated]);
 
   // Fetch shipping rate whenever shipping address or cart changes

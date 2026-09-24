@@ -34,6 +34,7 @@ export const StockNotificationProvider: React.FC<{ children: React.ReactNode }> 
     }
   }, [isAuthenticated]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- data load: setState here is the loading/reset step of an external fetch
   useEffect(() => { load(); }, [load]);
 
   const isRequested = (productId?: number, variantId?: number) => {

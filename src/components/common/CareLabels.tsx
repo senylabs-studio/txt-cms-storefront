@@ -7,6 +7,7 @@ import iconDryClean from '../../assets/careIcons/percloroetileno.png';
 import iconIron     from '../../assets/careIcons/iron-temperature.webp';
 import oekoTex     from '../../assets/careIcons/oeko-tex.png';
 
+// eslint-disable-next-line react-refresh/only-export-components -- the label definitions live next to the component that renders them; dev-only HMR nicety
 export const CARE_LABEL_DEFS = [
   { bit: 1,  key: 'wash30',    tKey: 'careLabels.wash30',    icon: iconWash },
   { bit: 2,  key: 'noBleach',  tKey: 'careLabels.noBleach',  icon: iconNoBleach },

@@ -22,6 +22,7 @@ const CheckoutSuccessPage: React.FC = () => {
   useEffect(() => {
     // Refresh cart so it clears the checked-out cart
     fetchCart();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- refresh the cart once after checkout; fetchCart is redefined by the provider
   }, []);
 
   const handleSetPassword = async (e: React.FormEvent) => {

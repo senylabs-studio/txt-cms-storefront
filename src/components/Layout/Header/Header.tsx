@@ -43,6 +43,7 @@ const Header: React.FC = () => {
 
   useEffect(() => {
     const query = debouncedSearch.trim();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- data load: setState here is the loading/reset step of an external fetch (search suggestions)
     if (query.length < 2) { setSuggestions([]); setSuggestionsLoading(false); return; }
     let cancelled = false;
     setSuggestionsLoading(true);

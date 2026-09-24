@@ -107,6 +107,7 @@ const VariantDetailPage: React.FC = () => {
     // newer id's and silently overwrite the page with the wrong variant's data while the URL
     // still shows the new id.
     return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- navigate is only the error fallback; refetch only on id/language change
   }, [id, i18n.language]);
 
   useEffect(() => {
@@ -138,6 +139,7 @@ const VariantDetailPage: React.FC = () => {
       }).catch(() => {});
     }
     return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- t only formats the load-error message; re-running would reset the review form
   }, [variant?.productSlug, isAuthenticated]);
 
   useEffect(() => {
@@ -154,6 +156,7 @@ const VariantDetailPage: React.FC = () => {
     // "recently viewed" batch could resolve after a newer one's and overwrite the rail with a
     // stale list (missing the variant the customer is now actually viewing).
     return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed on the variant id on purpose: the variant object changes on every rating refresh
   }, [variant?.id]);
 
   const changeReviewsPage = (page: number) => {

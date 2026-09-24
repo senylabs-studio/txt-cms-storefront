@@ -37,6 +37,7 @@ const CartDrawer: React.FC = () => {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- drives the expiry countdown timer from the cart's expiresAt
     if (!cart?.expiresAt) { setTimeLeft(''); return; }
     const tick = () => {
       const diff = new Date(cart.expiresAt).getTime() - Date.now();
@@ -50,6 +51,7 @@ const CartDrawer: React.FC = () => {
     return () => clearInterval(id);
   }, [cart?.expiresAt, t]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- clears a stale item error each time the drawer opens
   useEffect(() => { if (drawerOpen) setItemError(''); }, [drawerOpen]);
 
   const isEmpty = !cart?.items?.length;

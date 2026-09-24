@@ -60,6 +60,7 @@ const CartPage: React.FC = () => {
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchCart is redefined by the provider; refetch only when auth state changes
   useEffect(() => { if (isAuthenticated) fetchCart(); }, [isAuthenticated]);
 
   useEffect(() => {
@@ -74,6 +75,7 @@ const CartPage: React.FC = () => {
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- t only formats the countdown text; restarting the timer on every render isn't wanted
   }, [cart?.expiresAt]);
 
   if (!isAuthenticated) return (

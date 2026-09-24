@@ -34,6 +34,7 @@ const PageCatalogPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- another category (slug) starts from page 1 with no filters
     setCurrentPage(1);
     setFilters({});
   }, [slug]);
@@ -41,6 +42,7 @@ const PageCatalogPage: React.FC = () => {
   useEffect(() => {
     if (!slug) return;
     let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- data load: setState here is the loading/reset step of an external fetch
     setLoading(true);
     setNotFound(false);
     getPageBySlug(slug, currentPage, PAGE_SIZE, filters)

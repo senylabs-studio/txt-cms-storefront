@@ -77,6 +77,7 @@ const AccountPage: React.FC = () => {
       .finally(() => setLoading(false));
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- loadInitialData is redefined every render; load once per mount
   useEffect(() => { loadInitialData(); }, []);
 
   const handleSaveProfile = async (e: React.FormEvent) => {

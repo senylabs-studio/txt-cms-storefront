@@ -37,6 +37,7 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   }, [isAuthenticated]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- data load: setState here is the loading/reset step of an external fetch
   useEffect(() => { load(); }, [load]);
 
   const isFavorite = (productId?: number, variantId?: number) => {
