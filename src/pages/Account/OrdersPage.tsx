@@ -19,12 +19,15 @@ const OrdersPage: React.FC = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    let cancelled = false;
     setLoading(true);
     setError('');
     getOrders(currentPage, 10)
-      .then(r => { setOrders(r.items); setTotalPages(r.totalPages); })
-      .catch(err => setError(getApiErrorMessage(err, t('orders.loadError'))))
-      .finally(() => setLoading(false));
+      .then(r => { if (!cancelled) { setOrders(r.items); setTotalPages(r.totalPages); } })
+      .catch(err => { if (!cancelled) setError(getApiErrorMessage(err, t('orders.loadError'))); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    // Clicking through pages quickly: a slower response for an earlier page must not land last.
+    return () => { cancelled = true; };
   }, [currentPage]);
 
   return (
