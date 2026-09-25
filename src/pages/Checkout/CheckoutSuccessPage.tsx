@@ -8,6 +8,7 @@ import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { convertGuestAccount } from '../../services/authService';
 import { getApiErrorMessage } from '../../utils/apiError';
+import { meetsPasswordRules } from '../../utils/password';
 
 const CheckoutSuccessPage: React.FC = () => {
   const { t } = useTranslation();
@@ -22,11 +23,16 @@ const CheckoutSuccessPage: React.FC = () => {
   useEffect(() => {
     // Refresh cart so it clears the checked-out cart
     fetchCart();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- refresh the cart once after checkout; fetchCart is redefined by the provider
   }, []);
 
   const handleSetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    if (!meetsPasswordRules(password)) {
+      setError(t('auth.register.passwordHint'));
+      return;
+    }
     setSaving(true);
     try {
       const data = await convertGuestAccount(password);

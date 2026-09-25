@@ -3,6 +3,7 @@
     "freeShipping": "Envío gratis en pedidos > €50",
     "myAccount": "Mi cuenta",
     "myOrders": "Mis pedidos",
+    "loginToExistingAccount": "Iniciar sesión con otra cuenta",
     "logout": "Cerrar sesión",
     "login": "Iniciar sesión",
     "register": "Registrarse",
@@ -49,7 +50,8 @@
     "removeCoupon": "Quitar",
     "couponDiscount": "Cupón {{code}}",
     "couponApplyError": "No se ha podido aplicar el cupón.",
-    "couponApplySuccess": "Cupón aplicado correctamente."
+    "couponApplySuccess": "Cupón aplicado correctamente.",
+    "recargoEquivalencia": "Recargo de equivalencia ({{percent}}%)"
   },
   "auth": {
     "login": {
@@ -73,7 +75,7 @@
       "phone": "Teléfono",
       "phoneOptional": "(opcional)",
       "phonePlaceholder": "+34 600 000 000",
-      "passwordHint": "Mínimo 6 caracteres",
+      "passwordHint": "Mínimo 6 caracteres, con mayúscula, minúscula, número y símbolo",
       "loading": "Creando cuenta...",
       "submit": "Crear cuenta",
       "hasAccount": "¿Ya tienes cuenta?",
@@ -346,7 +348,8 @@
     "add": "Añadir al tablero",
     "added": "Añadido al tablero",
     "remove": "Quitar del tablero",
-    "viewProduct": "Ver producto"
+    "viewProduct": "Ver producto",
+    "noLongerAvailable": "Ya no disponible"
   },
   "stockNotifications": {
     "notifyMe": "Avísame cuando esté disponible",

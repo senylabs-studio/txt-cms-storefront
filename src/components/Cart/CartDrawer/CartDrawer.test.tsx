@@ -31,7 +31,7 @@ vi.mock('../../../contexts/CartContext', () => ({
 const cartWithItems = (overrides: Partial<Cart> = {}): Cart => ({
   id: 1,
   expiresAt: '2099-01-01T00:00:00.000Z',
-  discountPercent: 0, couponDiscountAmount: 0,
+  discountPercent: 0, couponDiscountAmount: 0, recargoEquivalenciaPercent: 0, recargoEquivalenciaAmount: 0,
   total: 20,
   items: [
     { id: 1, productName: 'Tela azul', productCode: 'TA1', originalUnitPrice: 10, unitPrice: 10, quantity: 2, subtotal: 20, availableStock: 5, minQuantity: 0.3, quantityStep: 0.05 },
@@ -60,7 +60,7 @@ describe('CartDrawer', () => {
   });
 
   it('shows an empty-cart message and navigates to /catalog while closing the drawer', () => {
-    mockCart.cart = { id: 1, expiresAt: '2099-01-01T00:00:00.000Z', discountPercent: 0, couponDiscountAmount: 0, total: 0, items: [] };
+    mockCart.cart = { id: 1, expiresAt: '2099-01-01T00:00:00.000Z', discountPercent: 0, couponDiscountAmount: 0, recargoEquivalenciaPercent: 0, recargoEquivalenciaAmount: 0, total: 0, items: [] };
     renderDrawer();
 
     fireEvent.click(screen.getByText('cart.browseCatalog'));
@@ -155,6 +155,16 @@ describe('CartDrawer', () => {
     rerender(<CartDrawer />);
 
     await waitFor(() => expect(screen.queryByText('cart.removeError')).not.toBeInTheDocument());
+  });
+
+  // Regression test: the drawer's total already correctly includes recargo (via cart.total),
+  // but never broke it out as its own line the way CartPage does, so a recargo-liable customer
+  // checking out straight from the drawer never saw why the total was higher.
+  it('shows the recargo de equivalencia line when the cart has one', () => {
+    mockCart.cart = cartWithItems({ recargoEquivalenciaPercent: 5.2, recargoEquivalenciaAmount: 1.04, total: 21.04 });
+    renderDrawer();
+
+    expect(screen.getByText('€1.04')).toBeInTheDocument();
   });
 
   it('navigates to /checkout while closing the drawer', () => {

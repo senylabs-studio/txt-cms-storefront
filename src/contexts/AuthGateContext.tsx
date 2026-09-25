@@ -25,22 +25,33 @@ export const AuthGateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [loading, setLoading] = useState(false);
-  const resolveRef = useRef<((value: boolean) => void) | null>(null);
+  // A queue, not a single ref: the modal is one shared instance reachable from many
+  // concurrently-rendered cards (VariantCard, FeaturedProductsGrid, VariantDetailPage). A single
+  // resolveRef would let a second requireAuth() call (e.g. clicking "Add to cart" on a different
+  // product before the first prompt is answered) silently clobber the first call's resolver,
+  // leaving that first await stuck forever with no error. Everyone waiting resolves together with
+  // the same outcome once the gate closes.
+  const resolversRef = useRef<Array<(value: boolean) => void>>([]);
 
   const requireAuth = () => {
     if (isAuthenticated) return Promise.resolve(true);
-    setName('');
-    setEmail('');
-    setError('');
-    setFieldErrors({});
-    setShow(true);
-    return new Promise<boolean>(resolve => { resolveRef.current = resolve; });
+    return new Promise<boolean>(resolve => {
+      resolversRef.current.push(resolve);
+      if (!show) {
+        setName('');
+        setEmail('');
+        setError('');
+        setFieldErrors({});
+        setShow(true);
+      }
+    });
   };
 
   const close = (result: boolean) => {
     setShow(false);
-    resolveRef.current?.(result);
-    resolveRef.current = null;
+    const resolvers = resolversRef.current;
+    resolversRef.current = [];
+    resolvers.forEach(resolve => resolve(result));
   };
 
   const handleGuestSubmit = async (e: React.FormEvent) => {

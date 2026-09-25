@@ -12,6 +12,8 @@ import { getVisibleCountries, type VisibleCountry } from '../../services/country
 import { useToast } from '../../contexts/ToastContext';
 import { getApiErrorMessage, parseFieldErrors, type FieldErrors } from '../../utils/apiError';
 import type { StorefrontProfile, CustomerAddress } from '../../types';
+import { useAuth } from '../../contexts/AuthContext';
+import { meetsPasswordRules } from '../../utils/password';
 
 const emptyAddress: Partial<CustomerAddress> = {
   alias: '', recipientName: '', street: '', city: '', postalCode: '', province: '', country: 'ES', phone: '', isDefault: false,
@@ -19,6 +21,7 @@ const emptyAddress: Partial<CustomerAddress> = {
 
 const AccountPage: React.FC = () => {
   const { t } = useTranslation();
+  const { login, updateUser } = useAuth();
   const { showToast } = useToast();
   const [profile, setProfile] = useState<StorefrontProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -77,6 +80,7 @@ const AccountPage: React.FC = () => {
       .finally(() => setLoading(false));
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- loadInitialData is redefined every render; load once per mount
   useEffect(() => { loadInitialData(); }, []);
 
   const handleSaveProfile = async (e: React.FormEvent) => {
@@ -85,6 +89,7 @@ const AccountPage: React.FC = () => {
     setProfileMsg(null);
     try {
       await updateProfile({ name, phone: phone || undefined, taxId: taxId || undefined });
+      updateUser({ name });
       setProfileMsg({ type: 'success', text: t('account.saved') });
     } catch (err) {
       setProfileMsg({ type: 'danger', text: getApiErrorMessage(err, t('account.saveError')) });
@@ -107,7 +112,11 @@ const AccountPage: React.FC = () => {
     setEmailFieldErrors({});
     setEmailSaving(true);
     try {
-      await updateEmail(newEmail, profile?.isGuest ? undefined : emailPassword);
+      const refreshed = await updateEmail(newEmail, profile?.isGuest ? undefined : emailPassword);
+      // A registered customer's old token was just invalidated (security stamp rotated) — use
+      // the new one, or the next request would log them out as "session expired".
+      if (refreshed) login(refreshed);
+      else updateUser({ email: newEmail });
       setProfile(p => p ? { ...p, email: newEmail } : p);
       setShowEmailModal(false);
       showToast('success', t('account.emailChangeSuccess'));
@@ -124,13 +133,18 @@ const AccountPage: React.FC = () => {
     e.preventDefault();
     setPwdMsg(null);
     setPwdFieldErrors({});
+    if (!meetsPasswordRules(newPassword)) {
+      setPwdFieldErrors({ newPassword: t('auth.register.passwordHint') });
+      return;
+    }
     if (newPassword !== confirmPassword) {
       setPwdFieldErrors({ confirmPassword: t('account.passwordMismatch') });
       return;
     }
     setPwdSaving(true);
     try {
-      await changePassword(currentPassword, newPassword);
+      // Same as the email change: keep this session signed in with the fresh token.
+      login(await changePassword(currentPassword, newPassword));
       setPwdMsg({ type: 'success', text: t('account.passwordChanged') });
       setCurrentPassword(''); setNewPassword(''); setConfirmPassword('');
     } catch (e) {
@@ -184,7 +198,9 @@ const AccountPage: React.FC = () => {
     setAddrListError('');
     try {
       await deleteAddress(id);
-      setProfile(p => p ? { ...p, addresses: p.addresses.filter(a => a.id !== id) } : p);
+      // Reload rather than filter locally: deleting the default address makes the backend promote
+      // another one to default, which a local filter wouldn't show.
+      setProfile(await getProfile());
       showToast('success', t('account.addrDeleteSuccess'));
     } catch (e) {
       setAddrListError(getApiErrorMessage(e, t('account.addrDeleteError')));
@@ -278,41 +294,44 @@ const AccountPage: React.FC = () => {
               </Card.Body>
             </Card>
 
-            <Card className="mt-4">
-              <Card.Body>
-                <h5 className="fw-semibold mb-3"><FaLock className="me-2" />{t('account.changePasswordTitle')}</h5>
-                {pwdMsg && <Alert variant={pwdMsg.type} className="py-2">{pwdMsg.text}</Alert>}
-                <Form onSubmit={handleChangePassword}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>{t('account.currentPassword')}</Form.Label>
-                    <Form.Control
-                      type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)}
-                      required autoComplete="current-password" isInvalid={!!pwdFieldErrors.currentPassword}
-                    />
-                    <Form.Control.Feedback type="invalid">{pwdFieldErrors.currentPassword}</Form.Control.Feedback>
-                  </Form.Group>
-                  <Form.Group className="mb-3">
-                    <Form.Label>{t('account.newPassword')}</Form.Label>
-                    <Form.Control
-                      type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)}
-                      required autoComplete="new-password" minLength={6} isInvalid={!!pwdFieldErrors.newPassword}
-                    />
-                    <Form.Control.Feedback type="invalid">{pwdFieldErrors.newPassword}</Form.Control.Feedback>
-                  </Form.Group>
-                  <Form.Group className="mb-3">
-                    <Form.Label>{t('account.confirmPassword')}</Form.Label>
-                    <Form.Control
-                      type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
-                      required autoComplete="new-password" isInvalid={!!pwdFieldErrors.confirmPassword}
-                    />
-                    <Form.Control.Feedback type="invalid">{pwdFieldErrors.confirmPassword}</Form.Control.Feedback>
-                  </Form.Group>
-                  <Button type="submit" variant="primary" disabled={pwdSaving}>
-                    {pwdSaving ? <Spinner size="sm" animation="border" /> : t('account.changePassword')}
-                  </Button>
-                </Form>
-              </Card.Body>
-            </Card>
+            {/* A guest has no password (the backend 404s this for them) — they set one by converting. */}
+            {!profile?.isGuest && (
+              <Card className="mt-4">
+                <Card.Body>
+                  <h5 className="fw-semibold mb-3"><FaLock className="me-2" />{t('account.changePasswordTitle')}</h5>
+                  {pwdMsg && <Alert variant={pwdMsg.type} className="py-2">{pwdMsg.text}</Alert>}
+                  <Form onSubmit={handleChangePassword}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>{t('account.currentPassword')}</Form.Label>
+                      <Form.Control
+                        type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)}
+                        required autoComplete="current-password" isInvalid={!!pwdFieldErrors.currentPassword}
+                      />
+                      <Form.Control.Feedback type="invalid">{pwdFieldErrors.currentPassword}</Form.Control.Feedback>
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>{t('account.newPassword')}</Form.Label>
+                      <Form.Control
+                        type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)}
+                        required autoComplete="new-password" minLength={6} isInvalid={!!pwdFieldErrors.newPassword}
+                      />
+                      <Form.Control.Feedback type="invalid">{pwdFieldErrors.newPassword}</Form.Control.Feedback>
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>{t('account.confirmPassword')}</Form.Label>
+                      <Form.Control
+                        type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
+                        required autoComplete="new-password" isInvalid={!!pwdFieldErrors.confirmPassword}
+                      />
+                      <Form.Control.Feedback type="invalid">{pwdFieldErrors.confirmPassword}</Form.Control.Feedback>
+                    </Form.Group>
+                    <Button type="submit" variant="primary" disabled={pwdSaving}>
+                      {pwdSaving ? <Spinner size="sm" animation="border" /> : t('account.changePassword')}
+                    </Button>
+                  </Form>
+                </Card.Body>
+              </Card>
+            )}
 
             <Card className="mt-4">
               <Card.Body>

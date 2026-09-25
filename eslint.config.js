@@ -33,4 +33,13 @@ export default defineConfig([
       'react-refresh/only-export-components': 'warn',
     },
   },
+  {
+    // Context files export their Provider plus the matching use* hook by design (splitting them
+    // was deferred, see above) — every warning here was that same known, dev-only HMR case, so it
+    // stays on for components elsewhere without drowning real warnings in noise.
+    files: ['src/contexts/**/*.{ts,tsx}'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
 ])

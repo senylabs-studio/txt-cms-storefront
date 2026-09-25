@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, createMemoryRouter, RouterProvider } from 'react-router-dom';
 import VariantDetailPage from './VariantDetailPage';
 import type { StorefrontVariantDetail, ProductReview, PaginatedResponse } from '../../../types';
 
@@ -20,7 +20,9 @@ vi.mock('../../../components/common/FavoriteButton/FavoriteButton', () => ({ def
 vi.mock('../../../components/common/BoardButton/BoardButton', () => ({ default: () => <div /> }));
 vi.mock('../../../components/common/NotifyMeButton/NotifyMeButton', () => ({ default: () => <div /> }));
 vi.mock('../../../components/common/CareLabels', () => ({ default: () => <div /> }));
-vi.mock('../../../components/Product/VariantCard/VariantCard', () => ({ default: () => <div /> }));
+vi.mock('../../../components/Product/VariantCard/VariantCard', () => ({
+  default: ({ variant }: { variant: { name: string } }) => <div>{variant.name}</div>,
+}));
 
 const navigate = vi.fn();
 vi.mock('react-router-dom', async () => {
@@ -37,8 +39,8 @@ vi.mock('../../../contexts/CartContext', () => ({ useCart: () => mockCart }));
 
 vi.mock('../../../contexts/SiteSettingsContext', () => ({ useSiteSettings: () => ({ siteName: 'TXT Shop' }) }));
 
-const { getVariantById } = vi.hoisted(() => ({ getVariantById: vi.fn() }));
-vi.mock('../../../services/productService', () => ({ getVariantById }));
+const { getVariantById, getVariantsBatch } = vi.hoisted(() => ({ getVariantById: vi.fn(), getVariantsBatch: vi.fn().mockResolvedValue([]) }));
+vi.mock('../../../services/productService', () => ({ getVariantById, getVariantsBatch }));
 
 const { getProductReviews, getMyReview, submitReview } = vi.hoisted(() => ({
   getProductReviews: vi.fn(),
@@ -212,5 +214,116 @@ describe('VariantDetailPage alsoBought', () => {
     await screen.findByText('Tela Azul');
     expect(screen.queryByText('product.alsoBought')).not.toBeInTheDocument();
     expect(screen.queryByText('product.youMightAlsoLike')).not.toBeInTheDocument();
+  });
+});
+
+// Regression test: the data-fetching effect had no stale-response guard — in-app navigation
+// between two /variant/:id routes (siblings/alsoBought/recentlyViewed links, or browser Back/
+// Forward) doesn't unmount this component, so an older id's slower response resolving after a
+// newer id's could silently overwrite the page with the wrong variant's data while the URL still
+// showed the new id. Same bug class already fixed elsewhere this session (block-translation
+// editors, useEntityTranslations).
+describe('VariantDetailPage stale-response guard', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
+    mockAuth.isAuthenticated = true;
+    getProductReviews.mockResolvedValue(reviewsPage([]));
+    getMyReview.mockResolvedValue({ hasPurchased: false, review: null });
+  });
+
+  function deferred<T>() {
+    let resolve!: (value: T) => void;
+    const promise = new Promise<T>(res => { resolve = res; });
+    return { promise, resolve };
+  }
+
+  it('ignores a stale response for a variant id no longer current after in-app navigation (no unmount)', async () => {
+    const v1 = deferred<StorefrontVariantDetail>();
+    const v2 = deferred<StorefrontVariantDetail>();
+    getVariantById.mockImplementation((id: number) => (id === 1 ? v1.promise : v2.promise));
+
+    const router = createMemoryRouter(
+      [{ path: '/variant/:id', element: <VariantDetailPage /> }],
+      { initialEntries: ['/variant/1'] },
+    );
+    render(<RouterProvider router={router} />);
+
+    // Navigate to variant 2 before variant 1's fetch resolves — mirrors clicking a related-
+    // variant link, or Back/Forward, on the same mounted route.
+    router.navigate('/variant/2');
+    v2.resolve(variant({ id: 2, name: 'Tela Verde' }));
+    await screen.findByText('Tela Verde');
+
+    // The stale, slower response for variant 1 resolves afterward — must be ignored.
+    v1.resolve(variant({ id: 1, name: 'Tela Azul' }));
+    await new Promise(r => setTimeout(r, 0));
+
+    expect(screen.getByText('Tela Verde')).toBeInTheDocument();
+    expect(screen.queryByText('Tela Azul')).not.toBeInTheDocument();
+  });
+
+  // Regression test: a SECOND effect in this same component (populating the "recently viewed"
+  // rail via getVariantsBatch) had no stale-response guard of its own, unlike the main
+  // variant-fetch effect above — a genuinely new, previously-unchecked instance of this bug class.
+  it('ignores a stale "recently viewed" batch response for a variant id no longer current', async () => {
+    localStorage.setItem('recently_viewed_variants', JSON.stringify([99]));
+    getVariantById.mockImplementation((id: number) =>
+      Promise.resolve(variant({ id, name: id === 1 ? 'Tela Azul' : 'Tela Verde' })));
+
+    const batch1 = deferred<{ id: number; name: string }[]>();
+    const batch2 = deferred<{ id: number; name: string }[]>();
+    // recordVariantView(id) runs before getRecentlyViewedIds(id) in the effect, so variant 1's
+    // batch excludes only [1] (-> ids [99], length 1) and variant 2's excludes only [2]
+    // (-> ids [1, 99], length 2) — distinguishable by the ids array length.
+    getVariantsBatch.mockImplementation((ids: number[]) => (ids.length === 1 ? batch1.promise : batch2.promise));
+
+    const router = createMemoryRouter(
+      [{ path: '/variant/:id', element: <VariantDetailPage /> }],
+      { initialEntries: ['/variant/1'] },
+    );
+    render(<RouterProvider router={router} />);
+    await screen.findByText('Tela Azul');
+
+    router.navigate('/variant/2');
+    await screen.findByText('Tela Verde');
+
+    // The newer "recently viewed" batch (triggered by variant 2's mount) resolves first.
+    batch2.resolve([{ id: 10, name: 'Reciente Nuevo' }]);
+    await screen.findByText('Reciente Nuevo');
+
+    // The stale, slower batch from variant 1 resolves afterward — must be ignored.
+    batch1.resolve([{ id: 11, name: 'Reciente Viejo' }]);
+    await new Promise(r => setTimeout(r, 0));
+
+    expect(screen.getByText('Reciente Nuevo')).toBeInTheDocument();
+    expect(screen.queryByText('Reciente Viejo')).not.toBeInTheDocument();
+  });
+
+  // Regression test: following an "also bought"/"recently viewed" link to a DIFFERENT product
+  // doesn't unmount the page. The customer's own rating/comment for the previous product stayed
+  // in the form whenever the new product had no review of theirs yet, ready to be submitted as a
+  // review of the wrong product.
+  it('does not carry the previous product\'s own review into the form after navigating to another product', async () => {
+    getVariantById.mockImplementation((id: number) => Promise.resolve(id === 1
+      ? variant()
+      : variant({ id: 2, name: 'Lino Verde', productId: 2, productSlug: 'lino' })));
+    getMyReview.mockImplementation((slug: string) => Promise.resolve(slug === 'tela'
+      ? { hasPurchased: true, review: { id: 1, customerName: 'Jane', rating: 5, comment: 'Genial', createdAt: '2026-01-01T00:00:00.000Z' } }
+      : { hasPurchased: true, review: null }));
+    const router = createMemoryRouter(
+      [{ path: '/variant/:id', element: <VariantDetailPage /> }],
+      { initialEntries: ['/variant/1'] },
+    );
+    render(<RouterProvider router={router} />);
+    expect(await screen.findByDisplayValue('Genial')).toBeInTheDocument();
+
+    router.navigate('/variant/2');
+    await screen.findByText('Lino Verde');
+    await waitFor(() => expect(getMyReview).toHaveBeenCalledWith('lino'));
+    await new Promise(r => setTimeout(r, 0));
+
+    expect(screen.queryByDisplayValue('Genial')).not.toBeInTheDocument();
+    expect(screen.queryByText('product.editYourReview')).not.toBeInTheDocument();
   });
 });

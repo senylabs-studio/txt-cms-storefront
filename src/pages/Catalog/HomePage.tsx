@@ -40,18 +40,24 @@ const HomePage: React.FC = () => {
   const debouncedSearch = useDebounce(search, 400);
 
   useEffect(() => {
+    let cancelled = false;
     setLoading(true);
     setError('');
     getVariantsPaged(currentPage, 12, debouncedSearch, undefined, filters.orderBy || 'name', 'asc', filters)
-      .then(r => { setVariants(r.items); setTotalPages(r.totalPages); setTotalItems(r.totalItems); setFacets(r.facets ?? EMPTY_FACETS); })
-      .catch(err => setError(getApiErrorMessage(err, t('catalog.home.loadError'))))
-      .finally(() => setLoading(false));
+      .then(r => { if (cancelled) return; setVariants(r.items); setTotalPages(r.totalPages); setTotalItems(r.totalItems); setFacets(r.facets ?? EMPTY_FACETS); })
+      .catch(err => { if (!cancelled) setError(getApiErrorMessage(err, t('catalog.home.loadError'))); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    // Search, filters and page change in quick succession — without this, a slower response for
+    // an older search/filter could land last and show results that don't match what's selected.
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- t only formats the load-error message; i18n.language is already a dep
   }, [currentPage, debouncedSearch, filters, i18n.language]);
 
   useEffect(() => {
     setCurrentPage(1);
     if (debouncedSearch) setSearchParams({ search: debouncedSearch });
     else setSearchParams({});
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- setSearchParams changes identity on every navigation, so listing it would loop; sync only when the debounced search changes
   }, [debouncedSearch]);
 
   const handleFilterChange = (f: PageFilters) => {

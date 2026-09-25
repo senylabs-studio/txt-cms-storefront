@@ -60,6 +60,7 @@ const CartPage: React.FC = () => {
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchCart is redefined by the provider; refetch only when auth state changes
   useEffect(() => { if (isAuthenticated) fetchCart(); }, [isAuthenticated]);
 
   useEffect(() => {
@@ -74,6 +75,7 @@ const CartPage: React.FC = () => {
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- t only formats the countdown text; restarting the timer on every render isn't wanted
   }, [cart?.expiresAt]);
 
   if (!isAuthenticated) return (
@@ -177,6 +179,12 @@ const CartPage: React.FC = () => {
                     <div className="d-flex justify-content-between small text-success mb-1">
                       <span>{t('cart.couponDiscount', { code: cart!.couponCode })}</span>
                       <span>−€{cart!.couponDiscountAmount.toFixed(2)}</span>
+                    </div>
+                  )}
+                  {cart!.recargoEquivalenciaAmount > 0 && (
+                    <div className="d-flex justify-content-between small text-muted mb-1">
+                      <span>{t('cart.recargoEquivalencia', { percent: cart!.recargoEquivalenciaPercent })}</span>
+                      <span>€{cart!.recargoEquivalenciaAmount.toFixed(2)}</span>
                     </div>
                   )}
                   <hr />

@@ -3,6 +3,7 @@
     "freeShipping": "Enviament gratuït en comandes > €50",
     "myAccount": "El meu compte",
     "myOrders": "Les meves comandes",
+    "loginToExistingAccount": "Iniciar sessió amb un altre compte",
     "logout": "Tancar sessió",
     "login": "Iniciar sessió",
     "register": "Registrar-se",
@@ -49,7 +50,8 @@
     "removeCoupon": "Treure",
     "couponDiscount": "Cupó {{code}}",
     "couponApplyError": "No s'ha pogut aplicar el cupó.",
-    "couponApplySuccess": "Cupó aplicat correctament."
+    "couponApplySuccess": "Cupó aplicat correctament.",
+    "recargoEquivalencia": "Recàrrec d'equivalència ({{percent}}%)"
   },
   "auth": {
     "login": {
@@ -73,7 +75,7 @@
       "phone": "Telèfon",
       "phoneOptional": "(opcional)",
       "phonePlaceholder": "+34 600 000 000",
-      "passwordHint": "Mínim 6 caràcters",
+      "passwordHint": "Mínim 6 caràcters, amb majúscula, minúscula, número i símbol",
       "loading": "Creant compte...",
       "submit": "Crear compte",
       "hasAccount": "Ja tens compte?",
@@ -346,7 +348,8 @@
     "add": "Afegir al tauler",
     "added": "Afegit al tauler",
     "remove": "Treure del tauler",
-    "viewProduct": "Veure producte"
+    "viewProduct": "Veure producte",
+    "noLongerAvailable": "Ja no disponible"
   },
   "stockNotifications": {
     "notifyMe": "Avisa'm quan estigui disponible",

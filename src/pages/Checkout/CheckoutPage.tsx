@@ -40,6 +40,7 @@ const CheckoutPage: React.FC = () => {
       const def = p.addresses.find(a => a.isDefault);
       if (def) { setShippingId(def.id); setBillingId(def.id); }
     }).catch(err => setAddressesError(getApiErrorMessage(err, t('checkout.loadAddressesError'))));
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- one-off checkout bootstrap per auth state; fetchCart/navigate/t don't change what's loaded
   }, [isAuthenticated]);
 
   // Fetch shipping rate whenever shipping address or cart changes
@@ -51,11 +52,16 @@ const CheckoutPage: React.FC = () => {
     const addr = addresses.find(a => a.id === shippingId);
     if (!addr?.country) { setShippingRate(undefined); return; }
 
+    let cancelled = false;
     const cartSubtotal = cart.items.reduce((sum, i) => sum + i.subtotal, 0);
     setShippingLoading(true);
-    getApplicableShippingRate(addr.country, cartSubtotal).then(rate => {
-      setShippingRate(rate);
-    }).finally(() => setShippingLoading(false));
+    getApplicableShippingRate(addr.country, cartSubtotal)
+      .then(rate => { if (!cancelled) setShippingRate(rate); })
+      .finally(() => { if (!cancelled) setShippingLoading(false); });
+    // Switching the shipping address twice in quick succession (before the first lookup
+    // resolves) must not let the slower, now-stale response overwrite the rate for the address
+    // actually selected now — same class of stale-response bug this codebase has hit before.
+    return () => { cancelled = true; };
   }, [shippingId, addresses, cart]);
 
   // Auto-submit the Redsys form once we have the data
@@ -65,10 +71,40 @@ const CheckoutPage: React.FC = () => {
     }
   }, [redsysData]);
 
+  // handleProceedToPayment never resets `loading` on success — it's mid-navigation to the
+  // Redsys-hosted page, expecting the browser to leave. If the customer hits Back before
+  // completing payment, most browsers restore this exact page (including its JS state) from the
+  // back/forward cache instead of reloading, which would otherwise leave the button stuck on
+  // "Procesando…" forever with no way to retry. `pageshow`'s `persisted` flag is the standard way
+  // to detect that restoration and reset the stale in-flight state.
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        setLoading(false);
+        setRedsysData(null);
+      }
+    };
+    window.addEventListener('pageshow', handlePageShow);
+    return () => window.removeEventListener('pageshow', handlePageShow);
+  }, []);
+
   const cartSubtotal = cart?.items.reduce((sum, i) => sum + i.subtotal, 0) ?? 0;
   const couponDiscount = cart?.couponDiscountAmount ?? 0;
   const estimatedShipping = shippingRate?.shippingCost ?? 0;
-  const estimatedTotal = Math.max(0, cartSubtotal - couponDiscount) + estimatedShipping;
+  const netAfterDiscount = Math.max(0, cartSubtotal - couponDiscount);
+  // The cart's own recargo estimate (cart.recargoEquivalenciaAmount) is computed on
+  // subtotal-coupon only, since shipping is unknown until an address is picked here — but
+  // CheckoutService.InitiatePaymentAsync actually charges recargo on subtotal-coupon+shipping,
+  // so using the cart's figure as-is understates this page's Total by however much recargo
+  // applies to the shipping cost (grows with pricier shipping rates, not just "a few cents").
+  // The frontend has no VAT rate to redo the exact base/recargo split itself, so instead of
+  // omitting shipping from the estimate, scale the cart's own recargo proportionally to the
+  // shipping-inclusive base — closer to the real charge without needing a new VAT-rate lookup.
+  // The real, authoritative amount is always computed server-side regardless; this only affects
+  // what's shown here before redirecting to Redsys.
+  const recargoRatio = netAfterDiscount > 0 ? (cart?.recargoEquivalenciaAmount ?? 0) / netAfterDiscount : 0;
+  const estimatedRecargo = Math.round((netAfterDiscount + estimatedShipping) * recargoRatio * 100) / 100;
+  const estimatedTotal = netAfterDiscount + estimatedShipping + estimatedRecargo;
 
   const handleProceedToPayment = async () => {
     setLoading(true);
@@ -234,6 +270,13 @@ const CheckoutPage: React.FC = () => {
                   <Alert variant="warning" className="py-2 small">
                     {t('checkout.noShippingRate')}
                   </Alert>
+                )}
+
+                {estimatedRecargo > 0 && (
+                  <div className="d-flex justify-content-between small text-muted mb-2">
+                    <span>{t('cart.recargoEquivalencia', { percent: cart?.recargoEquivalenciaPercent ?? 0 })}</span>
+                    <span>€{estimatedRecargo.toFixed(2)}</span>
+                  </div>
                 )}
 
                 <hr className="my-2" />

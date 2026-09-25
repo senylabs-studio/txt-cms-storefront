@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Container, Row, Col, Button, Spinner, Badge } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaHeart, FaShoppingCart, FaTrash } from 'react-icons/fa';
@@ -22,11 +22,18 @@ const FavoritesPage: React.FC = () => {
   const { showToast } = useToast();
   const navigate = useNavigate();
 
+  // Reloads on every language switch; only the latest request may write, or a slower response
+  // in the previous language could land last and show the favorites in the wrong language.
+  const latestRequest = useRef(0);
   const load = async () => {
+    const request = ++latestRequest.current;
     setLoading(true);
-    try { setItems(await getFavorites()); }
-    catch { setItems([]); }
-    finally { setLoading(false); }
+    try {
+      const favorites = await getFavorites();
+      if (request === latestRequest.current) setItems(favorites);
+    }
+    catch { if (request === latestRequest.current) setItems([]); }
+    finally { if (request === latestRequest.current) setLoading(false); }
   };
 
   useEffect(() => { load(); }, [i18n.language]);

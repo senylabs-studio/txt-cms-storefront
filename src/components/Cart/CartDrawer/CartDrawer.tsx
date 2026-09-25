@@ -37,6 +37,7 @@ const CartDrawer: React.FC = () => {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- drives the expiry countdown timer from the cart's expiresAt
     if (!cart?.expiresAt) { setTimeLeft(''); return; }
     const tick = () => {
       const diff = new Date(cart.expiresAt).getTime() - Date.now();
@@ -50,6 +51,7 @@ const CartDrawer: React.FC = () => {
     return () => clearInterval(id);
   }, [cart?.expiresAt, t]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- clears a stale item error each time the drawer opens
   useEffect(() => { if (drawerOpen) setItemError(''); }, [drawerOpen]);
 
   const isEmpty = !cart?.items?.length;
@@ -126,6 +128,12 @@ const CartDrawer: React.FC = () => {
                 <div className="d-flex justify-content-between small text-success mb-1">
                   <span>{t('cart.discount', { percent: cart!.discountPercent })}</span>
                   <span>−€{cart!.items.reduce((s, i) => s + (i.originalUnitPrice - i.unitPrice) * i.quantity, 0).toFixed(2)}</span>
+                </div>
+              )}
+              {cart!.recargoEquivalenciaAmount > 0 && (
+                <div className="d-flex justify-content-between small text-muted mb-1">
+                  <span>{t('cart.recargoEquivalencia', { percent: cart!.recargoEquivalenciaPercent })}</span>
+                  <span>€{cart!.recargoEquivalenciaAmount.toFixed(2)}</span>
                 </div>
               )}
               <div className="d-flex justify-content-between fw-bold fs-5 mb-3">

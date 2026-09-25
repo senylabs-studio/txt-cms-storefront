@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { resetPassword } from '../../services/authService';
 import { getApiErrorMessage, parseFieldErrors, type FieldErrors } from '../../utils/apiError';
+import { meetsPasswordRules } from '../../utils/password';
 
 const ResetPasswordPage: React.FC = () => {
   const { t } = useTranslation();
@@ -23,6 +24,10 @@ const ResetPasswordPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!meetsPasswordRules(newPassword)) {
+      setFieldErrors({ newPassword: t('auth.register.passwordHint') });
+      return;
+    }
     if (newPassword !== confirmPassword) {
       setFieldErrors({ confirmPassword: t('auth.resetPassword.passwordMismatch') });
       return;

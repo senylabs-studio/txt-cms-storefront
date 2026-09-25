@@ -93,40 +93,70 @@ const VariantDetailPage: React.FC = () => {
 
   useEffect(() => {
     if (!id) return;
+    let cancelled = false;
     setLoading(true);
     setSelectedImage(0);
     setDescExpanded(false);
     getVariantById(Number(id))
-      .then(v => { setVariant(v); setQuantity(v.minQuantity); })
-      .catch((e) => { if (e?.response?.status === 404) setNotFound(true); else navigate('/catalog'); })
-      .finally(() => setLoading(false));
+      .then(v => { if (!cancelled) { setVariant(v); setQuantity(v.minQuantity); } })
+      .catch((e) => { if (!cancelled) { if (e?.response?.status === 404) setNotFound(true); else navigate('/catalog'); } })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    // In-page "siblings"/"also bought"/"recently viewed" links navigate to another
+    // /variant/:id without unmounting this component, and the browser Back/Forward buttons can
+    // do the same — without this guard, an older id's slower response could resolve after a
+    // newer id's and silently overwrite the page with the wrong variant's data while the URL
+    // still shows the new id.
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- navigate is only the error fallback; refetch only on id/language change
   }, [id, i18n.language]);
 
   useEffect(() => {
     if (!variant?.productSlug) return;
+    let cancelled = false;
+    // "Also bought"/"recently viewed" links switch to another product without unmounting this
+    // page — everything review-related must start clean, or the previous product's reviews and
+    // (worse) the customer's own rating/comment for it would stay in the form and could be
+    // submitted as a review of this product.
+    setReviews([]);
     setReviewsPage(1);
+    setReviewsTotalPages(0);
     setReviewsError('');
+    setMyReview(null);
+    setReviewRating(0);
+    setReviewComment('');
+    setReviewMsg(null);
     getProductReviews(variant.productSlug, 1).then(r => {
+      if (cancelled) return;
       setReviews(r.items);
       setReviewsTotalPages(r.totalPages);
-    }).catch(err => setReviewsError(getApiErrorMessage(err, t('product.reviewsLoadError'))));
+    }).catch(err => { if (!cancelled) setReviewsError(getApiErrorMessage(err, t('product.reviewsLoadError'))); });
 
     if (isAuthenticated) {
       getMyReview(variant.productSlug).then(status => {
+        if (cancelled) return;
         setMyReview(status);
         if (status.review) { setReviewRating(status.review.rating); setReviewComment(status.review.comment ?? ''); }
       }).catch(() => {});
-    } else {
-      setMyReview(null);
     }
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- t only formats the load-error message; re-running would reset the review form
   }, [variant?.productSlug, isAuthenticated]);
 
   useEffect(() => {
     if (!variant) return;
+    let cancelled = false;
     recordVariantView(variant.id);
     const ids = getRecentlyViewedIds(variant.id);
     if (ids.length === 0) { setRecentlyViewed([]); return; }
-    getVariantsBatch(ids).then(setRecentlyViewed).catch(() => setRecentlyViewed([]));
+    getVariantsBatch(ids)
+      .then(v => { if (!cancelled) setRecentlyViewed(v); })
+      .catch(() => { if (!cancelled) setRecentlyViewed([]); });
+    // Same stale-response concern as the main variant-fetch effect above: following an in-page
+    // link to another variant doesn't unmount this component, so an older variant's slower
+    // "recently viewed" batch could resolve after a newer one's and overwrite the rail with a
+    // stale list (missing the variant the customer is now actually viewing).
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed on the variant id on purpose: the variant object changes on every rating refresh
   }, [variant?.id]);
 
   const changeReviewsPage = (page: number) => {

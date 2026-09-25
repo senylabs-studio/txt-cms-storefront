@@ -102,6 +102,7 @@ const ProductFilters: React.FC<Props> = ({ facets, filters, onChange, onClose })
   // fetch resolves; without absMin/absMax here, localMin/localMax would permanently stick at the
   // 0/0 they were lazily initialized to, showing "€0 – €0" even once real prices are in.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- re-syncs the draft/slider state when applied filters or facets change (see comment above)
     setDraft(filters);
     setLocalMin(filters.minPrice ?? absMin);
     setLocalMax(filters.maxPrice ?? absMax);

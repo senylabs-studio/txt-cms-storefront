@@ -42,7 +42,7 @@ vi.mock('../../contexts/CartContext', () => ({
 const cartWithItems = (overrides: Partial<Cart> = {}): Cart => ({
   id: 1,
   expiresAt: '2099-01-01T00:00:00.000Z',
-  discountPercent: 0, couponDiscountAmount: 0,
+  discountPercent: 0, couponDiscountAmount: 0, recargoEquivalenciaPercent: 0, recargoEquivalenciaAmount: 0,
   total: 20,
   items: [
     { id: 1, productName: 'Tela azul', productCode: 'TA1', originalUnitPrice: 10, unitPrice: 10, quantity: 2, subtotal: 20, availableStock: 5, minQuantity: 0.3, quantityStep: 0.05 },
@@ -80,7 +80,7 @@ describe('CartPage', () => {
   });
 
   it('shows an empty-cart message and navigates to /catalog from it', () => {
-    mockCart.cart = { id: 1, expiresAt: '2099-01-01T00:00:00.000Z', discountPercent: 0, couponDiscountAmount: 0, total: 0, items: [] };
+    mockCart.cart = { id: 1, expiresAt: '2099-01-01T00:00:00.000Z', discountPercent: 0, couponDiscountAmount: 0, recargoEquivalenciaPercent: 0, recargoEquivalenciaAmount: 0, total: 0, items: [] };
     renderCartPage();
 
     expect(screen.getByText('cart.empty')).toBeInTheDocument();
@@ -193,6 +193,21 @@ describe('CartPage', () => {
 
     fireEvent.click(screen.getByText('cart.removeCoupon'));
     expect(mockCart.removeCoupon).toHaveBeenCalled();
+  });
+
+  it('shows the recargo de equivalencia line when the customer is subject to it', () => {
+    mockCart.cart = cartWithItems({ recargoEquivalenciaPercent: 5.2, recargoEquivalenciaAmount: 1.04, total: 21.04 });
+    renderCartPage();
+
+    expect(screen.getByText('cart.recargoEquivalencia')).toBeInTheDocument();
+    expect(screen.getByText('€1.04')).toBeInTheDocument();
+  });
+
+  it('does not show a recargo de equivalencia line for a customer not subject to it', () => {
+    mockCart.cart = cartWithItems(); // recargoEquivalenciaAmount: 0
+    renderCartPage();
+
+    expect(screen.queryByText('cart.recargoEquivalencia')).not.toBeInTheDocument();
   });
 
   it('shows the couponError surfaced by the cart', () => {

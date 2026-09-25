@@ -36,8 +36,11 @@ const BannerSlideContent: React.FC<{ slide: HomeBannerSlide }> = ({ slide }) => 
     <div className="home-banner-overlay" style={overlayStyle}>
       {slide.title && <h1 className="home-banner-title">{slide.title}</h1>}
       {slide.subtitle && <p className="home-banner-subtitle" style={subtitleMarginForAlign(slide.textAlign)}>{slide.subtitle}</p>}
+      {/* Admin-authored URL (may be internal or external) — plain <a>, not <Link>, which
+          resolves any absolute URL as an app-relative pathname and silently breaks it. Matches
+          PageBlockRenderer's BannerBlock (the equivalent Page-block field). */}
       {slide.buttonText && slide.buttonUrl && (
-        <Link to={slide.buttonUrl} className="btn btn-light btn-lg px-4">{slide.buttonText}</Link>
+        <a href={slide.buttonUrl} className="btn btn-light btn-lg px-4">{slide.buttonText}</a>
       )}
     </div>
   );
@@ -91,12 +94,14 @@ const ImageGridBlock: React.FC<{ config: HomeImageGridBlockConfig }> = ({ config
         {images.map((img, i) => (
           <Col key={i} xs={6} sm={4} md={colSize}>
             {img.linkUrl ? (
-              <Link to={img.linkUrl} className="d-block">
+              // Admin-authored URL (may be internal or external) — plain <a>, not <Link>. Matches
+              // PageBlockRenderer's Gallery/Image blocks (the equivalent Page-block field).
+              <a href={img.linkUrl} target="_blank" rel="noopener noreferrer" className="d-block">
                 <div className="home-image-grid-item">
                   <img src={img.imageUrl} alt={img.caption ?? ''} className="w-100 h-100 object-fit-cover" />
                   {img.caption && <div className="home-image-grid-caption">{img.caption}</div>}
                 </div>
-              </Link>
+              </a>
             ) : (
               <div className="home-image-grid-item">
                 <img src={img.imageUrl} alt={img.caption ?? ''} className="w-100 h-100 object-fit-cover" />
@@ -138,7 +143,9 @@ const ImageTextBlock: React.FC<{ config: HomeImageTextBlockConfig }> = ({ config
           {config.title && <h2 className="fw-bold mb-3">{config.title}</h2>}
           <p style={{ whiteSpace: 'pre-line', lineHeight: 1.8 }}>{config.text}</p>
           {config.buttonText && config.buttonUrl && (
-            <Link to={config.buttonUrl} className="btn btn-primary mt-2">{config.buttonText}</Link>
+            // Admin-authored URL (may be internal or external) — plain <a>, not <Link>. Matches
+            // PageBlockRenderer's ImageTextBlock (the equivalent Page-block field).
+            <a href={config.buttonUrl} className="btn btn-primary mt-2" target="_blank" rel="noopener noreferrer">{config.buttonText}</a>
           )}
         </Col>
         {!imageLeft && config.imageUrl && (

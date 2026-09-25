@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import i18n from '../i18n';
+import { updatePreferredLanguage } from '../services/profileService';
 import type { AuthResponse } from '../types';
 
 interface AuthState {
@@ -14,6 +16,7 @@ interface AuthContextType extends AuthState {
   login: (data: AuthResponse) => void;
   logout: () => void;
   setIsGuest: (isGuest: boolean) => void;
+  updateUser: (patch: { name?: string; email?: string }) => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -52,7 +55,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
-  return <AuthContext.Provider value={{ ...state, login, logout, setIsGuest }}>{children}</AuthContext.Provider>;
+  // Keeps the header (and stored session) in step after a profile name/email change — it used to
+  // show the old name until the next login, up to 7 days later.
+  const updateUser = (patch: { name?: string; email?: string }) => {
+    setState(prev => {
+      const user = localStorage.getItem('storefront_user');
+      if (user) localStorage.setItem('storefront_user', JSON.stringify({ ...JSON.parse(user), ...patch }));
+      return { ...prev, ...patch };
+    });
+  };
+
+  // Emails go out in the customer's saved preferred language, which the backend only set at
+  // login/register — switching language mid-session kept emails in the old one.
+  useEffect(() => {
+    if (!state.isAuthenticated) return;
+    const sync = (lng: string) => { updatePreferredLanguage(lng.split('-')[0]).catch(() => {}); };
+    i18n.on('languageChanged', sync);
+    return () => { i18n.off('languageChanged', sync); };
+  }, [state.isAuthenticated]);
+
+  return <AuthContext.Provider value={{ ...state, login, logout, setIsGuest, updateUser }}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {

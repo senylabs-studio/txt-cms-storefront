@@ -13,6 +13,7 @@ import { getPageBySlug, type PageFilters } from '../../../services/pageService';
 import { useSiteSettings } from '../../../contexts/SiteSettingsContext';
 import { useDocumentMeta } from '../../../hooks/useDocumentMeta';
 import type { StorefrontPageDetail } from '../../../types';
+import { isSafeHttpUrl } from '../../../utils/safeUrl';
 
 const PAGE_SIZE = 12;
 const EMPTY_FACETS = { minPrice: 0, maxPrice: 0, widths: [], materials: [] };
@@ -34,24 +35,39 @@ const PageCatalogPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- another category (slug) starts from page 1 with no filters
     setCurrentPage(1);
     setFilters({});
   }, [slug]);
 
   useEffect(() => {
     if (!slug) return;
+    let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- data load: setState here is the loading/reset step of an external fetch
     setLoading(true);
     setNotFound(false);
     getPageBySlug(slug, currentPage, PAGE_SIZE, filters)
       .then(data => {
-        if (data.type === 'ExternalLink' && data.externalUrl) {
+        if (cancelled) return;
+        // externalUrl is an override independent of Type (NavMenu/MobileMenuSheet honor it the
+        // same way) — PageType has no "ExternalLink" member, so gating on data.type here could
+        // never actually match, leaving this redirect permanently unreachable.
+        // Only http(s): location.href isn't covered by React's javascript: blocking, so a stored
+        // javascript: URL here would run in every visitor's session (the backend now rejects it
+        // too — PageDto.ExternalUrl).
+        if (isSafeHttpUrl(data.externalUrl)) {
           window.location.href = data.externalUrl;
           return;
         }
         setPageDetail(data);
       })
-      .catch(e => { if (e?.response?.status === 404) setNotFound(true); })
-      .finally(() => setLoading(false));
+      .catch(e => { if (cancelled) return; if (e?.response?.status === 404) setNotFound(true); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    // Clicking a different category link (or rapidly toggling filters) before the previous
+    // request resolves doesn't unmount this component — without this guard, an older slug's/
+    // filter-state's slower response could resolve after a newer one's and silently overwrite the
+    // page with the wrong category's products while the URL/filters still show the new state.
+    return () => { cancelled = true; };
   }, [slug, currentPage, filters, i18n.language]);
 
   const handleFilterChange = (f: PageFilters) => {

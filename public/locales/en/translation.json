@@ -3,6 +3,7 @@
     "freeShipping": "Free shipping on orders > €50",
     "myAccount": "My account",
     "myOrders": "My orders",
+    "loginToExistingAccount": "Log in to an existing account",
     "logout": "Log out",
     "login": "Log in",
     "register": "Sign up",
@@ -49,7 +50,8 @@
     "removeCoupon": "Remove",
     "couponDiscount": "Coupon {{code}}",
     "couponApplyError": "Couldn't apply the coupon.",
-    "couponApplySuccess": "Coupon applied successfully."
+    "couponApplySuccess": "Coupon applied successfully.",
+    "recargoEquivalencia": "Equivalence surcharge ({{percent}}%)"
   },
   "auth": {
     "login": {
@@ -73,7 +75,7 @@
       "phone": "Phone",
       "phoneOptional": "(optional)",
       "phonePlaceholder": "+1 600 000 000",
-      "passwordHint": "At least 6 characters",
+      "passwordHint": "At least 6 characters, with an uppercase letter, a lowercase letter, a number and a symbol",
       "loading": "Creating account...",
       "submit": "Create account",
       "hasAccount": "Already have an account?",
@@ -346,7 +348,8 @@
     "add": "Add to board",
     "added": "Added to board",
     "remove": "Remove from board",
-    "viewProduct": "View product"
+    "viewProduct": "View product",
+    "noLongerAvailable": "No longer available"
   },
   "stockNotifications": {
     "notifyMe": "Notify me when back in stock",

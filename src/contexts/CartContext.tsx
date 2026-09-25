@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import type { Cart } from '../types';
 import { getCart, addToCart, updateCartItem, removeCartItem, applyCoupon as applyCouponRequest, removeCoupon as removeCouponRequest } from '../services/cartService';
 import { useAuth } from './AuthContext';
@@ -27,7 +27,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const fetchCart = useCallback(async () => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated) {
+      // Same reasoning as FavoritesContext's load(): without this, a stale cart from the
+      // previous session (items, prices, totals) stayed in state and kept rendering — in the
+      // header badge and, if opened, the full CartDrawer — after logout, with no session backing
+      // it anymore. Also close the drawer so a stale one isn't left open across the transition.
+      setCart(null);
+      setDrawerOpen(false);
+      return;
+    }
     try {
       const data = await getCart();
       setCart(data);
@@ -35,6 +43,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setCart(null);
     }
   }, [isAuthenticated]);
+
+  // Mirrors FavoritesContext's own useEffect(() => { load(); }, [load]) — runs fetchCart on every
+  // auth transition (login AND logout), not just when a page happens to mount while logged in.
+  useEffect(() => { fetchCart(); }, [fetchCart]);
 
   const addItem = async (productId?: number, variantId?: number, quantity = 1) => {
     setLoading(true);
