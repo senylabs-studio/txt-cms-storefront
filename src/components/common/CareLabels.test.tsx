@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import CareLabels from './CareLabels';
 
 vi.mock('react-i18next', () => ({
@@ -14,16 +14,16 @@ describe('CareLabels', () => {
 
   it('renders only the icon for a single set bit', () => {
     render(<CareLabels careLabels={1} />); // wash30 only
-    expect(screen.getByTitle('careLabels.wash30')).toBeInTheDocument();
-    expect(screen.queryByTitle('careLabels.noBleach')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('careLabels.wash30. careLabels.help.wash30')).toBeInTheDocument();
+    expect(screen.queryByLabelText('careLabels.noBleach. careLabels.help.noBleach')).not.toBeInTheDocument();
   });
 
   it('renders one icon per set bit, in CARE_LABEL_DEFS order', () => {
     render(<CareLabels careLabels={1 + 4} />); // wash30 (bit 1) + noDryer (bit 4)
     expect(screen.getAllByRole('img')).toHaveLength(2);
-    expect(screen.getByTitle('careLabels.wash30')).toBeInTheDocument();
-    expect(screen.getByTitle('careLabels.noDryer')).toBeInTheDocument();
-    expect(screen.queryByTitle('careLabels.noBleach')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('careLabels.wash30. careLabels.help.wash30')).toBeInTheDocument();
+    expect(screen.getByLabelText('careLabels.noDryer. careLabels.help.noDryer')).toBeInTheDocument();
+    expect(screen.queryByLabelText('careLabels.noBleach. careLabels.help.noBleach')).not.toBeInTheDocument();
   });
 
   it('renders all six icons when every known bit is set', () => {
@@ -35,5 +35,11 @@ describe('CareLabels', () => {
   it('ignores bits that do not correspond to a known care label', () => {
     render(<CareLabels careLabels={1 + 64} />); // 64 isn't in CARE_LABEL_DEFS
     expect(screen.getAllByRole('img')).toHaveLength(1);
+  });
+
+  it('explains the symbol in a tooltip on focus (tap on mobile)', async () => {
+    render(<CareLabels careLabels={32} />);
+    fireEvent.focus(screen.getByRole('img'));
+    expect(await screen.findByText('careLabels.help.oekoTex')).toBeInTheDocument();
   });
 });

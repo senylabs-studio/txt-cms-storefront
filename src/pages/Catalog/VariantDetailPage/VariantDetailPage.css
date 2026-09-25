@@ -75,6 +75,10 @@
   opacity: 1;
 }
 
+/* With the tape measure on, keep the controls clear of its bottom and left tapes. */
+.vdp-img-container--ruler .vdp-nav-btn--prev { left: 40px; }
+.vdp-img-container--ruler .vdp-dots { bottom: 40px; }
+
 /* Dot indicators */
 .vdp-dots {
   position: absolute;

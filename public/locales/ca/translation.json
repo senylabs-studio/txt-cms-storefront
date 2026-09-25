@@ -442,7 +442,15 @@
     "noDryer": "No assecadora",
     "dryCleanP": "Rentar en sec (percloroetilè)",
     "iron110": "Planxar màx. 110°C",
-    "oekoTex": "Certificat OEKO-TEX"
+    "oekoTex": "Certificat OEKO-TEX",
+    "help": {
+      "wash30": "Renta-la a la rentadora a 30 °C com a màxim. A més temperatura el teixit pot encongir o destenyir-se.",
+      "noBleach": "No facis servir lleixiu ni productes amb clor: decoloren i debiliten les fibres.",
+      "noDryer": "No la posis a l'assecadora. Deixa-la assecar a l'aire, estesa o en pla.",
+      "dryCleanP": "Admet neteja en sec professional (percloroetilè). Porta-la a la tintoreria.",
+      "iron110": "Planxa a temperatura baixa (un punt, màx. 110 °C), millor del revés i sense vapor.",
+      "oekoTex": "El teixit ha superat les anàlisis de substàncies nocives de l'estàndard OEKO-TEX®: és segur per a la pell."
+    }
   },
   "landing": {
     "comingSoon": "Properament...",

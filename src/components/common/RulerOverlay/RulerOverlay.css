@@ -1,54 +1,96 @@
+/* Two opaque tapes along the bottom and left edges; 0 is the inner corner where they meet. */
 .ruler-overlay {
+  --ruler-size: 28px; /* keep in sync with RULER_SIZE in RulerOverlay.tsx */
+  --ruler-bg: #fdfcf8;
+  --ruler-ink: #212529;
   position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 5;
 }
 
-.ruler-axis--h {
+.ruler-axis {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 22px;
-  background: rgba(255, 255, 255, 0.85);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.35);
+  background: var(--ruler-bg);
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.18);
 }
 
+/* Bottom tape: ticks hang down from its top edge (the edge touching the fabric). */
+.ruler-axis--h {
+  left: var(--ruler-size);
+  right: 0;
+  bottom: 0;
+  height: var(--ruler-size);
+  border-top: 1px solid rgba(0, 0, 0, 0.45);
+}
+
+/* Left tape: ticks point left from its right edge. */
 .ruler-axis--v {
-  position: absolute;
+  left: 0;
   top: 0;
+  bottom: var(--ruler-size);
+  width: var(--ruler-size);
+  border-right: 1px solid rgba(0, 0, 0, 0.45);
+}
+
+.ruler-corner {
+  position: absolute;
   left: 0;
   bottom: 0;
-  width: 22px;
-  background: rgba(255, 255, 255, 0.85);
-  border-right: 1px solid rgba(0, 0, 0, 0.35);
+  width: var(--ruler-size);
+  height: var(--ruler-size);
+  background: var(--ruler-bg);
+  border-top: 1px solid rgba(0, 0, 0, 0.45);
+  border-right: 1px solid rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 600;
+  color: #6c757d;
+}
+
+.ruler-tick {
+  position: absolute;
+  background: var(--ruler-ink);
 }
 
 .ruler-tick--h {
-  position: absolute;
   top: 0;
   width: 1px;
-  height: 8px;
-  background: rgba(0, 0, 0, 0.55);
+  height: 7px;
 }
-.ruler-tick--h.ruler-tick--major { height: 14px; background: rgba(0, 0, 0, 0.8); }
+.ruler-tick--h.ruler-tick--half { height: 4px; opacity: 0.6; }
+.ruler-tick--h.ruler-tick--major { height: 11px; }
 
 .ruler-tick--v {
-  position: absolute;
-  left: 0;
+  right: 0;
   height: 1px;
-  width: 8px;
-  background: rgba(0, 0, 0, 0.55);
+  width: 7px;
 }
-.ruler-tick--v.ruler-tick--major { width: 14px; background: rgba(0, 0, 0, 0.8); }
+.ruler-tick--v.ruler-tick--half { width: 4px; opacity: 0.6; }
+.ruler-tick--v.ruler-tick--major { width: 11px; }
 
 .ruler-label {
   position: absolute;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 600;
-  color: #212529;
+  color: var(--ruler-ink);
   line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
-.ruler-label--h { top: 15px; left: 2px; }
-.ruler-label--v { left: 15px; top: 2px; writing-mode: vertical-rl; }
+
+/* Centered under its tick, below the tick marks. */
+.ruler-label--h {
+  top: 13px;
+  left: 0;
+  transform: translateX(-50%);
+}
+
+/* Upright, centered on its tick, left of the tick marks. */
+.ruler-label--v {
+  right: 13px;
+  top: 0;
+  transform: translateY(-50%);
+}

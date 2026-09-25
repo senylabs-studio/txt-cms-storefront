@@ -442,7 +442,15 @@
     "noDryer": "No secadora",
     "dryCleanP": "Lavar en seco (percloroetileno)",
     "iron110": "Planchar máx. 110°C",
-    "oekoTex": "Certificado OEKO-TEX"
+    "oekoTex": "Certificado OEKO-TEX",
+    "help": {
+      "wash30": "Lávala en lavadora a 30 °C como máximo. A más temperatura el tejido puede encoger o desteñir.",
+      "noBleach": "No uses lejía ni productos con cloro: decoloran y debilitan las fibras.",
+      "noDryer": "No la metas en la secadora. Déjala secar al aire, tendida o en plano.",
+      "dryCleanP": "Admite limpieza en seco profesional (percloroetileno). Llévala a la tintorería.",
+      "iron110": "Plancha a temperatura baja (un punto, máx. 110 °C), mejor del revés y sin vapor.",
+      "oekoTex": "El tejido ha superado los análisis de sustancias nocivas del estándar OEKO-TEX®: es seguro para la piel."
+    }
   },
   "landing": {
     "comingSoon": "Próximamente...",
