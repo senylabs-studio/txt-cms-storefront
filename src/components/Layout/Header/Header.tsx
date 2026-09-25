@@ -10,12 +10,12 @@ import { useSiteSettings } from '../../../contexts/SiteSettingsContext';
 import NavMenu from '../NavMenu';
 import MobileMenuSheet from './MobileMenuSheet';
 import useDebounce from '../../../hooks/useDebounce';
+import useCollapsingHeader from '../../../hooks/useCollapsingHeader';
 import { getVariantsPaged } from '../../../services/productService';
 import { getLanguages, type StorefrontLanguage } from '../../../services/languageService';
 import type { StorefrontVariant } from '../../../types';
 import './Header.css';
 
-const COLLAPSE_THRESHOLD = 48;
 
 const Header: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -24,7 +24,7 @@ const Header: React.FC = () => {
   const { count: favCount } = useFavorites();
   const { logoUrl, siteName } = useSiteSettings();
   const [search, setSearch] = useState('');
-  const [scrolled, setScrolled] = useState(false);
+  const [scrolled, headerRef] = useCollapsingHeader<HTMLElement>();
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -53,13 +53,6 @@ const Header: React.FC = () => {
       .finally(() => { if (!cancelled) setSuggestionsLoading(false); });
     return () => { cancelled = true; };
   }, [debouncedSearch]);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > COLLAPSE_THRESHOLD);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
 
   const submitSearch = (query: string) => {
     if (!query.trim()) return;
@@ -175,7 +168,7 @@ const Header: React.FC = () => {
   );
 
   return (
-    <header className={`storefront-header${scrolled ? ' is-scrolled' : ''}`}>
+    <header ref={headerRef} className={`storefront-header${scrolled ? ' is-scrolled' : ''}`}>
       {/* Top bar — hidden once scrolled */}
       {!scrolled && (
         <div className="header-topbar">
