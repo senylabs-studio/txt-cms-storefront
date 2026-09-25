@@ -14,6 +14,7 @@ import { getApiErrorMessage, parseFieldErrors, type FieldErrors } from '../../ut
 import type { StorefrontProfile, CustomerAddress } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { meetsPasswordRules } from '../../utils/password';
+import IconTooltip from '../../components/common/IconTooltip/IconTooltip';
 
 const emptyAddress: Partial<CustomerAddress> = {
   alias: '', recipientName: '', street: '', city: '', postalCode: '', province: '', country: 'ES', phone: '', isDefault: false,
@@ -268,9 +269,11 @@ const AccountPage: React.FC = () => {
                     <Form.Label>{t('account.email')}</Form.Label>
                     <div className="d-flex gap-2">
                       <Form.Control value={profile.email} disabled />
-                      <Button variant="outline-secondary" onClick={openEmailModal} title={t('account.changeEmailTitle')}>
-                        <FaEdit />
-                      </Button>
+                      <IconTooltip label={t('account.changeEmailTitle')}>
+                        <Button variant="outline-secondary" onClick={openEmailModal} aria-label={t('account.changeEmailTitle')}>
+                          <FaEdit />
+                        </Button>
+                      </IconTooltip>
                     </div>
                   </Form.Group>
                   <Form.Group className="mb-3">
