@@ -57,7 +57,7 @@ export interface StorefrontVariantDetail {
   originalPrice: number;
   discountPercent: number;
   availableStock: number;
-  typeValue: string;
+  typeValue?: string;
   thumbnailUrl?: string;
   images: StorefrontImage[];
   productId: number;
@@ -70,7 +70,7 @@ export interface StorefrontVariantDetail {
   texture?: string;
   fabricType?: string;
   careLabels?: number;
-  productTypeName: string;
+  productTypeName?: string;
   minQuantity: number;
   quantityStep: number;
   siblings: StorefrontVariant[];

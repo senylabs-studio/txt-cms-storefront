@@ -77,7 +77,9 @@ const VariantCard: React.FC<Props> = ({ variant }) => {
       </div>
 
       <Card.Body className="d-flex flex-column">
-        <div className="product-card-type">{variant.productTypeName ?? variant.typeValue}</div>
+        {/* Both are omitted for a type whose values are hidden from customers (e.g. Referencia);
+            keep the line anyway so names stay aligned across a grid. */}
+        <div className="product-card-type">{variant.productTypeName ?? variant.typeValue ?? '\u00a0'}</div>
         <Card.Title as="h6" className="product-card-name">
           <Link to={`/variant/${variant.id}`}>
             {variant.productName}
