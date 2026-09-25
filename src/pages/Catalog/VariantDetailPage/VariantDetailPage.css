@@ -17,6 +17,33 @@
   object-fit: cover;
 }
 
+/* Hover magnifier: the photo scales around the cursor (transform set inline). */
+.vdp-main-img--lens {
+  cursor: zoom-in;
+  transition: transform 0.15s ease-out;
+}
+
+.vdp-main-img--clickable {
+  cursor: zoom-in;
+}
+
+.vdp-expand-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #222;
+  z-index: 2;
+}
+
 .vdp-img-placeholder {
   font-size: 4rem;
 }
