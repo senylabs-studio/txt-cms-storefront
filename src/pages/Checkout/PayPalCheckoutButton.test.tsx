@@ -80,6 +80,17 @@ describe('PayPalCheckoutButton', () => {
     expect(onPaid).not.toHaveBeenCalled();
   });
 
+  it('reports busy while a PayPal attempt is open, and idle once it is closed', async () => {
+    const onBusyChange = vi.fn();
+    render(<PayPalCheckoutButton buildRequest={() => ({ shippingAddressId: 7 })} disabled={false} onPaid={vi.fn()} onError={vi.fn()} onBusyChange={onBusyChange} />);
+
+    fireEvent.click(await screen.findByText('create'));
+    await waitFor(() => expect(onBusyChange).toHaveBeenLastCalledWith(true));
+    fireEvent.click(screen.getByText('cancel'));
+
+    expect(onBusyChange).toHaveBeenLastCalledWith(false);
+  });
+
   it('releases the cart when the customer closes PayPal without paying', async () => {
     setup();
 

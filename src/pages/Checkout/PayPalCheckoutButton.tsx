@@ -14,13 +14,16 @@ interface Props {
   disabled: boolean;
   onPaid: () => void;
   onError: (message: string) => void;
+  // True while a PayPal attempt is open (window shown / capturing) — the page disables the
+  // Redsys button meanwhile, which the backend would reject anyway ("pago en curso").
+  onBusyChange?: (busy: boolean) => void;
 }
 
 const SDK_LOCALE: Record<string, string> = { es: 'es-ES', ca: 'es-ES', en: 'en-GB' };
 
 // PayPal inside the storefront: PayPal's own window opens over our page and the customer comes
 // back already paid — no redirect to Redsys. Renders nothing unless PayPal is configured.
-const PayPalCheckoutButton: React.FC<Props> = ({ buildRequest, disabled, onPaid, onError }) => {
+const PayPalCheckoutButton: React.FC<Props> = ({ buildRequest, disabled, onPaid, onError, onBusyChange }) => {
   const { t, i18n } = useTranslation();
   const [config, setConfig] = useState<PayPalConfig | null>(null);
   // The PayPal order of the attempt in progress — onCancel/onError don't receive it.
@@ -38,6 +41,7 @@ const PayPalCheckoutButton: React.FC<Props> = ({ buildRequest, disabled, onPaid,
   const releaseAttempt = () => {
     const id = currentOrderId.current;
     currentOrderId.current = null;
+    onBusyChange?.(false);
     if (id) cancelPayPalOrder(id).catch(() => { /* the in-flight guard expires by itself */ });
   };
 
@@ -55,10 +59,12 @@ const PayPalCheckoutButton: React.FC<Props> = ({ buildRequest, disabled, onPaid,
           disabled={disabled}
           createOrder={async () => {
             try {
+              onBusyChange?.(true);
               const { payPalOrderId } = await createPayPalOrder(buildRequest());
               currentOrderId.current = payPalOrderId;
               return { orderId: payPalOrderId };
             } catch (err) {
+              onBusyChange?.(false);
               onError(getApiErrorMessage(err, t('checkout.initError')));
               throw err;
             }
@@ -68,12 +74,14 @@ const PayPalCheckoutButton: React.FC<Props> = ({ buildRequest, disabled, onPaid,
               const result = await capturePayPalOrder(orderId);
               currentOrderId.current = null;
               if (result.restart || !result.orderId) {
+                onBusyChange?.(false);
                 onError(t('checkout.paypalDeclined'));
                 return;
               }
               onPaid();
             } catch (err) {
               currentOrderId.current = null;
+              onBusyChange?.(false);
               onError(getApiErrorMessage(err, t('checkout.paypalError')));
             }
           }}

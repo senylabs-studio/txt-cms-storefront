@@ -25,6 +25,7 @@ const CheckoutPage: React.FC = () => {
   const [billingId, setBillingId] = useState<number | undefined>();
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
+  const [paypalBusy, setPaypalBusy] = useState(false);
   const [error, setError] = useState('');
   const [shippingRate, setShippingRate] = useState<ApplicableShippingRate | null | undefined>(undefined);
   const [shippingLoading, setShippingLoading] = useState(false);
@@ -214,7 +215,7 @@ const CheckoutPage: React.FC = () => {
                   size="lg"
                   className="w-100"
                   onClick={handleProceedToPayment}
-                  disabled={loading || !shippingId || shippingLoading || shippingRate === null}
+                  disabled={loading || paypalBusy || !shippingId || shippingLoading || shippingRate === null}
                 >
                   {loading
                     ? <><Spinner size="sm" animation="border" className="me-2" />{t('checkout.processing')}</>
@@ -226,6 +227,7 @@ const CheckoutPage: React.FC = () => {
                   disabled={loading || !shippingId || shippingLoading || shippingRate === null}
                   onPaid={() => navigate('/checkout/success')}
                   onError={message => setError(message)}
+                  onBusyChange={setPaypalBusy}
                 />
               </Card.Body>
             </Card>
