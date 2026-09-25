@@ -247,7 +247,7 @@ const VariantDetailPage: React.FC = () => {
           <Col md={6}>
             {/* Main image */}
             <div
-              className="vdp-img-container"
+              className={`vdp-img-container${canMeasure && rulerActive ? ' vdp-img-container--ruler' : ''}`}
               ref={imgContainerRef}
               onMouseMove={e => {
                 if (!lensEnabled) return;

@@ -7,8 +7,15 @@ interface Props {
   realWidthCm: number;
 }
 
-/** Static cm ruler overlaid on the top/left edges of a product image known to be a
- *  true-to-scale, straight-on shot (VariantImage.isRealScale + RealWidthCm).
+/** Thickness of each tape, in px — keep in sync with --ruler-size in RulerOverlay.css. */
+const RULER_SIZE = 28;
+
+/** Numbers every cm when there's room for them, otherwise every 2 or 5 cm. */
+const labelStep = (pxPerCm: number) => (pxPerCm >= 22 ? 1 : pxPerCm >= 12 ? 2 : 5);
+
+/** cm tape measures along the bottom and left edges of a product image known to be a
+ *  true-to-scale, straight-on shot (VariantImage.isRealScale + RealWidthCm). Both tapes start
+ *  at 0 in the inner corner where they meet, so what they measure is the visible fabric.
  *
  *  The image is displayed with object-fit: cover inside a possibly non-square
  *  container, so the on-screen scale isn't simply containerWidth / realWidthCm —
@@ -46,33 +53,38 @@ const RulerOverlay: React.FC<Props> = ({ containerRef, imgRef, realWidthCm }) =>
 
   if (!pxPerCm) return null;
 
-  const hTickCount = Math.floor(containerSize.width / pxPerCm);
-  const vTickCount = Math.floor(containerSize.height / pxPerCm);
+  const step = labelStep(pxPerCm);
+  const halfTicks = pxPerCm >= 16;
+  const hLength = containerSize.width - RULER_SIZE;
+  const vLength = containerSize.height - RULER_SIZE;
+
+  // Every tick position along one tape, in half-cm units when there's room for them.
+  const ticks = (lengthPx: number) => {
+    const unit = halfTicks ? 0.5 : 1;
+    const count = Math.floor(lengthPx / (pxPerCm * unit));
+    return Array.from({ length: count + 1 }, (_, i) => i * unit);
+  };
+  const tickClass = (cm: number) =>
+    !Number.isInteger(cm) ? ' ruler-tick--half' : cm % 5 === 0 ? ' ruler-tick--major' : '';
+  const showLabel = (cm: number) => Number.isInteger(cm) && cm % step === 0;
 
   return (
     <div className="ruler-overlay" aria-hidden="true">
       <div className="ruler-axis ruler-axis--h">
-        {Array.from({ length: hTickCount + 1 }, (_, cm) => (
-          <div
-            key={cm}
-            className={`ruler-tick ruler-tick--h${cm % 5 === 0 ? ' ruler-tick--major' : ''}`}
-            style={{ left: cm * pxPerCm }}
-          >
-            {cm % 5 === 0 && <span className="ruler-label ruler-label--h">{cm}</span>}
+        {ticks(hLength).map(cm => (
+          <div key={cm} className={`ruler-tick ruler-tick--h${tickClass(cm)}`} style={{ left: cm * pxPerCm }}>
+            {showLabel(cm) && cm > 0 && <span className="ruler-label ruler-label--h">{cm}</span>}
           </div>
         ))}
       </div>
       <div className="ruler-axis ruler-axis--v">
-        {Array.from({ length: vTickCount + 1 }, (_, cm) => (
-          <div
-            key={cm}
-            className={`ruler-tick ruler-tick--v${cm % 5 === 0 ? ' ruler-tick--major' : ''}`}
-            style={{ top: cm * pxPerCm }}
-          >
-            {cm % 5 === 0 && <span className="ruler-label ruler-label--v">{cm}</span>}
+        {ticks(vLength).map(cm => (
+          <div key={cm} className={`ruler-tick ruler-tick--v${tickClass(cm)}`} style={{ bottom: cm * pxPerCm }}>
+            {showLabel(cm) && cm > 0 && <span className="ruler-label ruler-label--v">{cm}</span>}
           </div>
         ))}
       </div>
+      <div className="ruler-corner">cm</div>
     </div>
   );
 };
