@@ -1,0 +1,5 @@
+/* Full width, like the "Ir al pago" button above it (the SDK's web component is fixed-width by default). */
+.paypal-checkout paypal-button {
+  display: block;
+  width: 100%;
+}

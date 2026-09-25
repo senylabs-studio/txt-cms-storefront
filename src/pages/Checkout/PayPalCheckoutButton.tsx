@@ -6,6 +6,7 @@ import {
 } from '../../services/paypalService';
 import { getApiErrorMessage } from '../../utils/apiError';
 import type { CheckoutRequest } from '../../types';
+import './PayPalCheckoutButton.css';
 
 interface Props {
   // Built at click time, so it carries the address/notes currently selected.
@@ -15,7 +16,7 @@ interface Props {
   onError: (message: string) => void;
 }
 
-const SDK_LOCALE: Record<string, string> = { es: 'es_ES', ca: 'es_ES', en: 'en_GB' };
+const SDK_LOCALE: Record<string, string> = { es: 'es-ES', ca: 'es-ES', en: 'en-GB' };
 
 // PayPal inside the storefront: PayPal's own window opens over our page and the customer comes
 // back already paid — no redirect to Redsys. Renders nothing unless PayPal is configured.
@@ -41,14 +42,14 @@ const PayPalCheckoutButton: React.FC<Props> = ({ buildRequest, disabled, onPaid,
   };
 
   return (
-    <div className="mt-3" data-testid="paypal-checkout">
+    <div className="mt-3 paypal-checkout" data-testid="paypal-checkout">
       <div className="text-center text-muted small my-2">{t('checkout.orPayWith')}</div>
       <PayPalProvider
         clientId={config.clientId}
         environment={config.environment}
         components={['paypal-payments']}
         pageType="checkout"
-        locale={SDK_LOCALE[i18n.language] ?? 'es_ES'}
+        locale={SDK_LOCALE[i18n.language] ?? 'es-ES'}
       >
         <PayPalOneTimePaymentButton
           disabled={disabled}
