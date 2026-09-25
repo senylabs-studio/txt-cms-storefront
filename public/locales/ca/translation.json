@@ -185,7 +185,10 @@
     "initError": "Error en iniciar el pagament",
     "estimatedDeliveryRange": "Lliurament estimat: {{min}}–{{max}} dies feiners",
     "estimatedDeliveryExact": "Lliurament estimat: {{days}} dies feiners",
-    "loadAddressesError": "No s'han pogut carregar les teves adreces."
+    "loadAddressesError": "No s'han pogut carregar les teves adreces.",
+    "orPayWith": "o paga amb",
+    "paypalDeclined": "PayPal no ha acceptat aquest mètode de pagament. No s'ha fet cap càrrec: torna-ho a provar amb un altre.",
+    "paypalError": "No s'ha pogut completar el pagament amb PayPal. No s'ha fet cap càrrec."
   },
   "checkoutSuccess": {
     "title": "Comanda rebuda!",

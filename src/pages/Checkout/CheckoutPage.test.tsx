@@ -37,6 +37,8 @@ vi.mock('../../services/profileService', () => ({ getProfile }));
 
 const { getApplicableShippingRate } = vi.hoisted(() => ({ getApplicableShippingRate: vi.fn() }));
 vi.mock('../../services/shippingService', () => ({ getApplicableShippingRate }));
+// PayPal has its own tests (PayPalCheckoutButton.test.tsx); here it just must not load the SDK.
+vi.mock('./PayPalCheckoutButton', () => ({ default: () => null }));
 
 const cartWithItems = (): Cart => ({
   id: 1,

@@ -185,7 +185,10 @@
     "initError": "Error initiating payment",
     "estimatedDeliveryRange": "Estimated delivery: {{min}}–{{max}} business days",
     "estimatedDeliveryExact": "Estimated delivery: {{days}} business days",
-    "loadAddressesError": "Failed to load your addresses."
+    "loadAddressesError": "Failed to load your addresses.",
+    "orPayWith": "or pay with",
+    "paypalDeclined": "PayPal did not accept that payment method. You have not been charged: please try again with another one.",
+    "paypalError": "The PayPal payment could not be completed. You have not been charged."
   },
   "checkoutSuccess": {
     "title": "Order received!",

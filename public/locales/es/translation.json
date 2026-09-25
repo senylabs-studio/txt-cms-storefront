@@ -185,7 +185,10 @@
     "initError": "Error al iniciar el pago",
     "estimatedDeliveryRange": "Entrega estimada: {{min}}–{{max}} días laborables",
     "estimatedDeliveryExact": "Entrega estimada: {{days}} días laborables",
-    "loadAddressesError": "No se pudieron cargar tus direcciones."
+    "loadAddressesError": "No se pudieron cargar tus direcciones.",
+    "orPayWith": "o paga con",
+    "paypalDeclined": "PayPal no ha aceptado ese método de pago. No se ha hecho ningún cargo: vuelve a intentarlo con otro.",
+    "paypalError": "No se ha podido completar el pago con PayPal. No se ha hecho ningún cargo."
   },
   "checkoutSuccess": {
     "title": "¡Pedido recibido!",
