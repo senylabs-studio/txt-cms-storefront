@@ -12,7 +12,14 @@
 
 :root {
   --brand-color: #06b773;
+  /* The brand colour darkened enough to read as text on white (#06b773 → ~5:1, WCAG AA even at
+     small sizes); follows whatever brand colour Site Settings sets. */
+  --brand-text-color: color-mix(in srgb, var(--brand-color) 70%, black);
 }
+
+/* Prices everywhere use the corporate colour (they used to be red in some places, dark grey in
+   others). */
+.sf-price { color: var(--brand-text-color); font-weight: 700; }
 
 /* Bootstrap primary overrides */
 .btn-primary {

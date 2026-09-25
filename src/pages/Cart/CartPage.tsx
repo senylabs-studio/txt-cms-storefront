@@ -128,7 +128,7 @@ const CartPage: React.FC = () => {
                               €{item.originalUnitPrice.toFixed(2)}
                             </span>
                           )}
-                          <span className={item.unitPrice < item.originalUnitPrice ? 'text-danger fw-semibold' : 'text-muted'}>
+                          <span className={item.unitPrice < item.originalUnitPrice ? 'sf-price' : 'text-muted'}>
                             €{item.unitPrice.toFixed(2)} / m
                           </span>
                         </div>
