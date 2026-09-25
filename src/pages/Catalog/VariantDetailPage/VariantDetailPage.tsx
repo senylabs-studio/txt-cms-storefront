@@ -1,12 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Container, Row, Col, Button, Badge, Spinner, Alert, Form } from 'react-bootstrap';
-import { FaShoppingCart, FaArrowLeft, FaChevronLeft, FaChevronRight, FaStar, FaRegStar, FaRulerHorizontal } from 'react-icons/fa';
+import { FaShoppingCart, FaArrowLeft, FaChevronLeft, FaChevronRight, FaStar, FaRegStar, FaRulerHorizontal, FaExpand } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import FavoriteButton from '../../../components/common/FavoriteButton/FavoriteButton';
 import BoardButton from '../../../components/common/BoardButton/BoardButton';
 import NotifyMeButton from '../../../components/common/NotifyMeButton/NotifyMeButton';
 import RulerOverlay from '../../../components/common/RulerOverlay/RulerOverlay';
+import ImageLightbox from '../../../components/common/ImageLightbox/ImageLightbox';
+import IconTooltip from '../../../components/common/IconTooltip/IconTooltip';
 import MainLayout from '../../../components/Layout/MainLayout';
 import { getVariantById, getVariantsBatch } from '../../../services/productService';
 import { getProductReviews, getMyReview, submitReview } from '../../../services/reviewService';
@@ -50,6 +52,9 @@ const InfoRow: React.FC<{ label: string; value: React.ReactNode }> = ({ label, v
 );
 
 // ── Main page ─────────────────────────────────────────────────────────────────
+const canHover = () =>
+  typeof window !== 'undefined' && !!window.matchMedia?.('(hover: hover) and (pointer: fine)').matches;
+
 const VariantDetailPage: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { id } = useParams<{ id: string }>();
@@ -68,6 +73,9 @@ const VariantDetailPage: React.FC = () => {
   const [notFound, setNotFound] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
   const [rulerActive, setRulerActive] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  // Hover magnifier: where the cursor is over the main image (in %), null when not hovering.
+  const [lensAt, setLensAt] = useState<{ x: number; y: number } | null>(null);
   const imgContainerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const [quantity, setQuantity] = useState(DEFAULT_MIN_QTY);
@@ -194,6 +202,9 @@ const VariantDetailPage: React.FC = () => {
     : variant.thumbnailUrl ? [{ url: variant.thumbnailUrl, isRealScale: false }] : [];
   const currentImage = images[selectedImage];
   const canMeasure = !!(currentImage?.isRealScale && currentImage.realWidthCm);
+  // Only with a real mouse (touch has no hover — a tap opens the viewer instead), and never over
+  // the tape measure: magnifying the photo would make its cm marks wrong.
+  const lensEnabled = !!currentImage && !rulerActive && canHover();
   const outOfStock = variant.availableStock <= 0;
   const hasDiscount = variant.originalPrice > variant.price;
   const hasGroupDiscount = (variant.discountPercent ?? 0) > 0;
@@ -235,10 +246,34 @@ const VariantDetailPage: React.FC = () => {
           {/* ── Images ── */}
           <Col md={6}>
             {/* Main image */}
-            <div className="vdp-img-container" ref={imgContainerRef}>
+            <div
+              className="vdp-img-container"
+              ref={imgContainerRef}
+              onMouseMove={e => {
+                if (!lensEnabled) return;
+                const r = e.currentTarget.getBoundingClientRect();
+                setLensAt({ x: ((e.clientX - r.left) / r.width) * 100, y: ((e.clientY - r.top) / r.height) * 100 });
+              }}
+              onMouseLeave={() => setLensAt(null)}
+            >
               {currentImage
-                ? <img ref={imgRef} src={currentImage.url} alt={currentImage.altText || variant.name} />
+                ? <img
+                    ref={imgRef}
+                    src={currentImage.url}
+                    alt={currentImage.altText || variant.name}
+                    className={`vdp-main-img${lensEnabled ? ' vdp-main-img--lens' : ' vdp-main-img--clickable'}`}
+                    style={lensEnabled && lensAt ? { transform: 'scale(2.5)', transformOrigin: `${lensAt.x}% ${lensAt.y}%` } : undefined}
+                    onClick={() => setLightboxOpen(true)}
+                  />
                 : <span className="vdp-img-placeholder">📦</span>}
+
+              {currentImage && (
+                <IconTooltip label={t('product.openImage')} placement="left">
+                  <button type="button" className="vdp-expand-btn" onClick={() => setLightboxOpen(true)} aria-label={t('product.openImage')}>
+                    <FaExpand size={14} />
+                  </button>
+                </IconTooltip>
+              )}
 
               {canMeasure && rulerActive && (
                 <RulerOverlay containerRef={imgContainerRef} imgRef={imgRef} realWidthCm={currentImage!.realWidthCm!} />
@@ -289,6 +324,15 @@ const VariantDetailPage: React.FC = () => {
                 ))}
               </div>
             )}
+
+            <ImageLightbox
+              images={images}
+              index={selectedImage}
+              show={lightboxOpen}
+              title={variant.name}
+              onClose={() => setLightboxOpen(false)}
+              onIndexChange={setSelectedImage}
+            />
 
             {canMeasure && (
               <Button
