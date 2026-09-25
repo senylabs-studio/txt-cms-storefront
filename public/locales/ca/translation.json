@@ -128,7 +128,9 @@
     "submit": "Enviar missatge",
     "sending": "Enviant...",
     "success": "Gràcies! Hem rebut el teu missatge i et respondrem el més aviat possible.",
-    "error": "No s'ha pogut enviar el missatge. Torna-ho a provar."
+    "error": "No s'ha pogut enviar el missatge. Torna-ho a provar.",
+    "privacyPrefix": "He llegit i accepto la",
+    "privacyLink": "Política de Privacitat"
   },
   "chat": {
     "title": "Assistent virtual",

@@ -128,7 +128,9 @@
     "submit": "Enviar mensaje",
     "sending": "Enviando...",
     "success": "¡Gracias! Hemos recibido tu mensaje y te responderemos lo antes posible.",
-    "error": "No se pudo enviar el mensaje. Inténtalo de nuevo."
+    "error": "No se pudo enviar el mensaje. Inténtalo de nuevo.",
+    "privacyPrefix": "He leído y acepto la",
+    "privacyLink": "Política de Privacidad"
   },
   "chat": {
     "title": "Asistente virtual",

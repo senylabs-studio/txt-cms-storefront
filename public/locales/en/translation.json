@@ -128,7 +128,9 @@
     "submit": "Send message",
     "sending": "Sending...",
     "success": "Thank you! We've received your message and will get back to you soon.",
-    "error": "Could not send the message. Please try again."
+    "error": "Could not send the message. Please try again.",
+    "privacyPrefix": "I have read and accept the",
+    "privacyLink": "Privacy Policy"
   },
   "chat": {
     "title": "Virtual assistant",
