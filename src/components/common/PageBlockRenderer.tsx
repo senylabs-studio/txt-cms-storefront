@@ -182,41 +182,53 @@ const GalleryBlock: React.FC<{ config: GalleryBlockConfig }> = ({ config }) => {
   );
 };
 
-const FormFieldBlock: React.FC<{ config: FormFieldBlockConfig }> = ({ config }) => (
-  <div style={buildStyle(config.style)}>
-    <label className="pbr-form-label">
-      {config.label}
-      {config.required && <span className="pbr-form-required">*</span>}
-    </label>
-    {config.fieldType === 'textarea' ? (
-      <textarea
-        className="form-control"
-        placeholder={config.placeholder}
-        required={config.required}
-        rows={4}
-      />
-    ) : config.fieldType === 'select' ? (
-      <select className="form-select" required={config.required}>
-        <option value="">{config.placeholder || 'Selecciona una opción'}</option>
-        {(config.options ?? '').split('\n').filter(Boolean).map((opt: string, i: number) => (
-          <option key={i} value={opt.trim()}>{opt.trim()}</option>
-        ))}
-      </select>
-    ) : config.fieldType === 'checkbox' ? (
-      <div className="form-check">
-        <input className="form-check-input" type="checkbox" required={config.required} id={`field-${config.label}`} />
-        <label className="form-check-label" htmlFor={`field-${config.label}`}>{config.placeholder}</label>
-      </div>
-    ) : (
-      <input
-        className="form-control"
-        type={config.fieldType ?? 'text'}
-        placeholder={config.placeholder}
-        required={config.required}
-      />
-    )}
-  </div>
-);
+const FormFieldBlock: React.FC<{ config: FormFieldBlockConfig }> = ({ config }) => {
+  // Unique per field: ids built from the label collided whenever two checkboxes had an empty
+  // label, so clicking the second one's text ticked the first.
+  const id = React.useId();
+  return (
+    <div style={buildStyle(config.style)}>
+      {/* A checkbox carries its own text (and required mark) on its line; the label above is only a
+          heading, shown when there is one — with an empty label the "*" used to sit alone there. */}
+      {(config.fieldType !== 'checkbox' || config.label) && (
+        <label className="pbr-form-label">
+          {config.label}
+          {config.required && config.fieldType !== 'checkbox' && <span className="pbr-form-required">*</span>}
+        </label>
+      )}
+      {config.fieldType === 'textarea' ? (
+        <textarea
+          className="form-control"
+          placeholder={config.placeholder}
+          required={config.required}
+          rows={4}
+        />
+      ) : config.fieldType === 'select' ? (
+        <select className="form-select" required={config.required}>
+          <option value="">{config.placeholder || 'Selecciona una opción'}</option>
+          {(config.options ?? '').split('\n').filter(Boolean).map((opt: string, i: number) => (
+            <option key={i} value={opt.trim()}>{opt.trim()}</option>
+          ))}
+        </select>
+      ) : config.fieldType === 'checkbox' ? (
+        <div className="form-check">
+          <input className="form-check-input" type="checkbox" required={config.required} id={id} />
+          <label className="form-check-label" htmlFor={id}>
+            {config.placeholder || config.label}
+            {config.required && <span className="pbr-form-required">*</span>}
+          </label>
+        </div>
+      ) : (
+        <input
+          className="form-control"
+          type={config.fieldType ?? 'text'}
+          placeholder={config.placeholder}
+          required={config.required}
+        />
+      )}
+    </div>
+  );
+};
 
 const BannerBlock: React.FC<{ config: BannerBlockConfig }> = ({ config }) => {
   const slides = config.slides ?? [];

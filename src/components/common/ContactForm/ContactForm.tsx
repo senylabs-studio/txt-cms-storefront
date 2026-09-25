@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Form, Button, Alert, Spinner, Row, Col } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { submitContactForm } from '../../../services/contactService';
 import { getApiErrorMessage } from '../../../utils/apiError';
 import './ContactForm.css';
@@ -12,6 +13,7 @@ const ContactForm: React.FC = () => {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [message, setMessage] = useState('');
+  const [acceptPrivacy, setAcceptPrivacy] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
@@ -21,12 +23,13 @@ const ContactForm: React.FC = () => {
     setLoading(true);
     setError('');
     try {
-      await submitContactForm({ name, email, phone: phone || undefined, message });
+      await submitContactForm({ name, email, phone: phone || undefined, message, acceptPrivacy });
       setSent(true);
       setName('');
       setEmail('');
       setPhone('');
       setMessage('');
+      setAcceptPrivacy(false);
     } catch (err) {
       setError(getApiErrorMessage(err, t('contact.error')));
     } finally {
@@ -44,7 +47,7 @@ const ContactForm: React.FC = () => {
       {error && <Alert variant="danger" className="py-2">{error}</Alert>}
       <Row>
         <Col md={6}>
-          <Form.Group className="mb-3">
+          <Form.Group className="mb-3" controlId="contact-name">
             <Form.Label>{t('contact.name')}</Form.Label>
             <Form.Control
               type="text"
@@ -56,7 +59,7 @@ const ContactForm: React.FC = () => {
           </Form.Group>
         </Col>
         <Col md={6}>
-          <Form.Group className="mb-3">
+          <Form.Group className="mb-3" controlId="contact-email">
             <Form.Label>{t('contact.email')}</Form.Label>
             <Form.Control
               type="email"
@@ -68,7 +71,7 @@ const ContactForm: React.FC = () => {
           </Form.Group>
         </Col>
       </Row>
-      <Form.Group className="mb-3">
+      <Form.Group className="mb-3" controlId="contact-phone">
         <Form.Label>{t('contact.phone')} <span className="text-muted">({t('contact.optional')})</span></Form.Label>
         <Form.Control
           type="tel"
@@ -77,7 +80,7 @@ const ContactForm: React.FC = () => {
           maxLength={30}
         />
       </Form.Group>
-      <Form.Group className="mb-4">
+      <Form.Group className="mb-4" controlId="contact-message">
         <Form.Label>{t('contact.message')}</Form.Label>
         <Form.Control
           as="textarea"
@@ -86,6 +89,22 @@ const ContactForm: React.FC = () => {
           onChange={e => setMessage(e.target.value)}
           required
           maxLength={2000}
+        />
+      </Form.Group>
+      <Form.Group className="mb-4" controlId="contact-accept-privacy">
+        <Form.Check
+          type="checkbox"
+          required
+          checked={acceptPrivacy}
+          onChange={e => setAcceptPrivacy(e.target.checked)}
+          label={
+            <>
+              {t('contact.privacyPrefix')}{' '}
+              {/* New tab, so following the link doesn't lose what was typed. */}
+              <Link to="/proteccion-de-datos" target="_blank" rel="noopener noreferrer">{t('contact.privacyLink')}</Link>
+              <span className="text-danger ms-1">*</span>
+            </>
+          }
         />
       </Form.Group>
       <Button type="submit" variant="primary" disabled={loading}>

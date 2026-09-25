@@ -128,7 +128,9 @@
     "submit": "Enviar mensaje",
     "sending": "Enviando...",
     "success": "¡Gracias! Hemos recibido tu mensaje y te responderemos lo antes posible.",
-    "error": "No se pudo enviar el mensaje. Inténtalo de nuevo."
+    "error": "No se pudo enviar el mensaje. Inténtalo de nuevo.",
+    "privacyPrefix": "He leído y acepto la",
+    "privacyLink": "Política de Privacidad"
   },
   "chat": {
     "title": "Asistente virtual",
@@ -183,7 +185,10 @@
     "initError": "Error al iniciar el pago",
     "estimatedDeliveryRange": "Entrega estimada: {{min}}–{{max}} días laborables",
     "estimatedDeliveryExact": "Entrega estimada: {{days}} días laborables",
-    "loadAddressesError": "No se pudieron cargar tus direcciones."
+    "loadAddressesError": "No se pudieron cargar tus direcciones.",
+    "orPayWith": "o paga con",
+    "paypalDeclined": "PayPal no ha aceptado ese método de pago. No se ha hecho ningún cargo: vuelve a intentarlo con otro.",
+    "paypalError": "No se ha podido completar el pago con PayPal. No se ha hecho ningún cargo."
   },
   "checkoutSuccess": {
     "title": "¡Pedido recibido!",

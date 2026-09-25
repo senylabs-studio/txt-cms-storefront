@@ -110,7 +110,7 @@ const FavoritesPage: React.FC = () => {
                         <Link to={slug}>{entity.name}</Link>
                       </div>
                       <div className="d-flex align-items-baseline gap-1">
-                        <span className="fw-bold text-danger">€{entity.price?.toFixed(2)}</span>
+                        <span className="sf-price">€{entity.price?.toFixed(2)}</span>
                         {showOriginal && (
                           <span className="text-muted text-decoration-line-through small">€{entity.originalPrice?.toFixed(2)}</span>
                         )}

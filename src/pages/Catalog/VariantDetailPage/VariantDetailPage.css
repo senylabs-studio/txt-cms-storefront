@@ -147,7 +147,7 @@
 .vdp-price {
   font-size: 2rem;
   font-weight: 800;
-  color: #212529;
+  color: var(--brand-text-color);
 }
 
 .vdp-price-original {

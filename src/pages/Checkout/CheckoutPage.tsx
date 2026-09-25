@@ -10,7 +10,8 @@ import { checkout } from '../../services/cartService';
 import { getProfile } from '../../services/profileService';
 import { getApplicableShippingRate, type ApplicableShippingRate } from '../../services/shippingService';
 import { getApiErrorMessage } from '../../utils/apiError';
-import type { CustomerAddress, CheckoutResponse } from '../../types';
+import type { CustomerAddress, CheckoutResponse, CheckoutRequest } from '../../types';
+import PayPalCheckoutButton from './PayPalCheckoutButton';
 
 const CheckoutPage: React.FC = () => {
   const { t } = useTranslation();
@@ -24,6 +25,7 @@ const CheckoutPage: React.FC = () => {
   const [billingId, setBillingId] = useState<number | undefined>();
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
+  const [paypalBusy, setPaypalBusy] = useState(false);
   const [error, setError] = useState('');
   const [shippingRate, setShippingRate] = useState<ApplicableShippingRate | null | undefined>(undefined);
   const [shippingLoading, setShippingLoading] = useState(false);
@@ -106,23 +108,26 @@ const CheckoutPage: React.FC = () => {
   const estimatedRecargo = Math.round((netAfterDiscount + estimatedShipping) * recargoRatio * 100) / 100;
   const estimatedTotal = netAfterDiscount + estimatedShipping + estimatedRecargo;
 
+  // Same request for both payment routes (Redsys page / PayPal button).
+  const buildCheckoutRequest = (): CheckoutRequest => ({
+    shippingAddressId: shippingId,
+    billingAddressId: billingId,
+    notes: notes || undefined,
+    browserAcceptHeader: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    browserUserAgent: navigator.userAgent,
+    browserJavaEnabled: false,
+    browserLanguage: navigator.language,
+    browserColorDepth: screen.colorDepth.toString(),
+    browserScreenHeight: screen.height.toString(),
+    browserScreenWidth: screen.width.toString(),
+    browserTZ: new Date().getTimezoneOffset().toString(),
+  });
+
   const handleProceedToPayment = async () => {
     setLoading(true);
     setError('');
     try {
-      const res = await checkout({
-        shippingAddressId: shippingId,
-        billingAddressId: billingId,
-        notes: notes || undefined,
-        browserAcceptHeader: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        browserUserAgent: navigator.userAgent,
-        browserJavaEnabled: false,
-        browserLanguage: navigator.language,
-        browserColorDepth: screen.colorDepth.toString(),
-        browserScreenHeight: screen.height.toString(),
-        browserScreenWidth: screen.width.toString(),
-        browserTZ: new Date().getTimezoneOffset().toString(),
-      });
+      const res = await checkout(buildCheckoutRequest());
       setRedsysData(res);
     } catch (e: unknown) {
       setError(getApiErrorMessage(e, t('checkout.initError')));
@@ -210,12 +215,20 @@ const CheckoutPage: React.FC = () => {
                   size="lg"
                   className="w-100"
                   onClick={handleProceedToPayment}
-                  disabled={loading || !shippingId || shippingLoading || shippingRate === null}
+                  disabled={loading || paypalBusy || !shippingId || shippingLoading || shippingRate === null}
                 >
                   {loading
                     ? <><Spinner size="sm" animation="border" className="me-2" />{t('checkout.processing')}</>
                     : t('checkout.proceed')}
                 </Button>
+
+                <PayPalCheckoutButton
+                  buildRequest={buildCheckoutRequest}
+                  disabled={loading || !shippingId || shippingLoading || shippingRate === null}
+                  onPaid={() => navigate('/checkout/success')}
+                  onError={message => setError(message)}
+                  onBusyChange={setPaypalBusy}
+                />
               </Card.Body>
             </Card>
           </Col>

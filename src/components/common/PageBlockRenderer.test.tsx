@@ -85,3 +85,28 @@ describe('PageBlockRenderer', () => {
     expect(container.querySelector('a')?.getAttribute('href')).toBe('https://example.com');
   });
 });
+
+// Contact page regression tests: a checkbox field with an empty label showed its "*" alone on the
+// line above, and two such checkboxes shared the id "field-", so clicking the second one's text
+// ticked the first.
+describe('PageBlockRenderer FormField checkboxes', () => {
+  const checkbox = (id: number, placeholder: string, required: boolean) => ({
+    id, type: 'FormField', sortOrder: id,
+    config: { label: '', fieldType: 'checkbox', placeholder, required },
+  }) as StorefrontPageBlock;
+
+  it('puts the required mark on the checkbox line and gives each checkbox its own label', () => {
+    const { container, getByLabelText } = render(<PageBlockRenderer blocks={[
+      checkbox(1, 'He leído y acepto la Política de Privacidad', true),
+      checkbox(2, 'Acepto recibir comunicaciones comerciales', false),
+    ]} />);
+
+    expect(container.querySelector('.pbr-form-label')).toBeNull();
+    const privacyLabel = container.querySelectorAll('.form-check-label')[0];
+    expect(privacyLabel.textContent).toBe('He leído y acepto la Política de Privacidad*');
+    const privacy = getByLabelText(/Política de Privacidad/) as HTMLInputElement;
+    const marketing = getByLabelText(/comunicaciones comerciales/) as HTMLInputElement;
+    expect(privacy).not.toBe(marketing);
+    expect(privacy.id).not.toBe(marketing.id);
+  });
+});
