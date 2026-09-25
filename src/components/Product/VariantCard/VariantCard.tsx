@@ -12,6 +12,7 @@ import { formatComposition } from '../../../utils/composition';
 import { getDiscountInfo } from '../../../utils/pricing';
 import { getApiErrorMessage } from '../../../utils/apiError';
 import '../ProductCard/ProductCard.css';
+import IconTooltip from '../../common/IconTooltip/IconTooltip';
 
 interface Props { variant: StorefrontVariant; }
 
@@ -126,9 +127,11 @@ const VariantCard: React.FC<Props> = ({ variant }) => {
                 <Button variant="primary" size="sm" className="flex-grow-1" disabled={loading} onClick={handleConfirm}>
                   <FaCheck className="me-1" />{t('product.add')}
                 </Button>
-                <Button variant="outline-secondary" size="sm" onClick={handleCancel}>
-                  <FaTimes />
-                </Button>
+                <IconTooltip label={t('product.cancelAdd')}>
+                  <Button variant="outline-secondary" size="sm" onClick={handleCancel} aria-label={t('product.cancelAdd')}>
+                    <FaTimes />
+                  </Button>
+                </IconTooltip>
               </div>
               {error && <div className="text-danger small mt-1">{error}</div>}
             </div>

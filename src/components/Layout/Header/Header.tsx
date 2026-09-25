@@ -15,6 +15,7 @@ import { getVariantsPaged } from '../../../services/productService';
 import { getLanguages, type StorefrontLanguage } from '../../../services/languageService';
 import type { StorefrontVariant } from '../../../types';
 import './Header.css';
+import IconTooltip from '../../common/IconTooltip/IconTooltip';
 
 
 const Header: React.FC = () => {
@@ -85,7 +86,9 @@ const Header: React.FC = () => {
           onBlur={() => setShowSuggestions(false)}
           onKeyDown={e => { if (e.key === 'Escape') setShowSuggestions(false); }}
         />
-        <Button variant="primary" type="submit" aria-label={t('header.search')}><FaSearch /></Button>
+        <IconTooltip label={t('header.search')} placement="bottom">
+          <Button variant="primary" type="submit" aria-label={t('header.search')}><FaSearch /></Button>
+        </IconTooltip>
       </InputGroup>
 
       {showSuggestions && search.trim().length >= 2 && (

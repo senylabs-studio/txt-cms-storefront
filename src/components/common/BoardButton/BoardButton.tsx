@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../contexts/AuthContext';
 import { addBoardItem } from '../../../services/boardService';
 import './BoardButton.css';
+import IconTooltip from '../IconTooltip/IconTooltip';
 
 interface Props {
   variantId: number;
@@ -39,15 +40,16 @@ const BoardButton: React.FC<Props> = ({ variantId, size = 'md', className = '' }
   const label = t(added ? 'board.added' : 'board.add');
 
   return (
-    <button
-      className={`board-btn board-btn--${size} ${added ? 'board-btn--active' : ''} ${className}`}
-      onClick={handleClick}
-      disabled={loading}
-      title={label}
-      aria-label={label}
-    >
-      {added ? <FaCheck /> : <FaPalette />}
-    </button>
+    <IconTooltip label={label} disabled={loading}>
+      <button
+        className={`board-btn board-btn--${size} ${added ? 'board-btn--active' : ''} ${className}`}
+        onClick={handleClick}
+        disabled={loading}
+        aria-label={label}
+      >
+        {added ? <FaCheck /> : <FaPalette />}
+      </button>
+    </IconTooltip>
   );
 };
 

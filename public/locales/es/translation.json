@@ -413,7 +413,8 @@
     "measureHide": "Ocultar cinta métrica",
     "goToImage": "Ir a imagen {{count}}",
     "noFeaturedProducts": "No hay productos destacados configurados.",
-    "reviewsLoadError": "No se pudieron cargar las reseñas."
+    "reviewsLoadError": "No se pudieron cargar las reseñas.",
+    "cancelAdd": "Cancelar"
   },
   "filters": {
     "title": "Filtros",
@@ -481,6 +482,8 @@
     "savePreferences": "Guardar configuración"
   },
   "common": {
-    "fieldRequired": "Este campo es obligatorio."
+    "fieldRequired": "Este campo es obligatorio.",
+    "unexpectedError": "Ha ocurrido un error inesperado. Inténtalo de nuevo.",
+    "networkError": "No se ha podido conectar. Comprueba tu conexión e inténtalo de nuevo."
   }
 }

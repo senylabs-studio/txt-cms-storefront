@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useFavorites } from '../../../contexts/FavoritesContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import './FavoriteButton.css';
+import IconTooltip from '../IconTooltip/IconTooltip';
 
 interface Props {
   productId?: number;
@@ -29,14 +30,15 @@ const FavoriteButton: React.FC<Props> = ({ productId, variantId, size = 'md', cl
   };
 
   return (
-    <button
-      className={`fav-btn fav-btn--${size} ${active ? 'fav-btn--active' : ''} ${className}`}
-      onClick={handleClick}
-      title={label}
-      aria-label={label}
-    >
-      {active ? <FaHeart /> : <FaRegHeart />}
-    </button>
+    <IconTooltip label={label}>
+      <button
+        className={`fav-btn fav-btn--${size} ${active ? 'fav-btn--active' : ''} ${className}`}
+        onClick={handleClick}
+        aria-label={label}
+      >
+        {active ? <FaHeart /> : <FaRegHeart />}
+      </button>
+    </IconTooltip>
   );
 };
 

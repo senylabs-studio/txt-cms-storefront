@@ -413,7 +413,8 @@
     "measureHide": "Hide measuring tape",
     "goToImage": "Go to image {{count}}",
     "noFeaturedProducts": "No featured products configured.",
-    "reviewsLoadError": "Failed to load the reviews."
+    "reviewsLoadError": "Failed to load the reviews.",
+    "cancelAdd": "Cancel"
   },
   "filters": {
     "title": "Filters",
@@ -481,6 +482,8 @@
     "savePreferences": "Save preferences"
   },
   "common": {
-    "fieldRequired": "This field is required."
+    "fieldRequired": "This field is required.",
+    "unexpectedError": "An unexpected error occurred. Please try again.",
+    "networkError": "Could not connect. Check your connection and try again."
   }
 }

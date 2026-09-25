@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { FaComments, FaTimes, FaPaperPlane } from 'react-icons/fa';
 import { sendChatMessage, type ChatMessage } from '../../services/chatService';
 import './ChatWidget.css';
+import IconTooltip from '../common/IconTooltip/IconTooltip';
 
 const ChatWidget: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -70,9 +71,11 @@ const ChatWidget: React.FC = () => {
               disabled={loading}
               maxLength={2000}
             />
-            <button type="submit" disabled={loading || !input.trim()} aria-label={t('chat.send')}>
-              <FaPaperPlane />
-            </button>
+            <IconTooltip label={t('chat.send')} disabled={loading || !input.trim()}>
+              <button type="submit" disabled={loading || !input.trim()} aria-label={t('chat.send')}>
+                <FaPaperPlane />
+              </button>
+            </IconTooltip>
           </form>
         </div>
       )}

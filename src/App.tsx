@@ -11,6 +11,7 @@ import { ToastProvider } from './contexts/ToastContext';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 import ChatWidget from './components/ChatWidget/ChatWidget';
 import GlobalToast from './components/common/GlobalToast/GlobalToast';
+import UnhandledApiErrorToaster from './components/common/UnhandledApiErrorToaster';
 import { useSyncDocumentLang } from './hooks/useSyncDocumentLang';
 
 import LandingPage from './pages/Home/LandingPage';
@@ -83,6 +84,7 @@ function App() {
             </Routes>
             <ChatWidget />
             <GlobalToast />
+            <UnhandledApiErrorToaster />
           </StockNotificationProvider>
           </FavoritesProvider>
         </CartProvider>
