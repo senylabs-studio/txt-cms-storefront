@@ -17,6 +17,8 @@ export interface StorefrontProduct {
   composition?: string;
   minQuantity: number;
   quantityStep: number;
+  /** Shows the "Nuevo" badge (its product's NewUntil is still in the future). */
+  isNew?: boolean;
 }
 
 export interface StorefrontVariant {
@@ -39,6 +41,8 @@ export interface StorefrontVariant {
   composition?: string;
   minQuantity: number;
   quantityStep: number;
+  /** Shows the "Nuevo" badge (its product's NewUntil is still in the future). */
+  isNew?: boolean;
 }
 
 export interface StorefrontImage {
@@ -49,6 +53,8 @@ export interface StorefrontImage {
 }
 
 export interface StorefrontVariantDetail {
+  /** Shows the "Nuevo" badge (its product's NewUntil is still in the future). */
+  isNew?: boolean;
   id: number;
   code: string;
   name: string;
@@ -252,6 +258,7 @@ export interface StorefrontPageItem {
   thumbnailUrl?: string;
   typeValue?: string;
   order: number;
+  isNew?: boolean;
   width?: number;
   composition?: string;
   minQuantity: number;
@@ -263,6 +270,8 @@ export interface PageFilterFacets {
   maxPrice: number;
   widths: number[];
   materials: string[];
+  /** Some item in the unfiltered set is new — offer the "Novedades" filter. */
+  hasNew?: boolean;
 }
 
 export interface BlockStyle {

@@ -418,7 +418,8 @@
     "goToImage": "Go to image {{count}}",
     "noFeaturedProducts": "No featured products configured.",
     "reviewsLoadError": "Failed to load the reviews.",
-    "cancelAdd": "Cancel"
+    "cancelAdd": "Cancel",
+    "new": "New"
   },
   "filters": {
     "title": "Filters",
@@ -434,7 +435,8 @@
     "composition": "Composition",
     "clear": "Clear",
     "viewResults": "View results",
-    "noResults": "No products match the selected filters."
+    "noResults": "No products match the selected filters.",
+    "onlyNew": "New arrivals only"
   },
   "careLabels": {
     "wash30": "Machine wash max. 30°C",

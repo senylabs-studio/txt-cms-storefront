@@ -101,7 +101,7 @@ const PageCatalogPage: React.FC = () => {
 
   const facets = pageDetail.facets ?? EMPTY_FACETS;
   const hasActiveFilters = filters.minPrice !== undefined || filters.maxPrice !== undefined
-    || filters.width !== undefined || !!filters.material || !!filters.orderBy;
+    || filters.width !== undefined || !!filters.material || !!filters.orderBy || !!filters.onlyNew;
   const showFilters = pageDetail.totalItems > 0 || hasActiveFilters;
 
   const CONTENT_TYPES = ['TermsAndConditions', 'PrivacyPolicy', 'WithdrawalPolicy', 'DeliveryInfo', 'CookiePolicy', 'Content', 'Form'];
@@ -112,6 +112,7 @@ const PageCatalogPage: React.FC = () => {
     filters.width !== undefined,
     !!filters.material,
     !!filters.orderBy,
+    !!filters.onlyNew,
   ].filter(Boolean).length;
 
   return (

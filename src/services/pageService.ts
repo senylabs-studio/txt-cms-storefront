@@ -7,6 +7,8 @@ export interface PageFilters {
   width?: number;
   material?: string;
   orderBy?: string;
+  /** Only products still showing the "Nuevo" badge. */
+  onlyNew?: boolean;
 }
 
 export const getMenu = async (): Promise<StorefrontMenuItem[]> => {
@@ -26,6 +28,7 @@ export const getPageBySlug = async (
   if (filters.width !== undefined) params.width = filters.width;
   if (filters.material) params.material = filters.material;
   if (filters.orderBy) params.orderBy = filters.orderBy;
+  if (filters.onlyNew) params.onlyNew = 'true';
   const res = await apiClient.get(`/storefront/pages/${slug}`, { params });
   return res.data;
 };

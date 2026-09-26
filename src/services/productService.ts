@@ -15,6 +15,7 @@ export const getVariantsPaged = async (
     params: {
       page, pageSize, search, productTypeId, orderBy, orderDir,
       minPrice: filters.minPrice, maxPrice: filters.maxPrice, width: filters.width, material: filters.material,
+      onlyNew: filters.onlyNew || undefined,
     }
   });
   return res.data;

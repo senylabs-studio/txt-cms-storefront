@@ -70,6 +70,7 @@ const HomePage: React.FC = () => {
     filters.width !== undefined,
     !!filters.material,
     !!filters.orderBy,
+    !!filters.onlyNew,
   ].filter(Boolean).length;
 
   return (

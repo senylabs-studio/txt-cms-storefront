@@ -298,7 +298,7 @@ const ProductsBlock: React.FC<{ config: ProductsBlockConfig; pageDetail?: Storef
   const cols = config.columns ?? 4;
   if (items.length === 0) return null;
   return (
-    <div style={buildStyle(config.style)}>
+    <div className="pbr-products" style={buildStyle(config.style)}>
       <Row xs={2} sm={cols > 2 ? 3 : 2} md={cols} className="g-3">
         {items.map(item => (
           <Col key={item.variantId}>
@@ -319,6 +319,7 @@ const ProductsBlock: React.FC<{ config: ProductsBlockConfig; pageDetail?: Storef
               composition: item.composition,
               minQuantity: item.minQuantity,
               quantityStep: item.quantityStep,
+              isNew: item.isNew,
             }} />
           </Col>
         ))}

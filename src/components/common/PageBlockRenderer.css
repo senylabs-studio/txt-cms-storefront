@@ -36,6 +36,11 @@
 .pbr-banner-title { font-weight: 700; margin-bottom: 0.5rem; }
 .pbr-banner-subtitle { font-size: 1.1rem; margin-bottom: 1.5rem; opacity: 0.9; }
 
+/* ── Products ───────────────────────────────────────────────────────────────────
+   Breathing room between the product grid and whatever block comes before it (e.g. the category's
+   intro text). Only when it isn't the first block, so a grid at the top stays flush. */
+.page-blocks > div + div > .pbr-products { margin-top: 2rem; }
+
 /* ── SubPages ─────────────────────────────────────────────────────────────────── */
 .pbr-subpages-link { text-decoration: none; color: inherit; display: block; height: 100%; }
 .pbr-subpages-card { border: 1px solid #dee2e6; border-radius: 8px; overflow: hidden; height: 100%; }

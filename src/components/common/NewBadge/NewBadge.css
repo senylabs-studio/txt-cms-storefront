@@ -1,0 +1,14 @@
+.new-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--brand-color);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+/* Next to a detail-page title */
+.new-badge--title { font-size: 11px; margin-left: 10px; vertical-align: middle; position: relative; top: -2px; }
