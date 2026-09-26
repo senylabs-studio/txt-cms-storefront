@@ -414,8 +414,10 @@ const VariantDetailPage: React.FC = () => {
                 <FaShoppingCart className="me-2" />
                 {outOfStock ? t('product.outOfStock') : t('product.addToCart')}
               </Button>
-              <FavoriteButton variantId={variant.id} size="lg" />
-              <BoardButton variantId={variant.id} size="lg" />
+              <div className="vdp-icon-actions">
+                <FavoriteButton variantId={variant.id} size="lg" />
+                <BoardButton variantId={variant.id} size="lg" />
+              </div>
             </div>
             {outOfStock && (
               <div className="vdp-notify mt-2">
