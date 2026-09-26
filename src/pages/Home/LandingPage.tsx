@@ -15,6 +15,7 @@ import {
   type HomeImageTextBlockConfig,
 } from '../../services/homeService';
 import FeaturedProductsGrid from '../../components/common/FeaturedProductsGrid/FeaturedProductsGrid';
+import { bannerTextPlacement } from '../../utils/bannerTextPlacement';
 import './LandingPage.css';
 
 // ─── Banner (carousel) ────────────────────────────────────────────────────────
@@ -57,7 +58,7 @@ const BannerBlock: React.FC<{ config: HomeBannerBlockConfig }> = ({ config }) =>
     return (
       <div
         className="home-banner"
-        style={{ backgroundImage: slide.imageUrl ? `url(${slide.imageUrl})` : undefined, minHeight: height }}
+        style={{ backgroundImage: slide.imageUrl ? `url(${slide.imageUrl})` : undefined, minHeight: height, ...bannerTextPlacement(slide.textAlign, slide.textVerticalAlign) }}
       >
         <BannerSlideContent slide={slide} />
       </div>
@@ -70,7 +71,7 @@ const BannerBlock: React.FC<{ config: HomeBannerBlockConfig }> = ({ config }) =>
         <Carousel.Item key={i} style={{ minHeight: height }}>
           <div
             className="home-banner"
-            style={{ backgroundImage: slide.imageUrl ? `url(${slide.imageUrl})` : undefined, minHeight: height }}
+            style={{ backgroundImage: slide.imageUrl ? `url(${slide.imageUrl})` : undefined, minHeight: height, ...bannerTextPlacement(slide.textAlign, slide.textVerticalAlign) }}
           >
             <BannerSlideContent slide={slide} />
           </div>

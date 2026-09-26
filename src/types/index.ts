@@ -378,6 +378,8 @@ export interface BannerSlide {
   subtitle?: string;
   buttonText?: string;
   buttonUrl?: string;
+  textAlign?: 'left' | 'center' | 'right';
+  textVerticalAlign?: 'top' | 'middle' | 'bottom';
 }
 
 export interface BannerBlockConfig {

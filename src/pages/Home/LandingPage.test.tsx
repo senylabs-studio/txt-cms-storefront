@@ -81,3 +81,31 @@ describe('LandingPage external links', () => {
     expect(link).toHaveAttribute('href', 'https://partner.example.com/campaign');
   });
 });
+
+describe('LandingPage banner text position', () => {
+  it('places the slide text block in the position picked in the CMS', async () => {
+    const block: StorefrontHomeBlock = {
+      id: 3, title: 'Hero', type: 'Banner', isActive: true, sortOrder: 0,
+      config: { slides: [{ imageUrl: '/a.jpg', title: 'Rebajas', textAlign: 'right', textVerticalAlign: 'bottom' }] },
+    };
+    getHomeBlocks.mockResolvedValue([block]);
+    renderPage();
+
+    const slide = (await screen.findByText('Rebajas')).closest('.home-banner') as HTMLElement;
+    expect(slide.style.justifyContent).toBe('flex-end');
+    expect(slide.style.alignItems).toBe('flex-end');
+  });
+
+  it('keeps the historical centered layout for slides saved before positions existed', async () => {
+    const block: StorefrontHomeBlock = {
+      id: 4, title: 'Hero', type: 'Banner', isActive: true, sortOrder: 0,
+      config: { slides: [{ imageUrl: '/a.jpg', title: 'Viejo' }] },
+    };
+    getHomeBlocks.mockResolvedValue([block]);
+    renderPage();
+
+    const slide = (await screen.findByText('Viejo')).closest('.home-banner') as HTMLElement;
+    expect(slide.style.justifyContent).toBe('center');
+    expect(slide.style.alignItems).toBe('center');
+  });
+});

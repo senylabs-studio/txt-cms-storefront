@@ -25,6 +25,7 @@ import type {
 import { pageUrl } from '../../utils/pageUrl';
 import VariantCard from '../Product/VariantCard/VariantCard';
 import FeaturedProductsGrid from './FeaturedProductsGrid/FeaturedProductsGrid';
+import { bannerTextPlacement } from '../../utils/bannerTextPlacement';
 import './PageBlockRenderer.css';
 
 // ─── Style helpers ────────────────────────────────────────────────────────────
@@ -246,10 +247,11 @@ const BannerBlock: React.FC<{ config: BannerBlockConfig }> = ({ config }) => {
               backgroundColor: slide.imageUrl ? undefined : '#343a40',
               height,
               minHeight: height,
+              ...bannerTextPlacement(slide.textAlign, slide.textVerticalAlign),
             }}
           >
             {slide.imageUrl && <div className="pbr-banner-overlay" />}
-            <div className="pbr-banner-content">
+            <div className="pbr-banner-content" style={{ textAlign: slide.textAlign ?? 'center' }}>
               {slide.title && <h2 className="pbr-banner-title">{slide.title}</h2>}
               {slide.subtitle && <p className="pbr-banner-subtitle">{slide.subtitle}</p>}
               {slide.buttonText && slide.buttonUrl && (

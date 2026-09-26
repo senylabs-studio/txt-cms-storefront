@@ -9,6 +9,7 @@ export interface HomeBannerSlide {
   buttonText?: string;
   buttonUrl?: string;
   textAlign?: 'left' | 'center' | 'right';
+  textVerticalAlign?: 'top' | 'middle' | 'bottom';
   textColor?: string;
 }
 
