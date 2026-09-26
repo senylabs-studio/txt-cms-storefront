@@ -15,6 +15,7 @@ import type { StorefrontProfile, CustomerAddress } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { meetsPasswordRules } from '../../utils/password';
 import IconTooltip from '../../components/common/IconTooltip/IconTooltip';
+import ScissorsLoader from '../../components/common/ScissorsLoader/ScissorsLoader';
 
 const emptyAddress: Partial<CustomerAddress> = {
   alias: '', recipientName: '', street: '', city: '', postalCode: '', province: '', country: 'ES', phone: '', isDefault: false,
@@ -238,7 +239,7 @@ const AccountPage: React.FC = () => {
     }
   };
 
-  if (loading) return <MainLayout><div className="text-center py-5"><Spinner animation="border" variant="primary" /></div></MainLayout>;
+  if (loading) return <MainLayout><div className="text-center py-5"><ScissorsLoader /></div></MainLayout>;
   if (!profile) return (
     <MainLayout>
       <Container className="py-5 text-center">

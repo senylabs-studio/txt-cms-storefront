@@ -498,6 +498,7 @@
   "common": {
     "fieldRequired": "This field is required.",
     "unexpectedError": "An unexpected error occurred. Please try again.",
-    "networkError": "Could not connect. Check your connection and try again."
+    "networkError": "Could not connect. Check your connection and try again.",
+    "loading": "Loading…"
   }
 }

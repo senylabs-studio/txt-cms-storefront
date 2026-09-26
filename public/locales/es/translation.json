@@ -498,6 +498,7 @@
   "common": {
     "fieldRequired": "Este campo es obligatorio.",
     "unexpectedError": "Ha ocurrido un error inesperado. Inténtalo de nuevo.",
-    "networkError": "No se ha podido conectar. Comprueba tu conexión e inténtalo de nuevo."
+    "networkError": "No se ha podido conectar. Comprueba tu conexión e inténtalo de nuevo.",
+    "loading": "Cargando…"
   }
 }

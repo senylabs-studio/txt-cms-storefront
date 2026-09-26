@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Spinner, Row, Col, Carousel } from 'react-bootstrap';
+import { Container, Row, Col, Carousel } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
@@ -18,6 +18,7 @@ import FeaturedProductsGrid from '../../components/common/FeaturedProductsGrid/F
 import { bannerTextPlacement } from '../../utils/bannerTextPlacement';
 import { blockLinkProps } from '../../utils/blockLinkProps';
 import './LandingPage.css';
+import ScissorsLoader from '../../components/common/ScissorsLoader/ScissorsLoader';
 
 // ─── Banner (carousel) ────────────────────────────────────────────────────────
 // The subtitle has its own fixed max-width + auto margins (see LandingPage.css) so it reads as a
@@ -198,7 +199,7 @@ const LandingPage: React.FC = () => {
   }, [i18n.language]);
 
   if (loading) {
-    return <MainLayout><div className="text-center py-5"><Spinner animation="border" variant="primary" /></div></MainLayout>;
+    return <MainLayout><div className="text-center py-5"><ScissorsLoader /></div></MainLayout>;
   }
 
   if (blocks.length === 0) {

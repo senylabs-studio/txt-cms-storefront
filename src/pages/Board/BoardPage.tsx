@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Container, Spinner, Alert } from 'react-bootstrap';
+import { Container, Alert } from 'react-bootstrap';
 import { FaTimes, FaExternalLinkAlt } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '../../components/Layout/MainLayout';
 import { getBoard, updateBoardItem, removeBoardItem, type BoardItem } from '../../services/boardService';
 import './BoardPage.css';
+import ScissorsLoader from '../../components/common/ScissorsLoader/ScissorsLoader';
 
 const MIN_SIZE = 60;
 const MAX_SIZE = 400;
@@ -98,7 +99,7 @@ const BoardPage: React.FC = () => {
   if (loading) {
     return (
       <MainLayout>
-        <div className="text-center py-5"><Spinner animation="border" variant="primary" /></div>
+        <div className="text-center py-5"><ScissorsLoader /></div>
       </MainLayout>
     );
   }

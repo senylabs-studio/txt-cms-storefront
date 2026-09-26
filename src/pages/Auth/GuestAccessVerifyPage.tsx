@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Card, Alert, Spinner } from 'react-bootstrap';
+import { Container, Card, Alert } from 'react-bootstrap';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { verifyGuestAccessLink } from '../../services/authService';
 import { useAuth } from '../../contexts/AuthContext';
 import { getApiErrorMessage } from '../../utils/apiError';
+import ScissorsLoader from '../../components/common/ScissorsLoader/ScissorsLoader';
 
 const GuestAccessVerifyPage: React.FC = () => {
   const { t } = useTranslation();
@@ -39,7 +40,7 @@ const GuestAccessVerifyPage: React.FC = () => {
           <Card.Body className="p-4 text-center">
             {status === 'verifying' ? (
               <>
-                <Spinner animation="border" variant="primary" className="mb-3" />
+                <ScissorsLoader className="mb-3" />
                 <p className="text-muted mb-0">{t('auth.guestAccess.verifying')}</p>
               </>
             ) : (

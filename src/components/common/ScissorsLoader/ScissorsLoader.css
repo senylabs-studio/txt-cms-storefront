@@ -1,0 +1,37 @@
+.scissors-loader {
+  --scissors-orbit: 2.4s;
+  display: inline-block;
+  color: var(--brand-color);
+}
+.scissors-loader svg { display: block; width: 100%; height: 100%; overflow: visible; }
+
+/* Faint tailor's-chalk guide under the cut */
+.scissors-loader__guide { fill: none; stroke: currentColor; stroke-width: 1.4; opacity: 0.16; }
+.scissors-loader__cut { fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-dasharray: 2.2 1.7; }
+/* A 75%-long window that trails the scissors; offset 75 → -25 moves its end with the orbit, so the loop is seamless */
+.scissors-loader__reveal {
+  fill: none; stroke: #fff; stroke-width: 10;
+  stroke-dasharray: 75 25; stroke-dashoffset: 75;
+  animation: scissors-loader-reveal var(--scissors-orbit) linear infinite;
+}
+.scissors-loader__orbit { transform-origin: 50px 50px; animation: scissors-loader-orbit var(--scissors-orbit) linear infinite; }
+.scissors-loader__blade { fill: #48524e; }
+.scissors-loader__handle { fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; }
+.scissors-loader__screw { fill: #fff; stroke: #48524e; stroke-width: 1.2; }
+/* Four snips per lap */
+.scissors-loader__blade-a { animation: scissors-loader-snip-a calc(var(--scissors-orbit) / 4) ease-in-out infinite; }
+.scissors-loader__blade-b { animation: scissors-loader-snip-b calc(var(--scissors-orbit) / 4) ease-in-out infinite; }
+
+@keyframes scissors-loader-orbit { to { transform: rotate(360deg); } }
+@keyframes scissors-loader-reveal { to { stroke-dashoffset: -25; } }
+@keyframes scissors-loader-snip-a { 0%, 100% { transform: rotate(0deg); } 60% { transform: rotate(-22deg); } }
+@keyframes scissors-loader-snip-b { 0%, 100% { transform: rotate(0deg); } 60% { transform: rotate(22deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .scissors-loader__orbit,
+  .scissors-loader__reveal,
+  .scissors-loader__blade-a,
+  .scissors-loader__blade-b { animation: none; }
+  .scissors-loader__blade-a { transform: rotate(-14deg); }
+  .scissors-loader__blade-b { transform: rotate(14deg); }
+}
