@@ -402,3 +402,20 @@ describe('PageBlockRenderer SubPages mosaic', () => {
     expect(c.querySelector('.pbr-mosaic')).toBeNull();
   });
 });
+
+describe('PageBlockRenderer ImageText alignment', () => {
+  it('the text column keeps its gutter padding under the CMS default padding "none"', () => {
+    const { container } = render(<PageBlockRenderer blocks={[{ id: 1, type: 'ImageText', sortOrder: 0,
+      config: { text: '<p>Tejidos llenos de color</p>', imageUrl: '', style: { padding: 'none', textAlign: 'left' } } } as StorefrontPageBlock]} />);
+    const col = container.querySelector<HTMLElement>('.row > div')!;
+    expect(col.style.padding).toBe('');
+    expect(col.style.textAlign).toBe('left');
+  });
+
+  it('a real padding preset still applies, on the block wrapper', () => {
+    const { container } = render(<PageBlockRenderer blocks={[{ id: 1, type: 'ImageText', sortOrder: 0,
+      config: { text: '<p>x</p>', style: { padding: 'md' } } } as StorefrontPageBlock]} />);
+    expect(container.querySelector<HTMLElement>('.page-blocks > div > div')!.style.padding).toBe('1.25rem 0px');
+  });
+});
+

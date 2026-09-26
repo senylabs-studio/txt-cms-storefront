@@ -295,7 +295,10 @@ const ImageTextBlock: React.FC<{ config: ImageTextBlockConfig }> = ({ config }) 
     </Col>
   ) : null;
   const textCol = (
-    <Col md={slides.length > 0 ? 7 : 12} className={card ? 'pbr-image-text-card-body' : undefined} style={card ? boxStyle(config.style) : buildStyle(config.style)}>
+    // boxStyle, not buildStyle: a padding preset here (the CMS default "none" = inline padding: 0)
+    // wiped the Bootstrap column's own gutter padding and pushed the text 12px out of line with
+    // the page title. The preset applies to the whole block instead (wrapper below).
+    <Col md={slides.length > 0 ? 7 : 12} className={card ? 'pbr-image-text-card-body' : undefined} style={boxStyle(config.style)}>
       {config.title && <h3>{config.title}</h3>}
       {config.text && <div className="rich-text" dangerouslySetInnerHTML={{ __html: sanitizeRichText(config.text) }} />}
       {config.showOpeningHours && <div className="pbr-image-text-hours"><OpeningHoursBlock config={{}} /></div>}
@@ -306,10 +309,13 @@ const ImageTextBlock: React.FC<{ config: ImageTextBlockConfig }> = ({ config }) 
       )}
     </Col>
   );
+  const preset = config.style?.padding && config.style.padding !== 'none' ? PADDING[config.style.padding] : undefined;
   return (
-    <Row className={card ? 'pbr-image-text-card g-0' : 'align-items-center g-4'}>
-      {imageLeft ? <>{imgCol}{textCol}</> : <>{textCol}{imgCol}</>}
-    </Row>
+    <div style={preset ? { padding: preset } : undefined}>
+      <Row className={card ? 'pbr-image-text-card g-0' : 'align-items-center g-4'}>
+        {imageLeft ? <>{imgCol}{textCol}</> : <>{textCol}{imgCol}</>}
+      </Row>
+    </div>
   );
 };
 
