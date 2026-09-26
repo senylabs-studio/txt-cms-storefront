@@ -81,6 +81,13 @@ function buildStyle(style?: BlockStyle): React.CSSProperties {
   };
 }
 
+/** buildStyle minus the padding preset, for boxed variants (callout, accordion, cards, hours):
+ *  they have their own inner padding, and a preset — the CMS default "none" is an inline
+ *  `padding: 0`, "md" is `1.25rem 0` — would flatten the content against the box's border. */
+function boxStyle(style?: BlockStyle): React.CSSProperties {
+  return { ...buildStyle(style), padding: undefined };
+}
+
 // ─── Block renderers ──────────────────────────────────────────────────────────
 const HeaderBlock: React.FC<{ config: HeaderBlockConfig }> = ({ config }) => {
   const Tag = (config.level ?? 'h2') as keyof JSX.IntrinsicElements;
@@ -121,7 +128,7 @@ const HeaderParagraphBlock: React.FC<{ config: HeaderParagraphBlockConfig }> = (
 
   if (config.variant === 'accordion') {
     return (
-      <details className="pbr-accordion" style={buildStyle(config.style)}>
+      <details className="pbr-accordion" style={boxStyle(config.style)}>
         <summary>
           <Tag className="pbr-accordion-title">{headerText}</Tag>
           <FaChevronDown className="pbr-accordion-chevron" aria-hidden="true" />
@@ -134,7 +141,7 @@ const HeaderParagraphBlock: React.FC<{ config: HeaderParagraphBlockConfig }> = (
   if (config.variant === 'callout') {
     const Icon = CALLOUT_ICONS[config.icon ?? 'info'] ?? FaInfoCircle;
     return (
-      <div className="pbr-callout" style={buildStyle(config.style)}>
+      <div className="pbr-callout" style={boxStyle(config.style)}>
         <span className="pbr-callout-icon" aria-hidden="true"><Icon /></span>
         <div className="pbr-callout-body">
           {headerText && <Tag className="pbr-callout-title">{headerText}</Tag>}
@@ -214,7 +221,7 @@ const ImageTextBlock: React.FC<{ config: ImageTextBlockConfig }> = ({ config }) 
     </Col>
   ) : null;
   const textCol = (
-    <Col md={config.imageUrl ? 7 : 12} className={card ? 'pbr-image-text-card-body' : undefined} style={buildStyle(config.style)}>
+    <Col md={config.imageUrl ? 7 : 12} className={card ? 'pbr-image-text-card-body' : undefined} style={card ? boxStyle(config.style) : buildStyle(config.style)}>
       {config.title && <h3>{config.title}</h3>}
       {config.text && <div className="rich-text" dangerouslySetInnerHTML={{ __html: sanitizeRichText(config.text) }} />}
       {config.buttonText && config.buttonUrl && (
@@ -513,7 +520,7 @@ const OpeningHoursBlock: React.FC<{ config: OpeningHoursBlockConfig }> = ({ conf
   };
 
   return (
-    <div className="pbr-hours" style={buildStyle(config.style)}>
+    <div className="pbr-hours" style={boxStyle(config.style)}>
       <div className="pbr-hours-top">
         <h3 className="pbr-hours-title"><FaClock aria-hidden="true" />{config.title || t('openingHours.title')}</h3>
         {status && <span className={`pbr-hours-status${status.open ? ' is-open' : ''}`}>{statusText(status)}</span>}
@@ -525,7 +532,7 @@ const OpeningHoursBlock: React.FC<{ config: OpeningHoursBlockConfig }> = ({ conf
               <th scope="row">{rowLabel(row, locale)}</th>
               <td>
                 {row.ranges.length > 0
-                  ? row.ranges.map(r => `${r.open} – ${r.close}`).join(' · ')
+                  ? row.ranges.map(r => <span key={r.open} className="pbr-hours-range">{r.open} – {r.close}</span>)
                   : <span className="pbr-hours-closed">{t('openingHours.closed')}</span>}
               </td>
             </tr>

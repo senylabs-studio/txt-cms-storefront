@@ -361,4 +361,11 @@
 .pbr-hours-table tr.is-today th,
 .pbr-hours-table tr.is-today td { font-weight: 600; }
 .pbr-hours-closed { color: #6c757d; }
+.pbr-hours-range { white-space: nowrap; }
+.pbr-hours-range + .pbr-hours-range::before { content: ' · '; }
+/* Narrow screens: one slot per line instead of wrapping mid-range. */
+@media (max-width: 575.98px) {
+  .pbr-hours-range { display: block; }
+  .pbr-hours-range + .pbr-hours-range::before { content: none; }
+}
 .pbr-hours-note { font-size: 0.85rem; color: #6c757d; margin: 0.5rem 0 0; }

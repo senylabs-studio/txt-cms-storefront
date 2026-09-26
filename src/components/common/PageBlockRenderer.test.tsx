@@ -228,6 +228,7 @@ describe('PageBlockRenderer new blocks', () => {
     const rows = c.querySelectorAll('.pbr-hours-table tr');
     expect(rows).toHaveLength(2);
     expect(rows[0].querySelector('th')!.textContent).toBe('Lunes – sábado');
+    expect(rows[0].querySelectorAll('.pbr-hours-range')).toHaveLength(1);
     expect(rows[0].querySelector('td')!.textContent).toBe('09:30 – 13:15');
     expect(rows[1].textContent).toContain('openingHours.closed');
     expect(c.querySelector('.pbr-hours-status')).not.toBeNull();
@@ -240,6 +241,32 @@ describe('PageBlockRenderer new blocks', () => {
 
     settings.current = {};
     expect(renderBlock('OpeningHours', {}).querySelector('.pbr-hours')).toBeNull();
+  });
+});
+
+describe('PageBlockRenderer boxed variants keep their own padding', () => {
+  // The CMS saves padding "none" by default, which buildStyle turns into an inline `padding: 0`.
+  const style = { padding: 'none' };
+  const renderBlock = (type: string, config: Record<string, unknown>) =>
+    render(<PageBlockRenderer blocks={[{ id: 1, type, config, sortOrder: 0 } as StorefrontPageBlock]} />).container;
+
+  it.each([
+    ['HeaderParagraph', { headerText: 'A', variant: 'callout', style }, '.pbr-callout'],
+    ['HeaderParagraph', { headerText: 'A', variant: 'accordion', style }, '.pbr-accordion'],
+    ['ImageText', { title: 'A', imageUrl: 'a.jpg', variant: 'card', style }, '.pbr-image-text-card-body'],
+  ])('%s %s has no inline padding', (type, config, selector) => {
+    const el = renderBlock(type, config as Record<string, unknown>).querySelector<HTMLElement>(selector)!;
+    expect(el.style.padding).toBe('');
+  });
+
+  it('OpeningHours has no inline padding', () => {
+    settings.current = { openingHours: [{ day: 1, ranges: [{ open: '09:00', close: '14:00' }] }] };
+    expect(renderBlock('OpeningHours', { style }).querySelector<HTMLElement>('.pbr-hours')!.style.padding).toBe('');
+  });
+
+  it('a plain paragraph still gets the padding preset', () => {
+    const el = renderBlock('Paragraph', { text: '<p>x</p>', style: { padding: 'md' } }).querySelector<HTMLElement>('.rich-text')!;
+    expect(el.style.padding).toBe('1.25rem 0px');
   });
 });
 
