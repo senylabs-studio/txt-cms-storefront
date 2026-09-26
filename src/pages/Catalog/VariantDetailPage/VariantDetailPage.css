@@ -242,6 +242,30 @@
 
 .vdp-add-btn {
   border-radius: 8px !important;
+  min-width: 0;
+}
+
+.vdp-icon-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* Mobile: stack fav/board vertically so the stepper and add-to-cart get the width */
+@media (max-width: 575.98px) {
+  .vdp-stepper { flex-shrink: 0; }
+  .vdp-stepper-btn { height: auto; min-height: 44px; }
+  .vdp-icon-actions {
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+  }
+  .vdp-icon-actions .fav-btn,
+  .vdp-icon-actions .board-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 17px;
+  }
 }
 
 .vdp-meters {
