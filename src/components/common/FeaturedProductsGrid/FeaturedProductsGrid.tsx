@@ -8,6 +8,7 @@ import { useAuthGate } from '../../../contexts/AuthGateContext';
 import { useToast } from '../../../contexts/ToastContext';
 import { getApiErrorMessage } from '../../../utils/apiError';
 import { getDiscountInfo } from '../../../utils/pricing';
+import NewBadge from '../NewBadge/NewBadge';
 import './FeaturedProductsGrid.css';
 
 /** Shape the backend resolves variantIds/productIds into server-side (see homeService.ts). */
@@ -22,6 +23,7 @@ export interface FeaturedProductItem {
   thumbnailUrl?: string;
   imageUrls?: string[];
   hasVariants?: boolean;
+  isNew?: boolean;
 }
 
 interface Props {
@@ -97,10 +99,15 @@ const FeaturedProductsGrid: React.FC<Props> = ({ title, variants = [], products 
                   {thumbnail
                     ? <img src={thumbnail} alt={item.name} className="home-featured-img" />
                     : <div className="home-featured-placeholder">📦</div>}
-                  {hasDiscount && (
-                    <Badge bg="danger" className="position-absolute top-0 start-0 m-2" style={{ fontSize: 10 }}>
-                      {hasGroupDiscount ? `−${item.discountPercent}%` : t('product.offer')}
-                    </Badge>
+                  {(hasDiscount || item.isNew) && (
+                    <div className="position-absolute top-0 start-0 m-2 d-flex flex-column align-items-start gap-1">
+                      {item.isNew && <NewBadge />}
+                      {hasDiscount && (
+                        <Badge bg="danger" style={{ fontSize: 10 }}>
+                          {hasGroupDiscount ? `−${item.discountPercent}%` : t('product.offer')}
+                        </Badge>
+                      )}
+                    </div>
                   )}
                   {outOfStock && <div className="home-featured-outofstock">{t('product.outOfStock')}</div>}
                 </Link>

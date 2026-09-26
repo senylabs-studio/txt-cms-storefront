@@ -157,7 +157,7 @@ const NavMenu: React.FC<NavMenuProps> = ({ leading, trailing }) => {
 
   return (
     <nav
-      className="nav-menu-bar"
+      className={`nav-menu-bar${leading || trailing ? ' nav-menu-bar--condensed' : ''}`}
       onMouseLeave={handleLeave}
     >
       {/* Top strip — the actual nav items */}

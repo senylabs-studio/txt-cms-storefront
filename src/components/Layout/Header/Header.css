@@ -270,6 +270,17 @@
   text-decoration: none;
 }
 
+/* Roomier, larger items on the full-height header. The condensed (scrolled) bar keeps the compact
+   sizes above, since it shares its row with the logo, search field and action icons. */
+@media (min-width: 768px) {
+  .nav-menu-bar:not(.nav-menu-bar--condensed) .nav-menu-link { font-size: 15px; padding: 14px 14px; }
+  .nav-menu-bar:not(.nav-menu-bar--condensed) .nav-menu-indicator { left: 14px; right: 14px; }
+}
+@media (min-width: 1200px) {
+  .nav-menu-bar:not(.nav-menu-bar--condensed) .nav-menu-link { font-size: 16px; padding: 16px 22px; }
+  .nav-menu-bar:not(.nav-menu-bar--condensed) .nav-menu-indicator { left: 22px; right: 22px; }
+}
+
 .nav-menu-indicator {
   display: block;
   position: absolute;

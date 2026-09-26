@@ -418,7 +418,8 @@
     "goToImage": "Ir a imagen {{count}}",
     "noFeaturedProducts": "No hay productos destacados configurados.",
     "reviewsLoadError": "No se pudieron cargar las reseñas.",
-    "cancelAdd": "Cancelar"
+    "cancelAdd": "Cancelar",
+    "new": "Nuevo"
   },
   "filters": {
     "title": "Filtros",
@@ -434,7 +435,8 @@
     "composition": "Composición",
     "clear": "Limpiar",
     "viewResults": "Ver resultados",
-    "noResults": "No hay productos que coincidan con los filtros seleccionados."
+    "noResults": "No hay productos que coincidan con los filtros seleccionados.",
+    "onlyNew": "Solo novedades"
   },
   "careLabels": {
     "wash30": "Lavar a máquina máx. 30°C",

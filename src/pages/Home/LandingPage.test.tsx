@@ -81,3 +81,62 @@ describe('LandingPage external links', () => {
     expect(link).toHaveAttribute('href', 'https://partner.example.com/campaign');
   });
 });
+
+describe('LandingPage banner text position', () => {
+  it('places the slide text block in the position picked in the CMS', async () => {
+    const block: StorefrontHomeBlock = {
+      id: 3, title: 'Hero', type: 'Banner', isActive: true, sortOrder: 0,
+      config: { slides: [{ imageUrl: '/a.jpg', title: 'Rebajas', textAlign: 'right', textVerticalAlign: 'bottom' }] },
+    };
+    getHomeBlocks.mockResolvedValue([block]);
+    renderPage();
+
+    const slide = (await screen.findByText('Rebajas')).closest('.home-banner') as HTMLElement;
+    expect(slide.style.justifyContent).toBe('flex-end');
+    expect(slide.style.alignItems).toBe('flex-end');
+  });
+
+  it('keeps the historical centered layout for slides saved before positions existed', async () => {
+    const block: StorefrontHomeBlock = {
+      id: 4, title: 'Hero', type: 'Banner', isActive: true, sortOrder: 0,
+      config: { slides: [{ imageUrl: '/a.jpg', title: 'Viejo' }] },
+    };
+    getHomeBlocks.mockResolvedValue([block]);
+    renderPage();
+
+    const slide = (await screen.findByText('Viejo')).closest('.home-banner') as HTMLElement;
+    expect(slide.style.justifyContent).toBe('center');
+    expect(slide.style.alignItems).toBe('center');
+  });
+});
+
+describe('LandingPage block links', () => {
+  it('opens a site page link (resolved by the backend from a picked page) in the same tab', async () => {
+    const block: StorefrontHomeBlock = {
+      id: 5, title: 'Pro', type: 'ImageText', isActive: true, sortOrder: 0,
+      config: { imageUrl: '/a.jpg', title: 'Precios especiales', text: '', imagePosition: 'left', buttonText: 'Pide presupuesto', buttonUrl: '/contacto', backgroundColor: '' },
+    };
+    getHomeBlocks.mockResolvedValue([block]);
+    renderPage();
+
+    const link = await screen.findByText('Pide presupuesto');
+    expect(link).toHaveAttribute('href', '/contacto');
+    expect(link).not.toHaveAttribute('target');
+  });
+});
+
+describe('LandingPage ImageText card', () => {
+  it('renders the eyebrow, and tints the card (not the full-width section) with backgroundColor', async () => {
+    const block: StorefrontHomeBlock = {
+      id: 6, title: 'Pro', type: 'ImageText', isActive: true, sortOrder: 0,
+      config: { imageUrl: '/a.jpg', eyebrow: 'Profesionales', title: 'Precios especiales', text: 'Contáctanos', imagePosition: 'left', buttonText: '', buttonUrl: '', backgroundColor: '#b4f9e8' },
+    };
+    getHomeBlocks.mockResolvedValue([block]);
+    renderPage();
+
+    expect(await screen.findByText('Profesionales')).toHaveClass('home-imagetext-eyebrow');
+    const card = screen.getByText('Precios especiales').closest('.home-imagetext-card') as HTMLElement;
+    expect(card.style.backgroundColor).toBe('rgb(180, 249, 232)');
+    expect((card.closest('.home-imagetext-section')!.parentElement as HTMLElement).style.backgroundColor).toBe('');
+  });
+});

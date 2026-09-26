@@ -10,6 +10,7 @@ import { formatComposition } from '../../utils/composition';
 import { useSiteSettings } from '../../contexts/SiteSettingsContext';
 import { useDocumentMeta } from '../../hooks/useDocumentMeta';
 import type { StorefrontProduct, StorefrontVariant } from '../../types';
+import NewBadge from '../../components/common/NewBadge/NewBadge';
 
 const ProductDetailPage: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -73,7 +74,7 @@ const ProductDetailPage: React.FC = () => {
           {product.productTypeName && (
             <div className="text-muted small text-uppercase mb-1">{product.productTypeName}</div>
           )}
-          <h1 className="h2 fw-bold mb-2">{product.name}</h1>
+          <h1 className="h2 fw-bold mb-2">{product.name}{product.isNew && <NewBadge className="new-badge--title" />}</h1>
           <div className="d-flex gap-2 align-items-center mb-3">
             <Badge bg="secondary">{t('product.referencesCount', { count: variants.length })}</Badge>
             {inStock > 0

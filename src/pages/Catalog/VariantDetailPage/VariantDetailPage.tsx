@@ -22,6 +22,7 @@ import { useSiteSettings } from '../../../contexts/SiteSettingsContext';
 import { useDocumentMeta } from '../../../hooks/useDocumentMeta';
 import CareLabels from '../../../components/common/CareLabels';
 import { getApiErrorMessage } from '../../../utils/apiError';
+import NewBadge from '../../../components/common/NewBadge/NewBadge';
 import './VariantDetailPage.css';
 
 const DEFAULT_MIN_QTY = 0.3;
@@ -357,7 +358,7 @@ const VariantDetailPage: React.FC = () => {
             )}
 
             {/* Title */}
-            <h1 className="vdp-title">{variant.name}</h1>
+            <h1 className="vdp-title">{variant.name}{variant.isNew && <NewBadge className="new-badge--title" />}</h1>
             {variant.typeValue && (
               <div className="vdp-type-value">{variant.typeValue}</div>
             )}

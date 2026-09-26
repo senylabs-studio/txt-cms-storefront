@@ -119,7 +119,7 @@ const ProductFilters: React.FC<Props> = ({ facets, filters, onChange, onClose })
   };
 
   const hasActive = draft.minPrice !== undefined || draft.maxPrice !== undefined
-    || draft.width !== undefined || !!draft.material || !!draft.orderBy;
+    || draft.width !== undefined || !!draft.material || !!draft.orderBy || !!draft.onlyNew;
 
   const reset = () => {
     setDraft({});
@@ -153,6 +153,18 @@ const ProductFilters: React.FC<Props> = ({ facets, filters, onChange, onClose })
           <option value="name_desc">{t('filters.nameDesc')}</option>
         </Form.Select>
       </div>
+
+      {/* New arrivals — only offered when the unfiltered set has any (or it's already on) */}
+      {(facets.hasNew || draft.onlyNew) && <>
+        {sep}
+        <Form.Check
+          type="switch"
+          id="filter-only-new"
+          label={t('filters.onlyNew')}
+          checked={!!draft.onlyNew}
+          onChange={e => setDraft(d => ({ ...d, onlyNew: e.target.checked || undefined }))}
+        />
+      </>}
 
       {/* Price */}
       {showPrice && <>

@@ -13,6 +13,7 @@ import { getDiscountInfo } from '../../../utils/pricing';
 import { getApiErrorMessage } from '../../../utils/apiError';
 import '../ProductCard/ProductCard.css';
 import IconTooltip from '../../common/IconTooltip/IconTooltip';
+import NewBadge from '../../common/NewBadge/NewBadge';
 
 interface Props { variant: StorefrontVariant; }
 
@@ -67,10 +68,15 @@ const VariantCard: React.FC<Props> = ({ variant }) => {
           {variant.thumbnailUrl
             ? <Card.Img variant="top" src={variant.thumbnailUrl} alt={variant.thumbnailAltText || variant.name} className="product-card-img" />
             : <div className="product-card-placeholder">📦</div>}
-          {hasDiscount && (
-            <Badge bg="danger" className="discount-badge">
-              {hasGroupDiscount ? `−${variant.discountPercent}%` : t('product.offer')}
-            </Badge>
+          {(hasDiscount || variant.isNew) && (
+            <div className="product-card-badges">
+              {variant.isNew && <NewBadge />}
+              {hasDiscount && (
+                <Badge bg="danger" className="discount-badge">
+                  {hasGroupDiscount ? `−${variant.discountPercent}%` : t('product.offer')}
+                </Badge>
+              )}
+            </div>
           )}
           {outOfStock && <div className="out-of-stock-overlay">{t('product.outOfStock')}</div>}
         </Link>

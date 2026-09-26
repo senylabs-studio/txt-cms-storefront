@@ -9,6 +9,7 @@ export interface HomeBannerSlide {
   buttonText?: string;
   buttonUrl?: string;
   textAlign?: 'left' | 'center' | 'right';
+  textVerticalAlign?: 'top' | 'middle' | 'bottom';
   textColor?: string;
 }
 
@@ -59,6 +60,8 @@ export interface HomeFeaturedProductsBlockConfig {
 
 export interface HomeImageTextBlockConfig {
   imageUrl?: string;
+  /** Small uppercase label above the title. */
+  eyebrow?: string;
   title?: string;
   text?: string;
   imagePosition?: 'left' | 'right';

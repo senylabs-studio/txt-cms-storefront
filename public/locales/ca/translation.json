@@ -418,7 +418,8 @@
     "goToImage": "Anar a la imatge {{count}}",
     "noFeaturedProducts": "No hi ha productes destacats configurats.",
     "reviewsLoadError": "No s'han pogut carregar les ressenyes.",
-    "cancelAdd": "Cancel·lar"
+    "cancelAdd": "Cancel·lar",
+    "new": "Nou"
   },
   "filters": {
     "title": "Filtres",
@@ -434,7 +435,8 @@
     "composition": "Composició",
     "clear": "Netejar",
     "viewResults": "Veure resultats",
-    "noResults": "No hi ha productes que coincideixin amb els filtres seleccionats."
+    "noResults": "No hi ha productes que coincideixin amb els filtres seleccionats.",
+    "onlyNew": "Només novetats"
   },
   "careLabels": {
     "wash30": "Rentar a màquina màx. 30°C",

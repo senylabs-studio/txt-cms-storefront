@@ -25,6 +25,8 @@ import type {
 import { pageUrl } from '../../utils/pageUrl';
 import VariantCard from '../Product/VariantCard/VariantCard';
 import FeaturedProductsGrid from './FeaturedProductsGrid/FeaturedProductsGrid';
+import { bannerTextPlacement } from '../../utils/bannerTextPlacement';
+import { blockLinkProps } from '../../utils/blockLinkProps';
 import './PageBlockRenderer.css';
 
 // ─── Style helpers ────────────────────────────────────────────────────────────
@@ -125,7 +127,7 @@ const ImageBlock: React.FC<{ config: ImageBlockConfig }> = ({ config }) => {
   const img = <img src={config.imageUrl} alt={config.altText ?? ''} />;
   return (
     <figure className="pbr-image" style={buildStyle(config.style)}>
-      {config.linkUrl ? <a href={config.linkUrl} target="_blank" rel="noopener noreferrer">{img}</a> : img}
+      {config.linkUrl ? <a {...blockLinkProps(config.linkUrl)}>{img}</a> : img}
       {config.caption && <figcaption className="pbr-image-caption">{config.caption}</figcaption>}
     </figure>
   );
@@ -143,7 +145,7 @@ const ImageTextBlock: React.FC<{ config: ImageTextBlockConfig }> = ({ config }) 
       {config.title && <h3>{config.title}</h3>}
       {config.text && <div className="rich-text" dangerouslySetInnerHTML={{ __html: sanitizeRichText(config.text) }} />}
       {config.buttonText && config.buttonUrl && (
-        <a href={config.buttonUrl} className="btn btn-primary btn-sm" target="_blank" rel="noopener noreferrer">
+        <a {...blockLinkProps(config.buttonUrl)} className="btn btn-primary btn-sm">
           {config.buttonText}
         </a>
       )}
@@ -170,7 +172,7 @@ const GalleryBlock: React.FC<{ config: GalleryBlockConfig }> = ({ config }) => {
         {images.map((img, i) => (
           <Col key={i}>
             {img.linkUrl
-              ? <a href={img.linkUrl} target="_blank" rel="noopener noreferrer">
+              ? <a {...blockLinkProps(img.linkUrl)}>
                   <img src={img.imageUrl} alt={img.altText ?? ''} className="pbr-gallery-img" />
                 </a>
               : <img src={img.imageUrl} alt={img.altText ?? ''} className="pbr-gallery-img" />
@@ -246,14 +248,15 @@ const BannerBlock: React.FC<{ config: BannerBlockConfig }> = ({ config }) => {
               backgroundColor: slide.imageUrl ? undefined : '#343a40',
               height,
               minHeight: height,
+              ...bannerTextPlacement(slide.textAlign, slide.textVerticalAlign),
             }}
           >
             {slide.imageUrl && <div className="pbr-banner-overlay" />}
-            <div className="pbr-banner-content">
+            <div className="pbr-banner-content" style={{ textAlign: slide.textAlign ?? 'center' }}>
               {slide.title && <h2 className="pbr-banner-title">{slide.title}</h2>}
               {slide.subtitle && <p className="pbr-banner-subtitle">{slide.subtitle}</p>}
               {slide.buttonText && slide.buttonUrl && (
-                <a href={slide.buttonUrl} className="btn btn-light btn-lg">{slide.buttonText}</a>
+                <a {...blockLinkProps(slide.buttonUrl)} className="btn btn-light btn-lg">{slide.buttonText}</a>
               )}
             </div>
           </div>
@@ -295,7 +298,7 @@ const ProductsBlock: React.FC<{ config: ProductsBlockConfig; pageDetail?: Storef
   const cols = config.columns ?? 4;
   if (items.length === 0) return null;
   return (
-    <div style={buildStyle(config.style)}>
+    <div className="pbr-products" style={buildStyle(config.style)}>
       <Row xs={2} sm={cols > 2 ? 3 : 2} md={cols} className="g-3">
         {items.map(item => (
           <Col key={item.variantId}>
@@ -316,6 +319,7 @@ const ProductsBlock: React.FC<{ config: ProductsBlockConfig; pageDetail?: Storef
               composition: item.composition,
               minQuantity: item.minQuantity,
               quantityStep: item.quantityStep,
+              isNew: item.isNew,
             }} />
           </Col>
         ))}
