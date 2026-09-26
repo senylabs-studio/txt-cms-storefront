@@ -309,8 +309,13 @@ export interface HeaderBlockConfig {
 
 export interface ParagraphBlockConfig {
   text: string;
+  /** `lead`: larger intro text, meant for the first paragraph of a page. */
+  variant?: 'default' | 'lead';
   style?: BlockStyle;
 }
+
+/** Icons a HeaderParagraph callout can show (keys shared with the CMS's CALLOUT_ICONS). */
+export type CalloutIcon = 'info' | 'truck' | 'help' | 'phone' | 'mail' | 'clock' | 'pin' | 'alert';
 
 /** `header`/`text` are legacy field names kept around for old saved blocks. */
 export interface HeaderParagraphBlockConfig {
@@ -318,13 +323,18 @@ export interface HeaderParagraphBlockConfig {
   header?: string;
   paragraphText?: string;
   text?: string;
-  level?: 'h1' | 'h2' | 'h3' | 'h4';
+  level?: 'h1' | 'h2' | 'h3' | 'h4' | number;
+  /** `accordion`: collapsible question/answer (FAQ). `callout`: highlighted box with icon and optional button. */
+  variant?: 'default' | 'accordion' | 'callout';
+  icon?: CalloutIcon;
+  buttonText?: string;
+  buttonUrl?: string;
   style?: BlockStyle;
 }
 
 export interface ListBlockConfig {
   items: string | string[];
-  variant?: 'unordered' | 'ordered';
+  variant?: 'unordered' | 'ordered' | 'check' | 'steps' | 'chips';
   style?: BlockStyle;
 }
 
@@ -343,10 +353,14 @@ export interface ImageTextBlockConfig {
   imagePosition?: 'left' | 'right';
   buttonText?: string;
   buttonUrl?: string;
+  /** `card`: image and text inside one bordered card. */
+  variant?: 'default' | 'card';
   style?: BlockStyle;
 }
 
 export interface DividerBlockConfig {
+  /** `stitch`: dashed "pespunte" line with scissors. `space`: blank gap, no line. */
+  variant?: 'line' | 'stitch' | 'space';
   style?: BlockStyle;
 }
 

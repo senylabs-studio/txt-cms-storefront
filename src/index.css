@@ -2,7 +2,7 @@
 
 /* ── Rich text content (rendered from TipTap HTML output) ───────────────── */
 .rich-text              { line-height: 1.75; }
-.rich-text a            { color: #0d6efd; text-decoration: underline; }
+.rich-text a            { color: var(--brand-text-color); text-decoration: underline; }
 .rich-text ul,
 .rich-text ol           { padding-left: 1.5rem; margin-bottom: 0.5rem; }
 .rich-text li           { margin-bottom: 0.2rem; }

@@ -2,11 +2,17 @@ import React, { type JSX } from 'react';
 import { Row, Col, Carousel } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import DOMPurify from 'dompurify';
+import type { IconType } from 'react-icons';
+import {
+  FaInfoCircle, FaTruck, FaQuestionCircle, FaPhoneAlt, FaEnvelope, FaClock,
+  FaMapMarkerAlt, FaExclamationTriangle, FaCheck, FaChevronDown, FaCut,
+} from 'react-icons/fa';
 import type {
   StorefrontPageBlock,
   StorefrontPageBlockType,
   StorefrontPageDetail,
   BlockStyle,
+  CalloutIcon,
   PageBlockConfig,
   HeaderBlockConfig,
   ParagraphBlockConfig,
@@ -78,11 +84,22 @@ const HeaderBlock: React.FC<{ config: HeaderBlockConfig }> = ({ config }) => {
 
 const ParagraphBlock: React.FC<{ config: ParagraphBlockConfig }> = ({ config }) => (
   <div
-    className="rich-text"
+    className={config.variant === 'lead' ? 'rich-text pbr-lead' : 'rich-text'}
     style={buildStyle(config.style)}
     dangerouslySetInnerHTML={{ __html: sanitizeRichText(config.text ?? '') }}
   />
 );
+
+const CALLOUT_ICONS: Record<CalloutIcon, IconType> = {
+  info: FaInfoCircle,
+  truck: FaTruck,
+  help: FaQuestionCircle,
+  phone: FaPhoneAlt,
+  mail: FaEnvelope,
+  clock: FaClock,
+  pin: FaMapMarkerAlt,
+  alert: FaExclamationTriangle,
+};
 
 const HeaderParagraphBlock: React.FC<{ config: HeaderParagraphBlockConfig }> = ({ config }) => {
   const lvl = config.level;
@@ -96,6 +113,37 @@ const HeaderParagraphBlock: React.FC<{ config: HeaderParagraphBlockConfig }> = (
   }
   const headerText = config.headerText ?? config.header ?? '';
   const paragraphText = config.paragraphText ?? config.text ?? '';
+
+  if (config.variant === 'accordion') {
+    return (
+      <details className="pbr-accordion" style={buildStyle(config.style)}>
+        <summary>
+          <Tag className="pbr-accordion-title">{headerText}</Tag>
+          <FaChevronDown className="pbr-accordion-chevron" aria-hidden="true" />
+        </summary>
+        {paragraphText && <div className="rich-text pbr-accordion-body" dangerouslySetInnerHTML={{ __html: sanitizeRichText(paragraphText) }} />}
+      </details>
+    );
+  }
+
+  if (config.variant === 'callout') {
+    const Icon = CALLOUT_ICONS[config.icon ?? 'info'] ?? FaInfoCircle;
+    return (
+      <div className="pbr-callout" style={buildStyle(config.style)}>
+        <span className="pbr-callout-icon" aria-hidden="true"><Icon /></span>
+        <div className="pbr-callout-body">
+          {headerText && <Tag className="pbr-callout-title">{headerText}</Tag>}
+          {paragraphText && <div className="rich-text" dangerouslySetInnerHTML={{ __html: sanitizeRichText(paragraphText) }} />}
+          {config.buttonText && config.buttonUrl && (
+            <a {...blockLinkProps(config.buttonUrl)} className="btn btn-primary btn-sm pbr-callout-btn">
+              {config.buttonText}
+            </a>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={buildStyle(config.style)}>
       <Tag>{headerText}</Tag>
@@ -112,6 +160,25 @@ const ListBlock: React.FC<{ config: ListBlockConfig }> = ({ config }) => {
       : '';
   const items = rawItems.split('\n').map((item: string) => item.trim()).filter(Boolean);
   if (items.length === 0) return null;
+  if (config.variant === 'check') {
+    return (
+      <ul className="pbr-list-check" style={buildStyle(config.style)}>
+        {items.map((item: string, index: number) => (
+          <li key={index}><FaCheck className="pbr-list-check-icon" aria-hidden="true" /><span>{item}</span></li>
+        ))}
+      </ul>
+    );
+  }
+  if (config.variant === 'steps' || config.variant === 'chips') {
+    const Wrapper = config.variant === 'steps' ? 'ol' : 'ul';
+    return (
+      <Wrapper className={`pbr-list-${config.variant}`} style={buildStyle(config.style)}>
+        {items.map((item: string, index: number) => (
+          <li key={index}>{item}</li>
+        ))}
+      </Wrapper>
+    );
+  }
   const Tag = config.variant === 'ordered' ? 'ol' : 'ul';
   return (
     <Tag className="pbr-list" style={buildStyle(config.style)}>
@@ -135,13 +202,14 @@ const ImageBlock: React.FC<{ config: ImageBlockConfig }> = ({ config }) => {
 
 const ImageTextBlock: React.FC<{ config: ImageTextBlockConfig }> = ({ config }) => {
   const imageLeft = (config.imagePosition ?? 'left') === 'left';
+  const card = config.variant === 'card';
   const imgCol = config.imageUrl ? (
-    <Col md={5}>
+    <Col md={5} className={card ? 'pbr-image-text-card-media' : undefined}>
       <img src={config.imageUrl} alt={config.title ?? ''} className="pbr-image-text-img" />
     </Col>
   ) : null;
   const textCol = (
-    <Col md={config.imageUrl ? 7 : 12} style={buildStyle(config.style)}>
+    <Col md={config.imageUrl ? 7 : 12} className={card ? 'pbr-image-text-card-body' : undefined} style={buildStyle(config.style)}>
       {config.title && <h3>{config.title}</h3>}
       {config.text && <div className="rich-text" dangerouslySetInnerHTML={{ __html: sanitizeRichText(config.text) }} />}
       {config.buttonText && config.buttonUrl && (
@@ -152,15 +220,30 @@ const ImageTextBlock: React.FC<{ config: ImageTextBlockConfig }> = ({ config }) 
     </Col>
   );
   return (
-    <Row className="align-items-center g-4">
+    <Row className={card ? 'pbr-image-text-card g-0' : 'align-items-center g-4'}>
       {imageLeft ? <>{imgCol}{textCol}</> : <>{textCol}{imgCol}</>}
     </Row>
   );
 };
 
-const DividerBlock: React.FC<{ config: DividerBlockConfig }> = ({ config }) => (
-  <hr style={{ borderColor: config.style?.color || '#dee2e6', ...buildStyle(config.style), padding: undefined, margin: config.style?.padding ? PADDING[config.style.padding] : '0.75rem 0' }} />
-);
+const DIVIDER_SPACE: Record<string, string> = {
+  none: '1rem', sm: '1.5rem', md: '2.5rem', lg: '4rem',
+};
+
+const DividerBlock: React.FC<{ config: DividerBlockConfig }> = ({ config }) => {
+  const margin = config.style?.padding ? PADDING[config.style.padding] : '0.75rem 0';
+  if (config.variant === 'space') {
+    return <div className="pbr-divider-space" aria-hidden="true" style={{ height: DIVIDER_SPACE[config.style?.padding ?? 'none'] }} />;
+  }
+  if (config.variant === 'stitch') {
+    return (
+      <div role="separator" className="pbr-divider-stitch" style={{ color: config.style?.color || undefined, margin }}>
+        <FaCut aria-hidden="true" />
+      </div>
+    );
+  }
+  return <hr style={{ borderColor: config.style?.color || '#dee2e6', ...buildStyle(config.style), padding: undefined, margin }} />;
+};
 
 const GalleryBlock: React.FC<{ config: GalleryBlockConfig }> = ({ config }) => {
   const images = config.images ?? [];
