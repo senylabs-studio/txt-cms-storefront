@@ -129,40 +129,45 @@ const FeaturedProductsBlock: React.FC<{ config: HomeFeaturedProductsBlockConfig 
 );
 
 // ─── Image + Text ─────────────────────────────────────────────────────────────
+// Rendered as one card (image flush to its edge + text) on a plain section, so the block reads as a
+// single piece between the surrounding blocks. Its backgroundColor tints the card, not the section
+// (see BlockRenderer); unset, it's a soft tint of the brand color.
 const ImageTextBlock: React.FC<{ config: HomeImageTextBlockConfig }> = ({ config }) => {
   const imageLeft = (config.imagePosition ?? 'left') === 'left';
-  const textStyle: React.CSSProperties = { textAlign: config.textAlign ?? 'left' };
+  const align = config.textAlign ?? 'left';
+  const textStyle: React.CSSProperties = { textAlign: align };
   if (config.textColor) textStyle.color = config.textColor;
+  const cardStyle: React.CSSProperties = config.backgroundColor ? { backgroundColor: config.backgroundColor } : {};
+  const hasImage = !!config.imageUrl;
   return (
-    <Container className="py-5">
-      <Row className="align-items-center g-4">
-        {imageLeft && config.imageUrl && (
-          <Col md={5}>
-            <img src={config.imageUrl} alt="" className="w-100 rounded shadow-sm" style={{ objectFit: 'cover', maxHeight: 360 }} />
-          </Col>
+    <Container className="home-imagetext-section">
+      <div className={`home-imagetext-card${hasImage ? '' : ' no-image'}${imageLeft ? '' : ' image-right'}`} style={cardStyle}>
+        {hasImage && (
+          <div className="home-imagetext-media">
+            <img src={config.imageUrl} alt="" />
+          </div>
         )}
-        <Col md={config.imageUrl ? 7 : 12} style={textStyle}>
-          {config.title && <h2 className="fw-bold mb-3">{config.title}</h2>}
-          <p style={{ whiteSpace: 'pre-line', lineHeight: 1.8 }}>{config.text}</p>
+        <div className={`home-imagetext-body align-${align}`} style={textStyle}>
+          {config.eyebrow && <p className="home-imagetext-eyebrow">{config.eyebrow}</p>}
+          {config.title && <h2 className="home-imagetext-title">{config.title}</h2>}
+          {config.text && <p className="home-imagetext-text">{config.text}</p>}
           {config.buttonText && config.buttonUrl && (
             // Admin-authored URL (may be internal or external) — plain <a>, not <Link>. Matches
             // PageBlockRenderer's ImageTextBlock (the equivalent Page-block field).
-            <a {...blockLinkProps(config.buttonUrl)} className="btn btn-primary mt-2">{config.buttonText}</a>
+            <div>
+              <a {...blockLinkProps(config.buttonUrl)} className="btn btn-primary home-imagetext-btn">{config.buttonText}</a>
+            </div>
           )}
-        </Col>
-        {!imageLeft && config.imageUrl && (
-          <Col md={5}>
-            <img src={config.imageUrl} alt="" className="w-100 rounded shadow-sm" style={{ objectFit: 'cover', maxHeight: 360 }} />
-          </Col>
-        )}
-      </Row>
+        </div>
+      </div>
     </Container>
   );
 };
 
 // ─── Block renderer with backgroundColor wrapper ──────────────────────────────
 const BlockRenderer: React.FC<{ block: StorefrontHomeBlock }> = ({ block }) => {
-  const bg = block.config?.backgroundColor;
+  // ImageText applies its backgroundColor to its own card instead of the full-width section.
+  const bg = block.type === 'ImageText' ? undefined : block.config?.backgroundColor;
   const wrapperStyle = bg ? { backgroundColor: bg } : undefined;
 
   let content: React.ReactNode = null;

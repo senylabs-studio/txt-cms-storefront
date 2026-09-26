@@ -60,6 +60,8 @@ export interface HomeFeaturedProductsBlockConfig {
 
 export interface HomeImageTextBlockConfig {
   imageUrl?: string;
+  /** Small uppercase label above the title. */
+  eyebrow?: string;
   title?: string;
   text?: string;
   imagePosition?: 'left' | 'right';

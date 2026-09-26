@@ -124,3 +124,19 @@ describe('LandingPage block links', () => {
     expect(link).not.toHaveAttribute('target');
   });
 });
+
+describe('LandingPage ImageText card', () => {
+  it('renders the eyebrow, and tints the card (not the full-width section) with backgroundColor', async () => {
+    const block: StorefrontHomeBlock = {
+      id: 6, title: 'Pro', type: 'ImageText', isActive: true, sortOrder: 0,
+      config: { imageUrl: '/a.jpg', eyebrow: 'Profesionales', title: 'Precios especiales', text: 'Contáctanos', imagePosition: 'left', buttonText: '', buttonUrl: '', backgroundColor: '#b4f9e8' },
+    };
+    getHomeBlocks.mockResolvedValue([block]);
+    renderPage();
+
+    expect(await screen.findByText('Profesionales')).toHaveClass('home-imagetext-eyebrow');
+    const card = screen.getByText('Precios especiales').closest('.home-imagetext-card') as HTMLElement;
+    expect(card.style.backgroundColor).toBe('rgb(180, 249, 232)');
+    expect((card.closest('.home-imagetext-section')!.parentElement as HTMLElement).style.backgroundColor).toBe('');
+  });
+});
