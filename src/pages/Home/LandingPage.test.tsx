@@ -109,3 +109,18 @@ describe('LandingPage banner text position', () => {
     expect(slide.style.alignItems).toBe('center');
   });
 });
+
+describe('LandingPage block links', () => {
+  it('opens a site page link (resolved by the backend from a picked page) in the same tab', async () => {
+    const block: StorefrontHomeBlock = {
+      id: 5, title: 'Pro', type: 'ImageText', isActive: true, sortOrder: 0,
+      config: { imageUrl: '/a.jpg', title: 'Precios especiales', text: '', imagePosition: 'left', buttonText: 'Pide presupuesto', buttonUrl: '/contacto', backgroundColor: '' },
+    };
+    getHomeBlocks.mockResolvedValue([block]);
+    renderPage();
+
+    const link = await screen.findByText('Pide presupuesto');
+    expect(link).toHaveAttribute('href', '/contacto');
+    expect(link).not.toHaveAttribute('target');
+  });
+});

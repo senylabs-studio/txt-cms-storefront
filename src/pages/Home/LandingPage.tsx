@@ -16,6 +16,7 @@ import {
 } from '../../services/homeService';
 import FeaturedProductsGrid from '../../components/common/FeaturedProductsGrid/FeaturedProductsGrid';
 import { bannerTextPlacement } from '../../utils/bannerTextPlacement';
+import { blockLinkProps } from '../../utils/blockLinkProps';
 import './LandingPage.css';
 
 // ─── Banner (carousel) ────────────────────────────────────────────────────────
@@ -41,7 +42,7 @@ const BannerSlideContent: React.FC<{ slide: HomeBannerSlide }> = ({ slide }) => 
           resolves any absolute URL as an app-relative pathname and silently breaks it. Matches
           PageBlockRenderer's BannerBlock (the equivalent Page-block field). */}
       {slide.buttonText && slide.buttonUrl && (
-        <a href={slide.buttonUrl} className="btn btn-light btn-lg px-4">{slide.buttonText}</a>
+        <a {...blockLinkProps(slide.buttonUrl)} className="btn btn-light btn-lg px-4">{slide.buttonText}</a>
       )}
     </div>
   );
@@ -97,7 +98,7 @@ const ImageGridBlock: React.FC<{ config: HomeImageGridBlockConfig }> = ({ config
             {img.linkUrl ? (
               // Admin-authored URL (may be internal or external) — plain <a>, not <Link>. Matches
               // PageBlockRenderer's Gallery/Image blocks (the equivalent Page-block field).
-              <a href={img.linkUrl} target="_blank" rel="noopener noreferrer" className="d-block">
+              <a {...blockLinkProps(img.linkUrl)} className="d-block">
                 <div className="home-image-grid-item">
                   <img src={img.imageUrl} alt={img.caption ?? ''} className="w-100 h-100 object-fit-cover" />
                   {img.caption && <div className="home-image-grid-caption">{img.caption}</div>}
@@ -146,7 +147,7 @@ const ImageTextBlock: React.FC<{ config: HomeImageTextBlockConfig }> = ({ config
           {config.buttonText && config.buttonUrl && (
             // Admin-authored URL (may be internal or external) — plain <a>, not <Link>. Matches
             // PageBlockRenderer's ImageTextBlock (the equivalent Page-block field).
-            <a href={config.buttonUrl} className="btn btn-primary mt-2" target="_blank" rel="noopener noreferrer">{config.buttonText}</a>
+            <a {...blockLinkProps(config.buttonUrl)} className="btn btn-primary mt-2">{config.buttonText}</a>
           )}
         </Col>
         {!imageLeft && config.imageUrl && (
