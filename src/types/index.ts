@@ -303,7 +303,8 @@ export type StorefrontPageBlockType =
   | 'InfoCards'
   | 'Timeline'
   | 'OpeningHours'
-  | 'FaqSearch';
+  | 'FaqSearch'
+  | 'TableOfContents';
 
 export interface HeaderBlockConfig {
   text: string;
@@ -457,6 +458,15 @@ export interface PageBlockConfigMap {
   Timeline: TimelineBlockConfig;
   OpeningHours: OpeningHoursBlockConfig;
   FaqSearch: FaqSearchBlockConfig;
+  TableOfContents: TableOfContentsBlockConfig;
+}
+
+/** Index of the page's own section headings (see utils/tableOfContents). */
+export interface TableOfContentsBlockConfig {
+  title?: string;
+  /** `numbered`: the index and the section headings themselves carry the same number. */
+  variant?: 'plain' | 'numbered';
+  style?: BlockStyle;
 }
 
 /** Filters the page's accordion blocks as the shopper types (see utils/faqSearch). */

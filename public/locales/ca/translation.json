@@ -512,5 +512,8 @@
   "faqSearch": {
     "placeholder": "Cerca una pregunta: mostres, devolucions, Canàries…",
     "noResults": "Cap pregunta coincideix amb la teva cerca."
+  },
+  "toc": {
+    "title": "Índex"
   }
 }

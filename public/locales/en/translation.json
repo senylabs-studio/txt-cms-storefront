@@ -512,5 +512,8 @@
   "faqSearch": {
     "placeholder": "Search a question: samples, returns, Canary Islands…",
     "noResults": "No question matches your search."
+  },
+  "toc": {
+    "title": "Contents"
   }
 }

@@ -300,3 +300,34 @@ describe('PageBlockRenderer FaqSearch', () => {
   });
 });
 
+
+describe('PageBlockRenderer TableOfContents', () => {
+  const page = (variant?: string) => [
+    { id: 1, type: 'TableOfContents', sortOrder: 0, config: { variant } },
+    { id: 2, type: 'HeaderParagraph', sortOrder: 1, config: { headerText: 'Stock', paragraphText: '<p>x</p>', level: 1 } },
+    { id: 3, type: 'HeaderParagraph', sortOrder: 2, config: { headerText: 'Subapartado', paragraphText: '<p>y</p>', level: 2 } },
+    { id: 4, type: 'Header', sortOrder: 3, config: { text: 'Devoluciones', level: 'h2' } },
+  ] as StorefrontPageBlock[];
+
+  it('links each top-level section heading to its anchor', () => {
+    const { container } = render(<PageBlockRenderer blocks={page()} />);
+
+    const links = [...container.querySelectorAll('nav.pbr-toc a')];
+    expect(links.map(a => a.textContent)).toEqual(['Stock', 'Devoluciones']);
+    expect(links.map(a => a.getAttribute('href'))).toEqual(['#seccion-2', '#seccion-4']);
+    expect(container.querySelector('#seccion-2 h2')!.textContent).toBe('Stock');
+    expect(container.querySelector('#seccion-3')).toBeNull();
+    expect(container.querySelector('.page-blocks')!.classList.contains('is-numbered')).toBe(false);
+  });
+
+  it('numbered variant numbers the index and turns on heading numbering for the page', () => {
+    const { container } = render(<PageBlockRenderer blocks={page('numbered')} />);
+    expect(container.querySelector('nav.pbr-toc.is-numbered')).not.toBeNull();
+    expect(container.querySelector('.page-blocks.is-numbered')).not.toBeNull();
+  });
+
+  it('renders nothing when the page has no sections', () => {
+    const { container } = render(<PageBlockRenderer blocks={[{ id: 1, type: 'TableOfContents', sortOrder: 0, config: {} } as StorefrontPageBlock]} />);
+    expect(container.querySelector('nav.pbr-toc')).toBeNull();
+  });
+});

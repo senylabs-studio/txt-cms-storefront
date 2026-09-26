@@ -389,3 +389,38 @@
 }
 .pbr-faq-search-box input { border: 0; outline: 0; flex: 1; min-width: 0; background: transparent; color: #212529; font-size: 1rem; }
 .pbr-faq-search-empty { color: #6c757d; font-size: 0.9rem; margin: 0.6rem 0 0; }
+
+/* ── TableOfContents ──────────────────────────────────────────────────────────── */
+.pbr-toc { background: #fff; border: 1px solid #e3e6e4; border-radius: 12px; padding: 1rem 1.25rem; }
+.pbr-toc-title { font: 600 1.05rem 'Barlow', system-ui, sans-serif; margin-bottom: 0.5rem; }
+.pbr-toc ol { list-style: none; margin: 0; padding: 0; columns: 2 240px; column-gap: 1.75rem; counter-reset: pbr-toc; }
+.pbr-toc li {
+  break-inside: avoid;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.3rem 0;
+  border-bottom: 1px dashed #e3e6e4;
+  font-size: 0.9rem;
+}
+.pbr-toc.is-numbered li { counter-increment: pbr-toc; }
+.pbr-toc.is-numbered li::before {
+  content: counter(pbr-toc);
+  min-width: 1.4em;
+  font: 600 0.8rem 'Barlow', system-ui, sans-serif;
+  color: var(--brand-text-color);
+  font-variant-numeric: tabular-nums;
+  padding-top: 0.15rem;
+}
+.pbr-toc a { color: #343a40; text-decoration: none; }
+.pbr-toc a:hover { color: var(--brand-text-color); text-decoration: underline; }
+
+/* Clear the sticky storefront header when jumping to a section from the index. */
+.pbr-section { scroll-margin-top: 11rem; }
+.page-blocks.is-numbered { counter-reset: pbr-section; }
+.page-blocks.is-numbered > .pbr-section { counter-increment: pbr-section; }
+.page-blocks.is-numbered > .pbr-section :is(h1, h2)::before {
+  content: counter(pbr-section);
+  color: var(--brand-text-color);
+  font-variant-numeric: tabular-nums;
+  margin-right: 0.45em;
+}

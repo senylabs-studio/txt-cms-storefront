@@ -31,8 +31,10 @@ import type {
   TimelineBlockConfig,
   OpeningHoursBlockConfig,
   FaqSearchBlockConfig,
+  TableOfContentsBlockConfig,
 } from '../../types';
 import { filterFaqBlocks } from '../../utils/faqSearch';
+import { sectionAnchor, tocSections, type TocSection } from '../../utils/tableOfContents';
 import { useSiteSettings } from '../../contexts/SiteSettingsContext';
 import { dayName, getOpeningStatus, groupOpeningHours, madridNow, rowLabel, type OpeningStatus } from '../../utils/openingHours';
 import { pageUrl } from '../../utils/pageUrl';
@@ -575,6 +577,26 @@ const OpeningHoursBlock: React.FC<{ config: OpeningHoursBlockConfig }> = ({ conf
   );
 };
 
+/** The page's section headings, computed once in PageBlockRenderer for the index block. */
+const TocContext = React.createContext<TocSection[]>([]);
+
+const TableOfContentsBlock: React.FC<{ config: TableOfContentsBlockConfig }> = ({ config }) => {
+  const { t } = useTranslation();
+  const sections = React.useContext(TocContext);
+  if (sections.length === 0) return null;
+  const title = config.title || t('toc.title');
+  return (
+    <nav className={`pbr-toc${config.variant === 'numbered' ? ' is-numbered' : ''}`} style={boxStyle(config.style)} aria-label={title}>
+      <div className="pbr-toc-title">{title}</div>
+      <ol>
+        {sections.map(s => (
+          <li key={s.blockId}><a href={`#${sectionAnchor(s.blockId)}`}>{s.text}</a></li>
+        ))}
+      </ol>
+    </nav>
+  );
+};
+
 // ─── Registry ─────────────────────────────────────────────────────────────────
 // Each *Block component above is precisely typed against its own config shape —
 // only this lookup-by-runtime-type registry needs a shared shape (same reasoning
@@ -597,6 +619,7 @@ const RENDERERS = {
   Timeline: ({ config }: { config: TimelineBlockConfig }) => <TimelineBlock config={config} />,
   OpeningHours: ({ config }: { config: OpeningHoursBlockConfig }) => <OpeningHoursBlock config={config} />,
   FaqSearch: ({ config }: { config: FaqSearchBlockConfig }) => <FaqSearchBlock config={config} />,
+  TableOfContents: ({ config }: { config: TableOfContentsBlockConfig }) => <TableOfContentsBlock config={config} />,
 } as unknown as Record<StorefrontPageBlockType, React.FC<{ config: PageBlockConfig; pageDetail?: StorefrontPageDetail }>>;
 
 // ─── Main export ──────────────────────────────────────────────────────────────
@@ -609,11 +632,17 @@ const PageBlockRenderer: React.FC<PageBlockRendererProps> = ({ blocks, pageDetai
   const [faqQuery, setFaqQuery] = React.useState('');
   const faq = React.useMemo(() => filterFaqBlocks(blocks ?? [], faqQuery), [blocks, faqQuery]);
   const faqContext = React.useMemo(() => ({ query: faqQuery, setQuery: setFaqQuery, matches: faq.matches }), [faqQuery, faq.matches]);
+  const sections = React.useMemo(() => tocSections(blocks ?? []), [blocks]);
+  const sectionIds = React.useMemo(() => new Set(sections.map(s => s.blockId)), [sections]);
+  // A numbered index numbers the headings too (CSS counters on .is-numbered), so "3" in the
+  // index and "3" above the section always agree, whatever blocks sit in between.
+  const numbered = (blocks ?? []).some(b => b.type === 'TableOfContents' && b.config.variant === 'numbered');
   if (!blocks || blocks.length === 0) return null;
 
   return (
     <FaqSearchContext.Provider value={faqContext}>
-    <div className="page-blocks">
+    <TocContext.Provider value={sections}>
+    <div className={numbered ? 'page-blocks is-numbered' : 'page-blocks'}>
       {blocks.map(block => {
         const Renderer = RENDERERS[block.type];
         if (!Renderer || faq.hidden.has(block.id)) return null;
@@ -621,6 +650,8 @@ const PageBlockRenderer: React.FC<PageBlockRendererProps> = ({ blocks, pageDetai
         return (
           <div
             key={block.id}
+            id={sectionIds.has(block.id) ? sectionAnchor(block.id) : undefined}
+            className={sectionIds.has(block.id) ? 'pbr-section' : undefined}
             style={bgColor ? { backgroundColor: bgColor } : undefined}
           >
             <Renderer config={block.config} pageDetail={pageDetail} />
@@ -628,6 +659,7 @@ const PageBlockRenderer: React.FC<PageBlockRendererProps> = ({ blocks, pageDetai
         );
       })}
     </div>
+    </TocContext.Provider>
     </FaqSearchContext.Provider>
   );
 };

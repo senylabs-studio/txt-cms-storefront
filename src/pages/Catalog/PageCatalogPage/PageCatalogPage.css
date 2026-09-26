@@ -96,6 +96,15 @@
   margin-top: 1.25rem;
 }
 
+/* Comfortable reading width for running text (~150 characters per line at full width was hard
+   to follow on the long legal pages). Cards, grids and boxed blocks keep the full width. */
+.page-content .page-blocks > div > .rich-text,
+.page-content .page-blocks .pbr-header-paragraph-text,
+.page-content .page-blocks .pbr-list,
+.page-content .page-blocks .pbr-list-check {
+  max-width: 72ch;
+}
+
 /* Consecutive FAQ accordions read as one list, not separate sections. */
 .page-content .page-blocks > div:has(> .pbr-accordion) + div:has(> .pbr-accordion) {
   margin-top: 0.5rem;

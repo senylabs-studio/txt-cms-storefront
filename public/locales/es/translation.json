@@ -512,5 +512,8 @@
   "faqSearch": {
     "placeholder": "Busca una pregunta: muestras, devoluciones, Canarias…",
     "noResults": "Ninguna pregunta coincide con tu búsqueda."
+  },
+  "toc": {
+    "title": "Índice"
   }
 }
