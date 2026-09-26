@@ -49,6 +49,44 @@
 .pbr-subpages-name { font-weight: 600; margin-bottom: 4px; }
 .pbr-subpages-desc { font-size: 0.875rem; color: #6c757d; margin: 0; }
 
+/* SubPages · mosaic — for categories with many subpages: square photo tiles with the name on
+   top; the description slides in on hover/keyboard focus. Touch screens have no hover, so they
+   just get photo + name (a tap opens the page). */
+.pbr-mosaic { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+@media (min-width: 576px) { .pbr-mosaic { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 768px) { .pbr-mosaic { grid-template-columns: repeat(4, 1fr); } }
+@media (min-width: 1200px) { .pbr-mosaic { grid-template-columns: repeat(6, 1fr); } }
+.pbr-mosaic-tile {
+  position: relative; display: block; aspect-ratio: 1; overflow: hidden; border-radius: 10px;
+  color: #fff; text-decoration: none;
+  background: color-mix(in srgb, var(--brand-color) 55%, #1c2321);
+}
+.pbr-mosaic-tile:hover, .pbr-mosaic-tile:focus-visible { color: #fff; }
+.pbr-mosaic-tile:focus-visible { outline: 3px solid var(--brand-color); outline-offset: 2px; }
+.pbr-mosaic-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+.pbr-mosaic-shade {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0) 55%);
+  transition: background-color 0.25s ease;
+}
+.pbr-mosaic-text { position: absolute; left: 0.75rem; right: 0.75rem; bottom: 0.65rem; }
+.pbr-mosaic-name { display: block; font-weight: 600; font-size: 0.95rem; line-height: 1.25; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4); }
+.pbr-mosaic-desc {
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 5; overflow: hidden;
+  margin: 0; font-size: 0.8rem; line-height: 1.35;
+  max-height: 0; opacity: 0; transition: max-height 0.3s ease, opacity 0.25s ease, margin-top 0.3s ease;
+}
+@media (hover: hover) {
+  .pbr-mosaic-tile:hover .pbr-mosaic-img { transform: scale(1.06); }
+  .pbr-mosaic-tile:hover .pbr-mosaic-shade,
+  .pbr-mosaic-tile:focus-visible .pbr-mosaic-shade { background-color: rgba(0, 0, 0, 0.45); }
+  .pbr-mosaic-tile:hover .pbr-mosaic-desc,
+  .pbr-mosaic-tile:focus-visible .pbr-mosaic-desc { max-height: 7em; opacity: 1; margin-top: 0.35rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pbr-mosaic-img, .pbr-mosaic-shade, .pbr-mosaic-desc { transition: none; }
+}
+
 /* ── FeaturedProducts ─────────────────────────────────────────────────────────── */
 .pbr-featured-title { margin-bottom: 1rem; }
 

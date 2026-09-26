@@ -396,6 +396,8 @@ export interface FormFieldBlockConfig {
 
 export interface SubPagesBlockConfig {
   columns?: number;
+  /** 'mosaic': dense square tiles (name only, description on hover); ignores `columns`. */
+  variant?: 'default' | 'mosaic';
   style?: BlockStyle;
 }
 

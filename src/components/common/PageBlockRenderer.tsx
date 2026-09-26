@@ -440,6 +440,22 @@ const SubPagesBlock: React.FC<{ config: SubPagesBlockConfig; pageDetail?: Storef
   const children = pageDetail?.childPages ?? [];
   const cols = config.columns ?? 3;
   if (children.length === 0) return null;
+  if (config.variant === 'mosaic') {
+    return (
+      <div style={buildStyle(config.style)} className="pbr-mosaic">
+        {children.map(child => (
+          <a key={child.id} href={pageUrl(child.type, child.slug)} className="pbr-mosaic-tile">
+            {child.imageUrl && <img src={child.imageUrl} alt="" className="pbr-mosaic-img" loading="lazy" />}
+            <span className="pbr-mosaic-shade" aria-hidden="true" />
+            <span className="pbr-mosaic-text">
+              <span className="pbr-mosaic-name">{child.name}</span>
+              {child.description && <span className="pbr-mosaic-desc">{child.description}</span>}
+            </span>
+          </a>
+        ))}
+      </div>
+    );
+  }
   return (
     <div style={buildStyle(config.style)}>
       <Row xs={1} sm={2} md={cols} className="g-4">
