@@ -19,6 +19,19 @@ const MegaPanel: React.FC<{ item: StorefrontMenuItem; onClose: () => void }> = (
   const isExternal = !!item.externalUrl;
   const children = item.children;
 
+  // Side image previews the subcategory under the pointer (Zalando-style), falling back to the
+  // parent's own image. The last hovered child stays selected when the pointer leaves its link, so
+  // the user can move across to the image and click it; hovering the section title resets it.
+  const [previewId, setPreviewId] = useState<number | null>(null);
+  const preview = children.find(c => c.id === previewId && c.imageUrl) ?? item;
+  const previewHref = resolveHref(preview);
+  const hasAnyImage = !!item.imageUrl || children.some(c => c.imageUrl);
+
+  // Warm the browser cache so swapping images on hover doesn't flash an empty frame.
+  useEffect(() => {
+    children.forEach(c => { if (c.imageUrl) new Image().src = c.imageUrl; });
+  }, [children]);
+
   // Split children into columns of max ~6 items each
   const colSize = Math.ceil(children.length / Math.min(COLS, Math.ceil(children.length / 5) || 1));
   const columns: StorefrontMenuItem[][] = [];
@@ -33,7 +46,7 @@ const MegaPanel: React.FC<{ item: StorefrontMenuItem; onClose: () => void }> = (
           <div className="mega-body">
             {/* Left: header + columns */}
             <div className="mega-content">
-              <div className="mega-section-header">
+              <div className="mega-section-header" onMouseEnter={() => setPreviewId(null)}>
                 {isExternal ? (
                   <a href={item.externalUrl!} target="_blank" rel="noopener noreferrer" className="mega-section-title">
                     {item.name}
@@ -53,7 +66,11 @@ const MegaPanel: React.FC<{ item: StorefrontMenuItem; onClose: () => void }> = (
                         const childHref = resolveHref(child);
                         const childExt = !!child.externalUrl;
                         return (
-                          <li key={child.id}>
+                          <li
+                            key={child.id}
+                            onMouseEnter={() => setPreviewId(child.id)}
+                            onFocus={() => setPreviewId(child.id)}
+                          >
                             {childExt ? (
                               <a href={child.externalUrl!} target="_blank" rel="noopener noreferrer" className="mega-link" onClick={onClose}>
                                 {child.name}
@@ -72,12 +89,25 @@ const MegaPanel: React.FC<{ item: StorefrontMenuItem; onClose: () => void }> = (
               )}
             </div>
 
-            {/* Right: parent page image */}
-            {item.imageUrl && (
-              <Link to={href} className="mega-image-wrap" onClick={onClose}>
-                <img src={item.imageUrl} alt={item.name} className="mega-image" />
-                <span className="mega-image-label">{t('nav.discoverMore')}</span>
-              </Link>
+            {/* Right: image of the hovered subcategory, or of the parent page */}
+            {hasAnyImage && (
+              preview.imageUrl ? (
+                preview.externalUrl ? (
+                  <a href={preview.externalUrl} target="_blank" rel="noopener noreferrer" className="mega-image-wrap" onClick={onClose}>
+                    <img src={preview.imageUrl} alt={preview.name} className="mega-image" />
+                    <span className="mega-image-label">{t('nav.discoverMore')}</span>
+                  </a>
+                ) : (
+                  <Link to={previewHref} className="mega-image-wrap" onClick={onClose}>
+                    <img src={preview.imageUrl} alt={preview.name} className="mega-image" />
+                    <span className="mega-image-label">{t('nav.discoverMore')}</span>
+                  </Link>
+                )
+              ) : (
+                // Parent has no image but some children do: keep the column's width reserved so
+                // the link columns don't jump sideways when a child's image appears.
+                <div className="mega-image-wrap" aria-hidden="true" />
+              )
             )}
           </div>
         </div>
@@ -168,7 +198,7 @@ const NavMenu: React.FC<NavMenuProps> = ({ leading, trailing }) => {
       {/* Mega panel */}
       {activeItem && activeItem.children.length > 0 && (
         <div onMouseEnter={() => handleEnter(activeItem.id)}>
-          <MegaPanel item={activeItem} onClose={handleClose} />
+          <MegaPanel key={activeItem.id} item={activeItem} onClose={handleClose} />
         </div>
       )}
     </nav>
