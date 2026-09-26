@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Container, Row, Col, Button, Spinner, Badge } from 'react-bootstrap';
+import { Container, Row, Col, Button, Badge } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaHeart, FaShoppingCart, FaTrash } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +11,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { getApiErrorMessage } from '../../utils/apiError';
 import './FavoritesPage.css';
+import ScissorsLoader from '../../components/common/ScissorsLoader/ScissorsLoader';
 
 const FavoritesPage: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -61,7 +62,7 @@ const FavoritesPage: React.FC = () => {
   };
 
   if (loading) {
-    return <MainLayout><div className="text-center py-5"><Spinner animation="border" variant="primary" /></div></MainLayout>;
+    return <MainLayout><div className="text-center py-5"><ScissorsLoader /></div></MainLayout>;
   }
 
   return (

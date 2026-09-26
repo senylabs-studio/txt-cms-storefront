@@ -498,6 +498,22 @@
   "common": {
     "fieldRequired": "Aquest camp és obligatori.",
     "unexpectedError": "S'ha produït un error inesperat. Torna-ho a provar.",
-    "networkError": "No s'ha pogut connectar. Comprova la connexió i torna-ho a provar."
+    "networkError": "No s'ha pogut connectar. Comprova la connexió i torna-ho a provar.",
+    "loading": "Carregant…"
+  },
+  "openingHours": {
+    "title": "Horari",
+    "openNow": "Obert ara · tanca a les {{time}}",
+    "opensToday": "Tancat · obre avui a les {{time}}",
+    "opensTomorrow": "Tancat · obre demà a les {{time}}",
+    "opensOn": "Tancat · obre el {{day}} a les {{time}}",
+    "closed": "Tancat"
+  },
+  "faqSearch": {
+    "placeholder": "Cerca una pregunta: mostres, devolucions, Canàries…",
+    "noResults": "Cap pregunta coincideix amb la teva cerca."
+  },
+  "toc": {
+    "title": "Índex"
   }
 }

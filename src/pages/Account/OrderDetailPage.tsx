@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Card, Table, Badge, Button, Spinner, Modal, Alert, Form } from 'react-bootstrap';
+import { Container, Row, Col, Card, Table, Badge, Button, Modal, Alert, Form } from 'react-bootstrap';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { FaArrowLeft, FaFileDownload, FaBan, FaUndo, FaStar } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +9,7 @@ import type { StorefrontOrderDetail } from '../../types';
 import { ORDER_STATUS_VARIANT } from '../../utils/orderStatus';
 import { useToast } from '../../contexts/ToastContext';
 import { getApiErrorMessage } from '../../utils/apiError';
+import ScissorsLoader from '../../components/common/ScissorsLoader/ScissorsLoader';
 
 const OrderDetailPage: React.FC = () => {
   const { t } = useTranslation();
@@ -51,7 +52,7 @@ const OrderDetailPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  if (loading) return <MainLayout><div className="text-center py-5"><Spinner animation="border" variant="primary" /></div></MainLayout>;
+  if (loading) return <MainLayout><div className="text-center py-5"><ScissorsLoader /></div></MainLayout>;
   if (!order) return null;
 
   const canDownloadInvoice = order.status !== 'PendingPayment' && order.status !== 'Cancelled';

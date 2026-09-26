@@ -299,7 +299,12 @@ export type StorefrontPageBlockType =
   | 'Banner'
   | 'SubPages'
   | 'Products'
-  | 'FeaturedProducts';
+  | 'FeaturedProducts'
+  | 'InfoCards'
+  | 'Timeline'
+  | 'OpeningHours'
+  | 'FaqSearch'
+  | 'TableOfContents';
 
 export interface HeaderBlockConfig {
   text: string;
@@ -309,8 +314,13 @@ export interface HeaderBlockConfig {
 
 export interface ParagraphBlockConfig {
   text: string;
+  /** `lead`: larger intro text, meant for the first paragraph of a page. */
+  variant?: 'default' | 'lead';
   style?: BlockStyle;
 }
+
+/** Icons a callout or an InfoCards card can show (keys shared with the CMS's CALLOUT_ICONS). */
+export type CalloutIcon = 'info' | 'truck' | 'help' | 'phone' | 'mail' | 'clock' | 'pin' | 'alert';
 
 /** `header`/`text` are legacy field names kept around for old saved blocks. */
 export interface HeaderParagraphBlockConfig {
@@ -318,13 +328,18 @@ export interface HeaderParagraphBlockConfig {
   header?: string;
   paragraphText?: string;
   text?: string;
-  level?: 'h1' | 'h2' | 'h3' | 'h4';
+  level?: 'h1' | 'h2' | 'h3' | 'h4' | number;
+  /** `accordion`: collapsible question/answer (FAQ). `callout`: highlighted box with icon and optional button. */
+  variant?: 'default' | 'accordion' | 'callout';
+  icon?: CalloutIcon;
+  buttonText?: string;
+  buttonUrl?: string;
   style?: BlockStyle;
 }
 
 export interface ListBlockConfig {
   items: string | string[];
-  variant?: 'unordered' | 'ordered';
+  variant?: 'unordered' | 'ordered' | 'check' | 'steps' | 'chips';
   style?: BlockStyle;
 }
 
@@ -343,10 +358,14 @@ export interface ImageTextBlockConfig {
   imagePosition?: 'left' | 'right';
   buttonText?: string;
   buttonUrl?: string;
+  /** `card`: image and text inside one bordered card. */
+  variant?: 'default' | 'card';
   style?: BlockStyle;
 }
 
 export interface DividerBlockConfig {
+  /** `stitch`: dashed "pespunte" line with scissors. `space`: blank gap, no line. */
+  variant?: 'line' | 'stitch' | 'space';
   style?: BlockStyle;
 }
 
@@ -435,6 +454,70 @@ export interface PageBlockConfigMap {
   SubPages: SubPagesBlockConfig;
   Products: ProductsBlockConfig;
   FeaturedProducts: FeaturedProductsBlockConfig;
+  InfoCards: InfoCardsBlockConfig;
+  Timeline: TimelineBlockConfig;
+  OpeningHours: OpeningHoursBlockConfig;
+  FaqSearch: FaqSearchBlockConfig;
+  TableOfContents: TableOfContentsBlockConfig;
+}
+
+/** Index of the page's own section headings (see utils/tableOfContents). */
+export interface TableOfContentsBlockConfig {
+  title?: string;
+  /** `numbered`: the index and the section headings themselves carry the same number. */
+  variant?: 'plain' | 'numbered';
+  style?: BlockStyle;
+}
+
+/** Filters the page's accordion blocks as the shopper types (see utils/faqSearch). */
+export interface FaqSearchBlockConfig {
+  placeholder?: string;
+  style?: BlockStyle;
+}
+
+export interface InfoCard {
+  id?: string;
+  icon?: CalloutIcon;
+  /** Small uppercase caption above the value ("Península y Portugal", "Teléfono"). */
+  label?: string;
+  /** The figure or fact itself ("2–4", "937 906 859"). */
+  value?: string;
+  /** Under the value ("días laborables"). */
+  unit?: string;
+  note?: string;
+  /** Highlighted caveat pill ("Posible retención aduanera"). */
+  warning?: string;
+  linkText?: string;
+  linkUrl?: string;
+}
+
+export interface InfoCardsBlockConfig {
+  items?: InfoCard[];
+  /** `grid`: cards side by side with a big value. `rows`: one card per line, icon + value + link (contact channels). */
+  variant?: 'grid' | 'rows';
+  style?: BlockStyle;
+}
+
+export interface TimelineItem {
+  id?: string;
+  year?: string;
+  title?: string;
+  description?: string;
+}
+
+export interface TimelineBlockConfig {
+  items?: TimelineItem[];
+  style?: BlockStyle;
+}
+
+/** The hours themselves come from SiteSettings.openingHours; the block only frames them. */
+export interface OpeningHoursBlockConfig {
+  title?: string;
+  /** Shows the live "open now / opens at" badge. Defaults to true. */
+  showStatus?: boolean;
+  /** Free text under the table (e.g. "Cerrado festivos"). */
+  note?: string;
+  style?: BlockStyle;
 }
 
 /** Union of every possible page-block config shape. */

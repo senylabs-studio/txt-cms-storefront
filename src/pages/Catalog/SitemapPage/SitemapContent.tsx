@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Spinner } from 'react-bootstrap';
+
 import { getMenu } from '../../../services/pageService';
 import type { StorefrontMenuItem } from '../../../types';
 import { pageUrl } from '../../../utils/pageUrl';
 import './SitemapPage.css';
+import ScissorsLoader from '../../../components/common/ScissorsLoader/ScissorsLoader';
 
 interface Props {
   pageName: string;
@@ -24,7 +25,7 @@ const SitemapContent: React.FC<Props> = ({ pageName }) => {
 
   if (loading) return (
     <div className="text-center py-5">
-      <Spinner animation="border" variant="primary" />
+      <ScissorsLoader />
     </div>
   );
 

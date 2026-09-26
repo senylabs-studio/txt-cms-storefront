@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Spinner, Alert, Badge } from 'react-bootstrap';
+import { Container, Row, Col, Alert, Badge } from 'react-bootstrap';
 import { FaArrowLeft } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
@@ -11,6 +11,7 @@ import { useSiteSettings } from '../../contexts/SiteSettingsContext';
 import { useDocumentMeta } from '../../hooks/useDocumentMeta';
 import type { StorefrontProduct, StorefrontVariant } from '../../types';
 import NewBadge from '../../components/common/NewBadge/NewBadge';
+import ScissorsLoader from '../../components/common/ScissorsLoader/ScissorsLoader';
 
 const ProductDetailPage: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -48,7 +49,7 @@ const ProductDetailPage: React.FC = () => {
     return () => { cancelled = true; };
   }, [slug, i18n.language, navigate]);
 
-  if (loading) return <MainLayout><div className="text-center py-5"><Spinner animation="border" variant="primary" /></div></MainLayout>;
+  if (loading) return <MainLayout><div className="text-center py-5"><ScissorsLoader /></div></MainLayout>;
   if (notFound) return <MainLayout><Container className="py-5"><Alert variant="warning">{t('product.productNotFound')}</Alert></Container></MainLayout>;
   if (!product) return null;
 

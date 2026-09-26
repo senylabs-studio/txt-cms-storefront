@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Spinner, Pagination, Alert, Button, Badge } from 'react-bootstrap';
+import { Container, Pagination, Alert, Button, Badge } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 import { FaFilter, FaTimes } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
@@ -14,6 +14,7 @@ import { useSiteSettings } from '../../../contexts/SiteSettingsContext';
 import { useDocumentMeta } from '../../../hooks/useDocumentMeta';
 import type { StorefrontPageDetail } from '../../../types';
 import { isSafeHttpUrl } from '../../../utils/safeUrl';
+import ScissorsLoader from '../../../components/common/ScissorsLoader/ScissorsLoader';
 
 const PAGE_SIZE = 12;
 const EMPTY_FACETS = { minPrice: 0, maxPrice: 0, widths: [], materials: [] };
@@ -77,7 +78,7 @@ const PageCatalogPage: React.FC = () => {
 
   if (loading) return (
     <MainLayout>
-      <Container className="py-5 text-center"><Spinner animation="border" variant="primary" /></Container>
+      <Container className="py-5 text-center"><ScissorsLoader /></Container>
     </MainLayout>
   );
 

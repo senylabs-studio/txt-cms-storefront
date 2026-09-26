@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Table, Badge, Button, Spinner, Pagination, Alert } from 'react-bootstrap';
+import { Container, Table, Badge, Button, Pagination, Alert } from 'react-bootstrap';
 import { useNavigate, Link } from 'react-router-dom';
 import { FaArrowLeft, FaEye } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
@@ -8,6 +8,7 @@ import { getOrders } from '../../services/profileService';
 import { getApiErrorMessage } from '../../utils/apiError';
 import type { StorefrontOrder } from '../../types';
 import { ORDER_STATUS_VARIANT } from '../../utils/orderStatus';
+import ScissorsLoader from '../../components/common/ScissorsLoader/ScissorsLoader';
 
 const OrdersPage: React.FC = () => {
   const { t } = useTranslation();
@@ -42,7 +43,7 @@ const OrdersPage: React.FC = () => {
         </div>
 
         {loading ? (
-          <div className="text-center py-5"><Spinner animation="border" variant="primary" /></div>
+          <div className="text-center py-5"><ScissorsLoader /></div>
         ) : error ? (
           <Alert variant="danger">{error}</Alert>
         ) : orders.length === 0 ? (

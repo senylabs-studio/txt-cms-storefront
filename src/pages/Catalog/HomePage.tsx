@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Form, InputGroup, Button, Spinner, Pagination, Badge, Alert } from 'react-bootstrap';
+import { Container, Row, Col, Form, InputGroup, Button, Pagination, Badge, Alert } from 'react-bootstrap';
 import { FaSearch, FaFilter, FaTimes } from 'react-icons/fa';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -14,6 +14,7 @@ import useDebounce from '../../hooks/useDebounce';
 import { useSiteSettings } from '../../contexts/SiteSettingsContext';
 import { useDocumentMeta } from '../../hooks/useDocumentMeta';
 import './PageCatalogPage/PageCatalogPage.css';
+import ScissorsLoader from '../../components/common/ScissorsLoader/ScissorsLoader';
 
 const EMPTY_FACETS: PageFilterFacets = { minPrice: 0, maxPrice: 0, widths: [], materials: [] };
 
@@ -127,7 +128,7 @@ const HomePage: React.FC = () => {
         </Row>
 
         {loading ? (
-          <div className="text-center py-5"><Spinner animation="border" variant="primary" /></div>
+          <div className="text-center py-5"><ScissorsLoader /></div>
         ) : error ? (
           <Alert variant="danger">{error}</Alert>
         ) : variants.length === 0 ? (

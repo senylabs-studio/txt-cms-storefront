@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Container, Row, Col, Button, Badge, Spinner, Alert, Form } from 'react-bootstrap';
+import { Container, Row, Col, Button, Badge, Alert, Form } from 'react-bootstrap';
 import { FaShoppingCart, FaArrowLeft, FaChevronLeft, FaChevronRight, FaStar, FaRegStar, FaRulerHorizontal, FaExpand } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import FavoriteButton from '../../../components/common/FavoriteButton/FavoriteButton';
@@ -24,6 +24,7 @@ import CareLabels from '../../../components/common/CareLabels';
 import { getApiErrorMessage } from '../../../utils/apiError';
 import NewBadge from '../../../components/common/NewBadge/NewBadge';
 import './VariantDetailPage.css';
+import ScissorsLoader from '../../../components/common/ScissorsLoader/ScissorsLoader';
 
 const DEFAULT_MIN_QTY = 0.3;
 const DESC_THRESHOLD = 300;
@@ -194,7 +195,7 @@ const VariantDetailPage: React.FC = () => {
     }
   };
 
-  if (loading) return <MainLayout><div className="text-center py-5"><Spinner animation="border" variant="primary" /></div></MainLayout>;
+  if (loading) return <MainLayout><div className="text-center py-5"><ScissorsLoader /></div></MainLayout>;
   if (notFound) return <MainLayout><Container className="py-5"><Alert variant="warning">{t('product.notFound')}</Alert></Container></MainLayout>;
   if (!variant) return null;
 

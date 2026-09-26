@@ -2,11 +2,17 @@ import React, { type JSX } from 'react';
 import { Row, Col, Carousel } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import DOMPurify from 'dompurify';
+import type { IconType } from 'react-icons';
+import {
+  FaInfoCircle, FaTruck, FaQuestionCircle, FaPhoneAlt, FaEnvelope, FaClock,
+  FaMapMarkerAlt, FaExclamationTriangle, FaCheck, FaChevronDown, FaCut, FaSearch,
+} from 'react-icons/fa';
 import type {
   StorefrontPageBlock,
   StorefrontPageBlockType,
   StorefrontPageDetail,
   BlockStyle,
+  CalloutIcon,
   PageBlockConfig,
   HeaderBlockConfig,
   ParagraphBlockConfig,
@@ -21,7 +27,16 @@ import type {
   SubPagesBlockConfig,
   ProductsBlockConfig,
   FeaturedProductsBlockConfig,
+  InfoCardsBlockConfig,
+  TimelineBlockConfig,
+  OpeningHoursBlockConfig,
+  FaqSearchBlockConfig,
+  TableOfContentsBlockConfig,
 } from '../../types';
+import { filterFaqBlocks } from '../../utils/faqSearch';
+import { sectionAnchor, tocSections, type TocSection } from '../../utils/tableOfContents';
+import { useSiteSettings } from '../../contexts/SiteSettingsContext';
+import { dayName, getOpeningStatus, groupOpeningHours, madridNow, rowLabel, type OpeningStatus } from '../../utils/openingHours';
 import { pageUrl } from '../../utils/pageUrl';
 import VariantCard from '../Product/VariantCard/VariantCard';
 import FeaturedProductsGrid from './FeaturedProductsGrid/FeaturedProductsGrid';
@@ -70,6 +85,13 @@ function buildStyle(style?: BlockStyle): React.CSSProperties {
   };
 }
 
+/** buildStyle minus the padding preset, for boxed variants (callout, accordion, cards, hours):
+ *  they have their own inner padding, and a preset — the CMS default "none" is an inline
+ *  `padding: 0`, "md" is `1.25rem 0` — would flatten the content against the box's border. */
+function boxStyle(style?: BlockStyle): React.CSSProperties {
+  return { ...buildStyle(style), padding: undefined };
+}
+
 // ─── Block renderers ──────────────────────────────────────────────────────────
 const HeaderBlock: React.FC<{ config: HeaderBlockConfig }> = ({ config }) => {
   const Tag = (config.level ?? 'h2') as keyof JSX.IntrinsicElements;
@@ -78,13 +100,52 @@ const HeaderBlock: React.FC<{ config: HeaderBlockConfig }> = ({ config }) => {
 
 const ParagraphBlock: React.FC<{ config: ParagraphBlockConfig }> = ({ config }) => (
   <div
-    className="rich-text"
+    className={config.variant === 'lead' ? 'rich-text pbr-lead' : 'rich-text'}
     style={buildStyle(config.style)}
     dangerouslySetInnerHTML={{ __html: sanitizeRichText(config.text ?? '') }}
   />
 );
 
+const CALLOUT_ICONS: Record<CalloutIcon, IconType> = {
+  info: FaInfoCircle,
+  truck: FaTruck,
+  help: FaQuestionCircle,
+  phone: FaPhoneAlt,
+  mail: FaEnvelope,
+  clock: FaClock,
+  pin: FaMapMarkerAlt,
+  alert: FaExclamationTriangle,
+};
+
+/** The page's FaqSearch query, shared between the search box and the accordion blocks it filters. */
+const FaqSearchContext = React.createContext<{ query: string; setQuery: (q: string) => void; matches: number }>({
+  query: '', setQuery: () => {}, matches: 0,
+});
+
+const FaqSearchBlock: React.FC<{ config: FaqSearchBlockConfig }> = ({ config }) => {
+  const { t } = useTranslation();
+  const { query, setQuery, matches } = React.useContext(FaqSearchContext);
+  const id = React.useId();
+  return (
+    <div className="pbr-faq-search" style={boxStyle(config.style)} role="search">
+      <label className="pbr-faq-search-box" htmlFor={id}>
+        <FaSearch aria-hidden="true" />
+        <input
+          id={id}
+          type="search"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          placeholder={config.placeholder || t('faqSearch.placeholder')}
+          aria-label={config.placeholder || t('faqSearch.placeholder')}
+        />
+      </label>
+      {query.trim() && matches === 0 && <p className="pbr-faq-search-empty" role="status">{t('faqSearch.noResults')}</p>}
+    </div>
+  );
+};
+
 const HeaderParagraphBlock: React.FC<{ config: HeaderParagraphBlockConfig }> = ({ config }) => {
+  const searching = React.useContext(FaqSearchContext).query.trim() !== '';
   const lvl = config.level;
   let Tag: keyof JSX.IntrinsicElements = 'h2';
   if (typeof lvl === 'number') {
@@ -96,6 +157,38 @@ const HeaderParagraphBlock: React.FC<{ config: HeaderParagraphBlockConfig }> = (
   }
   const headerText = config.headerText ?? config.header ?? '';
   const paragraphText = config.paragraphText ?? config.text ?? '';
+
+  if (config.variant === 'accordion') {
+    return (
+      // While a FaqSearch query is active every remaining answer is shown expanded.
+      <details className="pbr-accordion" style={boxStyle(config.style)} open={searching || undefined}>
+        <summary>
+          <Tag className="pbr-accordion-title">{headerText}</Tag>
+          <FaChevronDown className="pbr-accordion-chevron" aria-hidden="true" />
+        </summary>
+        {paragraphText && <div className="rich-text pbr-accordion-body" dangerouslySetInnerHTML={{ __html: sanitizeRichText(paragraphText) }} />}
+      </details>
+    );
+  }
+
+  if (config.variant === 'callout') {
+    const Icon = CALLOUT_ICONS[config.icon ?? 'info'] ?? FaInfoCircle;
+    return (
+      <div className="pbr-callout" style={boxStyle(config.style)}>
+        <span className="pbr-callout-icon" aria-hidden="true"><Icon /></span>
+        <div className="pbr-callout-body">
+          {headerText && <Tag className="pbr-callout-title">{headerText}</Tag>}
+          {paragraphText && <div className="rich-text" dangerouslySetInnerHTML={{ __html: sanitizeRichText(paragraphText) }} />}
+          {config.buttonText && config.buttonUrl && (
+            <a {...blockLinkProps(config.buttonUrl)} className="btn btn-primary btn-sm pbr-callout-btn">
+              {config.buttonText}
+            </a>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={buildStyle(config.style)}>
       <Tag>{headerText}</Tag>
@@ -112,6 +205,25 @@ const ListBlock: React.FC<{ config: ListBlockConfig }> = ({ config }) => {
       : '';
   const items = rawItems.split('\n').map((item: string) => item.trim()).filter(Boolean);
   if (items.length === 0) return null;
+  if (config.variant === 'check') {
+    return (
+      <ul className="pbr-list-check" style={buildStyle(config.style)}>
+        {items.map((item: string, index: number) => (
+          <li key={index}><FaCheck className="pbr-list-check-icon" aria-hidden="true" /><span>{item}</span></li>
+        ))}
+      </ul>
+    );
+  }
+  if (config.variant === 'steps' || config.variant === 'chips') {
+    const Wrapper = config.variant === 'steps' ? 'ol' : 'ul';
+    return (
+      <Wrapper className={`pbr-list-${config.variant}`} style={buildStyle(config.style)}>
+        {items.map((item: string, index: number) => (
+          <li key={index}>{item}</li>
+        ))}
+      </Wrapper>
+    );
+  }
   const Tag = config.variant === 'ordered' ? 'ol' : 'ul';
   return (
     <Tag className="pbr-list" style={buildStyle(config.style)}>
@@ -135,13 +247,14 @@ const ImageBlock: React.FC<{ config: ImageBlockConfig }> = ({ config }) => {
 
 const ImageTextBlock: React.FC<{ config: ImageTextBlockConfig }> = ({ config }) => {
   const imageLeft = (config.imagePosition ?? 'left') === 'left';
+  const card = config.variant === 'card';
   const imgCol = config.imageUrl ? (
-    <Col md={5}>
+    <Col md={5} className={card ? 'pbr-image-text-card-media' : undefined}>
       <img src={config.imageUrl} alt={config.title ?? ''} className="pbr-image-text-img" />
     </Col>
   ) : null;
   const textCol = (
-    <Col md={config.imageUrl ? 7 : 12} style={buildStyle(config.style)}>
+    <Col md={config.imageUrl ? 7 : 12} className={card ? 'pbr-image-text-card-body' : undefined} style={card ? boxStyle(config.style) : buildStyle(config.style)}>
       {config.title && <h3>{config.title}</h3>}
       {config.text && <div className="rich-text" dangerouslySetInnerHTML={{ __html: sanitizeRichText(config.text) }} />}
       {config.buttonText && config.buttonUrl && (
@@ -152,15 +265,30 @@ const ImageTextBlock: React.FC<{ config: ImageTextBlockConfig }> = ({ config }) 
     </Col>
   );
   return (
-    <Row className="align-items-center g-4">
+    <Row className={card ? 'pbr-image-text-card g-0' : 'align-items-center g-4'}>
       {imageLeft ? <>{imgCol}{textCol}</> : <>{textCol}{imgCol}</>}
     </Row>
   );
 };
 
-const DividerBlock: React.FC<{ config: DividerBlockConfig }> = ({ config }) => (
-  <hr style={{ borderColor: config.style?.color || '#dee2e6', ...buildStyle(config.style), padding: undefined, margin: config.style?.padding ? PADDING[config.style.padding] : '0.75rem 0' }} />
-);
+const DIVIDER_SPACE: Record<string, string> = {
+  none: '1rem', sm: '1.5rem', md: '2.5rem', lg: '4rem',
+};
+
+const DividerBlock: React.FC<{ config: DividerBlockConfig }> = ({ config }) => {
+  const margin = config.style?.padding ? PADDING[config.style.padding] : '0.75rem 0';
+  if (config.variant === 'space') {
+    return <div className="pbr-divider-space" aria-hidden="true" style={{ height: DIVIDER_SPACE[config.style?.padding ?? 'none'] }} />;
+  }
+  if (config.variant === 'stitch') {
+    return (
+      <div role="separator" className="pbr-divider-stitch" style={{ color: config.style?.color || undefined, margin }}>
+        <FaCut aria-hidden="true" />
+      </div>
+    );
+  }
+  return <hr style={{ borderColor: config.style?.color || '#dee2e6', ...buildStyle(config.style), padding: undefined, margin }} />;
+};
 
 const GalleryBlock: React.FC<{ config: GalleryBlockConfig }> = ({ config }) => {
   const images = config.images ?? [];
@@ -342,6 +470,133 @@ const FeaturedProductsBlock: React.FC<{ config: FeaturedProductsBlockConfig }> =
   );
 };
 
+const InfoCardsBlock: React.FC<{ config: InfoCardsBlockConfig }> = ({ config }) => {
+  const cards = (config.items ?? []).filter(c => c.label || c.value || c.note);
+  if (cards.length === 0) return null;
+  const rows = config.variant === 'rows';
+  return (
+    <div className={rows ? 'pbr-cards-rows' : 'pbr-cards'} style={buildStyle(config.style)}>
+      {cards.map((card, i) => {
+        const Icon = card.icon ? CALLOUT_ICONS[card.icon] : undefined;
+        const link = card.linkText && card.linkUrl
+          ? <a {...blockLinkProps(card.linkUrl)} className="pbr-card-link">{card.linkText}</a>
+          : null;
+        if (rows) {
+          return (
+            <div key={card.id ?? i} className="pbr-card-row">
+              {Icon && <span className="pbr-card-row-icon" aria-hidden="true"><Icon /></span>}
+              <div className="pbr-card-row-text">
+                {card.label && <div className="pbr-card-label">{card.label}</div>}
+                {card.value && <div className="pbr-card-row-value">{card.value}</div>}
+                {(card.unit || card.note) && <div className="pbr-card-note">{[card.unit, card.note].filter(Boolean).join(' · ')}</div>}
+              </div>
+              {link}
+            </div>
+          );
+        }
+        return (
+          <div key={card.id ?? i} className="pbr-card">
+            {(Icon || card.label) && (
+              <div className="pbr-card-label">{Icon && <Icon aria-hidden="true" />}{card.label}</div>
+            )}
+            {card.value && <div className="pbr-card-value">{card.value}</div>}
+            {card.unit && <div className="pbr-card-unit">{card.unit}</div>}
+            {card.warning && (
+              <span className="pbr-card-warning"><FaExclamationTriangle aria-hidden="true" />{card.warning}</span>
+            )}
+            {card.note && <div className="pbr-card-note pbr-card-note-bottom">{card.note}</div>}
+            {link}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+const TimelineBlock: React.FC<{ config: TimelineBlockConfig }> = ({ config }) => {
+  const items = (config.items ?? []).filter(item => item.year || item.title || item.description);
+  if (items.length === 0) return null;
+  return (
+    <ol className="pbr-timeline" style={buildStyle(config.style)}>
+      {items.map((item, i) => (
+        <li key={item.id ?? i}>
+          {item.year && <div className="pbr-timeline-year">{item.year}</div>}
+          {item.title && <div className="pbr-timeline-title">{item.title}</div>}
+          {item.description && <p className="pbr-timeline-desc">{item.description}</p>}
+        </li>
+      ))}
+    </ol>
+  );
+};
+
+const OpeningHoursBlock: React.FC<{ config: OpeningHoursBlockConfig }> = ({ config }) => {
+  const { t, i18n } = useTranslation();
+  const { openingHours } = useSiteSettings();
+  const [now, setNow] = React.useState(() => new Date());
+  React.useEffect(() => {
+    const id = window.setInterval(() => setNow(new Date()), 60_000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const hours = openingHours ?? [];
+  if (hours.length === 0) return null;
+
+  const locale = i18n.resolvedLanguage ?? i18n.language ?? 'es';
+  const today = madridNow(now).day;
+  const status = config.showStatus === false ? null : getOpeningStatus(hours, now);
+  const statusText = (s: OpeningStatus): string => {
+    if (s.open) return t('openingHours.openNow', { time: s.closesAt });
+    if (s.opensAt === null) return t('openingHours.closed');
+    if (s.inDays === 0) return t('openingHours.opensToday', { time: s.opensAt });
+    if (s.inDays === 1) return t('openingHours.opensTomorrow', { time: s.opensAt });
+    return t('openingHours.opensOn', { day: dayName(s.day, locale), time: s.opensAt });
+  };
+
+  return (
+    <div className="pbr-hours" style={boxStyle(config.style)}>
+      <div className="pbr-hours-top">
+        <h3 className="pbr-hours-title"><FaClock aria-hidden="true" />{config.title || t('openingHours.title')}</h3>
+        {status && <span className={`pbr-hours-status${status.open ? ' is-open' : ''}`}>{statusText(status)}</span>}
+      </div>
+      <table className="pbr-hours-table">
+        <tbody>
+          {groupOpeningHours(hours).map(row => (
+            <tr key={row.days.join('-')} className={row.days.includes(today) ? 'is-today' : undefined}>
+              <th scope="row">{rowLabel(row, locale)}</th>
+              <td>
+                {row.ranges.length > 0
+                  ? row.ranges.map(r => <span key={r.open} className="pbr-hours-range">{r.open} – {r.close}</span>)
+                  : <span className="pbr-hours-closed">{t('openingHours.closed')}</span>}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {config.note && <p className="pbr-hours-note">{config.note}</p>}
+    </div>
+  );
+};
+
+/** The page's section headings, computed once in PageBlockRenderer for the index block. */
+const TocContext = React.createContext<TocSection[]>([]);
+
+const TableOfContentsBlock: React.FC<{ config: TableOfContentsBlockConfig }> = ({ config }) => {
+  const { t } = useTranslation();
+  const sections = React.useContext(TocContext);
+  if (sections.length === 0) return null;
+  const title = config.title || t('toc.title');
+  return (
+    <nav className={`pbr-toc${config.variant === 'numbered' ? ' is-numbered' : ''}`} style={boxStyle(config.style)} aria-label={title}>
+      <div className="pbr-toc-title">{title}</div>
+      <ol>
+        {sections.map(s => (
+          <li key={s.blockId}><a href={`#${sectionAnchor(s.blockId)}`}>{s.text}</a></li>
+        ))}
+      </ol>
+    </nav>
+  );
+};
+
 // ─── Registry ─────────────────────────────────────────────────────────────────
 // Each *Block component above is precisely typed against its own config shape —
 // only this lookup-by-runtime-type registry needs a shared shape (same reasoning
@@ -360,6 +615,11 @@ const RENDERERS = {
   SubPages: ({ config, pageDetail }: { config: SubPagesBlockConfig; pageDetail?: StorefrontPageDetail }) => <SubPagesBlock config={config} pageDetail={pageDetail} />,
   Products: ({ config, pageDetail }: { config: ProductsBlockConfig; pageDetail?: StorefrontPageDetail }) => <ProductsBlock config={config} pageDetail={pageDetail} />,
   FeaturedProducts: ({ config }: { config: FeaturedProductsBlockConfig }) => <FeaturedProductsBlock config={config} />,
+  InfoCards: ({ config }: { config: InfoCardsBlockConfig }) => <InfoCardsBlock config={config} />,
+  Timeline: ({ config }: { config: TimelineBlockConfig }) => <TimelineBlock config={config} />,
+  OpeningHours: ({ config }: { config: OpeningHoursBlockConfig }) => <OpeningHoursBlock config={config} />,
+  FaqSearch: ({ config }: { config: FaqSearchBlockConfig }) => <FaqSearchBlock config={config} />,
+  TableOfContents: ({ config }: { config: TableOfContentsBlockConfig }) => <TableOfContentsBlock config={config} />,
 } as unknown as Record<StorefrontPageBlockType, React.FC<{ config: PageBlockConfig; pageDetail?: StorefrontPageDetail }>>;
 
 // ─── Main export ──────────────────────────────────────────────────────────────
@@ -369,17 +629,29 @@ interface PageBlockRendererProps {
 }
 
 const PageBlockRenderer: React.FC<PageBlockRendererProps> = ({ blocks, pageDetail }) => {
+  const [faqQuery, setFaqQuery] = React.useState('');
+  const faq = React.useMemo(() => filterFaqBlocks(blocks ?? [], faqQuery), [blocks, faqQuery]);
+  const faqContext = React.useMemo(() => ({ query: faqQuery, setQuery: setFaqQuery, matches: faq.matches }), [faqQuery, faq.matches]);
+  const sections = React.useMemo(() => tocSections(blocks ?? []), [blocks]);
+  const sectionIds = React.useMemo(() => new Set(sections.map(s => s.blockId)), [sections]);
+  // A numbered index numbers the headings too (CSS counters on .is-numbered), so "3" in the
+  // index and "3" above the section always agree, whatever blocks sit in between.
+  const numbered = (blocks ?? []).some(b => b.type === 'TableOfContents' && b.config.variant === 'numbered');
   if (!blocks || blocks.length === 0) return null;
 
   return (
-    <div className="page-blocks">
+    <FaqSearchContext.Provider value={faqContext}>
+    <TocContext.Provider value={sections}>
+    <div className={numbered ? 'page-blocks is-numbered' : 'page-blocks'}>
       {blocks.map(block => {
         const Renderer = RENDERERS[block.type];
-        if (!Renderer) return null;
+        if (!Renderer || faq.hidden.has(block.id)) return null;
         const bgColor = block.config.style?.backgroundColor;
         return (
           <div
             key={block.id}
+            id={sectionIds.has(block.id) ? sectionAnchor(block.id) : undefined}
+            className={sectionIds.has(block.id) ? 'pbr-section' : undefined}
             style={bgColor ? { backgroundColor: bgColor } : undefined}
           >
             <Renderer config={block.config} pageDetail={pageDetail} />
@@ -387,6 +659,8 @@ const PageBlockRenderer: React.FC<PageBlockRendererProps> = ({ blocks, pageDetai
         );
       })}
     </div>
+    </TocContext.Provider>
+    </FaqSearchContext.Provider>
   );
 };
 
