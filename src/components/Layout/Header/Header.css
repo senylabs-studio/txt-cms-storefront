@@ -376,9 +376,10 @@
   min-width: 0;
 }
 
+/* Scales with the viewport (was a fixed 220×160, lost in the empty space right of the columns). */
 .mega-image-wrap {
   flex-shrink: 0;
-  width: 220px;
+  width: clamp(260px, 28vw, 420px);
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -388,7 +389,8 @@
 
 .mega-image {
   width: 100%;
-  height: 160px;
+  aspect-ratio: 4 / 3;
+  height: auto;
   object-fit: cover;
   border-radius: 6px;
   display: block;
