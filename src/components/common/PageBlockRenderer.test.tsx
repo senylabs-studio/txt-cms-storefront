@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, fireEvent, act } from '@testing-library/react';
 import PageBlockRenderer from './PageBlockRenderer';
-import type { StorefrontPageBlock } from '../../types';
+import type { StorefrontPageBlock, StorefrontPageDetail } from '../../types';
 
 const settings = vi.hoisted(() => ({ current: {} as Record<string, unknown> }));
 vi.mock('../../contexts/SiteSettingsContext', () => ({ useSiteSettings: () => settings.current }));
@@ -370,5 +370,35 @@ describe('PageBlockRenderer ImageText photos and hours', () => {
     expect(renderImageText({ title: 'T', imageUrl: 'a.jpg', variant: 'card' }).querySelector('.pbr-hours')).toBeNull();
     const c = renderImageText({ title: 'T', imageUrl: 'a.jpg', variant: 'card', showOpeningHours: true });
     expect(c.querySelector('.pbr-image-text-card-body .pbr-image-text-hours .pbr-hours-table')).not.toBeNull();
+  });
+});
+
+describe('PageBlockRenderer SubPages mosaic', () => {
+  const pageDetail = {
+    childPages: [
+      { id: 7, name: 'Minky', slug: 'minky', description: 'Extra suave.', type: 'Category', imageUrl: 'minky.jpg' },
+      { id: 8, name: 'PUL', slug: 'pul', description: '', type: 'Category' },
+    ],
+  } as unknown as StorefrontPageDetail;
+  const renderSubPages = (config: Record<string, unknown>) =>
+    render(<PageBlockRenderer blocks={[{ id: 1, type: 'SubPages', config, sortOrder: 0 } as StorefrontPageBlock]} pageDetail={pageDetail} />).container;
+
+  it('mosaic renders one linked tile per subpage with its name and description', () => {
+    const c = renderSubPages({ variant: 'mosaic', columns: 3 });
+    const tiles = c.querySelectorAll('.pbr-mosaic a.pbr-mosaic-tile');
+    expect(tiles).toHaveLength(2);
+    expect(tiles[0].querySelector('.pbr-mosaic-name')!.textContent).toBe('Minky');
+    expect(tiles[0].querySelector('.pbr-mosaic-desc')!.textContent).toBe('Extra suave.');
+    expect(tiles[0].querySelector('img.pbr-mosaic-img')!.getAttribute('src')).toBe('minky.jpg');
+    // No photo and no description: still a usable tile, just without the empty parts.
+    expect(tiles[1].querySelector('img')).toBeNull();
+    expect(tiles[1].querySelector('.pbr-mosaic-desc')).toBeNull();
+    expect(c.querySelector('.pbr-subpages-card')).toBeNull();
+  });
+
+  it('without a variant keeps the original card grid', () => {
+    const c = renderSubPages({ columns: 3 });
+    expect(c.querySelectorAll('.pbr-subpages-card')).toHaveLength(2);
+    expect(c.querySelector('.pbr-mosaic')).toBeNull();
   });
 });
