@@ -299,7 +299,10 @@ export type StorefrontPageBlockType =
   | 'Banner'
   | 'SubPages'
   | 'Products'
-  | 'FeaturedProducts';
+  | 'FeaturedProducts'
+  | 'InfoCards'
+  | 'Timeline'
+  | 'OpeningHours';
 
 export interface HeaderBlockConfig {
   text: string;
@@ -314,7 +317,7 @@ export interface ParagraphBlockConfig {
   style?: BlockStyle;
 }
 
-/** Icons a HeaderParagraph callout can show (keys shared with the CMS's CALLOUT_ICONS). */
+/** Icons a callout or an InfoCards card can show (keys shared with the CMS's CALLOUT_ICONS). */
 export type CalloutIcon = 'info' | 'truck' | 'help' | 'phone' | 'mail' | 'clock' | 'pin' | 'alert';
 
 /** `header`/`text` are legacy field names kept around for old saved blocks. */
@@ -449,6 +452,54 @@ export interface PageBlockConfigMap {
   SubPages: SubPagesBlockConfig;
   Products: ProductsBlockConfig;
   FeaturedProducts: FeaturedProductsBlockConfig;
+  InfoCards: InfoCardsBlockConfig;
+  Timeline: TimelineBlockConfig;
+  OpeningHours: OpeningHoursBlockConfig;
+}
+
+export interface InfoCard {
+  id?: string;
+  icon?: CalloutIcon;
+  /** Small uppercase caption above the value ("Península y Portugal", "Teléfono"). */
+  label?: string;
+  /** The figure or fact itself ("2–4", "937 906 859"). */
+  value?: string;
+  /** Under the value ("días laborables"). */
+  unit?: string;
+  note?: string;
+  /** Highlighted caveat pill ("Posible retención aduanera"). */
+  warning?: string;
+  linkText?: string;
+  linkUrl?: string;
+}
+
+export interface InfoCardsBlockConfig {
+  items?: InfoCard[];
+  /** `grid`: cards side by side with a big value. `rows`: one card per line, icon + value + link (contact channels). */
+  variant?: 'grid' | 'rows';
+  style?: BlockStyle;
+}
+
+export interface TimelineItem {
+  id?: string;
+  year?: string;
+  title?: string;
+  description?: string;
+}
+
+export interface TimelineBlockConfig {
+  items?: TimelineItem[];
+  style?: BlockStyle;
+}
+
+/** The hours themselves come from SiteSettings.openingHours; the block only frames them. */
+export interface OpeningHoursBlockConfig {
+  title?: string;
+  /** Shows the live "open now / opens at" badge. Defaults to true. */
+  showStatus?: boolean;
+  /** Free text under the table (e.g. "Cerrado festivos"). */
+  note?: string;
+  style?: BlockStyle;
 }
 
 /** Union of every possible page-block config shape. */

@@ -500,5 +500,13 @@
     "unexpectedError": "Ha ocurrido un error inesperado. Inténtalo de nuevo.",
     "networkError": "No se ha podido conectar. Comprueba tu conexión e inténtalo de nuevo.",
     "loading": "Cargando…"
+  },
+  "openingHours": {
+    "title": "Horario",
+    "openNow": "Abierto ahora · cierra a las {{time}}",
+    "opensToday": "Cerrado · abre hoy a las {{time}}",
+    "opensTomorrow": "Cerrado · abre mañana a las {{time}}",
+    "opensOn": "Cerrado · abre el {{day}} a las {{time}}",
+    "closed": "Cerrado"
   }
 }

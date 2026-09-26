@@ -3,8 +3,11 @@ import { render } from '@testing-library/react';
 import PageBlockRenderer from './PageBlockRenderer';
 import type { StorefrontPageBlock } from '../../types';
 
+const settings = vi.hoisted(() => ({ current: {} as Record<string, unknown> }));
+vi.mock('../../contexts/SiteSettingsContext', () => ({ useSiteSettings: () => settings.current }));
+
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
+  useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'es', resolvedLanguage: 'es' } }),
   // FeaturedProductsBlock/VariantCard transitively import src/i18n.ts, whose module-level
   // `i18n.use(initReactI18next)` would otherwise blow up once this mock replaces the real export.
   initReactI18next: { type: '3rdParty', init: () => {} },
@@ -177,3 +180,66 @@ describe('PageBlockRenderer block variants', () => {
     expect(renderBlock('ImageText', { title: 'Tienda', imageUrl: 'a.jpg', variant: 'card' }).querySelector('.pbr-image-text-card .pbr-image-text-card-media img')).not.toBeNull();
   });
 });
+
+describe('PageBlockRenderer new blocks', () => {
+  const renderBlock = (type: string, config: Record<string, unknown>) =>
+    render(<PageBlockRenderer blocks={[{ id: 1, type, config, sortOrder: 0 } as StorefrontPageBlock]} />).container;
+
+  it('InfoCards grid renders each non-empty card with its value, warning and link', () => {
+    const c = renderBlock('InfoCards', { items: [
+      { id: 'a', icon: 'pin', label: 'Península y Portugal', value: '2–4', unit: 'días laborables' },
+      { id: 'b', label: 'Islas Canarias', value: '10', warning: 'Posible retención aduanera', linkText: 'Ver', linkUrl: '/faq' },
+      { id: 'c' },
+    ] });
+
+    const cards = c.querySelectorAll('.pbr-cards .pbr-card');
+    expect(cards).toHaveLength(2);
+    expect(cards[0].querySelector('.pbr-card-value')!.textContent).toBe('2–4');
+    expect(cards[0].querySelector('.pbr-card-label svg')).not.toBeNull();
+    expect(cards[1].querySelector('.pbr-card-warning')!.textContent).toContain('retención');
+    expect(cards[1].querySelector('a.pbr-card-link')!.getAttribute('href')).toBe('/faq');
+  });
+
+  it('InfoCards rows opens a tel: link in the same tab', () => {
+    const c = renderBlock('InfoCards', { variant: 'rows', items: [
+      { id: 'a', icon: 'phone', label: 'Teléfono', value: '937 906 859', linkText: 'Llamar', linkUrl: 'tel:937906859' },
+    ] });
+
+    const link = c.querySelector('.pbr-cards-rows .pbr-card-row a.pbr-card-link')!;
+    expect(link.getAttribute('href')).toBe('tel:937906859');
+    expect(link.getAttribute('target')).toBeNull();
+  });
+
+  it('Timeline renders one milestone per item and skips empty ones', () => {
+    const c = renderBlock('Timeline', { items: [
+      { id: 'a', year: '1980', title: 'Premià de Mar', description: 'Modistería' },
+      { id: 'b' },
+    ] });
+    const items = c.querySelectorAll('ol.pbr-timeline li');
+    expect(items).toHaveLength(1);
+    expect(items[0].querySelector('.pbr-timeline-year')!.textContent).toBe('1980');
+  });
+
+  it('OpeningHours renders the site-wide hours grouped by day, with a status badge', () => {
+    settings.current = { openingHours: [1, 2, 3, 4, 5, 6].map(day => ({ day, ranges: [{ open: '09:30', close: '13:15' }] })) };
+
+    const c = renderBlock('OpeningHours', { title: 'Horario comercial', note: 'Cerrado festivos' });
+
+    const rows = c.querySelectorAll('.pbr-hours-table tr');
+    expect(rows).toHaveLength(2);
+    expect(rows[0].querySelector('th')!.textContent).toBe('Lunes – sábado');
+    expect(rows[0].querySelector('td')!.textContent).toBe('09:30 – 13:15');
+    expect(rows[1].textContent).toContain('openingHours.closed');
+    expect(c.querySelector('.pbr-hours-status')).not.toBeNull();
+    expect(c.querySelector('.pbr-hours-title')!.textContent).toBe('Horario comercial');
+  });
+
+  it('OpeningHours hides the status when showStatus is false, and renders nothing without hours', () => {
+    settings.current = { openingHours: [{ day: 1, ranges: [{ open: '09:00', close: '14:00' }] }] };
+    expect(renderBlock('OpeningHours', { showStatus: false }).querySelector('.pbr-hours-status')).toBeNull();
+
+    settings.current = {};
+    expect(renderBlock('OpeningHours', {}).querySelector('.pbr-hours')).toBeNull();
+  });
+});
+

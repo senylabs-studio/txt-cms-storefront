@@ -207,3 +207,158 @@
 }
 .pbr-image-text-card-body { padding: 1.4rem 1.5rem; }
 .page-blocks .pbr-image-text-card .pbr-image-text-card-body h3 { margin-top: 0; }
+
+/* ── InfoCards ────────────────────────────────────────────────────────────────── */
+.pbr-cards { display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+.pbr-card {
+  background: #fff;
+  border: 1px solid #e3e6e4;
+  border-radius: 12px;
+  padding: 1rem 1rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.pbr-card-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font: 600 0.8rem 'Barlow', system-ui, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6c757d;
+}
+.pbr-card-label svg { color: var(--brand-color); flex: none; font-size: 1rem; }
+.pbr-card-value {
+  font: 700 2rem/1.1 'Barlow', system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  color: #212529;
+  margin-top: 0.35rem;
+  overflow-wrap: anywhere;
+}
+.pbr-card-unit { font-size: 0.875rem; color: #6c757d; }
+.pbr-card-note { font-size: 0.82rem; color: #6c757d; }
+.pbr-card-note-bottom { margin-top: auto; padding-top: 0.5rem; }
+.pbr-card-warning {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  align-self: flex-start;
+  margin-top: 0.5rem;
+  font-size: 0.78rem;
+  color: #8a5a00;
+  background: #fff4dc;
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+}
+.pbr-card-link { font-size: 0.875rem; font-weight: 500; color: var(--brand-text-color); margin-top: 0.5rem; }
+
+.pbr-cards-rows { display: grid; gap: 0.6rem; }
+.pbr-card-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.8rem;
+  align-items: center;
+  background: #fff;
+  border: 1px solid #e3e6e4;
+  border-radius: 12px;
+  padding: 0.75rem 0.9rem;
+}
+.pbr-card-row-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--brand-color) 8%, white);
+  color: var(--brand-text-color);
+}
+.pbr-card-row-text { min-width: 0; grid-column: 2; }
+.pbr-card-row-value { font: 600 1rem 'Barlow', system-ui, sans-serif; overflow-wrap: anywhere; white-space: pre-line; }
+.pbr-card-row .pbr-card-link {
+  margin-top: 0;
+  border: 1px solid #e3e6e4;
+  border-radius: 6px;
+  padding: 0.25rem 0.7rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.pbr-card-row .pbr-card-link:hover { border-color: var(--brand-color); }
+
+/* ── Timeline ─────────────────────────────────────────────────────────────────── */
+.pbr-timeline {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+.pbr-timeline li { position: relative; padding: 2.1rem 1.1rem 0 0; }
+.pbr-timeline li::before {
+  content: '';
+  position: absolute;
+  top: 0.62rem;
+  left: 0;
+  right: 0;
+  border-top: 2px dashed color-mix(in srgb, var(--brand-color) 30%, white);
+}
+.pbr-timeline li::after {
+  content: '';
+  position: absolute;
+  top: 0.25rem;
+  left: 0;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid var(--brand-color);
+}
+.pbr-timeline-year { font: 700 1.5rem 'Barlow', system-ui, sans-serif; color: var(--brand-text-color); font-variant-numeric: tabular-nums; }
+.pbr-timeline-title { font: 600 1rem 'Barlow', system-ui, sans-serif; margin: 0.1rem 0 0.25rem; }
+.pbr-timeline-desc { font-size: 0.875rem; color: #495057; line-height: 1.55; margin: 0; white-space: pre-line; }
+@media (max-width: 575.98px) {
+  .pbr-timeline { grid-template-columns: 1fr; }
+  .pbr-timeline li { padding: 0 0 1.1rem 1.9rem; }
+  .pbr-timeline li::before { top: 1.1rem; bottom: 0; left: 6px; right: auto; border-top: 0; border-left: 2px dashed color-mix(in srgb, var(--brand-color) 30%, white); }
+  .pbr-timeline li::after { top: 0.35rem; }
+}
+
+/* ── OpeningHours ─────────────────────────────────────────────────────────────── */
+.pbr-hours { background: #fff; border: 1px solid #e3e6e4; border-radius: 12px; padding: 1rem 1.1rem; max-width: 560px; }
+.pbr-hours-top { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem; margin-bottom: 0.5rem; }
+.page-blocks .pbr-hours .pbr-hours-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font: 600 1.1rem 'Barlow', system-ui, sans-serif;
+  text-transform: none;
+  letter-spacing: normal;
+  color: #212529;
+  margin: 0;
+}
+.pbr-hours-title svg { color: var(--brand-color); }
+.pbr-hours-status {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  background: #f1f3f2;
+  color: #495057;
+}
+.pbr-hours-status::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #adb5bd; }
+.pbr-hours-status.is-open { background: color-mix(in srgb, var(--brand-color) 10%, white); color: var(--brand-text-color); }
+.pbr-hours-status.is-open::before { background: var(--brand-color); }
+.pbr-hours-table { width: 100%; border-collapse: collapse; }
+.pbr-hours-table th,
+.pbr-hours-table td { padding: 0.45rem 0; border-bottom: 1px dashed #e3e6e4; font-weight: 400; }
+.pbr-hours-table tr:last-child th,
+.pbr-hours-table tr:last-child td { border-bottom: 0; }
+.pbr-hours-table td { text-align: right; font-variant-numeric: tabular-nums; }
+.pbr-hours-table tr.is-today th,
+.pbr-hours-table tr.is-today td { font-weight: 600; }
+.pbr-hours-closed { color: #6c757d; }
+.pbr-hours-note { font-size: 0.85rem; color: #6c757d; margin: 0.5rem 0 0; }

@@ -28,6 +28,18 @@ export interface FooterColumn {
   features: FooterFeature[];
 }
 
+/** "HH:mm", Madrid local time. */
+export interface OpeningHoursRange {
+  open: string;
+  close: string;
+}
+
+/** `day`: 0 = Sunday … 6 = Saturday. A day that isn't listed is closed. */
+export interface OpeningHoursDay {
+  day: number;
+  ranges: OpeningHoursRange[];
+}
+
 export interface SiteSettings {
   siteName: string;
   logoUrl?: string;
@@ -42,6 +54,7 @@ export interface SiteSettings {
   youtubeUrl?: string;
   linkedInUrl?: string;
   footerColumns: FooterColumn[];
+  openingHours?: OpeningHoursDay[];
 }
 
 export const getSiteSettings = (): Promise<SiteSettings> =>

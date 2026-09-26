@@ -27,7 +27,12 @@ import type {
   SubPagesBlockConfig,
   ProductsBlockConfig,
   FeaturedProductsBlockConfig,
+  InfoCardsBlockConfig,
+  TimelineBlockConfig,
+  OpeningHoursBlockConfig,
 } from '../../types';
+import { useSiteSettings } from '../../contexts/SiteSettingsContext';
+import { dayName, getOpeningStatus, groupOpeningHours, madridNow, rowLabel, type OpeningStatus } from '../../utils/openingHours';
 import { pageUrl } from '../../utils/pageUrl';
 import VariantCard from '../Product/VariantCard/VariantCard';
 import FeaturedProductsGrid from './FeaturedProductsGrid/FeaturedProductsGrid';
@@ -425,6 +430,113 @@ const FeaturedProductsBlock: React.FC<{ config: FeaturedProductsBlockConfig }> =
   );
 };
 
+const InfoCardsBlock: React.FC<{ config: InfoCardsBlockConfig }> = ({ config }) => {
+  const cards = (config.items ?? []).filter(c => c.label || c.value || c.note);
+  if (cards.length === 0) return null;
+  const rows = config.variant === 'rows';
+  return (
+    <div className={rows ? 'pbr-cards-rows' : 'pbr-cards'} style={buildStyle(config.style)}>
+      {cards.map((card, i) => {
+        const Icon = card.icon ? CALLOUT_ICONS[card.icon] : undefined;
+        const link = card.linkText && card.linkUrl
+          ? <a {...blockLinkProps(card.linkUrl)} className="pbr-card-link">{card.linkText}</a>
+          : null;
+        if (rows) {
+          return (
+            <div key={card.id ?? i} className="pbr-card-row">
+              {Icon && <span className="pbr-card-row-icon" aria-hidden="true"><Icon /></span>}
+              <div className="pbr-card-row-text">
+                {card.label && <div className="pbr-card-label">{card.label}</div>}
+                {card.value && <div className="pbr-card-row-value">{card.value}</div>}
+                {(card.unit || card.note) && <div className="pbr-card-note">{[card.unit, card.note].filter(Boolean).join(' · ')}</div>}
+              </div>
+              {link}
+            </div>
+          );
+        }
+        return (
+          <div key={card.id ?? i} className="pbr-card">
+            {(Icon || card.label) && (
+              <div className="pbr-card-label">{Icon && <Icon aria-hidden="true" />}{card.label}</div>
+            )}
+            {card.value && <div className="pbr-card-value">{card.value}</div>}
+            {card.unit && <div className="pbr-card-unit">{card.unit}</div>}
+            {card.warning && (
+              <span className="pbr-card-warning"><FaExclamationTriangle aria-hidden="true" />{card.warning}</span>
+            )}
+            {card.note && <div className="pbr-card-note pbr-card-note-bottom">{card.note}</div>}
+            {link}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+const TimelineBlock: React.FC<{ config: TimelineBlockConfig }> = ({ config }) => {
+  const items = (config.items ?? []).filter(item => item.year || item.title || item.description);
+  if (items.length === 0) return null;
+  return (
+    <ol className="pbr-timeline" style={buildStyle(config.style)}>
+      {items.map((item, i) => (
+        <li key={item.id ?? i}>
+          {item.year && <div className="pbr-timeline-year">{item.year}</div>}
+          {item.title && <div className="pbr-timeline-title">{item.title}</div>}
+          {item.description && <p className="pbr-timeline-desc">{item.description}</p>}
+        </li>
+      ))}
+    </ol>
+  );
+};
+
+const OpeningHoursBlock: React.FC<{ config: OpeningHoursBlockConfig }> = ({ config }) => {
+  const { t, i18n } = useTranslation();
+  const { openingHours } = useSiteSettings();
+  const [now, setNow] = React.useState(() => new Date());
+  React.useEffect(() => {
+    const id = window.setInterval(() => setNow(new Date()), 60_000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const hours = openingHours ?? [];
+  if (hours.length === 0) return null;
+
+  const locale = i18n.resolvedLanguage ?? i18n.language ?? 'es';
+  const today = madridNow(now).day;
+  const status = config.showStatus === false ? null : getOpeningStatus(hours, now);
+  const statusText = (s: OpeningStatus): string => {
+    if (s.open) return t('openingHours.openNow', { time: s.closesAt });
+    if (s.opensAt === null) return t('openingHours.closed');
+    if (s.inDays === 0) return t('openingHours.opensToday', { time: s.opensAt });
+    if (s.inDays === 1) return t('openingHours.opensTomorrow', { time: s.opensAt });
+    return t('openingHours.opensOn', { day: dayName(s.day, locale), time: s.opensAt });
+  };
+
+  return (
+    <div className="pbr-hours" style={buildStyle(config.style)}>
+      <div className="pbr-hours-top">
+        <h3 className="pbr-hours-title"><FaClock aria-hidden="true" />{config.title || t('openingHours.title')}</h3>
+        {status && <span className={`pbr-hours-status${status.open ? ' is-open' : ''}`}>{statusText(status)}</span>}
+      </div>
+      <table className="pbr-hours-table">
+        <tbody>
+          {groupOpeningHours(hours).map(row => (
+            <tr key={row.days.join('-')} className={row.days.includes(today) ? 'is-today' : undefined}>
+              <th scope="row">{rowLabel(row, locale)}</th>
+              <td>
+                {row.ranges.length > 0
+                  ? row.ranges.map(r => `${r.open} – ${r.close}`).join(' · ')
+                  : <span className="pbr-hours-closed">{t('openingHours.closed')}</span>}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {config.note && <p className="pbr-hours-note">{config.note}</p>}
+    </div>
+  );
+};
+
 // ─── Registry ─────────────────────────────────────────────────────────────────
 // Each *Block component above is precisely typed against its own config shape —
 // only this lookup-by-runtime-type registry needs a shared shape (same reasoning
@@ -443,6 +555,9 @@ const RENDERERS = {
   SubPages: ({ config, pageDetail }: { config: SubPagesBlockConfig; pageDetail?: StorefrontPageDetail }) => <SubPagesBlock config={config} pageDetail={pageDetail} />,
   Products: ({ config, pageDetail }: { config: ProductsBlockConfig; pageDetail?: StorefrontPageDetail }) => <ProductsBlock config={config} pageDetail={pageDetail} />,
   FeaturedProducts: ({ config }: { config: FeaturedProductsBlockConfig }) => <FeaturedProductsBlock config={config} />,
+  InfoCards: ({ config }: { config: InfoCardsBlockConfig }) => <InfoCardsBlock config={config} />,
+  Timeline: ({ config }: { config: TimelineBlockConfig }) => <TimelineBlock config={config} />,
+  OpeningHours: ({ config }: { config: OpeningHoursBlockConfig }) => <OpeningHoursBlock config={config} />,
 } as unknown as Record<StorefrontPageBlockType, React.FC<{ config: PageBlockConfig; pageDetail?: StorefrontPageDetail }>>;
 
 // ─── Main export ──────────────────────────────────────────────────────────────

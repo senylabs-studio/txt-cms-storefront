@@ -500,5 +500,13 @@
     "unexpectedError": "An unexpected error occurred. Please try again.",
     "networkError": "Could not connect. Check your connection and try again.",
     "loading": "Loading…"
+  },
+  "openingHours": {
+    "title": "Opening hours",
+    "openNow": "Open now · closes at {{time}}",
+    "opensToday": "Closed · opens today at {{time}}",
+    "opensTomorrow": "Closed · opens tomorrow at {{time}}",
+    "opensOn": "Closed · opens {{day}} at {{time}}",
+    "closed": "Closed"
   }
 }
