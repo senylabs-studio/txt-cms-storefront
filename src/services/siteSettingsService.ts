@@ -43,6 +43,8 @@ export interface OpeningHoursDay {
 export interface SiteSettings {
   siteName: string;
   logoUrl?: string;
+  /** Browser-tab icon; empty = the built-in neutral one. */
+  faviconUrl?: string;
   brandColor?: string;
   siteDescription: string;
   copyright: string;

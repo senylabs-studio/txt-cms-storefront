@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { getSiteSettings, type SiteSettings } from '../services/siteSettingsService';
+import { applyFavicon } from '../utils/favicon';
 export type { SiteSettings };
 
 const DEFAULT_BRAND_COLOR = '#06b773';
@@ -25,6 +26,7 @@ export const SiteSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ 
         setSettings(merged);
         const color = merged.brandColor || DEFAULT_BRAND_COLOR;
         document.documentElement.style.setProperty('--brand-color', color);
+        applyFavicon(merged.faviconUrl);
       })
       .catch(() => {/* use defaults */});
   }, []);
