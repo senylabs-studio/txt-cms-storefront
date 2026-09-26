@@ -360,6 +360,10 @@ export interface ImageTextBlockConfig {
   buttonUrl?: string;
   /** `card`: image and text inside one bordered card. */
   variant?: 'default' | 'card';
+  /** More photos shown after `imageUrl`, cross-fading every few seconds. */
+  images?: { id?: string; imageUrl: string; altText?: string }[];
+  /** Shows the shop's opening hours (SiteSettings) inside the text column. */
+  showOpeningHours?: boolean;
   style?: BlockStyle;
 }
 

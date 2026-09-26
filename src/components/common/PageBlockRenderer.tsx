@@ -245,18 +245,60 @@ const ImageBlock: React.FC<{ config: ImageBlockConfig }> = ({ config }) => {
   );
 };
 
+const ROTATE_MS = 5000;
+
+/**
+ * Several photos in one place, cross-fading every few seconds. The first photo stays in the page
+ * flow and sets the box's size; the rest sit on top of it and fade in when they're the current one.
+ * Stops on hover/focus (so a shopper can look) and never auto-plays with reduced motion on.
+ */
+const ImageRotator: React.FC<{ slides: { src: string; alt: string }[]; imgClassName: string }> = ({ slides, imgClassName }) => {
+  const { t } = useTranslation();
+  const [index, setIndex] = React.useState(0);
+  const [paused, setPaused] = React.useState(false);
+  const reducedMotion = React.useMemo(
+    () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true, []);
+  React.useEffect(() => {
+    if (slides.length < 2 || paused || reducedMotion) return;
+    const id = window.setInterval(() => setIndex(i => (i + 1) % slides.length), ROTATE_MS);
+    return () => window.clearInterval(id);
+  }, [slides.length, paused, reducedMotion]);
+
+  if (slides.length === 1) return <img src={slides[0].src} alt={slides[0].alt} className={imgClassName} />;
+  return (
+    <div className="pbr-rotator" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}
+      onFocus={() => setPaused(true)} onBlur={() => setPaused(false)}>
+      {slides.map((s, i) => (
+        <img key={i} src={s.src} alt={s.alt} className={`${imgClassName}${i > 0 ? ' pbr-rotator-layer' : ''}${i === index ? ' is-active' : ''}`}
+          aria-hidden={i === index ? undefined : true} />
+      ))}
+      <div className="pbr-rotator-dots">
+        {slides.map((_, i) => (
+          <button key={i} type="button" className={i === index ? 'is-active' : undefined} aria-current={i === index ? 'true' : undefined}
+            aria-label={t('imageRotator.goTo', { n: i + 1, total: slides.length })} onClick={() => setIndex(i)} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const ImageTextBlock: React.FC<{ config: ImageTextBlockConfig }> = ({ config }) => {
   const imageLeft = (config.imagePosition ?? 'left') === 'left';
   const card = config.variant === 'card';
-  const imgCol = config.imageUrl ? (
+  const slides = [
+    ...(config.imageUrl ? [{ src: config.imageUrl, alt: config.title ?? '' }] : []),
+    ...(config.images ?? []).filter(i => i.imageUrl).map(i => ({ src: i.imageUrl, alt: i.altText ?? '' })),
+  ];
+  const imgCol = slides.length > 0 ? (
     <Col md={5} className={card ? 'pbr-image-text-card-media' : undefined}>
-      <img src={config.imageUrl} alt={config.title ?? ''} className="pbr-image-text-img" />
+      <ImageRotator slides={slides} imgClassName="pbr-image-text-img" />
     </Col>
   ) : null;
   const textCol = (
-    <Col md={config.imageUrl ? 7 : 12} className={card ? 'pbr-image-text-card-body' : undefined} style={card ? boxStyle(config.style) : buildStyle(config.style)}>
+    <Col md={slides.length > 0 ? 7 : 12} className={card ? 'pbr-image-text-card-body' : undefined} style={card ? boxStyle(config.style) : buildStyle(config.style)}>
       {config.title && <h3>{config.title}</h3>}
       {config.text && <div className="rich-text" dangerouslySetInnerHTML={{ __html: sanitizeRichText(config.text) }} />}
+      {config.showOpeningHours && <div className="pbr-image-text-hours"><OpeningHoursBlock config={{}} /></div>}
       {config.buttonText && config.buttonUrl && (
         <a {...blockLinkProps(config.buttonUrl)} className="btn btn-primary btn-sm">
           {config.buttonText}

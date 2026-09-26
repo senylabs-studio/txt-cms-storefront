@@ -515,5 +515,8 @@
   },
   "toc": {
     "title": "Contents"
+  },
+  "imageRotator": {
+    "goTo": "Show image {{n}} of {{total}}"
   }
 }

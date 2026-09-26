@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, act } from '@testing-library/react';
 import PageBlockRenderer from './PageBlockRenderer';
 import type { StorefrontPageBlock } from '../../types';
 
@@ -329,5 +329,46 @@ describe('PageBlockRenderer TableOfContents', () => {
   it('renders nothing when the page has no sections', () => {
     const { container } = render(<PageBlockRenderer blocks={[{ id: 1, type: 'TableOfContents', sortOrder: 0, config: {} } as StorefrontPageBlock]} />);
     expect(container.querySelector('nav.pbr-toc')).toBeNull();
+  });
+});
+
+describe('PageBlockRenderer ImageText photos and hours', () => {
+  const renderImageText = (config: Record<string, unknown>) =>
+    render(<PageBlockRenderer blocks={[{ id: 1, type: 'ImageText', sortOrder: 0, config } as StorefrontPageBlock]} />).container;
+
+  it('a single photo renders as a plain image, without rotator or dots', () => {
+    const c = renderImageText({ title: 'Tienda', imageUrl: 'fachada.jpg', variant: 'card' });
+    expect(c.querySelector('.pbr-rotator')).toBeNull();
+    expect(c.querySelector('img')!.getAttribute('alt')).toBe('Tienda');
+  });
+
+  it('extra photos cross-fade every 5 seconds and the dots switch by hand', () => {
+    vi.useFakeTimers();
+    try {
+      const c = renderImageText({
+        title: 'Visítanos', imageUrl: 'fachada.jpg', variant: 'card',
+        images: [{ id: 'a', imageUrl: 'mostrador.jpg', altText: 'Mostrador' }, { id: 'b', imageUrl: '', altText: 'vacía' }, { id: 'c', imageUrl: 'interior.jpg', altText: 'Interior' }],
+      });
+      const imgs = () => [...c.querySelectorAll('.pbr-rotator img')];
+      expect(imgs().map(i => i.getAttribute('src'))).toEqual(['fachada.jpg', 'mostrador.jpg', 'interior.jpg']); // empty one skipped
+      expect(c.querySelectorAll('.pbr-rotator-dots button')).toHaveLength(3);
+      expect(imgs()[0].classList.contains('is-active')).toBe(true);
+
+      act(() => { vi.advanceTimersByTime(5000); });
+      expect(imgs()[1].classList.contains('is-active')).toBe(true);
+
+      fireEvent.click(c.querySelectorAll('.pbr-rotator-dots button')[2]);
+      expect(imgs()[2].classList.contains('is-active')).toBe(true);
+      expect(imgs()[2].getAttribute('alt')).toBe('Interior');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('showOpeningHours puts the shop hours inside the card; off by default', () => {
+    settings.current = { openingHours: [{ day: 1, ranges: [{ open: '09:30', close: '13:15' }] }] };
+    expect(renderImageText({ title: 'T', imageUrl: 'a.jpg', variant: 'card' }).querySelector('.pbr-hours')).toBeNull();
+    const c = renderImageText({ title: 'T', imageUrl: 'a.jpg', variant: 'card', showOpeningHours: true });
+    expect(c.querySelector('.pbr-image-text-card-body .pbr-image-text-hours .pbr-hours-table')).not.toBeNull();
   });
 });

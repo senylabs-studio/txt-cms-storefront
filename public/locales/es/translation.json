@@ -515,5 +515,8 @@
   },
   "toc": {
     "title": "Índice"
+  },
+  "imageRotator": {
+    "goTo": "Ver imagen {{n}} de {{total}}"
   }
 }
