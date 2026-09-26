@@ -302,7 +302,8 @@ export type StorefrontPageBlockType =
   | 'FeaturedProducts'
   | 'InfoCards'
   | 'Timeline'
-  | 'OpeningHours';
+  | 'OpeningHours'
+  | 'FaqSearch';
 
 export interface HeaderBlockConfig {
   text: string;
@@ -455,6 +456,13 @@ export interface PageBlockConfigMap {
   InfoCards: InfoCardsBlockConfig;
   Timeline: TimelineBlockConfig;
   OpeningHours: OpeningHoursBlockConfig;
+  FaqSearch: FaqSearchBlockConfig;
+}
+
+/** Filters the page's accordion blocks as the shopper types (see utils/faqSearch). */
+export interface FaqSearchBlockConfig {
+  placeholder?: string;
+  style?: BlockStyle;
 }
 
 export interface InfoCard {

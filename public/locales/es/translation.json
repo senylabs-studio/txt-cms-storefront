@@ -508,5 +508,9 @@
     "opensTomorrow": "Cerrado · abre mañana a las {{time}}",
     "opensOn": "Cerrado · abre el {{day}} a las {{time}}",
     "closed": "Cerrado"
+  },
+  "faqSearch": {
+    "placeholder": "Busca una pregunta: muestras, devoluciones, Canarias…",
+    "noResults": "Ninguna pregunta coincide con tu búsqueda."
   }
 }

@@ -508,5 +508,9 @@
     "opensTomorrow": "Closed · opens tomorrow at {{time}}",
     "opensOn": "Closed · opens {{day}} at {{time}}",
     "closed": "Closed"
+  },
+  "faqSearch": {
+    "placeholder": "Search a question: samples, returns, Canary Islands…",
+    "noResults": "No question matches your search."
   }
 }

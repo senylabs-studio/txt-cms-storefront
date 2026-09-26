@@ -369,3 +369,23 @@
   .pbr-hours-range + .pbr-hours-range::before { content: none; }
 }
 .pbr-hours-note { font-size: 0.85rem; color: #6c757d; margin: 0.5rem 0 0; }
+
+/* ── FaqSearch ────────────────────────────────────────────────────────────────── */
+.pbr-faq-search { max-width: 560px; }
+.pbr-faq-search-box {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #fff;
+  border: 1px solid #e3e6e4;
+  border-radius: 10px;
+  padding: 0.6rem 0.9rem;
+  margin: 0;
+  color: #6c757d;
+}
+.pbr-faq-search-box:focus-within {
+  border-color: var(--brand-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-color) 18%, transparent);
+}
+.pbr-faq-search-box input { border: 0; outline: 0; flex: 1; min-width: 0; background: transparent; color: #212529; font-size: 1rem; }
+.pbr-faq-search-empty { color: #6c757d; font-size: 0.9rem; margin: 0.6rem 0 0; }

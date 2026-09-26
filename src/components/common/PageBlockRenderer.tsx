@@ -5,7 +5,7 @@ import DOMPurify from 'dompurify';
 import type { IconType } from 'react-icons';
 import {
   FaInfoCircle, FaTruck, FaQuestionCircle, FaPhoneAlt, FaEnvelope, FaClock,
-  FaMapMarkerAlt, FaExclamationTriangle, FaCheck, FaChevronDown, FaCut,
+  FaMapMarkerAlt, FaExclamationTriangle, FaCheck, FaChevronDown, FaCut, FaSearch,
 } from 'react-icons/fa';
 import type {
   StorefrontPageBlock,
@@ -30,7 +30,9 @@ import type {
   InfoCardsBlockConfig,
   TimelineBlockConfig,
   OpeningHoursBlockConfig,
+  FaqSearchBlockConfig,
 } from '../../types';
+import { filterFaqBlocks } from '../../utils/faqSearch';
 import { useSiteSettings } from '../../contexts/SiteSettingsContext';
 import { dayName, getOpeningStatus, groupOpeningHours, madridNow, rowLabel, type OpeningStatus } from '../../utils/openingHours';
 import { pageUrl } from '../../utils/pageUrl';
@@ -113,7 +115,35 @@ const CALLOUT_ICONS: Record<CalloutIcon, IconType> = {
   alert: FaExclamationTriangle,
 };
 
+/** The page's FaqSearch query, shared between the search box and the accordion blocks it filters. */
+const FaqSearchContext = React.createContext<{ query: string; setQuery: (q: string) => void; matches: number }>({
+  query: '', setQuery: () => {}, matches: 0,
+});
+
+const FaqSearchBlock: React.FC<{ config: FaqSearchBlockConfig }> = ({ config }) => {
+  const { t } = useTranslation();
+  const { query, setQuery, matches } = React.useContext(FaqSearchContext);
+  const id = React.useId();
+  return (
+    <div className="pbr-faq-search" style={boxStyle(config.style)} role="search">
+      <label className="pbr-faq-search-box" htmlFor={id}>
+        <FaSearch aria-hidden="true" />
+        <input
+          id={id}
+          type="search"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          placeholder={config.placeholder || t('faqSearch.placeholder')}
+          aria-label={config.placeholder || t('faqSearch.placeholder')}
+        />
+      </label>
+      {query.trim() && matches === 0 && <p className="pbr-faq-search-empty" role="status">{t('faqSearch.noResults')}</p>}
+    </div>
+  );
+};
+
 const HeaderParagraphBlock: React.FC<{ config: HeaderParagraphBlockConfig }> = ({ config }) => {
+  const searching = React.useContext(FaqSearchContext).query.trim() !== '';
   const lvl = config.level;
   let Tag: keyof JSX.IntrinsicElements = 'h2';
   if (typeof lvl === 'number') {
@@ -128,7 +158,8 @@ const HeaderParagraphBlock: React.FC<{ config: HeaderParagraphBlockConfig }> = (
 
   if (config.variant === 'accordion') {
     return (
-      <details className="pbr-accordion" style={boxStyle(config.style)}>
+      // While a FaqSearch query is active every remaining answer is shown expanded.
+      <details className="pbr-accordion" style={boxStyle(config.style)} open={searching || undefined}>
         <summary>
           <Tag className="pbr-accordion-title">{headerText}</Tag>
           <FaChevronDown className="pbr-accordion-chevron" aria-hidden="true" />
@@ -565,6 +596,7 @@ const RENDERERS = {
   InfoCards: ({ config }: { config: InfoCardsBlockConfig }) => <InfoCardsBlock config={config} />,
   Timeline: ({ config }: { config: TimelineBlockConfig }) => <TimelineBlock config={config} />,
   OpeningHours: ({ config }: { config: OpeningHoursBlockConfig }) => <OpeningHoursBlock config={config} />,
+  FaqSearch: ({ config }: { config: FaqSearchBlockConfig }) => <FaqSearchBlock config={config} />,
 } as unknown as Record<StorefrontPageBlockType, React.FC<{ config: PageBlockConfig; pageDetail?: StorefrontPageDetail }>>;
 
 // ─── Main export ──────────────────────────────────────────────────────────────
@@ -574,13 +606,17 @@ interface PageBlockRendererProps {
 }
 
 const PageBlockRenderer: React.FC<PageBlockRendererProps> = ({ blocks, pageDetail }) => {
+  const [faqQuery, setFaqQuery] = React.useState('');
+  const faq = React.useMemo(() => filterFaqBlocks(blocks ?? [], faqQuery), [blocks, faqQuery]);
+  const faqContext = React.useMemo(() => ({ query: faqQuery, setQuery: setFaqQuery, matches: faq.matches }), [faqQuery, faq.matches]);
   if (!blocks || blocks.length === 0) return null;
 
   return (
+    <FaqSearchContext.Provider value={faqContext}>
     <div className="page-blocks">
       {blocks.map(block => {
         const Renderer = RENDERERS[block.type];
-        if (!Renderer) return null;
+        if (!Renderer || faq.hidden.has(block.id)) return null;
         const bgColor = block.config.style?.backgroundColor;
         return (
           <div
@@ -592,6 +628,7 @@ const PageBlockRenderer: React.FC<PageBlockRendererProps> = ({ blocks, pageDetai
         );
       })}
     </div>
+    </FaqSearchContext.Provider>
   );
 };
 

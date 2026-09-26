@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import PageBlockRenderer from './PageBlockRenderer';
 import type { StorefrontPageBlock } from '../../types';
 
@@ -267,6 +267,36 @@ describe('PageBlockRenderer boxed variants keep their own padding', () => {
   it('a plain paragraph still gets the padding preset', () => {
     const el = renderBlock('Paragraph', { text: '<p>x</p>', style: { padding: 'md' } }).querySelector<HTMLElement>('.rich-text')!;
     expect(el.style.padding).toBe('1.25rem 0px');
+  });
+});
+
+describe('PageBlockRenderer FaqSearch', () => {
+  const blocks = [
+    { id: 1, type: 'FaqSearch', sortOrder: 0, config: {} },
+    { id: 2, type: 'Header', sortOrder: 1, config: { text: 'Pedidos', level: 'h2' } },
+    { id: 3, type: 'HeaderParagraph', sortOrder: 2, config: { headerText: '¿Puedo pedir muestras?', paragraphText: '<p>Sí.</p>', variant: 'accordion' } },
+    { id: 4, type: 'Header', sortOrder: 3, config: { text: 'Envíos', level: 'h2' } },
+    { id: 5, type: 'HeaderParagraph', sortOrder: 4, config: { headerText: '¿Enviáis a Canarias?', paragraphText: '<p>Sí, 10 días.</p>', variant: 'accordion' } },
+  ] as StorefrontPageBlock[];
+
+  it('filters the accordions as the shopper types, opening the matches and hiding emptied group headings', () => {
+    const { container } = render(<PageBlockRenderer blocks={blocks} />);
+    const input = container.querySelector<HTMLInputElement>('.pbr-faq-search input')!;
+    expect(container.querySelectorAll('details')).toHaveLength(2);
+
+    fireEvent.change(input, { target: { value: 'canarias' } });
+
+    const details = container.querySelectorAll('details');
+    expect(details).toHaveLength(1);
+    expect(details[0].hasAttribute('open')).toBe(true);
+    expect(container.textContent).not.toContain('Pedidos');
+    expect(container.textContent).toContain('Envíos');
+
+    fireEvent.change(input, { target: { value: 'zzz' } });
+    expect(container.querySelector('.pbr-faq-search-empty')!.textContent).toBe('faqSearch.noResults');
+
+    fireEvent.change(input, { target: { value: '' } });
+    expect(container.querySelectorAll('details')).toHaveLength(2);
   });
 });
 

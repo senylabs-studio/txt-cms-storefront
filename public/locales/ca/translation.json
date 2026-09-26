@@ -508,5 +508,9 @@
     "opensTomorrow": "Tancat · obre demà a les {{time}}",
     "opensOn": "Tancat · obre el {{day}} a les {{time}}",
     "closed": "Tancat"
+  },
+  "faqSearch": {
+    "placeholder": "Cerca una pregunta: mostres, devolucions, Canàries…",
+    "noResults": "Cap pregunta coincideix amb la teva cerca."
   }
 }
