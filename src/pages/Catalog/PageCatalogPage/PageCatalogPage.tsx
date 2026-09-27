@@ -14,7 +14,7 @@ import { useSiteSettings } from '../../../contexts/SiteSettingsContext';
 import { useDocumentMeta } from '../../../hooks/useDocumentMeta';
 import type { StorefrontPageDetail } from '../../../types';
 import { isSafeHttpUrl } from '../../../utils/safeUrl';
-import ScissorsLoader from '../../../components/common/ScissorsLoader/ScissorsLoader';
+import PageLoader from '../../../components/common/ScissorsLoader/PageLoader';
 
 const PAGE_SIZE = 12;
 const EMPTY_FACETS = { minPrice: 0, maxPrice: 0, widths: [], materials: [] };
@@ -78,7 +78,7 @@ const PageCatalogPage: React.FC = () => {
 
   if (loading) return (
     <MainLayout>
-      <Container className="py-5 text-center"><ScissorsLoader /></Container>
+      <PageLoader />
     </MainLayout>
   );
 

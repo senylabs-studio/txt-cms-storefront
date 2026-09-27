@@ -35,3 +35,12 @@
   .scissors-loader__blade-a { transform: rotate(-14deg); }
   .scissors-loader__blade-b { transform: rotate(14deg); }
 }
+
+/* PageLoader: fills the main area's height (viewport minus header/footer, roughly) and centres. */
+.page-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 320px);
+  padding: 3rem 0;
+}

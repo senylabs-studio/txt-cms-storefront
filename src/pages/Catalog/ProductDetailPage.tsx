@@ -11,7 +11,7 @@ import { useSiteSettings } from '../../contexts/SiteSettingsContext';
 import { useDocumentMeta } from '../../hooks/useDocumentMeta';
 import type { StorefrontProduct, StorefrontVariant } from '../../types';
 import NewBadge from '../../components/common/NewBadge/NewBadge';
-import ScissorsLoader from '../../components/common/ScissorsLoader/ScissorsLoader';
+import PageLoader from '../../components/common/ScissorsLoader/PageLoader';
 
 const ProductDetailPage: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -49,7 +49,7 @@ const ProductDetailPage: React.FC = () => {
     return () => { cancelled = true; };
   }, [slug, i18n.language, navigate]);
 
-  if (loading) return <MainLayout><div className="text-center py-5"><ScissorsLoader /></div></MainLayout>;
+  if (loading) return <MainLayout><PageLoader /></MainLayout>;
   if (notFound) return <MainLayout><Container className="py-5"><Alert variant="warning">{t('product.productNotFound')}</Alert></Container></MainLayout>;
   if (!product) return null;
 
