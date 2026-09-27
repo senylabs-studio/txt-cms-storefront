@@ -383,6 +383,13 @@ describe('PageBlockRenderer SubPages mosaic', () => {
   const renderSubPages = (config: Record<string, unknown>) =>
     render(<PageBlockRenderer blocks={[{ id: 1, type: 'SubPages', config, sortOrder: 0 } as StorefrontPageBlock]} pageDetail={pageDetail} />).container;
 
+  it('mosaic uses the Columnas setting (3–6) on wide screens, default 6', () => {
+    const cols = (config: Record<string, unknown>) => renderSubPages(config).querySelector<HTMLElement>('.pbr-mosaic')!;
+    expect(cols({ variant: 'mosaic', columns: 4 }).style.getPropertyValue('--pbr-mosaic-cols')).toBe('4');
+    expect(cols({ variant: 'mosaic' }).style.getPropertyValue('--pbr-mosaic-cols')).toBe('6');
+    expect(cols({ variant: 'mosaic', columns: 2 }).classList.contains('pbr-mosaic-3')).toBe(true); // clamped to 3
+  });
+
   it('mosaic renders one linked tile per subpage with its name and description', () => {
     const c = renderSubPages({ variant: 'mosaic', columns: 3 });
     const tiles = c.querySelectorAll('.pbr-mosaic a.pbr-mosaic-tile');

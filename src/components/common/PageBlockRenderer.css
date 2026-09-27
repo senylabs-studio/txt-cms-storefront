@@ -59,8 +59,12 @@
    just get photo + name (a tap opens the page). */
 .pbr-mosaic { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
 @media (min-width: 576px) { .pbr-mosaic { grid-template-columns: repeat(3, 1fr); } }
-@media (min-width: 768px) { .pbr-mosaic { grid-template-columns: repeat(4, 1fr); } }
-@media (min-width: 1200px) { .pbr-mosaic { grid-template-columns: repeat(6, 1fr); } }
+/* The CMS "Columnas" setting (3–6) is the count on wide screens; tablets get at most 4. */
+@media (min-width: 768px) {
+  .pbr-mosaic { grid-template-columns: repeat(4, 1fr); }
+  .pbr-mosaic.pbr-mosaic-3 { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 1200px) { .pbr-mosaic { grid-template-columns: repeat(var(--pbr-mosaic-cols, 6), 1fr); } }
 .pbr-mosaic-tile {
   position: relative; display: block; aspect-ratio: 1; overflow: hidden; border-radius: 10px;
   color: #fff; text-decoration: none;

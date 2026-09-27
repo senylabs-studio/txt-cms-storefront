@@ -447,8 +447,11 @@ const SubPagesBlock: React.FC<{ config: SubPagesBlockConfig; pageDetail?: Storef
   const cols = config.columns ?? 3;
   if (children.length === 0) return null;
   if (config.variant === 'mosaic') {
+    // Tiles per row on wide screens (3–6, default 6); narrower screens cap it (see CSS).
+    const mosaicCols = Math.min(6, Math.max(3, config.columns ?? 6));
     return (
-      <div style={buildStyle(config.style)} className="pbr-mosaic">
+      <div style={{ ...buildStyle(config.style), ['--pbr-mosaic-cols' as string]: mosaicCols }}
+        className={mosaicCols === 3 ? 'pbr-mosaic pbr-mosaic-3' : 'pbr-mosaic'}>
         {children.map(child => (
           <a key={child.id} href={pageUrl(child.type, child.slug)} className="pbr-mosaic-tile">
             {child.imageUrl && <img src={child.imageUrl} alt="" className="pbr-mosaic-img" loading="lazy" />}
