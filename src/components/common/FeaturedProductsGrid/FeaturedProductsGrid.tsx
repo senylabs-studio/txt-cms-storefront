@@ -7,7 +7,7 @@ import { useCart } from '../../../contexts/CartContext';
 import { useAuthGate } from '../../../contexts/AuthGateContext';
 import { useToast } from '../../../contexts/ToastContext';
 import { getApiErrorMessage } from '../../../utils/apiError';
-import { getDiscountInfo } from '../../../utils/pricing';
+import { getDiscountInfo, formatPrice } from '../../../utils/pricing';
 import NewBadge from '../NewBadge/NewBadge';
 import './FeaturedProductsGrid.css';
 
@@ -114,9 +114,9 @@ const FeaturedProductsGrid: React.FC<Props> = ({ title, variants = [], products 
                 <div className="p-2">
                   <div className="home-featured-name"><Link to={slug}>{item.name}</Link></div>
                   <div className="d-flex align-items-baseline gap-1 mt-1">
-                    <span className="sf-price">€{item.price?.toFixed(2)}</span>
+                    <span className="sf-price">{formatPrice(item.price)}</span>
                     {hasDiscount && (
-                      <span className="text-muted text-decoration-line-through small">€{item.originalPrice?.toFixed(2)}</span>
+                      <span className="text-muted text-decoration-line-through small">{formatPrice(item.originalPrice)}</span>
                     )}
                   </div>
                   <Button

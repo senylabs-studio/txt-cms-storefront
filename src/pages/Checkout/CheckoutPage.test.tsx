@@ -112,7 +112,7 @@ describe('CheckoutPage', () => {
     render(<CheckoutPage />);
 
     await waitFor(() => expect(getProfile).toHaveBeenCalled());
-    await waitFor(() => expect(screen.getAllByText('€20.00').length).toBeGreaterThan(0));
+    await waitFor(() => expect(screen.getAllByText('20,00 €').length).toBeGreaterThan(0));
   });
 
   it('submits the Redsys form automatically once checkout() succeeds', async () => {
@@ -184,8 +184,8 @@ describe('CheckoutPage', () => {
 
     // subtotal 100, shipping 5 (validShippingRate), recargo ratio 10/100 = 0.1
     // -> estimatedRecargo = (100 + 5) * 0.1 = 10.50, estimatedTotal = 100 + 5 + 10.50 = 115.50
-    expect(await screen.findByText('€10.50')).toBeInTheDocument();
-    expect(await screen.findByText('€115.50')).toBeInTheDocument();
+    expect(await screen.findByText('10,50 €')).toBeInTheDocument();
+    expect(await screen.findByText('115,50 €')).toBeInTheDocument();
   });
 
   // Regression test: the shipping-rate effect had no cancellation guard, so switching the

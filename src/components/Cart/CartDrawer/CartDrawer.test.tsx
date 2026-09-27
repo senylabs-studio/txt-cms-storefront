@@ -73,7 +73,7 @@ describe('CartDrawer', () => {
     renderDrawer();
 
     expect(screen.getByText('Tela azul')).toBeInTheDocument();
-    expect(screen.getAllByText('€20.00')).toHaveLength(2);
+    expect(screen.getAllByText('20,00 €')).toHaveLength(2);
   });
 
   it('the plus/minus buttons call updateItem with quantity +/- the item\'s own quantityStep', () => {
@@ -164,7 +164,7 @@ describe('CartDrawer', () => {
     mockCart.cart = cartWithItems({ recargoEquivalenciaPercent: 5.2, recargoEquivalenciaAmount: 1.04, total: 21.04 });
     renderDrawer();
 
-    expect(screen.getByText('€1.04')).toBeInTheDocument();
+    expect(screen.getByText('1,04 €')).toBeInTheDocument();
   });
 
   it('navigates to /checkout while closing the drawer', () => {

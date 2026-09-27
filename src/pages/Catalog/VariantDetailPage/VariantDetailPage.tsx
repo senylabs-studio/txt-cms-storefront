@@ -25,6 +25,7 @@ import { getApiErrorMessage } from '../../../utils/apiError';
 import NewBadge from '../../../components/common/NewBadge/NewBadge';
 import './VariantDetailPage.css';
 import PageLoader from '../../../components/common/ScissorsLoader/PageLoader';
+import { formatPrice } from '../../../utils/pricing';
 
 const DEFAULT_MIN_QTY = 0.3;
 const DESC_THRESHOLD = 300;
@@ -374,9 +375,9 @@ const VariantDetailPage: React.FC = () => {
 
             {/* Price */}
             <div className="vdp-price-row">
-              <span className="vdp-price">{variant.price.toFixed(2)} €</span>
+              <span className="vdp-price">{formatPrice(variant.price)}</span>
               {(hasDiscount || hasGroupDiscount) && (
-                <span className="vdp-price-original">{variant.originalPrice.toFixed(2)} €</span>
+                <span className="vdp-price-original">{formatPrice(variant.originalPrice)}</span>
               )}
               {hasGroupDiscount
                 ? <Badge bg="success">−{variant.discountPercent}%</Badge>

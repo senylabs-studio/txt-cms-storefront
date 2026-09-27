@@ -16,6 +16,7 @@ import { getLanguages, type StorefrontLanguage } from '../../../services/languag
 import type { StorefrontVariant } from '../../../types';
 import './Header.css';
 import IconTooltip from '../../common/IconTooltip/IconTooltip';
+import { formatPrice } from '../../../utils/pricing';
 
 
 const Header: React.FC = () => {
@@ -111,7 +112,7 @@ const Header: React.FC = () => {
                 </span>
                 <span className="header-search-suggestion-info">
                   <span className="header-search-suggestion-name">{v.productName} · {v.name}</span>
-                  <span className="header-search-suggestion-price">{v.price.toFixed(2)} €</span>
+                  <span className="header-search-suggestion-price">{formatPrice(v.price)}</span>
                 </span>
               </button>
             ))

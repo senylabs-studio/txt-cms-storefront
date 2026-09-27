@@ -12,6 +12,7 @@ import { getApplicableShippingRate, type ApplicableShippingRate } from '../../se
 import { getApiErrorMessage } from '../../utils/apiError';
 import type { CustomerAddress, CheckoutResponse, CheckoutRequest } from '../../types';
 import PayPalCheckoutButton from './PayPalCheckoutButton';
+import { formatPrice } from '../../utils/pricing';
 
 const CheckoutPage: React.FC = () => {
   const { t } = useTranslation();
@@ -241,19 +242,19 @@ const CheckoutPage: React.FC = () => {
                 {cart.items.map(item => (
                   <div key={item.id} className="d-flex justify-content-between small mb-1">
                     <span className="text-muted">{item.productName} x{item.quantity}m</span>
-                    <span>€{item.subtotal.toFixed(2)}</span>
+                    <span>{formatPrice(item.subtotal)}</span>
                   </div>
                 ))}
                 <hr className="my-2" />
 
                 <div className="d-flex justify-content-between small mb-1">
                   <span className="text-muted">{t('checkout.subtotal')}</span>
-                  <span>€{cartSubtotal.toFixed(2)}</span>
+                  <span>{formatPrice(cartSubtotal)}</span>
                 </div>
                 {cart.couponCode && (
                   <div className="d-flex justify-content-between small text-success mb-1">
                     <span>{t('cart.couponDiscount', { code: cart.couponCode })}</span>
-                    <span>−€{couponDiscount.toFixed(2)}</span>
+                    <span>−{formatPrice(couponDiscount)}</span>
                   </div>
                 )}
                 <div className="d-flex justify-content-between small mb-2">
@@ -268,7 +269,7 @@ const CheckoutPage: React.FC = () => {
                     ) : shippingRate.isFree ? (
                       <span className="text-success fw-semibold">{t('checkout.free')}</span>
                     ) : (
-                      `€${shippingRate.shippingCost.toFixed(2)}`
+                      formatPrice(shippingRate.shippingCost)
                     )}
                   </span>
                 </div>
@@ -288,14 +289,14 @@ const CheckoutPage: React.FC = () => {
                 {estimatedRecargo > 0 && (
                   <div className="d-flex justify-content-between small text-muted mb-2">
                     <span>{t('cart.recargoEquivalencia', { percent: cart?.recargoEquivalenciaPercent ?? 0 })}</span>
-                    <span>€{estimatedRecargo.toFixed(2)}</span>
+                    <span>{formatPrice(estimatedRecargo)}</span>
                   </div>
                 )}
 
                 <hr className="my-2" />
                 <div className="d-flex justify-content-between fw-bold fs-5">
                   <span>{t('checkout.total')}</span>
-                  <span>€{estimatedTotal.toFixed(2)}</span>
+                  <span>{formatPrice(estimatedTotal)}</span>
                 </div>
 
                 {shippingRate && (

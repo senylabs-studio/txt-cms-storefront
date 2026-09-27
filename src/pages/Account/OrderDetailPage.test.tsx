@@ -68,7 +68,7 @@ describe('OrderDetailPage', () => {
 
     expect(await screen.findByText('Tela azul')).toBeInTheDocument();
     expect(screen.getByText('Paid')).toBeInTheDocument();
-    expect(screen.getByText('€21.00')).toBeInTheDocument();
+    expect(screen.getByText('21,00 €')).toBeInTheDocument();
     expect(screen.getByText('orderDetail.free')).toBeInTheDocument();
   });
 
@@ -94,7 +94,7 @@ describe('OrderDetailPage', () => {
     renderDetail();
 
     await screen.findByText('Tela azul');
-    expect(screen.getByText('€5.00')).toBeInTheDocument();
+    expect(screen.getByText('5,00 €')).toBeInTheDocument();
   });
 
   it('navigates back to /account/orders on failure', async () => {

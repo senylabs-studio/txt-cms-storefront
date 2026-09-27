@@ -9,6 +9,7 @@ import { getApiErrorMessage } from '../../utils/apiError';
 import type { StorefrontOrder } from '../../types';
 import { ORDER_STATUS_VARIANT } from '../../utils/orderStatus';
 import ScissorsLoader from '../../components/common/ScissorsLoader/ScissorsLoader';
+import { formatPrice } from '../../utils/pricing';
 
 const OrdersPage: React.FC = () => {
   const { t } = useTranslation();
@@ -73,7 +74,7 @@ const OrdersPage: React.FC = () => {
                         {t(`orders.statuses.${o.status}`, { defaultValue: o.status })}
                       </Badge>
                     </td>
-                    <td className="text-end fw-bold">€{o.total.toFixed(2)}</td>
+                    <td className="text-end fw-bold">{formatPrice(o.total)}</td>
                     <td className="text-end">
                       <Link to={`/account/orders/${o.id}`} className="btn btn-sm btn-outline-secondary">
                         <FaEye />
