@@ -47,14 +47,8 @@
 .page-blocks > div + div > .pbr-products { margin-top: 2rem; }
 
 /* ── SubPages ─────────────────────────────────────────────────────────────────── */
-.pbr-subpages-link { text-decoration: none; color: inherit; display: block; height: 100%; }
-.pbr-subpages-card { border: 1px solid #dee2e6; border-radius: 8px; overflow: hidden; height: 100%; }
-.pbr-subpages-img { width: 100%; height: 160px; object-fit: cover; }
-.pbr-subpages-body { padding: 1rem; }
-.pbr-subpages-name { font-weight: 600; margin-bottom: 4px; }
-.pbr-subpages-desc { font-size: 0.875rem; color: #6c757d; margin: 0; }
 
-/* SubPages · mosaic — for categories with many subpages: square photo tiles with the name on
+/* SubPages (mosaic): square photo tiles with the name on
    top; the description slides in on hover/keyboard focus. Touch screens have no hover, so they
    just get photo + name (a tap opens the page). */
 .pbr-mosaic { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }

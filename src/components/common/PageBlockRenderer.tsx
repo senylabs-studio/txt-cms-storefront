@@ -442,48 +442,29 @@ const BannerBlock: React.FC<{ config: BannerBlockConfig }> = ({ config }) => {
   );
 };
 
+// Mosaic is the only SubPages layout. Tiles per row on wide screens follow Columnas (3–6,
+// default 6); narrower screens cap it (see CSS). A block saved before the mosaic existed
+// (no `variant`) stored a card-grid column count (2–4), which means nothing here: default it.
+const subPagesColumns = (config: SubPagesBlockConfig): number =>
+  config.variant === 'mosaic' ? Math.min(6, Math.max(3, config.columns ?? 6)) : 6;
+
 const SubPagesBlock: React.FC<{ config: SubPagesBlockConfig; pageDetail?: StorefrontPageDetail }> = ({ config, pageDetail }) => {
   const children = pageDetail?.childPages ?? [];
-  const cols = config.columns ?? 3;
   if (children.length === 0) return null;
-  if (config.variant === 'mosaic') {
-    // Tiles per row on wide screens (3–6, default 6); narrower screens cap it (see CSS).
-    const mosaicCols = Math.min(6, Math.max(3, config.columns ?? 6));
-    return (
-      <div style={{ ...buildStyle(config.style), ['--pbr-mosaic-cols' as string]: mosaicCols }}
-        className={mosaicCols === 3 ? 'pbr-mosaic pbr-mosaic-3' : 'pbr-mosaic'}>
-        {children.map(child => (
-          <a key={child.id} href={pageUrl(child.type, child.slug)} className="pbr-mosaic-tile">
-            {child.imageUrl && <img src={child.imageUrl} alt="" className="pbr-mosaic-img" loading="lazy" />}
-            <span className="pbr-mosaic-shade" aria-hidden="true" />
-            <span className="pbr-mosaic-text">
-              <span className="pbr-mosaic-name">{child.name}</span>
-              {child.description && <span className="pbr-mosaic-desc">{child.description}</span>}
-            </span>
-          </a>
-        ))}
-      </div>
-    );
-  }
+  const cols = subPagesColumns(config);
   return (
-    <div style={buildStyle(config.style)}>
-      <Row xs={1} sm={2} md={cols} className="g-4">
-        {children.map(child => (
-          <Col key={child.id}>
-            <a href={pageUrl(child.type, child.slug)} className="pbr-subpages-link">
-              <div className="pbr-subpages-card">
-                {child.imageUrl && (
-                  <img src={child.imageUrl} alt={child.name} className="pbr-subpages-img" />
-                )}
-                <div className="pbr-subpages-body">
-                  <div className="pbr-subpages-name">{child.name}</div>
-                  {child.description && <p className="pbr-subpages-desc">{child.description}</p>}
-                </div>
-              </div>
-            </a>
-          </Col>
-        ))}
-      </Row>
+    <div style={{ ...buildStyle(config.style), ['--pbr-mosaic-cols' as string]: cols }}
+      className={cols === 3 ? 'pbr-mosaic pbr-mosaic-3' : 'pbr-mosaic'}>
+      {children.map(child => (
+        <a key={child.id} href={pageUrl(child.type, child.slug)} className="pbr-mosaic-tile">
+          {child.imageUrl && <img src={child.imageUrl} alt="" className="pbr-mosaic-img" loading="lazy" />}
+          <span className="pbr-mosaic-shade" aria-hidden="true" />
+          <span className="pbr-mosaic-text">
+            <span className="pbr-mosaic-name">{child.name}</span>
+            {child.description && <span className="pbr-mosaic-desc">{child.description}</span>}
+          </span>
+        </a>
+      ))}
     </div>
   );
 };

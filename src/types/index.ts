@@ -395,9 +395,11 @@ export interface FormFieldBlockConfig {
 }
 
 export interface SubPagesBlockConfig {
+  /** Mosaic tiles per row on wide screens, 3–6 (default 6). */
   columns?: number;
-  /** 'mosaic': dense square tiles (name only, description on hover); ignores `columns`. */
-  variant?: 'default' | 'mosaic';
+  /** Always 'mosaic' once saved by the current CMS; absent on blocks saved before the mosaic
+   *  existed, whose `columns` was a card-grid count and is ignored. */
+  variant?: 'mosaic';
   style?: BlockStyle;
 }
 
