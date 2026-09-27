@@ -400,13 +400,12 @@ describe('PageBlockRenderer SubPages mosaic', () => {
     // No photo and no description: still a usable tile, just without the empty parts.
     expect(tiles[1].querySelector('img')).toBeNull();
     expect(tiles[1].querySelector('.pbr-mosaic-desc')).toBeNull();
-    expect(c.querySelector('.pbr-subpages-card')).toBeNull();
   });
 
-  it('without a variant keeps the original card grid', () => {
+  it('a block saved before the mosaic existed renders as mosaic at 6, ignoring its card-grid columns', () => {
     const c = renderSubPages({ columns: 3 });
-    expect(c.querySelectorAll('.pbr-subpages-card')).toHaveLength(2);
-    expect(c.querySelector('.pbr-mosaic')).toBeNull();
+    expect(c.querySelectorAll('.pbr-mosaic a.pbr-mosaic-tile')).toHaveLength(2);
+    expect(c.querySelector<HTMLElement>('.pbr-mosaic')!.style.getPropertyValue('--pbr-mosaic-cols')).toBe('6');
   });
 });
 
