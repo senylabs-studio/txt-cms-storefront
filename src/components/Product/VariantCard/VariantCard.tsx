@@ -9,7 +9,7 @@ import { useAuthGate } from '../../../contexts/AuthGateContext';
 import FavoriteButton from '../../common/FavoriteButton/FavoriteButton';
 import NotifyMeButton from '../../common/NotifyMeButton/NotifyMeButton';
 import { formatComposition } from '../../../utils/composition';
-import { getDiscountInfo } from '../../../utils/pricing';
+import { getDiscountInfo, formatPrice } from '../../../utils/pricing';
 import { getApiErrorMessage } from '../../../utils/apiError';
 import '../ProductCard/ProductCard.css';
 import IconTooltip from '../../common/IconTooltip/IconTooltip';
@@ -105,8 +105,8 @@ const VariantCard: React.FC<Props> = ({ variant }) => {
 
         <div className="mt-auto">
           <div className="product-card-price">
-            <span className="price-current">€{variant.price.toFixed(2)}</span>
-            {hasDiscount && <span className="price-original">€{variant.originalPrice.toFixed(2)}</span>}
+            <span className="price-current">{formatPrice(variant.price)}</span>
+            {hasDiscount && <span className="price-original">{formatPrice(variant.originalPrice)}</span>}
           </div>
           {hasGroupDiscount && (
             <div className="small text-success product-card-group-price">{t('product.groupPrice', { percent: variant.discountPercent })}</div>

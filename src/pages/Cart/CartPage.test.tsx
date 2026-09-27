@@ -94,7 +94,7 @@ describe('CartPage', () => {
 
     expect(screen.getByText('Tela azul')).toBeInTheDocument();
     expect(screen.getByText('cart.discount')).toBeInTheDocument();
-    expect(screen.getByText('€18.00')).toBeInTheDocument();
+    expect(screen.getByText('18,00 €')).toBeInTheDocument();
   });
 
   it('navigates to /checkout when the checkout button is clicked', () => {
@@ -200,7 +200,7 @@ describe('CartPage', () => {
     renderCartPage();
 
     expect(screen.getByText('cart.recargoEquivalencia')).toBeInTheDocument();
-    expect(screen.getByText('€1.04')).toBeInTheDocument();
+    expect(screen.getByText('1,04 €')).toBeInTheDocument();
   });
 
   it('does not show a recargo de equivalencia line for a customer not subject to it', () => {

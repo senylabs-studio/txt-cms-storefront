@@ -8,6 +8,7 @@ import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { getApiErrorMessage } from '../../utils/apiError';
+import { formatPrice } from '../../utils/pricing';
 
 const CartPage: React.FC = () => {
   const { t } = useTranslation();
@@ -125,11 +126,11 @@ const CartPage: React.FC = () => {
                         <div className="small">
                           {item.unitPrice < item.originalUnitPrice && (
                             <span className="text-muted text-decoration-line-through me-1">
-                              €{item.originalUnitPrice.toFixed(2)}
+                              {formatPrice(item.originalUnitPrice)}
                             </span>
                           )}
                           <span className={item.unitPrice < item.originalUnitPrice ? 'sf-price' : 'text-muted'}>
-                            €{item.unitPrice.toFixed(2)} / m
+                            {formatPrice(item.unitPrice)} / m
                           </span>
                         </div>
                       </Col>
@@ -148,7 +149,7 @@ const CartPage: React.FC = () => {
                         />
                       </Col>
                       <Col sm={2} className="text-end mt-2 mt-sm-0">
-                        <div className="fw-bold">€{item.subtotal.toFixed(2)}</div>
+                        <div className="fw-bold">{formatPrice(item.subtotal)}</div>
                         <Button size="sm" variant="link" className="text-danger p-0" onClick={() => handleRemove(item.id)} disabled={loading}>
                           <FaTrash size={12} />
                         </Button>
@@ -166,25 +167,25 @@ const CartPage: React.FC = () => {
                   {cart!.items.map(item => (
                     <div key={item.id} className="d-flex justify-content-between small mb-1">
                       <span className="text-muted">{item.productName} x{item.quantity}m</span>
-                      <span>€{item.subtotal.toFixed(2)}</span>
+                      <span>{formatPrice(item.subtotal)}</span>
                     </div>
                   ))}
                   {(cart!.discountPercent ?? 0) > 0 && (
                     <div className="d-flex justify-content-between small text-success mb-1">
                       <span>{t('cart.discount', { percent: cart!.discountPercent })}</span>
-                      <span>−€{(cart!.items.reduce((s, i) => s + (i.originalUnitPrice - i.unitPrice) * i.quantity, 0)).toFixed(2)}</span>
+                      <span>−{formatPrice(cart!.items.reduce((s, i) => s + (i.originalUnitPrice - i.unitPrice) * i.quantity, 0))}</span>
                     </div>
                   )}
                   {cart!.couponCode && (
                     <div className="d-flex justify-content-between small text-success mb-1">
                       <span>{t('cart.couponDiscount', { code: cart!.couponCode })}</span>
-                      <span>−€{cart!.couponDiscountAmount.toFixed(2)}</span>
+                      <span>−{formatPrice(cart!.couponDiscountAmount)}</span>
                     </div>
                   )}
                   {cart!.recargoEquivalenciaAmount > 0 && (
                     <div className="d-flex justify-content-between small text-muted mb-1">
                       <span>{t('cart.recargoEquivalencia', { percent: cart!.recargoEquivalenciaPercent })}</span>
-                      <span>€{cart!.recargoEquivalenciaAmount.toFixed(2)}</span>
+                      <span>{formatPrice(cart!.recargoEquivalenciaAmount)}</span>
                     </div>
                   )}
                   <hr />
@@ -220,7 +221,7 @@ const CartPage: React.FC = () => {
                   )}
                   <div className="d-flex justify-content-between fw-bold fs-5 mb-3">
                     <span>{t('cart.total')}</span>
-                    <span>€{(cart!.total ?? 0).toFixed(2)}</span>
+                    <span>{formatPrice(cart!.total ?? 0)}</span>
                   </div>
                   <Button variant="primary" size="lg" className="w-100" onClick={() => navigate('/checkout')}>
                     {t('cart.checkout')} <FaArrowRight className="ms-1" />

@@ -58,7 +58,7 @@ describe('OrdersPage', () => {
 
     expect(await screen.findByText('#42')).toBeInTheDocument();
     expect(screen.getByText('Paid')).toBeInTheDocument();
-    expect(screen.getByText('€99.50')).toBeInTheDocument();
+    expect(screen.getByText('99,50 €')).toBeInTheDocument();
   });
 
   it('links each row to its order detail page', async () => {

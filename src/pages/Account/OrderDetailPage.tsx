@@ -10,6 +10,7 @@ import { ORDER_STATUS_VARIANT } from '../../utils/orderStatus';
 import { useToast } from '../../contexts/ToastContext';
 import { getApiErrorMessage } from '../../utils/apiError';
 import PageLoader from '../../components/common/ScissorsLoader/PageLoader';
+import { formatPrice } from '../../utils/pricing';
 
 const OrderDetailPage: React.FC = () => {
   const { t } = useTranslation();
@@ -222,9 +223,9 @@ const OrderDetailPage: React.FC = () => {
                       )}
                     </td>
                     <td className="text-center">{line.quantity} m</td>
-                    <td className="text-end">€{line.unitPrice.toFixed(2)}</td>
+                    <td className="text-end">{formatPrice(line.unitPrice)}</td>
                     <td className="text-end">{line.discountPercent > 0 ? `${line.discountPercent}%` : '—'}</td>
-                    <td className="text-end fw-semibold">€{line.subtotal.toFixed(2)}</td>
+                    <td className="text-end fw-semibold">{formatPrice(line.subtotal)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -232,12 +233,12 @@ const OrderDetailPage: React.FC = () => {
                 <tr>
                   <td colSpan={5} className="text-end text-muted">{t('orderDetail.shippingCost')}</td>
                   <td className="text-end">
-                    {order.shippingCost > 0 ? `€${order.shippingCost.toFixed(2)}` : t('orderDetail.free')}
+                    {order.shippingCost > 0 ? formatPrice(order.shippingCost) : t('orderDetail.free')}
                   </td>
                 </tr>
                 <tr>
                   <td colSpan={5} className="text-end fw-bold fs-5">{t('orderDetail.total')}</td>
-                  <td className="text-end fw-bold fs-5">€{order.total.toFixed(2)}</td>
+                  <td className="text-end fw-bold fs-5">{formatPrice(order.total)}</td>
                 </tr>
               </tfoot>
             </Table>

@@ -12,6 +12,7 @@ import { useToast } from '../../contexts/ToastContext';
 import { getApiErrorMessage } from '../../utils/apiError';
 import './FavoritesPage.css';
 import PageLoader from '../../components/common/ScissorsLoader/PageLoader';
+import { formatPrice } from '../../utils/pricing';
 
 const FavoritesPage: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -111,9 +112,9 @@ const FavoritesPage: React.FC = () => {
                         <Link to={slug}>{entity.name}</Link>
                       </div>
                       <div className="d-flex align-items-baseline gap-1">
-                        <span className="sf-price">€{entity.price?.toFixed(2)}</span>
+                        <span className="sf-price">{formatPrice(entity.price)}</span>
                         {showOriginal && (
-                          <span className="text-muted text-decoration-line-through small">€{entity.originalPrice?.toFixed(2)}</span>
+                          <span className="text-muted text-decoration-line-through small">{formatPrice(entity.originalPrice)}</span>
                         )}
                       </div>
                       <div className="d-flex gap-1 mt-1">

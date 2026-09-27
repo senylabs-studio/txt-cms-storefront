@@ -100,7 +100,7 @@ const ProductFilters: React.FC<Props> = ({ facets, filters, onChange, onClose })
   // also when facets arrive — this panel is always mounted (just CSS-hidden until opened), so on
   // first render facets is still the {0,0,[],[]} placeholder the parent seeds before its async
   // fetch resolves; without absMin/absMax here, localMin/localMax would permanently stick at the
-  // 0/0 they were lazily initialized to, showing "€0 – €0" even once real prices are in.
+  // 0/0 they were lazily initialized to, showing "0 € – 0 €" even once real prices are in.
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- re-syncs the draft/slider state when applied filters or facets change (see comment above)
     setDraft(filters);
@@ -173,7 +173,7 @@ const ProductFilters: React.FC<Props> = ({ facets, filters, onChange, onClose })
           <div style={{ ...labelStyle, display: 'flex', justifyContent: 'space-between' }}>
             <span>{t('filters.price')}</span>
             <span style={{ color: '#0d6efd', fontWeight: 700, textTransform: 'none', letterSpacing: 0 }}>
-              €{localMin} – €{localMax}
+              {localMin} € – {localMax} €
             </span>
           </div>
           <PriceRangeSlider
@@ -182,8 +182,8 @@ const ProductFilters: React.FC<Props> = ({ facets, filters, onChange, onClose })
             onChange={handleSlider}
           />
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: '#adb5bd', marginTop: 2 }}>
-            <span>€{absMin}</span>
-            <span>€{absMax}</span>
+            <span>{absMin} €</span>
+            <span>{absMax} €</span>
           </div>
         </div>
       </>}

@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useCart } from '../../../contexts/CartContext';
 import { getApiErrorMessage } from '../../../utils/apiError';
 import './CartDrawer.css';
+import { formatPrice } from '../../../utils/pricing';
 
 // Avoids floating-point artifacts from repeated +/- quantityStep arithmetic (e.g. 0.5 - 0.05
 // would otherwise become 0.44999999999999996 in JS).
@@ -96,11 +97,11 @@ const CartDrawer: React.FC = () => {
                     <div className="cart-item-price">
                       {item.unitPrice < item.originalUnitPrice && (
                         <span style={{ textDecoration: 'line-through', color: '#aaa', marginRight: 4, fontSize: '0.8em' }}>
-                          €{item.originalUnitPrice.toFixed(2)}
+                          {formatPrice(item.originalUnitPrice)}
                         </span>
                       )}
                       <span style={item.unitPrice < item.originalUnitPrice ? { color: '#dc3545', fontWeight: 600 } : {}}>
-                        €{item.unitPrice.toFixed(2)}
+                        {formatPrice(item.unitPrice)}
                       </span>
                     </div>
                     <div className="cart-item-qty">
@@ -114,7 +115,7 @@ const CartDrawer: React.FC = () => {
                     </div>
                   </div>
                   <div className="cart-item-subtotal">
-                    <div className="fw-semibold">€{item.subtotal.toFixed(2)}</div>
+                    <div className="fw-semibold">{formatPrice(item.subtotal)}</div>
                     <button className="remove-btn" onClick={() => handleRemove(item.id)} disabled={loading}>
                       <FaTrash size={12} />
                     </button>
@@ -127,18 +128,18 @@ const CartDrawer: React.FC = () => {
               {(cart!.discountPercent ?? 0) > 0 && (
                 <div className="d-flex justify-content-between small text-success mb-1">
                   <span>{t('cart.discount', { percent: cart!.discountPercent })}</span>
-                  <span>−€{cart!.items.reduce((s, i) => s + (i.originalUnitPrice - i.unitPrice) * i.quantity, 0).toFixed(2)}</span>
+                  <span>−{formatPrice(cart!.items.reduce((s, i) => s + (i.originalUnitPrice - i.unitPrice) * i.quantity, 0))}</span>
                 </div>
               )}
               {cart!.recargoEquivalenciaAmount > 0 && (
                 <div className="d-flex justify-content-between small text-muted mb-1">
                   <span>{t('cart.recargoEquivalencia', { percent: cart!.recargoEquivalenciaPercent })}</span>
-                  <span>€{cart!.recargoEquivalenciaAmount.toFixed(2)}</span>
+                  <span>{formatPrice(cart!.recargoEquivalenciaAmount)}</span>
                 </div>
               )}
               <div className="d-flex justify-content-between fw-bold fs-5 mb-3">
                 <span>{t('cart.total')}</span>
-                <span>€{(cart!.total ?? 0).toFixed(2)}</span>
+                <span>{formatPrice(cart!.total ?? 0)}</span>
               </div>
               <Button variant="primary" size="lg" className="w-100 mb-2" onClick={() => { closeDrawer(); navigate('/checkout'); }}>
                 {t('cart.checkout')}
