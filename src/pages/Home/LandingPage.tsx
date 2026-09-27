@@ -18,7 +18,7 @@ import FeaturedProductsGrid from '../../components/common/FeaturedProductsGrid/F
 import { bannerTextPlacement } from '../../utils/bannerTextPlacement';
 import { blockLinkProps } from '../../utils/blockLinkProps';
 import './LandingPage.css';
-import ScissorsLoader from '../../components/common/ScissorsLoader/ScissorsLoader';
+import PageLoader from '../../components/common/ScissorsLoader/PageLoader';
 
 // ─── Banner (carousel) ────────────────────────────────────────────────────────
 // The subtitle has its own fixed max-width + auto margins (see LandingPage.css) so it reads as a
@@ -199,7 +199,7 @@ const LandingPage: React.FC = () => {
   }, [i18n.language]);
 
   if (loading) {
-    return <MainLayout><div className="text-center py-5"><ScissorsLoader /></div></MainLayout>;
+    return <MainLayout><PageLoader /></MainLayout>;
   }
 
   if (blocks.length === 0) {

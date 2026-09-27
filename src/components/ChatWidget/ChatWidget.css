@@ -145,3 +145,6 @@
     right: 1rem;
   }
 }
+
+/* Hidden while the mobile menu sheet is open (see MobileMenuSheet). */
+body.mobile-menu-open .chat-widget { display: none; }

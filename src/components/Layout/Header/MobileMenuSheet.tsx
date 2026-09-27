@@ -33,6 +33,14 @@ const MobileMenuSheet: React.FC<MobileMenuSheetProps> = ({ open, onClose }) => {
     getLanguages().then(setLanguages).catch(() => {});
   }, []);
 
+  // The sheet renders inside the sticky header (its own stacking context, z-index 1000), so the
+  // floating chat button (1050) would sit on top of the open menu and cover its items.
+  useEffect(() => {
+    if (!open) return;
+    document.body.classList.add('mobile-menu-open');
+    return () => document.body.classList.remove('mobile-menu-open');
+  }, [open]);
+
   if (!open) return null;
 
   const changeLang = (lng: string) => i18n.changeLanguage(lng);

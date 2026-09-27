@@ -9,7 +9,7 @@ import type { StorefrontOrderDetail } from '../../types';
 import { ORDER_STATUS_VARIANT } from '../../utils/orderStatus';
 import { useToast } from '../../contexts/ToastContext';
 import { getApiErrorMessage } from '../../utils/apiError';
-import ScissorsLoader from '../../components/common/ScissorsLoader/ScissorsLoader';
+import PageLoader from '../../components/common/ScissorsLoader/PageLoader';
 
 const OrderDetailPage: React.FC = () => {
   const { t } = useTranslation();
@@ -52,7 +52,7 @@ const OrderDetailPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  if (loading) return <MainLayout><div className="text-center py-5"><ScissorsLoader /></div></MainLayout>;
+  if (loading) return <MainLayout><PageLoader /></MainLayout>;
   if (!order) return null;
 
   const canDownloadInvoice = order.status !== 'PendingPayment' && order.status !== 'Cancelled';

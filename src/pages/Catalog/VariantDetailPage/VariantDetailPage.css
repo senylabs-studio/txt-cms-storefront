@@ -208,6 +208,7 @@
 
 .vdp-stepper {
   display: flex;
+  flex-shrink: 0; /* never squeeze it: its "+" used to end up hidden under the add-to-cart button */
   border: 1px solid #dee2e6;
   border-radius: 8px;
   overflow: hidden;
@@ -243,6 +244,16 @@
 .vdp-add-btn {
   border-radius: 8px !important;
   min-width: 0;
+}
+
+/* Tablet / small laptop (768–1199px): the two-column layout leaves the details column too narrow
+   for stepper + button + two icons on one line. Stepper and icons share the first row, the
+   add-to-cart button takes a full row of its own underneath. */
+@media (min-width: 768px) and (max-width: 1199.98px) {
+  .vdp-actions { flex-wrap: wrap; }
+  .vdp-stepper { order: 1; }
+  .vdp-icon-actions { order: 2; margin-left: auto; }
+  .vdp-add-btn { order: 3; flex: 1 0 100%; white-space: nowrap; }
 }
 
 .vdp-icon-actions {

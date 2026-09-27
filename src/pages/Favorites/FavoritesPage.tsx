@@ -11,7 +11,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { getApiErrorMessage } from '../../utils/apiError';
 import './FavoritesPage.css';
-import ScissorsLoader from '../../components/common/ScissorsLoader/ScissorsLoader';
+import PageLoader from '../../components/common/ScissorsLoader/PageLoader';
 
 const FavoritesPage: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -62,7 +62,7 @@ const FavoritesPage: React.FC = () => {
   };
 
   if (loading) {
-    return <MainLayout><div className="text-center py-5"><ScissorsLoader /></div></MainLayout>;
+    return <MainLayout><PageLoader /></MainLayout>;
   }
 
   return (

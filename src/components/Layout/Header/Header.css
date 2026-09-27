@@ -9,6 +9,7 @@
 
 /* ── Top bar ──────────────────────────────────────────────────────────── */
 .header-topbar {
+  white-space: nowrap;
   background: color-mix(in srgb, var(--brand-color) 10%, white);
   border-bottom: 1px solid color-mix(in srgb, var(--brand-color) 16%, white);
   padding: 6px 0;
@@ -272,7 +273,7 @@
 
 /* Roomier, larger items on the full-height header. The condensed (scrolled) bar keeps the compact
    sizes above, since it shares its row with the logo, search field and action icons. */
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   .nav-menu-bar:not(.nav-menu-bar--condensed) .nav-menu-link { font-size: 15px; padding: 14px 14px; }
   .nav-menu-bar:not(.nav-menu-bar--condensed) .nav-menu-indicator { left: 14px; right: 14px; }
 }
@@ -488,15 +489,22 @@
 
 .mobile-menu-logout,
 .mobile-menu-close {
+  /* a plain text link, not the browser's default grey bordered button */
+  background: none;
+  border: 0;
   text-align: left;
   padding: 6px 0;
+  cursor: pointer;
 }
+.mobile-menu-close:focus-visible { outline: 2px solid var(--brand-color); outline-offset: 2px; }
 .mobile-menu-close { color: var(--brand-color); font-weight: 600; }
 
 /* ── Responsive rules ─────────────────────────────────────────────────── */
 
-/* < 768px (mobile): hamburger + mobile search row take over, nav row hides */
-@media (max-width: 767.98px) {
+/* < 992px (mobile and tablet): hamburger + mobile search row take over, nav row hides. The
+   desktop nav row needs ~900px for a typical set of top categories; below that it wrapped onto a
+   second line (768–991px showed "Complementos" alone underneath). */
+@media (max-width: 991.98px) {
   .header-hamburger { display: flex; }
   .header-mobile-search-row { display: block; }
   .header-search { max-width: none; }
@@ -510,13 +518,21 @@
   .brand-logo { height: 48px; }
 }
 
-/* >= 768px (tablet/desktop): action icon labels only show at desktop width */
-@media (min-width: 768px) {
+/* >= 992px (desktop): action icon labels only show at wide desktop width */
+@media (min-width: 992px) {
   .header-mobile-search-row { display: none; }
 }
 
-@media (min-width: 768px) and (max-width: 1199.98px) {
+@media (min-width: 992px) and (max-width: 1199.98px) {
   .header-icons--labeled .header-icon-btn { flex-direction: row; width: 42px; padding: 0; }
   .header-icon-label { display: none; }
   .header-icons--labeled .header-icon-badge { top: 2px; right: 6px; }
+}
+
+/* Phones: the top bar is one line. The promo text gives way (ellipsis) so the language switch and
+   the login/register links never wrap onto two or three lines. */
+@media (max-width: 575.98px) {
+  .header-topbar .container > .d-flex { gap: 10px; }
+  .header-topbar .container > .d-flex > small { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .header-topbar .container > .d-flex > .d-flex { flex-shrink: 0; gap: 10px !important; }
 }

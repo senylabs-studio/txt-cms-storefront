@@ -24,7 +24,7 @@ import CareLabels from '../../../components/common/CareLabels';
 import { getApiErrorMessage } from '../../../utils/apiError';
 import NewBadge from '../../../components/common/NewBadge/NewBadge';
 import './VariantDetailPage.css';
-import ScissorsLoader from '../../../components/common/ScissorsLoader/ScissorsLoader';
+import PageLoader from '../../../components/common/ScissorsLoader/PageLoader';
 
 const DEFAULT_MIN_QTY = 0.3;
 const DESC_THRESHOLD = 300;
@@ -195,7 +195,7 @@ const VariantDetailPage: React.FC = () => {
     }
   };
 
-  if (loading) return <MainLayout><div className="text-center py-5"><ScissorsLoader /></div></MainLayout>;
+  if (loading) return <MainLayout><PageLoader /></MainLayout>;
   if (notFound) return <MainLayout><Container className="py-5"><Alert variant="warning">{t('product.notFound')}</Alert></Container></MainLayout>;
   if (!variant) return null;
 
@@ -244,7 +244,7 @@ const VariantDetailPage: React.FC = () => {
           <FaArrowLeft className="me-1" size={12} /> {t('product.back')}
         </button>
 
-        <Row className="g-5">
+        <Row className="g-4 g-lg-5">
           {/* ── Images ── */}
           <Col md={6}>
             {/* Main image */}
