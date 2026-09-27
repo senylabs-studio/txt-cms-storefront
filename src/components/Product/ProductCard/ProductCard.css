@@ -33,5 +33,7 @@
 .price-original { font-size: 13px; color: #adb5bd; text-decoration: line-through; }
 
 .product-card-meta { font-size: 0.72rem; line-height: 1.4; margin-bottom: 0.35rem; }
+/* each fact stays whole ("100% Algodón" used to split across lines on phones) */
+.product-card-meta > span { white-space: nowrap; }
 .product-card-group-price { font-size: 0.75rem; }
 .variant-qty-input { min-width: 0; }
