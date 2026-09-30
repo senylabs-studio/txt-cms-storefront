@@ -209,7 +209,7 @@ const OrderDetailPage: React.FC = () => {
                   <tr key={i}>
                     <td>
                       {line.thumbnailUrl
-                        ? <img src={line.thumbnailUrl} alt={line.productName} style={{ width: 44, height: 44, objectFit: 'cover', borderRadius: 6, border: '1px solid #e9ecef' }} />
+                        ? <img src={line.thumbnailUrl} alt={line.productName} style={{ width: 54, height: 36, objectFit: 'cover', borderRadius: 6, border: '1px solid #e9ecef' }} />
                         : <div style={{ width: 44, height: 44, background: '#f8f9fa', borderRadius: 6, border: '1px solid #e9ecef', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>📦</div>
                       }
                     </td>

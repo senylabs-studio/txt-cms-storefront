@@ -98,8 +98,8 @@
 }
 
 .image-lightbox__thumb {
-  width: 56px;
-  height: 56px;
+  width: 72px;
+  height: 48px; /* 3:2, the fabric photos' shape */
   flex-shrink: 0;
   padding: 0;
   border: 2px solid transparent;
