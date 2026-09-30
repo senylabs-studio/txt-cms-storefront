@@ -14,6 +14,7 @@ import { getApiErrorMessage } from '../../../utils/apiError';
 import '../ProductCard/ProductCard.css';
 import IconTooltip from '../../common/IconTooltip/IconTooltip';
 import NewBadge from '../../common/NewBadge/NewBadge';
+import { variantCardTitle } from '../../../utils/variantTitle';
 
 interface Props { variant: StorefrontVariant; }
 
@@ -31,13 +32,9 @@ const VariantCard: React.FC<Props> = ({ variant }) => {
 
   const outOfStock = variant.availableStock <= 0;
 
-  // The title is what tells this variant apart from its siblings — its type value ("Blanco"),
-  // or, for a type whose values are hidden from shoppers (Referencia), its own name — with the
-  // product's name small above it, where the type's name ("COLOR", "REFERENCIA", meaningless to
-  // shoppers) used to be. Variants named like their product (Cretona lisa) used to show nothing
-  // that told them apart.
-  const title = variant.typeValue || variant.name || variant.productName;
-  const productLabel = title === variant.productName ? '\u00a0' : variant.productName; // keeps names aligned across a grid
+  // Title = what tells this variant apart (see variantCardTitle); the product's name goes small
+  // above it, where the type's name ("COLOR", "REFERENCIA", meaningless to shoppers) used to be.
+  const { title, productLabel } = variantCardTitle(variant);
   const { hasGroupDiscount, hasDiscount } = getDiscountInfo(variant.price, variant.originalPrice, variant.discountPercent);
 
   const handleOpenQty = async () => {
