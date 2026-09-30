@@ -108,3 +108,18 @@ describe('NavMenu mega panel side image', () => {
     }
   });
 });
+
+describe('NavMenu Ofertas link', () => {
+  it('marks only the Ofertas page link, in the bar and in the mega panel', async () => {
+    getMenu.mockResolvedValue([
+      node({ id: 3, name: 'Ofertas', slug: 'ofertas', type: 'Offers' }),
+      node({ id: 4, name: 'Hogar', slug: 'hogar', children: [node({ id: 41, name: 'Rebajas', slug: 'rebajas', type: 'Offers' })] }),
+    ]);
+    render(<MemoryRouter><NavMenu /></MemoryRouter>);
+
+    expect((await screen.findByText('Ofertas')).className).toContain('is-offers');
+    expect(screen.getByText('Hogar').className).not.toContain('is-offers');
+    await openPanel('Hogar');
+    expect(screen.getByText('Rebajas').className).toContain('is-offers');
+  });
+});
