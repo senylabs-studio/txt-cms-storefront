@@ -445,13 +445,15 @@
     "dryCleanP": "Dry clean (perchloroethylene)",
     "iron110": "Iron max. 110°C",
     "oekoTex": "OEKO-TEX certified",
+    "gots": "GOTS certified",
     "help": {
       "wash30": "Machine wash at 30 °C maximum. Higher temperatures may shrink the fabric or make it fade.",
       "noBleach": "Do not use bleach or chlorine products: they discolour and weaken the fibres.",
       "noDryer": "Do not tumble dry. Let it air dry, hung or laid flat.",
       "dryCleanP": "Professional dry cleaning (perchloroethylene) allowed. Take it to a dry cleaner.",
       "iron110": "Iron at low temperature (one dot, max. 110 °C), preferably inside out and without steam.",
-      "oekoTex": "The fabric has passed the OEKO-TEX® harmful-substance tests: it is safe for your skin."
+      "oekoTex": "The fabric has passed the OEKO-TEX® harmful-substance tests: it is safe for your skin.",
+      "gots": "GOTS (Global Organic Textile Standard) certified: organically grown fibres, environmentally responsible manufacturing and socially responsible trade."
     }
   },
   "landing": {
