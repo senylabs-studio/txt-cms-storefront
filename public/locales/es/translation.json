@@ -419,7 +419,8 @@
     "noFeaturedProducts": "No hay productos destacados configurados.",
     "reviewsLoadError": "No se pudieron cargar las reseñas.",
     "cancelAdd": "Cancelar",
-    "new": "Nuevo"
+    "new": "Nuevo",
+    "seeAllOffers": "Ver todas las ofertas"
   },
   "filters": {
     "title": "Filtros",

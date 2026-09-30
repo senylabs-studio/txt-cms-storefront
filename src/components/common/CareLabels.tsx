@@ -17,7 +17,7 @@ export const CARE_LABEL_DEFS = [
   { bit: 8,  key: 'dryCleanP', tKey: 'careLabels.dryCleanP', icon: iconDryClean },
   { bit: 16, key: 'iron110',   tKey: 'careLabels.iron110',   icon: iconIron },
   { bit: 32, key: 'oekoTex',   tKey: 'careLabels.oekoTex',   icon: oekoTex },
-  { bit: 64, key: 'gots',      tKey: 'careLabels.gots',      icon: gots },
+  { bit: 64, key: 'gots',      tKey: 'careLabels.gots',      icon: gots, scale: 1.3 }, // the round logo reads small at the same size
 ] as const;
 
 interface Props {
@@ -31,7 +31,7 @@ const CareLabels: React.FC<Props> = ({ careLabels }) => {
 
   return (
     <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-      {active.map(({ key, tKey, icon }) => (
+      {active.map(({ key, tKey, icon, ...def }) => (
         // A symbol alone doesn't tell most shoppers what it means: hover (or tap, on mobile —
         // it's focusable) shows its name and a one-line explanation.
         <OverlayTrigger
@@ -58,7 +58,7 @@ const CareLabels: React.FC<Props> = ({ careLabels }) => {
               cursor: 'help',
             }}
           >
-            <img src={icon} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            <img src={icon} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', transform: 'scale' in def ? `scale(${def.scale})` : undefined }} />
           </div>
         </OverlayTrigger>
       ))}

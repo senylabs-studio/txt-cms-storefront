@@ -119,15 +119,23 @@ const ImageGridBlock: React.FC<{ config: HomeImageGridBlockConfig }> = ({ config
 };
 
 // ─── Featured Products ────────────────────────────────────────────────────────
-const FeaturedProductsBlock: React.FC<{ config: HomeFeaturedProductsBlockConfig }> = ({ config }) => (
-  <FeaturedProductsGrid
-    title={config.title}
-    variants={config.variants}
-    products={config.products}
-    titleAlign={config.textAlign}
-    titleColor={config.textColor}
-  />
-);
+// In offers mode the backend picks the variants and, while the Ofertas page is visible, sends its
+// URL for a "see all offers" link. Nothing on sale → no cards → the grid renders nothing at all.
+const FeaturedProductsBlock: React.FC<{ config: HomeFeaturedProductsBlockConfig }> = ({ config }) => {
+  const { t } = useTranslation();
+  return (
+    <FeaturedProductsGrid
+      title={config.title}
+      variants={config.variants}
+      products={config.products}
+      titleAlign={config.textAlign}
+      titleColor={config.textColor}
+      moreLink={config.source === 'offers' && config.offersUrl
+        ? { to: config.offersUrl, label: config.buttonText?.trim() || t('product.seeAllOffers') }
+        : undefined}
+    />
+  );
+};
 
 // ─── Image + Text ─────────────────────────────────────────────────────────────
 // Rendered as one card (image flush to its edge + text) on a plain section, so the block reads as a
