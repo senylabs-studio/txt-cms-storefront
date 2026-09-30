@@ -419,7 +419,8 @@
     "noFeaturedProducts": "No featured products configured.",
     "reviewsLoadError": "Failed to load the reviews.",
     "cancelAdd": "Cancel",
-    "new": "New"
+    "new": "New",
+    "seeAllOffers": "See all offers"
   },
   "filters": {
     "title": "Filters",

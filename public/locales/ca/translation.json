@@ -419,7 +419,8 @@
     "noFeaturedProducts": "No hi ha productes destacats configurats.",
     "reviewsLoadError": "No s'han pogut carregar les ressenyes.",
     "cancelAdd": "Cancel·lar",
-    "new": "Nou"
+    "new": "Nou",
+    "seeAllOffers": "Veure totes les ofertes"
   },
   "filters": {
     "title": "Filtres",

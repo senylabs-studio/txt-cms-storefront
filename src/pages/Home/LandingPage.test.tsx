@@ -140,3 +140,47 @@ describe('LandingPage ImageText card', () => {
     expect((card.closest('.home-imagetext-section')!.parentElement as HTMLElement).style.backgroundColor).toBe('');
   });
 });
+
+vi.mock('../../contexts/CartContext', () => ({ useCart: () => ({ addItem: vi.fn(), loading: false }) }));
+vi.mock('../../contexts/AuthGateContext', () => ({ useAuthGate: () => ({ requireAuth: vi.fn() }) }));
+vi.mock('../../contexts/ToastContext', () => ({ useToast: () => ({ showToast: vi.fn() }) }));
+
+describe('LandingPage featured products in offers mode', () => {
+  const variant = { id: 7, name: 'Cretona azul', price: 8, originalPrice: 10, availableStock: 3 };
+  const offersBlock = (config: Partial<Extract<StorefrontHomeBlock, { type: 'FeaturedProducts' }>['config']>): StorefrontHomeBlock => ({
+    id: 1, title: 'Ofertas', type: 'FeaturedProducts', isActive: true, sortOrder: 0,
+    config: { title: 'Ofertas', source: 'offers', variants: [variant], offersUrl: '/ofertas', ...config },
+  });
+
+  it('links to the Ofertas page under the cards, with the default text', async () => {
+    getHomeBlocks.mockResolvedValue([offersBlock({})]);
+    renderPage();
+
+    const link = await screen.findByText('product.seeAllOffers');
+    expect(link).toHaveAttribute('href', '/ofertas');
+  });
+
+  it('uses the link text written in the CMS', async () => {
+    getHomeBlocks.mockResolvedValue([offersBlock({ buttonText: 'Todas las rebajas' })]);
+    renderPage();
+
+    expect(await screen.findByText('Todas las rebajas')).toHaveAttribute('href', '/ofertas');
+  });
+
+  it('shows neither cards nor link when nothing is on sale', async () => {
+    getHomeBlocks.mockResolvedValue([offersBlock({ variants: [] }), { id: 2, title: 'x', type: 'ImageText', isActive: true, sortOrder: 1, config: { title: 'Después' } }]);
+    renderPage();
+
+    await screen.findByText('Después');
+    expect(screen.queryByText('Ofertas')).toBeNull();
+    expect(screen.queryByText('product.seeAllOffers')).toBeNull();
+  });
+
+  it('has no link while the Ofertas page is hidden (no offersUrl)', async () => {
+    getHomeBlocks.mockResolvedValue([offersBlock({ offersUrl: null })]);
+    renderPage();
+
+    await screen.findByText('Ofertas');
+    expect(screen.queryByText('product.seeAllOffers')).toBeNull();
+  });
+});

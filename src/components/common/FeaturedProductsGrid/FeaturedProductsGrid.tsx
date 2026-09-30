@@ -42,13 +42,15 @@ interface Props {
   /** Defaults to 'center' when unset. */
   titleAlign?: 'left' | 'center' | 'right';
   titleColor?: string;
+  /** "See all" link under the cards (e.g. home offers block → Ofertas page). Only shown with cards. */
+  moreLink?: { to: string; label: string };
 }
 
 type Item = FeaturedProductItem & { _isVariant: boolean };
 
 /** Card grid for "featured products" blocks — shared by the Home landing page and
  *  content-page blocks, since both resolve to the same variants/products shape. */
-const FeaturedProductsGrid: React.FC<Props> = ({ title, variants = [], products = [], emptyMessage, titleAlign, titleColor }) => {
+const FeaturedProductsGrid: React.FC<Props> = ({ title, variants = [], products = [], emptyMessage, titleAlign, titleColor, moreLink }) => {
   const { t } = useTranslation();
   const { addItem, loading: cartLoading } = useCart();
   const { requireAuth } = useAuthGate();
@@ -140,6 +142,11 @@ const FeaturedProductsGrid: React.FC<Props> = ({ title, variants = [], products 
           );
         })}
       </Row>
+      {moreLink && (
+        <div className="text-center mt-4">
+          <Link to={moreLink.to} className="btn btn-outline-primary">{moreLink.label}</Link>
+        </div>
+      )}
     </Container>
   );
 };
