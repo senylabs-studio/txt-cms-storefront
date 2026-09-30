@@ -18,22 +18,28 @@ const variant = (over: Partial<StorefrontVariant>): StorefrontVariant => ({
   productId: 1, productName: 'Cretona lisa', productSlug: 'cretona', minQuantity: 0.5, quantityStep: 0.5, ...over,
 } as StorefrontVariant);
 
-const nameLine = () => screen.getByRole('heading').textContent;
+const title = () => screen.getByRole('heading').textContent;
+const productLabel = (container: HTMLElement) => container.querySelector('.product-card-product')!.textContent;
 
-// The card's name line is what tells sibling variants apart in the catalog.
-describe('VariantCard name line', () => {
-  it('shows the type value when the variant is named like its product', () => {
-    render(<MemoryRouter><VariantCard variant={variant({ typeValue: 'Blanco', productTypeName: 'Color' })} /></MemoryRouter>);
-    expect(nameLine()).toBe('Cretona lisa · Blanco');
-  });
-
-  it("shows the variant's own name, and the value only when the name doesn't already say it", () => {
-    render(<MemoryRouter><VariantCard variant={variant({ productName: 'Coralina Estampada', name: 'Coralina Flanagan Bleu', typeValue: 'Bleu' })} /></MemoryRouter>);
-    expect(nameLine()).toBe('Coralina Estampada · Coralina Flanagan Bleu');
-  });
-
-  it('no longer shows the type name (COLOR, REFERENCIA)', () => {
-    render(<MemoryRouter><VariantCard variant={variant({ typeValue: 'Blanco', productTypeName: 'Color' })} /></MemoryRouter>);
+// The card's title is what tells sibling variants apart in the catalog; the product's name goes
+// small above it, where the type's name (COLOR, REFERENCIA) used to be.
+describe('VariantCard title', () => {
+  it("is the variant's type value, with the product name above", () => {
+    const { container } = render(<MemoryRouter><VariantCard variant={variant({ typeValue: 'Blanco', productTypeName: 'Color' })} /></MemoryRouter>);
+    expect(title()).toBe('Blanco');
+    expect(productLabel(container)).toBe('Cretona lisa');
     expect(screen.queryByText('Color')).toBeNull();
+  });
+
+  it("is the variant's own name when its type's values are hidden (Referencia)", () => {
+    const { container } = render(<MemoryRouter><VariantCard variant={variant({ productName: 'Coralina Estampada', name: 'Coralina Flanagan Bleu Jaune' })} /></MemoryRouter>);
+    expect(title()).toBe('Coralina Flanagan Bleu Jaune');
+    expect(productLabel(container)).toBe('Coralina Estampada');
+  });
+
+  it("doesn't repeat the product name when that's all there is", () => {
+    const { container } = render(<MemoryRouter><VariantCard variant={variant({})} /></MemoryRouter>);
+    expect(title()).toBe('Cretona lisa');
+    expect(productLabel(container)?.trim()).toBe('');
   });
 });

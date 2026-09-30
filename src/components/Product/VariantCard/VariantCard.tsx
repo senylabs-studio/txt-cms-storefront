@@ -31,13 +31,13 @@ const VariantCard: React.FC<Props> = ({ variant }) => {
 
   const outOfStock = variant.availableStock <= 0;
 
-  // What tells this variant apart from its siblings: its own name when it differs from the
-  // product's, and its type value ("Blanco") unless the name already says it. Variants named like
-  // their product (Cretona lisa · Cretona lisa) used to show nothing that told them apart. The
-  // type's name ("COLOR", "REFERENCIA") said nothing to shoppers and is no longer shown.
-  const ownName = variant.name !== variant.productName ? variant.name : '';
-  const typeValue = variant.typeValue && !ownName.toLowerCase().includes(variant.typeValue.toLowerCase()) ? variant.typeValue : '';
-  const detail = [ownName, typeValue].filter(Boolean).join(' · ');
+  // The title is what tells this variant apart from its siblings — its type value ("Blanco"),
+  // or, for a type whose values are hidden from shoppers (Referencia), its own name — with the
+  // product's name small above it, where the type's name ("COLOR", "REFERENCIA", meaningless to
+  // shoppers) used to be. Variants named like their product (Cretona lisa) used to show nothing
+  // that told them apart.
+  const title = variant.typeValue || variant.name || variant.productName;
+  const productLabel = title === variant.productName ? '\u00a0' : variant.productName; // keeps names aligned across a grid
   const { hasGroupDiscount, hasDiscount } = getDiscountInfo(variant.price, variant.originalPrice, variant.discountPercent);
 
   const handleOpenQty = async () => {
@@ -92,11 +92,9 @@ const VariantCard: React.FC<Props> = ({ variant }) => {
       </div>
 
       <Card.Body className="d-flex flex-column">
+        <div className="product-card-product">{productLabel}</div>
         <Card.Title as="h6" className="product-card-name">
-          <Link to={`/variant/${variant.id}`}>
-            {variant.productName}
-            {detail && <span className="text-muted fw-normal"> · {detail}</span>}
-          </Link>
+          <Link to={`/variant/${variant.id}`}>{title}</Link>
         </Card.Title>
         {(variant.width && variant.width > 0 || variant.composition) && (
           <div className="product-card-meta text-muted">
