@@ -30,6 +30,14 @@ const VariantCard: React.FC<Props> = ({ variant }) => {
   const [error, setError] = useState('');
 
   const outOfStock = variant.availableStock <= 0;
+
+  // The title is what tells this variant apart from its siblings — its type value ("Blanco"),
+  // or, for a type whose values are hidden from shoppers (Referencia), its own name — with the
+  // product's name small above it, where the type's name ("COLOR", "REFERENCIA", meaningless to
+  // shoppers) used to be. Variants named like their product (Cretona lisa) used to show nothing
+  // that told them apart.
+  const title = variant.typeValue || variant.name || variant.productName;
+  const productLabel = title === variant.productName ? '\u00a0' : variant.productName; // keeps names aligned across a grid
   const { hasGroupDiscount, hasDiscount } = getDiscountInfo(variant.price, variant.originalPrice, variant.discountPercent);
 
   const handleOpenQty = async () => {
@@ -84,16 +92,9 @@ const VariantCard: React.FC<Props> = ({ variant }) => {
       </div>
 
       <Card.Body className="d-flex flex-column">
-        {/* Both are omitted for a type whose values are hidden from customers (e.g. Referencia);
-            keep the line anyway so names stay aligned across a grid. */}
-        <div className="product-card-type">{variant.productTypeName ?? variant.typeValue ?? '\u00a0'}</div>
+        <div className="product-card-product">{productLabel}</div>
         <Card.Title as="h6" className="product-card-name">
-          <Link to={`/variant/${variant.id}`}>
-            {variant.productName}
-            {variant.name !== variant.productName && (
-              <span className="text-muted fw-normal"> · {variant.name}</span>
-            )}
-          </Link>
+          <Link to={`/variant/${variant.id}`}>{title}</Link>
         </Card.Title>
         {(variant.width && variant.width > 0 || variant.composition) && (
           <div className="product-card-meta text-muted">

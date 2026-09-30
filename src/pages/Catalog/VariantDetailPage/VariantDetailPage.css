@@ -296,6 +296,10 @@
   margin-bottom: 20px;
 }
 
+.vdp-desc--below-images {
+  margin-top: 24px;
+}
+
 .vdp-desc-text {
   font-size: 0.9rem;
   color: #495057;

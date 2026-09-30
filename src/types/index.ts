@@ -249,6 +249,8 @@ export interface StorefrontPageItem {
   variantId: number;
   productId: number;
   name: string;
+  /** The parent product's name — the card shows "Product · variant". */
+  productName?: string;
   code: string;
   variantSlug: string;
   productSlug: string;
