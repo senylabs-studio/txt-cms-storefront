@@ -5,11 +5,11 @@
   border-radius: 10px;
   overflow: hidden;
   margin-bottom: 10px;
-  /* A4 portrait: fabric photos are A4 scans, which a square frame cropped by ~30% top and
-     bottom. As big as the column allows, but never taller than the screen (the width shrinks
-     to keep the shape, so the whole scan stays visible without scrolling). */
-  aspect-ratio: 210 / 297;
-  max-width: calc((100vh - 140px) * 210 / 297);
+  /* 2:3 portrait: fabric photos are A4 scans edited to 2:3, which a square frame cropped by a
+     third of their height. As big as the column allows, but never taller than the screen (the
+     width shrinks to keep the shape, so the whole photo stays visible without scrolling). */
+  aspect-ratio: 2 / 3;
+  max-width: calc((100vh - 140px) * 2 / 3);
   margin-inline: auto;
   display: flex;
   align-items: center;
@@ -126,7 +126,7 @@
 
 .vdp-thumb {
   width: 60px;
-  aspect-ratio: 210 / 297; /* same A4 shape as the main image */
+  aspect-ratio: 2 / 3; /* same shape as the main image */
   border-radius: 6px;
   overflow: hidden;
   cursor: pointer;
