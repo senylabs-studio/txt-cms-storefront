@@ -383,6 +383,16 @@ describe('PageBlockRenderer SubPages mosaic', () => {
   const renderSubPages = (config: Record<string, unknown>) =>
     render(<PageBlockRenderer blocks={[{ id: 1, type: 'SubPages', config, sortOrder: 0 } as StorefrontPageBlock]} pageDetail={pageDetail} />).container;
 
+  it('mosaic tiles use the small copy of the photo when there is one', () => {
+    const detail = { childPages: [
+      { id: 7, name: 'Minky', slug: 'minky', description: '', type: 'Category', imageUrl: 'minky.jpg', thumbnailUrl: 'minky.webp' },
+      { id: 8, name: 'PUL', slug: 'pul', description: '', type: 'Category', imageUrl: 'pul.jpg' },
+    ] } as unknown as StorefrontPageDetail;
+    const c = render(<PageBlockRenderer blocks={[{ id: 1, type: 'SubPages', config: { variant: 'mosaic' }, sortOrder: 0 } as StorefrontPageBlock]} pageDetail={detail} />).container;
+    const srcs = [...c.querySelectorAll('img.pbr-mosaic-img')].map(i => i.getAttribute('src'));
+    expect(srcs).toEqual(['minky.webp', 'pul.jpg']);
+  });
+
   it('mosaic uses the Columnas setting (3–6) on wide screens, default 6', () => {
     const cols = (config: Record<string, unknown>) => renderSubPages(config).querySelector<HTMLElement>('.pbr-mosaic')!;
     expect(cols({ variant: 'mosaic', columns: 4 }).style.getPropertyValue('--pbr-mosaic-cols')).toBe('4');

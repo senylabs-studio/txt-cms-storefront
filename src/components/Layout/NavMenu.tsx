@@ -22,15 +22,13 @@ const MegaPanel: React.FC<{ item: StorefrontMenuItem; onClose: () => void }> = (
   // Side image previews the subcategory under the pointer (Zalando-style), falling back to the
   // parent's own image. The last hovered child stays selected when the pointer leaves its link, so
   // the user can move across to the image and click it; hovering the section title resets it.
+  // Only the photo under the pointer is fetched, as its small copy: preloading every child's photo
+  // on open meant ~29 MB for Patchwork's 61 subcategories.
   const [previewId, setPreviewId] = useState<number | null>(null);
   const preview = children.find(c => c.id === previewId && c.imageUrl) ?? item;
   const previewHref = resolveHref(preview);
+  const previewSrc = preview.thumbnailUrl ?? preview.imageUrl;
   const hasAnyImage = !!item.imageUrl || children.some(c => c.imageUrl);
-
-  // Warm the browser cache so swapping images on hover doesn't flash an empty frame.
-  useEffect(() => {
-    children.forEach(c => { if (c.imageUrl) new Image().src = c.imageUrl; });
-  }, [children]);
 
   // Split children into columns of max ~6 items each
   const colSize = Math.ceil(children.length / Math.min(COLS, Math.ceil(children.length / 5) || 1));
@@ -94,12 +92,12 @@ const MegaPanel: React.FC<{ item: StorefrontMenuItem; onClose: () => void }> = (
               preview.imageUrl ? (
                 preview.externalUrl ? (
                   <a href={preview.externalUrl} target="_blank" rel="noopener noreferrer" className="mega-image-wrap" onClick={onClose}>
-                    <img src={preview.imageUrl} alt={preview.name} className="mega-image" />
+                    <img src={previewSrc} alt={preview.name} className="mega-image" decoding="async" />
                     <span className="mega-image-label">{t('nav.discoverMore')}</span>
                   </a>
                 ) : (
                   <Link to={previewHref} className="mega-image-wrap" onClick={onClose}>
-                    <img src={preview.imageUrl} alt={preview.name} className="mega-image" />
+                    <img src={previewSrc} alt={preview.name} className="mega-image" decoding="async" />
                     <span className="mega-image-label">{t('nav.discoverMore')}</span>
                   </Link>
                 )
