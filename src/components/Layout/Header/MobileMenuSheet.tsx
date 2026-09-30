@@ -6,7 +6,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { getMenu } from '../../../services/pageService';
 import { getLanguages, type StorefrontLanguage } from '../../../services/languageService';
 import type { StorefrontMenuItem } from '../../../types';
-import { pageUrl } from '../../../utils/pageUrl';
+import { pageUrl, offersClass } from '../../../utils/pageUrl';
 
 function resolveHref(item: StorefrontMenuItem): string {
   if (item.externalUrl) return item.externalUrl;
@@ -53,12 +53,12 @@ const MobileMenuSheet: React.FC<MobileMenuSheetProps> = ({ open, onClose }) => {
         <div className="mobile-menu-list">
           {items.map(item => (
             item.externalUrl ? (
-              <a key={item.id} href={item.externalUrl} target="_blank" rel="noopener noreferrer" className="mobile-menu-item" onClick={onClose}>
+              <a key={item.id} href={item.externalUrl} target="_blank" rel="noopener noreferrer" className={`mobile-menu-item${offersClass(item)}`} onClick={onClose}>
                 <span>{item.name}</span>
                 <FaChevronRight size={14} />
               </a>
             ) : (
-              <Link key={item.id} to={resolveHref(item)} className="mobile-menu-item" onClick={onClose}>
+              <Link key={item.id} to={resolveHref(item)} className={`mobile-menu-item${offersClass(item)}`} onClick={onClose}>
                 <span>{item.name}</span>
                 <FaChevronRight size={14} />
               </Link>

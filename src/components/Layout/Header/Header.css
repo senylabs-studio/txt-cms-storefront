@@ -366,6 +366,20 @@
   border-bottom-color: var(--brand-color);
 }
 
+/* Ofertas page link: bold red in the bar, the mega panel and the mobile sheet (hover included, so
+   it doesn't turn brand-colored like the rest). */
+.nav-menu-link.is-offers,
+.nav-menu-link.is-offers:hover,
+.nav-menu-item.is-active .nav-menu-link.is-offers,
+.mega-link.is-offers,
+.mega-link.is-offers:hover,
+.mobile-menu-item.is-offers,
+.mobile-menu-item.is-offers:hover {
+  color: var(--bs-danger);
+  font-weight: 700;
+}
+.mega-link.is-offers:hover { border-bottom-color: var(--bs-danger); }
+
 .mega-body {
   display: flex;
   align-items: flex-start;
