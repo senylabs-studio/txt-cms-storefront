@@ -7,6 +7,7 @@ import iconNoDryer  from '../../assets/careIcons/no-dryer.webp';
 import iconDryClean from '../../assets/careIcons/percloroetileno.png';
 import iconIron     from '../../assets/careIcons/iron-temperature.webp';
 import oekoTex     from '../../assets/careIcons/oeko-tex.png';
+import gots        from '../../assets/careIcons/gots.png';
 
 // eslint-disable-next-line react-refresh/only-export-components -- the label definitions live next to the component that renders them; dev-only HMR nicety
 export const CARE_LABEL_DEFS = [
@@ -16,6 +17,7 @@ export const CARE_LABEL_DEFS = [
   { bit: 8,  key: 'dryCleanP', tKey: 'careLabels.dryCleanP', icon: iconDryClean },
   { bit: 16, key: 'iron110',   tKey: 'careLabels.iron110',   icon: iconIron },
   { bit: 32, key: 'oekoTex',   tKey: 'careLabels.oekoTex',   icon: oekoTex },
+  { bit: 64, key: 'gots',      tKey: 'careLabels.gots',      icon: gots },
 ] as const;
 
 interface Props {

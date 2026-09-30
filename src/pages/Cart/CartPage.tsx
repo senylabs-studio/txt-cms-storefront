@@ -117,7 +117,7 @@ const CartPage: React.FC = () => {
                     <Row className="align-items-center">
                       <Col xs={3} sm={2}>
                         {item.thumbnailUrl
-                          ? <img src={item.thumbnailUrl} alt={item.productName} className="w-100 rounded" style={{ aspectRatio: '1', objectFit: 'cover' }} />
+                          ? <img src={item.thumbnailUrl} alt={item.productName} className="w-100 rounded" style={{ aspectRatio: '3 / 2', objectFit: 'cover' }} />
                           : <div className="bg-light rounded d-flex align-items-center justify-content-center" style={{ aspectRatio: '1', fontSize: 24 }}>📦</div>}
                       </Col>
                       <Col xs={9} sm={5}>

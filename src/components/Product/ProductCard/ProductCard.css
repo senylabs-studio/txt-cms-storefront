@@ -7,8 +7,9 @@
 .product-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,.1); transform: translateY(-2px); }
 
 .product-card-img-link { position: relative; display: block; }
-.product-card-img { height: 220px; object-fit: cover; width: 100%; }
-.product-card-placeholder { height: 220px; display: flex; align-items: center; justify-content: center; background: #f8f9fa; font-size: 48px; }
+/* Fabric photos are scanned at 3:2 (landscape): the frame has that shape, so they show whole. */
+.product-card-img { aspect-ratio: 3 / 2; height: auto; object-fit: cover; width: 100%; }
+.product-card-placeholder { aspect-ratio: 3 / 2; display: flex; align-items: center; justify-content: center; background: #f8f9fa; font-size: 48px; }
 
 .product-card-badges { position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
 .discount-badge { font-size: 10px; }

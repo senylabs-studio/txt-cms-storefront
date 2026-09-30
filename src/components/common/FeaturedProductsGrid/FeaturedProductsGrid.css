@@ -13,13 +13,13 @@
 
 .home-featured-img {
   width: 100%;
-  height: 160px;
+  aspect-ratio: 3 / 2; /* the fabric photos' own shape: they show whole */
   object-fit: cover;
   display: block;
 }
 
 .home-featured-placeholder {
-  height: 160px;
+  aspect-ratio: 3 / 2;
   display: flex;
   align-items: center;
   justify-content: center;

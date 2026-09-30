@@ -33,8 +33,14 @@ describe('CareLabels', () => {
   });
 
   it('ignores bits that do not correspond to a known care label', () => {
-    render(<CareLabels careLabels={1 + 64} />); // 64 isn't in CARE_LABEL_DEFS
+    render(<CareLabels careLabels={1 + 128} />); // 128 isn't in CARE_LABEL_DEFS
     expect(screen.getAllByRole('img')).toHaveLength(1);
+  });
+
+  it('shows the GOTS certification with its explanation', async () => {
+    render(<CareLabels careLabels={64} />);
+    fireEvent.focus(screen.getByRole('img'));
+    expect(await screen.findByText('careLabels.help.gots')).toBeInTheDocument();
   });
 
   it('explains the symbol in a tooltip on focus (tap on mobile)', async () => {
