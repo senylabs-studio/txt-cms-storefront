@@ -79,4 +79,32 @@ describe('NavMenu mega panel side image', () => {
     expect(a.getAttribute('target')).toBe('_blank');
     expect(a.getAttribute('rel')).toBe('noopener noreferrer');
   });
+
+  it('fetches only the hovered photo, as its thumbnail when there is one', async () => {
+    // Opening a panel used to preload every child's full-size photo (~29 MB for Patchwork).
+    const created = vi.fn();
+    const RealImage = window.Image;
+    window.Image = class extends RealImage { constructor() { super(); created(); } } as typeof Image;
+    try {
+      getMenu.mockResolvedValue([node({
+        id: 1, name: 'Tejidos', slug: 'tejidos', imageUrl: '/parent.jpg', thumbnailUrl: '/parent.webp',
+        children: [
+          node({ id: 11, name: 'Lino', slug: 'lino', imageUrl: '/lino.jpg', thumbnailUrl: '/lino.webp' }),
+          node({ id: 12, name: 'Seda', slug: 'seda', imageUrl: '/seda.jpg' }), // no thumbnail made yet
+        ],
+      })]);
+      render(<MemoryRouter><NavMenu /></MemoryRouter>);
+      await openPanel('Tejidos');
+
+      expect(created).not.toHaveBeenCalled();
+      expect(document.querySelectorAll('img')).toHaveLength(1);
+      expect(sideImage().getAttribute('src')).toBe('/parent.webp');
+      fireEvent.mouseEnter(screen.getByText('Lino').closest('li')!);
+      expect(sideImage().getAttribute('src')).toBe('/lino.webp');
+      fireEvent.mouseEnter(screen.getByText('Seda').closest('li')!);
+      expect(sideImage().getAttribute('src')).toBe('/seda.jpg');
+    } finally {
+      window.Image = RealImage;
+    }
+  });
 });

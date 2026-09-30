@@ -241,6 +241,8 @@ export interface StorefrontMenuItem {
   type: string;
   externalUrl?: string;
   imageUrl?: string;
+  /** Small WebP copy of imageUrl (absent for photos the backend hasn't made one for yet). */
+  thumbnailUrl?: string;
   order: number;
   children: StorefrontMenuItem[];
 }
@@ -550,6 +552,8 @@ export interface StorefrontChildPage {
   description: string;
   type: string;
   imageUrl?: string;
+  /** Small WebP copy of imageUrl (absent for photos the backend hasn't made one for yet). */
+  thumbnailUrl?: string;
 }
 
 export interface StorefrontPageDetail {

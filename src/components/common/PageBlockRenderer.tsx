@@ -457,7 +457,7 @@ const SubPagesBlock: React.FC<{ config: SubPagesBlockConfig; pageDetail?: Storef
       className={cols === 3 ? 'pbr-mosaic pbr-mosaic-3' : 'pbr-mosaic'}>
       {children.map(child => (
         <a key={child.id} href={pageUrl(child.type, child.slug)} className="pbr-mosaic-tile">
-          {child.imageUrl && <img src={child.imageUrl} alt="" className="pbr-mosaic-img" loading="lazy" />}
+          {child.imageUrl && <img src={child.thumbnailUrl ?? child.imageUrl} alt="" className="pbr-mosaic-img" loading="lazy" decoding="async" />}
           <span className="pbr-mosaic-shade" aria-hidden="true" />
           <span className="pbr-mosaic-text">
             <span className="pbr-mosaic-name">{child.name}</span>
