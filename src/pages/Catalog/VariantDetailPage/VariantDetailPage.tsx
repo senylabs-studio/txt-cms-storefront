@@ -237,6 +237,21 @@ const VariantDetailPage: React.FC = () => {
   const longDesc = desc.length > DESC_THRESHOLD;
   const displayDesc = longDesc && !descExpanded ? desc.slice(0, DESC_THRESHOLD) + '…' : desc;
 
+  // From tablet up it goes under the photos, in the space the 3:2 image leaves free, so the right
+  // column is price, cart, information and care. On phones the columns stack, and there it stays
+  // after the cart button — under the photos it would push the price and button down.
+  const descriptionBlock = (className: string) => desc && (
+    <div className={`vdp-desc ${className}`}>
+      <SectionTitle>{t('product.description')}</SectionTitle>
+      <p className="vdp-desc-text">{displayDesc}</p>
+      {longDesc && (
+        <button className="vdp-read-more" onClick={() => setDescExpanded(x => !x)}>
+          {descExpanded ? t('product.readLess') : t('product.readMore')}
+        </button>
+      )}
+    </div>
+  );
+
   return (
     <MainLayout>
       <Container className="py-4">
@@ -348,6 +363,8 @@ const VariantDetailPage: React.FC = () => {
                 {rulerActive ? t('product.measureHide') : t('product.measure')}
               </Button>
             )}
+
+            {descriptionBlock('vdp-desc--below-images d-none d-md-block')}
           </Col>
 
           {/* ── Info ── */}
@@ -429,18 +446,8 @@ const VariantDetailPage: React.FC = () => {
 
             {error && <Alert variant="danger" className="py-2 mb-3">{error}</Alert>}
 
-            {/* Description */}
-            {desc && (
-              <div className="vdp-desc">
-                <SectionTitle>{t('product.description')}</SectionTitle>
-                <p className="vdp-desc-text">{displayDesc}</p>
-                {longDesc && (
-                  <button className="vdp-read-more" onClick={() => setDescExpanded(x => !x)}>
-                    {descExpanded ? t('product.readLess') : t('product.readMore')}
-                  </button>
-                )}
-              </div>
-            )}
+            {/* Description: here only on phones — see descriptionBlock */}
+            {descriptionBlock('d-md-none')}
 
             {/* Information */}
             {(variant.width > 0 || variant.weight > 0 || compositionText || variant.fabricType || variant.fall || variant.texture) && (

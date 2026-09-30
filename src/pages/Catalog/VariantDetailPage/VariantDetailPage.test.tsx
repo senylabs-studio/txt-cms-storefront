@@ -327,3 +327,26 @@ describe('VariantDetailPage stale-response guard', () => {
     expect(screen.queryByText('product.editYourReview')).not.toBeInTheDocument();
   });
 });
+
+// From tablet up the description goes under the photos; on phones (columns stacked) it stays
+// after the cart button, or it would push the price and the button down.
+describe('VariantDetailPage description placement', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockAuth.isAuthenticated = true;
+    getProductReviews.mockResolvedValue(reviewsPage([]));
+    getMyReview.mockResolvedValue({ hasPurchased: false, review: null });
+  });
+
+  it('renders under the photos from tablet up and in the info column only on phones', async () => {
+    getVariantById.mockResolvedValue(variant({ description: 'Algodón suave de trama cerrada.' }));
+    renderPage();
+
+    const copies = await screen.findAllByText('Algodón suave de trama cerrada.');
+    expect(copies).toHaveLength(2);
+    const [underPhotos, inInfo] = copies.map(p => p.closest('.vdp-desc')!);
+    expect(underPhotos).toHaveClass('vdp-desc--below-images', 'd-none', 'd-md-block');
+    expect(underPhotos.parentElement!.querySelector('.vdp-img-container')).not.toBeNull();
+    expect(inInfo).toHaveClass('d-md-none');
+  });
+});
