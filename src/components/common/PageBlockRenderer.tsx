@@ -489,7 +489,7 @@ const ProductsBlock: React.FC<{ config: ProductsBlockConfig; pageDetail?: Storef
               thumbnailUrl: item.thumbnailUrl,
               typeValue: item.typeValue,
               productId: item.productId,
-              productName: item.name,
+              productName: item.productName || item.name,
               productSlug: item.productSlug,
               width: item.width,
               composition: item.composition,
