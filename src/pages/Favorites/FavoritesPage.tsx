@@ -12,6 +12,7 @@ import { useToast } from '../../contexts/ToastContext';
 import { getApiErrorMessage } from '../../utils/apiError';
 import './FavoritesPage.css';
 import PageLoader from '../../components/common/ScissorsLoader/PageLoader';
+import { variantCardTitle } from '../../utils/variantTitle';
 import { formatPrice } from '../../utils/pricing';
 
 const FavoritesPage: React.FC = () => {
@@ -108,8 +109,10 @@ const FavoritesPage: React.FC = () => {
                       {outOfStock && <div className="fav-card-outofstock">{t('product.outOfStock')}</div>}
                     </Link>
                     <div className="p-2 d-flex flex-column gap-1">
+                      {/* Variants read like the catalog cards: product name small, value as the title. */}
+                      {item.variant && <div className="fav-card-product">{variantCardTitle(item.variant).productLabel}</div>}
                       <div className="fav-card-name">
-                        <Link to={slug}>{entity.name}</Link>
+                        <Link to={slug}>{item.variant ? variantCardTitle(item.variant).title : entity.name}</Link>
                       </div>
                       <div className="d-flex align-items-baseline gap-1">
                         <span className="sf-price">{formatPrice(entity.price)}</span>

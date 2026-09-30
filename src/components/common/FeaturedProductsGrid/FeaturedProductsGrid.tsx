@@ -9,6 +9,7 @@ import { useToast } from '../../../contexts/ToastContext';
 import { getApiErrorMessage } from '../../../utils/apiError';
 import { getDiscountInfo, formatPrice } from '../../../utils/pricing';
 import NewBadge from '../NewBadge/NewBadge';
+import { variantCardTitle } from '../../../utils/variantTitle';
 import './FeaturedProductsGrid.css';
 
 /** Shape the backend resolves variantIds/productIds into server-side (see homeService.ts). */
@@ -24,6 +25,9 @@ export interface FeaturedProductItem {
   imageUrls?: string[];
   hasVariants?: boolean;
   isNew?: boolean;
+  /** Variants only: shown like the catalog cards (see variantCardTitle). */
+  productName?: string;
+  typeValue?: string;
 }
 
 interface Props {
@@ -112,7 +116,9 @@ const FeaturedProductsGrid: React.FC<Props> = ({ title, variants = [], products 
                   {outOfStock && <div className="home-featured-outofstock">{t('product.outOfStock')}</div>}
                 </Link>
                 <div className="p-2">
-                  <div className="home-featured-name"><Link to={slug}>{item.name}</Link></div>
+                  {/* Variants read like the catalog cards: product name small, value as the title. */}
+                  {item._isVariant && <div className="home-featured-product">{variantCardTitle(item).productLabel}</div>}
+                  <div className="home-featured-name"><Link to={slug}>{item._isVariant ? variantCardTitle(item).title : item.name}</Link></div>
                   <div className="d-flex align-items-baseline gap-1 mt-1">
                     <span className="sf-price">{formatPrice(item.price)}</span>
                     {hasDiscount && (
