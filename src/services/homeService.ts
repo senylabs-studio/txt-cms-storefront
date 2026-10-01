@@ -80,9 +80,9 @@ export interface HomeImageTextBlockConfig {
   decoration?: {
     /** Edge between photo and text cut like pinking shears. */
     pinking?: boolean;
-    /** The site icon, large and faint, in the corner of the text side. */
-    watermark?: boolean;
-    /** The eyebrow as a hanging cardboard tag. */
+    /** Scissors on a dashed "cut here" line along the bottom of the text side. */
+    cutLine?: boolean;
+    /** The eyebrow on a cardboard tag. */
     tag?: boolean;
   };
 }
