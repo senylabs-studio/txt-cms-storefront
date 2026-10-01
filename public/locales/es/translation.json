@@ -583,7 +583,6 @@
     "balanceExpires": "Válida hasta el {{date}}",
     "balanceNotUsable": "Esta tarjeta no se puede usar ahora (caducada, desactivada o sin saldo).",
     "balanceError": "No se ha podido consultar el saldo.",
-    "menuLink": "Tarjeta regalo",
     "edit": "Editar",
     "editTitle": "Editar tarjeta regalo",
     "editSave": "Guardar cambios",
