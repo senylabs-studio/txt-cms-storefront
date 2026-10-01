@@ -10,6 +10,11 @@ describe('pageUrl', () => {
     expect(pageUrl('Category', 'camisas')).toBe('/pages/camisas');
   });
 
+  it('routes the gift card menu entry to the gift card page whatever its slug', () => {
+    expect(pageUrl('GiftCards', 'tarjeta-regalo')).toBe('/tarjeta-regalo');
+    expect(pageUrl('GiftCards', 'regalos')).toBe('/tarjeta-regalo');
+  });
+
   it('routes every other page type to /:slug', () => {
     expect(pageUrl('Content', 'sobre-nosotros')).toBe('/sobre-nosotros');
     expect(pageUrl('PrivacyPolicy', 'privacidad')).toBe('/privacidad');
