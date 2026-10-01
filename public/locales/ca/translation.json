@@ -51,7 +51,16 @@
     "couponDiscount": "Cupó {{code}}",
     "couponApplyError": "No s'ha pogut aplicar el cupó.",
     "couponApplySuccess": "Cupó aplicat correctament.",
-    "recargoEquivalencia": "Recàrrec d'equivalència ({{percent}}%)"
+    "recargoEquivalencia": "Recàrrec d'equivalència ({{percent}}%)",
+    "giftCardTitle": "Tens una targeta regal?",
+    "giftCardPlaceholder": "Codi de la targeta",
+    "giftCardApply": "Fer servir",
+    "giftCardRemove": "Treure",
+    "giftCardApplied": "Targeta regal {{code}}",
+    "giftCardApplySuccess": "Targeta regal aplicada.",
+    "giftCardApplyError": "No s'ha pogut aplicar la targeta regal.",
+    "giftCardAvailable": "Saldo disponible: {{amount}}",
+    "amountDue": "A pagar"
   },
   "auth": {
     "login": {
@@ -189,7 +198,10 @@
     "orPayWith": "o paga amb",
     "paypalDeclined": "PayPal no ha acceptat aquest mètode de pagament. No s'ha fet cap càrrec: torna-ho a provar amb un altre.",
     "paypalUnconfirmed": "No hem pogut confirmar el teu pagament amb PayPal. Si s'ha completat, rebràs el correu de confirmació de la comanda d'aquí a uns minuts i el veuràs a Les meves comandes; no el tornis a pagar.",
-    "paypalError": "No s'ha pogut completar el pagament amb PayPal. No s'ha fet cap càrrec."
+    "paypalError": "No s'ha pogut completar el pagament amb PayPal. No s'ha fet cap càrrec.",
+    "giftCardDelivery": "Les targetes regal s'envien per correu en confirmar el pagament: no cal adreça d'enviament.",
+    "confirmWithGiftCard": "Confirmar la comanda",
+    "coveredByGiftCard": "La teva targeta regal cobreix tota la comanda: no has de pagar res més."
   },
   "checkoutSuccess": {
     "title": "Comanda rebuda!",
@@ -335,7 +347,14 @@
     "leaveReview": "Deixar una ressenya",
     "downloadError": "No s'ha pogut descarregar la factura.",
     "cancelSuccess": "Comanda cancel·lada correctament.",
-    "returnSuccess": "Sol·licitud de devolució enviada."
+    "returnSuccess": "Sol·licitud de devolució enviada.",
+    "giftCardPaid": "Pagat amb la targeta regal {{code}}",
+    "amountPaid": "Pagat amb el teu mètode de pagament",
+    "giftCardsBought": "Targetes regal",
+    "downloadLetter": "Descarregar la carta",
+    "letterError": "No s'ha pogut descarregar la carta.",
+    "cardBalance": "Saldo: {{amount}}",
+    "cardSentTo": "Enviada també a {{email}}"
   },
   "favorites": {
     "title": "Els meus favorits",
@@ -523,5 +542,53 @@
   },
   "imageRotator": {
     "goTo": "Veure la imatge {{n}} de {{total}}"
+  },
+  "giftCard": {
+    "lineName": "Targeta regal",
+    "lineFor": "Per a {{name}}",
+    "title": "Targeta regal",
+    "subtitle": "Regala roba, idees i projectes: tria l'import, escriu una dedicatòria i t'enviarem una carta a punt per imprimir.",
+    "amountLabel": "Import",
+    "amountHint": "Entre {{min}} i {{max}}, en salts de {{step}}.",
+    "decrease": "Restar import",
+    "increase": "Sumar import",
+    "recipientName": "Per a",
+    "recipientNamePlaceholder": "Nom de qui la rep",
+    "recipientEmail": "Correu del destinatari (opcional)",
+    "recipientEmailHint": "Si l'indiques, també li enviarem la carta directament. Si no, t'arribarà només a tu perquè la imprimeixis o la reenviïs.",
+    "senderName": "De part de",
+    "senderNamePlaceholder": "El teu nom",
+    "message": "Dedicatòria (opcional)",
+    "messagePlaceholder": "Per molts anys! Perquè et facis aquell vestit…",
+    "messageCounter": "{{count}}/500",
+    "addToCart": "Afegir a la cistella",
+    "added": "Targeta regal afegida a la cistella.",
+    "addError": "No s'ha pogut afegir la targeta regal.",
+    "loadError": "No s'ha pogut carregar la informació de les targetes regal.",
+    "unavailable": "Les targetes regal no estan disponibles en aquest moment.",
+    "separatePurchase": "Les targetes regal es compren per separat dels productes.",
+    "howItWorksTitle": "Com funciona",
+    "howItWorks1": "Tria l'import i personalitza la carta.",
+    "howItWorks2": "En pagar, t'enviem per correu la carta en PDF per imprimir o reenviar.",
+    "howItWorks3": "Qui la rebi pot gastar el saldo en una o diverses compres durant {{months}} mesos.",
+    "howItWorks3NoExpiry": "Qui la rebi pot gastar el saldo en una o diverses compres.",
+    "previewTitle": "Així quedarà la carta",
+    "previewFor": "Per a",
+    "previewFrom": "De part de",
+    "previewCode": "El codi es genera en pagar",
+    "balanceTitle": "Ja tens una targeta? Consulta'n el saldo",
+    "balancePlaceholder": "XXXX-XXXX-XXXX",
+    "balanceCheck": "Consultar",
+    "balanceResult": "Saldo disponible: {{amount}}",
+    "balanceExpires": "Vàlida fins al {{date}}",
+    "balanceNotUsable": "Aquesta targeta no es pot fer servir ara (caducada, desactivada o sense saldo).",
+    "balanceError": "No s'ha pogut consultar el saldo.",
+    "menuLink": "Targeta regal",
+    "edit": "Editar",
+    "editTitle": "Editar la targeta regal",
+    "editSave": "Desar els canvis",
+    "editSuccess": "Targeta regal actualitzada.",
+    "editError": "No s'ha pogut actualitzar la targeta regal.",
+    "editCancel": "Cancel·lar"
   }
 }

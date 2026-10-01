@@ -1,5 +1,5 @@
 import apiClient from '../apiClient';
-import type { Cart, CheckoutRequest, CheckoutResponse } from '../types';
+import type { AddGiftCardRequest, Cart, CheckoutRequest, CheckoutResponse } from '../types';
 
 export const getCart = async (): Promise<Cart> => {
   const res = await apiClient.get('/storefront/cart');
@@ -28,6 +28,26 @@ export const applyCoupon = async (code: string): Promise<Cart> => {
 
 export const removeCoupon = async (): Promise<Cart> => {
   const res = await apiClient.delete('/storefront/cart/coupon');
+  return res.data;
+};
+
+export const addGiftCardToCart = async (data: AddGiftCardRequest): Promise<Cart> => {
+  const res = await apiClient.post('/storefront/cart/gift-cards', data);
+  return res.data;
+};
+
+export const updateGiftCardInCart = async (itemId: number, data: AddGiftCardRequest): Promise<Cart> => {
+  const res = await apiClient.put(`/storefront/cart/gift-cards/${itemId}`, data);
+  return res.data;
+};
+
+export const applyGiftCard = async (code: string): Promise<Cart> => {
+  const res = await apiClient.post('/storefront/cart/gift-card', { code });
+  return res.data;
+};
+
+export const removeGiftCard = async (): Promise<Cart> => {
+  const res = await apiClient.delete('/storefront/cart/gift-card');
   return res.data;
 };
 

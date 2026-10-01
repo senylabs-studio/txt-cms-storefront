@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Button, Card, Alert, Form } from 'react-bootstrap';
-import { FaTrash, FaArrowRight, FaTag } from 'react-icons/fa';
+import { FaTrash, FaArrowRight, FaTag, FaGift } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
@@ -9,10 +9,13 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { getApiErrorMessage } from '../../utils/apiError';
 import { formatPrice } from '../../utils/pricing';
+import { cartItemName } from '../../utils/giftCard';
+import GiftCardEditModal from '../../components/Cart/GiftCardEditModal/GiftCardEditModal';
+import type { CartItem } from '../../types';
 
 const CartPage: React.FC = () => {
   const { t } = useTranslation();
-  const { cart, loading, fetchCart, updateItem, removeItem, applyCoupon, removeCoupon } = useCart();
+  const { cart, loading, fetchCart, updateItem, removeItem, applyCoupon, removeCoupon, applyGiftCard, removeGiftCard } = useCart();
   const { isAuthenticated } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
@@ -21,6 +24,31 @@ const CartPage: React.FC = () => {
   const [couponInput, setCouponInput] = useState('');
   const [couponError, setCouponError] = useState('');
   const [couponLoading, setCouponLoading] = useState(false);
+  const [giftCardInput, setGiftCardInput] = useState('');
+  const [giftCardError, setGiftCardError] = useState('');
+  const [giftCardLoading, setGiftCardLoading] = useState(false);
+  const [editingGiftCard, setEditingGiftCard] = useState<CartItem | null>(null);
+
+  const handleApplyGiftCard = async () => {
+    if (!giftCardInput.trim()) return;
+    setGiftCardError('');
+    setGiftCardLoading(true);
+    try {
+      await applyGiftCard(giftCardInput.trim());
+      setGiftCardInput('');
+      showToast('success', t('cart.giftCardApplySuccess'));
+    } catch (e) {
+      setGiftCardError(getApiErrorMessage(e, t('cart.giftCardApplyError')));
+    } finally {
+      setGiftCardLoading(false);
+    }
+  };
+
+  const handleRemoveGiftCard = async () => {
+    setGiftCardError('');
+    try { await removeGiftCard(); }
+    catch (e) { setGiftCardError(getApiErrorMessage(e, t('cart.giftCardApplyError'))); }
+  };
 
   const handleApplyCoupon = async () => {
     if (!couponInput.trim()) return;
@@ -118,8 +146,19 @@ const CartPage: React.FC = () => {
                       <Col xs={3} sm={2}>
                         {item.thumbnailUrl
                           ? <img src={item.thumbnailUrl} alt={item.productName} className="w-100 rounded" style={{ aspectRatio: '3 / 2', objectFit: 'cover' }} />
-                          : <div className="bg-light rounded d-flex align-items-center justify-content-center" style={{ aspectRatio: '1', fontSize: 24 }}>📦</div>}
+                          : <div className="bg-light rounded d-flex align-items-center justify-content-center" style={{ aspectRatio: '1', fontSize: 24 }}>{item.giftCard ? <FaGift className="text-primary" /> : '📦'}</div>}
                       </Col>
+                      {item.giftCard ? (
+                        <Col xs={9} sm={8}>
+                          <div className="fw-semibold">{cartItemName(item, t)}</div>
+                          <div className="text-muted small">{t('giftCard.lineFor', { name: item.giftCard.recipientName })}</div>
+                          {item.giftCard.message && <div className="small fst-italic text-truncate">“{item.giftCard.message}”</div>}
+                          <Button size="sm" variant="link" className="p-0 small" onClick={() => setEditingGiftCard(item)} disabled={loading}>
+                            {t('giftCard.edit')}
+                          </Button>
+                        </Col>
+                      ) : (
+                        <>
                       <Col xs={9} sm={5}>
                         <div className="fw-semibold">{item.productName}</div>
                         <div className="text-muted small">{item.productCode}</div>
@@ -148,6 +187,8 @@ const CartPage: React.FC = () => {
                           disabled={loading}
                         />
                       </Col>
+                        </>
+                      )}
                       <Col sm={2} className="text-end mt-2 mt-sm-0">
                         <div className="fw-bold">{formatPrice(item.subtotal)}</div>
                         <Button size="sm" variant="link" className="text-danger p-0" onClick={() => handleRemove(item.id)} disabled={loading}>
@@ -166,7 +207,7 @@ const CartPage: React.FC = () => {
                   <h5 className="fw-bold mb-3">{t('cart.summary')}</h5>
                   {cart!.items.map(item => (
                     <div key={item.id} className="d-flex justify-content-between small mb-1">
-                      <span className="text-muted">{item.productName} x{item.quantity}m</span>
+                      <span className="text-muted">{item.giftCard ? cartItemName(item, t) : `${item.productName} x${item.quantity}m`}</span>
                       <span>{formatPrice(item.subtotal)}</span>
                     </div>
                   ))}
@@ -193,7 +234,7 @@ const CartPage: React.FC = () => {
                   {cart!.couponError && (
                     <Alert variant="warning" className="py-2 small mb-2">{cart!.couponError}</Alert>
                   )}
-                  {cart!.couponCode ? (
+                  {cart!.isGiftCardPurchase ? null : cart!.couponCode ? (
                     <div className="d-flex justify-content-between align-items-center small mb-3">
                       <span><FaTag className="me-1" />{cart!.couponCode}</span>
                       <Button size="sm" variant="link" className="text-danger p-0" onClick={handleRemoveCoupon} disabled={loading}>
@@ -219,10 +260,56 @@ const CartPage: React.FC = () => {
                       {couponError && <div className="text-danger small mt-1">{couponError}</div>}
                     </div>
                   )}
-                  <div className="d-flex justify-content-between fw-bold fs-5 mb-3">
+                  {!cart!.isGiftCardPurchase && (
+                    <div className="mb-3">
+                      {cart!.giftCardError && <Alert variant="warning" className="py-2 small mb-2">{cart!.giftCardError}</Alert>}
+                      {cart!.giftCardCode ? (
+                        <div className="d-flex justify-content-between align-items-center small">
+                          <span><FaGift className="me-1" />{t('cart.giftCardApplied', { code: cart!.giftCardCode })}</span>
+                          <Button size="sm" variant="link" className="text-danger p-0" onClick={handleRemoveGiftCard} disabled={loading}>
+                            {t('cart.giftCardRemove')}
+                          </Button>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="small fw-semibold mb-1"><FaGift className="me-1" />{t('cart.giftCardTitle')}</div>
+                          <div className="d-flex gap-2">
+                            <Form.Control
+                              type="text"
+                              size="sm"
+                              placeholder={t('cart.giftCardPlaceholder')}
+                              aria-label={t('cart.giftCardPlaceholder')}
+                              value={giftCardInput}
+                              onChange={e => setGiftCardInput(e.target.value)}
+                              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleApplyGiftCard(); } }}
+                              disabled={giftCardLoading}
+                            />
+                            <Button size="sm" variant="outline-primary" onClick={handleApplyGiftCard} disabled={giftCardLoading || !giftCardInput.trim()}>
+                              {t('cart.giftCardApply')}
+                            </Button>
+                          </div>
+                          {giftCardError && <div className="text-danger small mt-1">{giftCardError}</div>}
+                        </>
+                      )}
+                    </div>
+                  )}
+                  <div className="d-flex justify-content-between fw-bold fs-5 mb-1">
                     <span>{t('cart.total')}</span>
                     <span>{formatPrice(cart!.total ?? 0)}</span>
                   </div>
+                  {cart!.giftCardAmount > 0 && (
+                    <>
+                      <div className="d-flex justify-content-between small text-success mb-1">
+                        <span>{t('cart.giftCardApplied', { code: cart!.giftCardCode })}</span>
+                        <span>−{formatPrice(cart!.giftCardAmount)}</span>
+                      </div>
+                      <div className="d-flex justify-content-between fw-bold mb-1">
+                        <span>{t('cart.amountDue')}</span>
+                        <span>{formatPrice(cart!.amountDue)}</span>
+                      </div>
+                    </>
+                  )}
+                  <div className="mb-3" />
                   <Button variant="primary" size="lg" className="w-100" onClick={() => navigate('/checkout')}>
                     {t('cart.checkout')} <FaArrowRight className="ms-1" />
                   </Button>
@@ -232,6 +319,11 @@ const CartPage: React.FC = () => {
           </Row>
         )}
       </Container>
+      <GiftCardEditModal
+        item={editingGiftCard}
+        onClose={() => setEditingGiftCard(null)}
+        onSaved={() => { setEditingGiftCard(null); showToast('success', t('giftCard.editSuccess')); }}
+      />
     </MainLayout>
   );
 };

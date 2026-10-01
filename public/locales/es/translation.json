@@ -51,7 +51,16 @@
     "couponDiscount": "Cupón {{code}}",
     "couponApplyError": "No se ha podido aplicar el cupón.",
     "couponApplySuccess": "Cupón aplicado correctamente.",
-    "recargoEquivalencia": "Recargo de equivalencia ({{percent}}%)"
+    "recargoEquivalencia": "Recargo de equivalencia ({{percent}}%)",
+    "giftCardTitle": "¿Tienes una tarjeta regalo?",
+    "giftCardPlaceholder": "Código de la tarjeta",
+    "giftCardApply": "Usar",
+    "giftCardRemove": "Quitar",
+    "giftCardApplied": "Tarjeta regalo {{code}}",
+    "giftCardApplySuccess": "Tarjeta regalo aplicada.",
+    "giftCardApplyError": "No se ha podido aplicar la tarjeta regalo.",
+    "giftCardAvailable": "Saldo disponible: {{amount}}",
+    "amountDue": "A pagar"
   },
   "auth": {
     "login": {
@@ -189,7 +198,10 @@
     "orPayWith": "o paga con",
     "paypalDeclined": "PayPal no ha aceptado ese método de pago. No se ha hecho ningún cargo: vuelve a intentarlo con otro.",
     "paypalUnconfirmed": "No hemos podido confirmar tu pago con PayPal. Si se ha completado, recibirás el email de confirmación del pedido en unos minutos y lo verás en Mis pedidos; no vuelvas a pagarlo.",
-    "paypalError": "No se ha podido completar el pago con PayPal. No se ha hecho ningún cargo."
+    "paypalError": "No se ha podido completar el pago con PayPal. No se ha hecho ningún cargo.",
+    "giftCardDelivery": "Las tarjetas regalo se envían por email al confirmar el pago: no hace falta dirección de envío.",
+    "confirmWithGiftCard": "Confirmar pedido",
+    "coveredByGiftCard": "Tu tarjeta regalo cubre todo el pedido: no tienes que pagar nada más."
   },
   "checkoutSuccess": {
     "title": "¡Pedido recibido!",
@@ -335,7 +347,14 @@
     "leaveReview": "Dejar una reseña",
     "downloadError": "No se pudo descargar la factura.",
     "cancelSuccess": "Pedido cancelado correctamente.",
-    "returnSuccess": "Solicitud de devolución enviada."
+    "returnSuccess": "Solicitud de devolución enviada.",
+    "giftCardPaid": "Pagado con tarjeta regalo {{code}}",
+    "amountPaid": "Pagado con tu método de pago",
+    "giftCardsBought": "Tarjetas regalo",
+    "downloadLetter": "Descargar carta",
+    "letterError": "No se ha podido descargar la carta.",
+    "cardBalance": "Saldo: {{amount}}",
+    "cardSentTo": "Enviada también a {{email}}"
   },
   "favorites": {
     "title": "Mis favoritos",
@@ -523,5 +542,53 @@
   },
   "imageRotator": {
     "goTo": "Ver imagen {{n}} de {{total}}"
+  },
+  "giftCard": {
+    "lineName": "Tarjeta regalo",
+    "lineFor": "Para {{name}}",
+    "title": "Tarjeta regalo",
+    "subtitle": "Regala tela, ideas y proyectos: elige el importe, escribe una dedicatoria y te enviaremos una carta lista para imprimir.",
+    "amountLabel": "Importe",
+    "amountHint": "Entre {{min}} y {{max}}, en saltos de {{step}}.",
+    "decrease": "Restar importe",
+    "increase": "Sumar importe",
+    "recipientName": "Para",
+    "recipientNamePlaceholder": "Nombre de quien la recibe",
+    "recipientEmail": "Email del destinatario (opcional)",
+    "recipientEmailHint": "Si lo indicas, también le enviaremos la carta directamente. Si no, te llegará solo a ti para que la imprimas o la reenvíes.",
+    "senderName": "De parte de",
+    "senderNamePlaceholder": "Tu nombre",
+    "message": "Dedicatoria (opcional)",
+    "messagePlaceholder": "¡Feliz cumpleaños! Para que te hagas ese vestido…",
+    "messageCounter": "{{count}}/500",
+    "addToCart": "Añadir al carrito",
+    "added": "Tarjeta regalo añadida al carrito.",
+    "addError": "No se ha podido añadir la tarjeta regalo.",
+    "loadError": "No se ha podido cargar la información de las tarjetas regalo.",
+    "unavailable": "Las tarjetas regalo no están disponibles en este momento.",
+    "separatePurchase": "Las tarjetas regalo se compran por separado de los productos.",
+    "howItWorksTitle": "Cómo funciona",
+    "howItWorks1": "Elige el importe y personaliza la carta.",
+    "howItWorks2": "Al pagar, te enviamos por email la carta en PDF para imprimir o reenviar.",
+    "howItWorks3": "Quien la reciba puede gastar el saldo en una o varias compras durante {{months}} meses.",
+    "howItWorks3NoExpiry": "Quien la reciba puede gastar el saldo en una o varias compras.",
+    "previewTitle": "Así quedará la carta",
+    "previewFor": "Para",
+    "previewFrom": "De parte de",
+    "previewCode": "El código se genera al pagar",
+    "balanceTitle": "¿Ya tienes una tarjeta? Consulta su saldo",
+    "balancePlaceholder": "XXXX-XXXX-XXXX",
+    "balanceCheck": "Consultar",
+    "balanceResult": "Saldo disponible: {{amount}}",
+    "balanceExpires": "Válida hasta el {{date}}",
+    "balanceNotUsable": "Esta tarjeta no se puede usar ahora (caducada, desactivada o sin saldo).",
+    "balanceError": "No se ha podido consultar el saldo.",
+    "menuLink": "Tarjeta regalo",
+    "edit": "Editar",
+    "editTitle": "Editar tarjeta regalo",
+    "editSave": "Guardar cambios",
+    "editSuccess": "Tarjeta regalo actualizada.",
+    "editError": "No se ha podido actualizar la tarjeta regalo.",
+    "editCancel": "Cancelar"
   }
 }

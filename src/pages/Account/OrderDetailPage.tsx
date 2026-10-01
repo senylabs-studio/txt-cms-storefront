@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Table, Badge, Button, Modal, Alert, Form } from 'react-bootstrap';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { FaArrowLeft, FaFileDownload, FaBan, FaUndo, FaStar } from 'react-icons/fa';
+import { FaArrowLeft, FaFileDownload, FaBan, FaUndo, FaStar, FaGift } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { getOrderDetail, downloadOrderInvoice, cancelOrder, requestReturn } from '../../services/profileService';
@@ -11,6 +11,7 @@ import { useToast } from '../../contexts/ToastContext';
 import { getApiErrorMessage } from '../../utils/apiError';
 import PageLoader from '../../components/common/ScissorsLoader/PageLoader';
 import { formatPrice } from '../../utils/pricing';
+import { downloadGiftCardLetter } from '../../services/giftCardService';
 
 const OrderDetailPage: React.FC = () => {
   const { t } = useTranslation();
@@ -28,6 +29,7 @@ const OrderDetailPage: React.FC = () => {
   const [returnReason, setReturnReason] = useState('');
   const [requestingReturn, setRequestingReturn] = useState(false);
   const [returnError, setReturnError] = useState('');
+  const [downloadingLetterId, setDownloadingLetterId] = useState<number | null>(null);
 
   const loadOrder = () => {
     if (!id) return;
@@ -56,10 +58,18 @@ const OrderDetailPage: React.FC = () => {
   if (loading) return <MainLayout><PageLoader /></MainLayout>;
   if (!order) return null;
 
-  const canDownloadInvoice = order.status !== 'PendingPayment' && order.status !== 'Cancelled';
+  // Gift card purchases carry no invoice (the order where the balance is spent is invoiced).
+  const canDownloadInvoice = order.status !== 'PendingPayment' && order.status !== 'Cancelled' && !order.isGiftCardPurchase;
   const canCancelOrder = order.status === 'PendingPayment' || order.status === 'Paid';
   const canRequestReturn = order.status === 'Delivered' && !order.returnRequestedAt;
   const canReview = order.status === 'Delivered';
+
+  const handleDownloadLetter = async (giftCardId: number, code: string) => {
+    setDownloadingLetterId(giftCardId);
+    try { await downloadGiftCardLetter(giftCardId, code); }
+    catch (err) { showToast('danger', getApiErrorMessage(err, t('orderDetail.letterError'))); }
+    finally { setDownloadingLetterId(null); }
+  };
 
   const handleDownloadInvoice = async () => {
     setDownloadingInvoice(true);
@@ -210,19 +220,36 @@ const OrderDetailPage: React.FC = () => {
                     <td>
                       {line.thumbnailUrl
                         ? <img src={line.thumbnailUrl} alt={line.productName} style={{ width: 54, height: 36, objectFit: 'cover', borderRadius: 6, border: '1px solid #e9ecef' }} />
-                        : <div style={{ width: 44, height: 44, background: '#f8f9fa', borderRadius: 6, border: '1px solid #e9ecef', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>📦</div>
+                        : <div style={{ width: 44, height: 44, background: '#f8f9fa', borderRadius: 6, border: '1px solid #e9ecef', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>{line.giftCard ? <FaGift className="text-primary" /> : '📦'}</div>
                       }
                     </td>
                     <td>
+                      {line.giftCard ? (
+                        <>
+                          <div className="fw-semibold small">{t('giftCard.lineName')} · {t('giftCard.lineFor', { name: line.giftCard.recipientName })}</div>
+                          <div className="text-muted" style={{ fontSize: 11 }}>
+                            {line.giftCard.code} · {t('orderDetail.cardBalance', { amount: formatPrice(line.giftCard.balance) })}
+                            {line.giftCard.recipientEmail && <> · {t('orderDetail.cardSentTo', { email: line.giftCard.recipientEmail })}</>}
+                          </div>
+                          <Button variant="link" size="sm" className="p-0 mt-1" style={{ fontSize: 12 }}
+                            disabled={downloadingLetterId === line.giftCard.id}
+                            onClick={() => handleDownloadLetter(line.giftCard!.id, line.giftCard!.code)}>
+                            <FaFileDownload className="me-1" />{t('orderDetail.downloadLetter')}
+                          </Button>
+                        </>
+                      ) : (
+                        <>
                       <div className="fw-semibold small">{line.productName}</div>
                       <div className="text-muted" style={{ fontSize: 11 }}>{line.productCode}</div>
+                        </>
+                      )}
                       {canReview && line.variantId && (
                         <Link to={`/variant/${line.variantId}#reviews`} className="d-inline-flex align-items-center gap-1 mt-1" style={{ fontSize: 12 }}>
                           <FaStar className="text-warning" /> {t('orderDetail.leaveReview')}
                         </Link>
                       )}
                     </td>
-                    <td className="text-center">{line.quantity} m</td>
+                    <td className="text-center">{line.giftCard ? line.quantity : `${line.quantity} m`}</td>
                     <td className="text-end">{formatPrice(line.unitPrice)}</td>
                     <td className="text-end">{line.discountPercent > 0 ? `${line.discountPercent}%` : '—'}</td>
                     <td className="text-end fw-semibold">{formatPrice(line.subtotal)}</td>
@@ -230,16 +257,30 @@ const OrderDetailPage: React.FC = () => {
                 ))}
               </tbody>
               <tfoot>
-                <tr>
-                  <td colSpan={5} className="text-end text-muted">{t('orderDetail.shippingCost')}</td>
-                  <td className="text-end">
-                    {order.shippingCost > 0 ? formatPrice(order.shippingCost) : t('orderDetail.free')}
-                  </td>
-                </tr>
+                {!order.isGiftCardPurchase && (
+                  <tr>
+                    <td colSpan={5} className="text-end text-muted">{t('orderDetail.shippingCost')}</td>
+                    <td className="text-end">
+                      {order.shippingCost > 0 ? formatPrice(order.shippingCost) : t('orderDetail.free')}
+                    </td>
+                  </tr>
+                )}
                 <tr>
                   <td colSpan={5} className="text-end fw-bold fs-5">{t('orderDetail.total')}</td>
                   <td className="text-end fw-bold fs-5">{formatPrice(order.total)}</td>
                 </tr>
+                {(order.giftCardAmount ?? 0) > 0 && (
+                  <>
+                    <tr>
+                      <td colSpan={5} className="text-end text-success small">{t('orderDetail.giftCardPaid', { code: order.giftCardCode })}</td>
+                      <td className="text-end text-success small">−{formatPrice(order.giftCardAmount)}</td>
+                    </tr>
+                    <tr>
+                      <td colSpan={5} className="text-end text-muted small">{t('orderDetail.amountPaid')}</td>
+                      <td className="text-end small">{formatPrice(order.total - (order.giftCardAmount ?? 0))}</td>
+                    </tr>
+                  </>
+                )}
               </tfoot>
             </Table>
           </Card.Body>

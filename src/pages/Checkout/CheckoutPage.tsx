@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Container, Row, Col, Form, Button, Card, Alert, Spinner, Badge } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FaTruck } from 'react-icons/fa';
+import { FaTruck, FaGift } from 'react-icons/fa';
 import MainLayout from '../../components/Layout/MainLayout';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -13,6 +13,7 @@ import { getApiErrorMessage } from '../../utils/apiError';
 import type { CustomerAddress, CheckoutResponse, CheckoutRequest } from '../../types';
 import PayPalCheckoutButton from './PayPalCheckoutButton';
 import { formatPrice } from '../../utils/pricing';
+import { cartItemName } from '../../utils/giftCard';
 
 const CheckoutPage: React.FC = () => {
   const { t } = useTranslation();
@@ -48,7 +49,7 @@ const CheckoutPage: React.FC = () => {
 
   // Fetch shipping rate whenever shipping address or cart changes
   useEffect(() => {
-    if (!shippingId || !cart?.items?.length) {
+    if (!shippingId || !cart?.items?.length || cart.isGiftCardPurchase) {
       setShippingRate(undefined);
       return;
     }
@@ -108,10 +109,18 @@ const CheckoutPage: React.FC = () => {
   const recargoRatio = netAfterDiscount > 0 ? (cart?.recargoEquivalenciaAmount ?? 0) / netAfterDiscount : 0;
   const estimatedRecargo = Math.round((netAfterDiscount + estimatedShipping) * recargoRatio * 100) / 100;
   const estimatedTotal = netAfterDiscount + estimatedShipping + estimatedRecargo;
+  // The gift card can also cover the shipping that's only known here: what it covers is the
+  // smaller of its free balance and the whole estimate (the server recomputes it exactly).
+  const giftCardCovers = cart?.giftCardCode ? Math.min(cart.giftCardAvailable, estimatedTotal) : 0;
+  const amountDue = Math.round((estimatedTotal - giftCardCovers) * 100) / 100;
+  const isGiftCardPurchase = cart?.isGiftCardPurchase ?? false;
+  const coveredByGiftCard = !!cart?.giftCardCode && amountDue <= 0;
+  // Gift cards are emailed: no address (and no shipping rate) needed to buy them.
+  const addressReady = isGiftCardPurchase || (!!shippingId && !shippingLoading && shippingRate !== null);
 
   // Same request for both payment routes (Redsys page / PayPal button).
   const buildCheckoutRequest = (): CheckoutRequest => ({
-    shippingAddressId: shippingId,
+    shippingAddressId: cart?.isGiftCardPurchase ? undefined : shippingId,
     billingAddressId: billingId,
     notes: notes || undefined,
     browserAcceptHeader: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -129,6 +138,11 @@ const CheckoutPage: React.FC = () => {
     setError('');
     try {
       const res = await checkout(buildCheckoutRequest());
+      // Paid entirely with the gift card: the order already exists, nothing to send to Redsys.
+      if (res.orderId) {
+        navigate('/checkout/success');
+        return;
+      }
       setRedsysData(res);
     } catch (e: unknown) {
       setError(getApiErrorMessage(e, t('checkout.initError')));
@@ -167,7 +181,12 @@ const CheckoutPage: React.FC = () => {
               <Card.Body>
                 <h5 className="fw-bold mb-3">{t('checkout.shippingBilling')}</h5>
 
-                {addressesError ? (
+                {isGiftCardPurchase ? (
+                  <Alert variant="info" className="d-flex gap-2 align-items-start">
+                    <FaGift className="mt-1 flex-shrink-0" />
+                    <span>{t('checkout.giftCardDelivery')}</span>
+                  </Alert>
+                ) : addressesError ? (
                   <Alert variant="danger">{addressesError}</Alert>
                 ) : addresses.length === 0 ? (
                   <Alert variant="info">
@@ -216,20 +235,23 @@ const CheckoutPage: React.FC = () => {
                   size="lg"
                   className="w-100"
                   onClick={handleProceedToPayment}
-                  disabled={loading || paypalBusy || !shippingId || shippingLoading || shippingRate === null}
+                  disabled={loading || paypalBusy || !addressReady}
                 >
                   {loading
                     ? <><Spinner size="sm" animation="border" className="me-2" />{t('checkout.processing')}</>
-                    : t('checkout.proceed')}
+                    : coveredByGiftCard ? t('checkout.confirmWithGiftCard') : t('checkout.proceed')}
                 </Button>
+                {coveredByGiftCard && <div className="small text-success mt-2">{t('checkout.coveredByGiftCard')}</div>}
 
-                <PayPalCheckoutButton
-                  buildRequest={buildCheckoutRequest}
-                  disabled={loading || !shippingId || shippingLoading || shippingRate === null}
-                  onPaid={() => navigate('/checkout/success')}
-                  onError={message => setError(message)}
-                  onBusyChange={setPaypalBusy}
-                />
+                {!coveredByGiftCard && (
+                  <PayPalCheckoutButton
+                    buildRequest={buildCheckoutRequest}
+                    disabled={loading || !addressReady}
+                    onPaid={() => navigate('/checkout/success')}
+                    onError={message => setError(message)}
+                    onBusyChange={setPaypalBusy}
+                  />
+                )}
               </Card.Body>
             </Card>
           </Col>
@@ -241,7 +263,7 @@ const CheckoutPage: React.FC = () => {
                 <h5 className="fw-bold mb-3">{t('checkout.orderSummary')}</h5>
                 {cart.items.map(item => (
                   <div key={item.id} className="d-flex justify-content-between small mb-1">
-                    <span className="text-muted">{item.productName} x{item.quantity}m</span>
+                    <span className="text-muted">{item.giftCard ? `${cartItemName(item, t)} · ${t('giftCard.lineFor', { name: item.giftCard.recipientName })}` : `${item.productName} x${item.quantity}m`}</span>
                     <span>{formatPrice(item.subtotal)}</span>
                   </div>
                 ))}
@@ -257,7 +279,7 @@ const CheckoutPage: React.FC = () => {
                     <span>−{formatPrice(couponDiscount)}</span>
                   </div>
                 )}
-                <div className="d-flex justify-content-between small mb-2">
+                {!isGiftCardPurchase && <div className="d-flex justify-content-between small mb-2">
                   <span className="text-muted">{t('checkout.shipping')}</span>
                   <span>
                     {shippingLoading ? (
@@ -272,7 +294,7 @@ const CheckoutPage: React.FC = () => {
                       formatPrice(shippingRate.shippingCost)
                     )}
                   </span>
-                </div>
+                </div>}
 
                 {shippingRate && shippingRate.freeShippingThreshold && !shippingRate.isFree && (
                   <div className="small text-muted mb-2">
@@ -298,6 +320,18 @@ const CheckoutPage: React.FC = () => {
                   <span>{t('checkout.total')}</span>
                   <span>{formatPrice(estimatedTotal)}</span>
                 </div>
+                {giftCardCovers > 0 && (
+                  <>
+                    <div className="d-flex justify-content-between small text-success mt-1">
+                      <span><FaGift className="me-1" />{t('cart.giftCardApplied', { code: cart.giftCardCode })}</span>
+                      <span>−{formatPrice(giftCardCovers)}</span>
+                    </div>
+                    <div className="d-flex justify-content-between fw-bold mt-1">
+                      <span>{t('cart.amountDue')}</span>
+                      <span>{formatPrice(amountDue)}</span>
+                    </div>
+                  </>
+                )}
 
                 {shippingRate && (
                   <div className="small text-muted mt-1">{shippingRate.name}</div>

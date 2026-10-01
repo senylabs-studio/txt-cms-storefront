@@ -27,6 +27,8 @@ const { getOrderDetail, downloadOrderInvoice, cancelOrder, requestReturn } = vi.
   requestReturn: vi.fn(),
 }));
 vi.mock('../../services/profileService', () => ({ getOrderDetail, downloadOrderInvoice, cancelOrder, requestReturn }));
+const { downloadGiftCardLetter } = vi.hoisted(() => ({ downloadGiftCardLetter: vi.fn() }));
+vi.mock('../../services/giftCardService', () => ({ downloadGiftCardLetter }));
 
 const renderDetail = (id = '42') => render(
   <MemoryRouter initialEntries={[`/account/orders/${id}`]}>
@@ -247,5 +249,29 @@ describe('OrderDetailPage', () => {
 
     await screen.findByText('Tela azul');
     expect(screen.queryByText('orderDetail.leaveReview')).not.toBeInTheDocument();
+  });
+
+  it('a gift card purchase offers each letter for download and no invoice', async () => {
+    getOrderDetail.mockResolvedValue(order({
+      status: 'Delivered', total: 45, isGiftCardPurchase: true,
+      lines: [{ productName: 'Tarjeta regalo 45,00 €', productCode: 'TARJETA-REGALO', unitPrice: 45, discountPercent: 0, quantity: 1, subtotal: 45,
+        giftCard: { id: 7, code: 'ABCD-EFGH-JKLM', recipientName: 'Ana', balance: 45 } }],
+    }));
+    downloadGiftCardLetter.mockResolvedValue(undefined);
+    renderDetail();
+
+    await screen.findByText('orderDetail.downloadLetter');
+    expect(screen.queryByText('orderDetail.downloadInvoice')).toBeNull();
+    expect(screen.queryByText('orderDetail.shippingCost')).toBeNull();
+    fireEvent.click(screen.getByText('orderDetail.downloadLetter'));
+    await waitFor(() => expect(downloadGiftCardLetter).toHaveBeenCalledWith(7, 'ABCD-EFGH-JKLM'));
+  });
+
+  it('shows the part paid with a gift card', async () => {
+    getOrderDetail.mockResolvedValue(order({ total: 105, giftCardAmount: 30, giftCardCode: 'ABCD-EFGH-JKLM' }));
+    renderDetail();
+
+    await screen.findByText('orderDetail.giftCardPaid');
+    expect(screen.getByText('orderDetail.amountPaid')).toBeTruthy();
   });
 });

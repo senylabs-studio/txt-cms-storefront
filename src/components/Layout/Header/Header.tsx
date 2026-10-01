@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Badge, Form, InputGroup, Button, NavDropdown } from 'react-bootstrap';
-import { FaShoppingCart, FaUser, FaSearch, FaBars, FaHeart, FaPalette } from 'react-icons/fa';
+import { FaShoppingCart, FaUser, FaSearch, FaBars, FaHeart, FaPalette, FaGift } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -11,6 +11,7 @@ import NavMenu from '../NavMenu';
 import MobileMenuSheet from './MobileMenuSheet';
 import useDebounce from '../../../hooks/useDebounce';
 import useCollapsingHeader from '../../../hooks/useCollapsingHeader';
+import useGiftCardsEnabled from '../../../hooks/useGiftCardsEnabled';
 import { getVariantsPaged } from '../../../services/productService';
 import { getLanguages, type StorefrontLanguage } from '../../../services/languageService';
 import type { StorefrontVariant } from '../../../types';
@@ -25,6 +26,7 @@ const Header: React.FC = () => {
   const { itemCount, openDrawer } = useCart();
   const { count: favCount } = useFavorites();
   const { logoUrl, siteName } = useSiteSettings();
+  const giftCardsEnabled = useGiftCardsEnabled();
   const [search, setSearch] = useState('');
   const [scrolled, headerRef] = useCollapsingHeader<HTMLElement>();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -144,6 +146,14 @@ const Header: React.FC = () => {
             {labeled && <span className="header-icon-label">{t('board.title')}</span>}
           </Link>
         </>
+      )}
+      {giftCardsEnabled && (
+        <IconTooltip label={labeled ? undefined : t('giftCard.menuLink')} placement="bottom">
+          <Link to="/tarjeta-regalo" className="header-icon-btn text-decoration-none" aria-label={t('giftCard.menuLink')}>
+            <FaGift size={20} />
+            {labeled && <span className="header-icon-label">{t('giftCard.menuLink')}</span>}
+          </Link>
+        </IconTooltip>
       )}
       <button className="header-icon-btn" onClick={openDrawer} aria-label={t('header.cart')}>
         <FaShoppingCart size={20} />

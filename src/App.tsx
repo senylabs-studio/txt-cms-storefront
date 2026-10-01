@@ -20,6 +20,7 @@ import ProductDetailPage from './pages/Catalog/ProductDetailPage';
 import VariantDetailPage from './pages/Catalog/VariantDetailPage/VariantDetailPage';
 import PageCatalogPage from './pages/Catalog/PageCatalogPage/PageCatalogPage';
 import CartPage from './pages/Cart/CartPage';
+import GiftCardPage from './pages/GiftCard/GiftCardPage';
 import CheckoutPage from './pages/Checkout/CheckoutPage';
 import CheckoutSuccessPage from './pages/Checkout/CheckoutSuccessPage';
 import CheckoutErrorPage from './pages/Checkout/CheckoutErrorPage';
@@ -57,6 +58,7 @@ function App() {
               <Route path="/product/:slug" element={<ProductDetailPage />} />
               <Route path="/variant/:id" element={<VariantDetailPage />} />
               <Route path="/cart" element={<CartPage />} />
+              <Route path="/tarjeta-regalo" element={<GiftCardPage />} />
               <Route path="/pages/:slug" element={<PageCatalogPage />} />
               <Route path="/:slug" element={<PageCatalogPage />} />
               <Route path="/login" element={<LoginPage />} />

@@ -1,6 +1,9 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import type { Cart } from '../types';
-import { getCart, addToCart, updateCartItem, removeCartItem, applyCoupon as applyCouponRequest, removeCoupon as removeCouponRequest } from '../services/cartService';
+import type { AddGiftCardRequest, Cart } from '../types';
+import {
+  getCart, addToCart, updateCartItem, removeCartItem, applyCoupon as applyCouponRequest, removeCoupon as removeCouponRequest,
+  addGiftCardToCart, updateGiftCardInCart, applyGiftCard as applyGiftCardRequest, removeGiftCard as removeGiftCardRequest,
+} from '../services/cartService';
 import { useAuth } from './AuthContext';
 
 interface CartContextType {
@@ -15,6 +18,10 @@ interface CartContextType {
   removeItem: (itemId: number) => Promise<void>;
   applyCoupon: (code: string) => Promise<void>;
   removeCoupon: () => Promise<void>;
+  addGiftCard: (data: AddGiftCardRequest) => Promise<void>;
+  updateGiftCard: (itemId: number, data: AddGiftCardRequest) => Promise<void>;
+  applyGiftCard: (code: string) => Promise<void>;
+  removeGiftCard: () => Promise<void>;
   itemCount: number;
 }
 
@@ -99,6 +106,22 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Every cart mutation follows the same shape: call the API, take the cart it returns.
+  const run = async (request: () => Promise<Cart>, openAfter = false) => {
+    setLoading(true);
+    try {
+      setCart(await request());
+      if (openAfter) setDrawerOpen(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const addGiftCard = (data: AddGiftCardRequest) => run(() => addGiftCardToCart(data), true);
+  const updateGiftCard = (itemId: number, data: AddGiftCardRequest) => run(() => updateGiftCardInCart(itemId, data));
+  const applyGiftCard = (code: string) => run(() => applyGiftCardRequest(code));
+  const removeGiftCard = () => run(removeGiftCardRequest);
+
   const itemCount = cart?.items.length ?? 0;
 
   return (
@@ -106,7 +129,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       cart, loading, drawerOpen,
       openDrawer: () => setDrawerOpen(true),
       closeDrawer: () => setDrawerOpen(false),
-      fetchCart, addItem, updateItem, removeItem, applyCoupon, removeCoupon, itemCount
+      fetchCart, addItem, updateItem, removeItem, applyCoupon, removeCoupon, addGiftCard, updateGiftCard, applyGiftCard, removeGiftCard, itemCount
     }}>
       {children}
     </CartContext.Provider>

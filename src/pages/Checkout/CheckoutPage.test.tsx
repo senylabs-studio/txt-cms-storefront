@@ -43,7 +43,7 @@ vi.mock('./PayPalCheckoutButton', () => ({ default: () => null }));
 const cartWithItems = (): Cart => ({
   id: 1,
   expiresAt: '2099-01-01',
-  discountPercent: 0, couponDiscountAmount: 0, recargoEquivalenciaPercent: 0, recargoEquivalenciaAmount: 0,
+  discountPercent: 0, couponDiscountAmount: 0, recargoEquivalenciaPercent: 0, recargoEquivalenciaAmount: 0, isGiftCardPurchase: false, giftCardAvailable: 0, giftCardAmount: 0, amountDue: 0,
   total: 20,
   items: [
     { id: 1, productName: 'Tela azul', productCode: 'TA1', originalUnitPrice: 10, unitPrice: 10, quantity: 2, subtotal: 20, availableStock: 5, minQuantity: 0.3, quantityStep: 0.05 },
@@ -75,6 +75,7 @@ const checkoutResponse: CheckoutResponse = {
   shippingCost: 0,
   couponDiscountAmount: 0,
   recargoEquivalenciaAmount: 0,
+  giftCardAmount: 0,
 };
 
 describe('CheckoutPage', () => {
@@ -94,14 +95,14 @@ describe('CheckoutPage', () => {
   });
 
   it('shows an empty-cart message and no redsys form when the cart has no items', () => {
-    mockCart.cart = { id: 1, expiresAt: '2099-01-01', discountPercent: 0, couponDiscountAmount: 0, recargoEquivalenciaPercent: 0, recargoEquivalenciaAmount: 0, total: 0, items: [] };
+    mockCart.cart = { id: 1, expiresAt: '2099-01-01', discountPercent: 0, couponDiscountAmount: 0, recargoEquivalenciaPercent: 0, recargoEquivalenciaAmount: 0, isGiftCardPurchase: false, giftCardAvailable: 0, giftCardAmount: 0, amountDue: 0, total: 0, items: [] };
     render(<CheckoutPage />);
     expect(screen.getByText('checkout.cartEmpty')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'checkout.proceed' })).not.toBeInTheDocument();
   });
 
   it('navigates to /catalog from the empty-cart state', () => {
-    mockCart.cart = { id: 1, expiresAt: '2099-01-01', discountPercent: 0, couponDiscountAmount: 0, recargoEquivalenciaPercent: 0, recargoEquivalenciaAmount: 0, total: 0, items: [] };
+    mockCart.cart = { id: 1, expiresAt: '2099-01-01', discountPercent: 0, couponDiscountAmount: 0, recargoEquivalenciaPercent: 0, recargoEquivalenciaAmount: 0, isGiftCardPurchase: false, giftCardAvailable: 0, giftCardAmount: 0, amountDue: 0, total: 0, items: [] };
     render(<CheckoutPage />);
     fireEvent.click(screen.getByText('cart.browseCatalog'));
     expect(navigate).toHaveBeenCalledWith('/catalog');
@@ -173,6 +174,7 @@ describe('CheckoutPage', () => {
     mockCart.cart = {
       id: 1, expiresAt: '2099-01-01', discountPercent: 0, couponDiscountAmount: 0,
       recargoEquivalenciaPercent: 5.2, recargoEquivalenciaAmount: 10, // 10% of the €100 subtotal, for a clean expected number
+      isGiftCardPurchase: false, giftCardAvailable: 0, giftCardAmount: 0, amountDue: 110,
       total: 110,
       items: [
         { id: 1, productName: 'Tela azul', productCode: 'TA1', originalUnitPrice: 100, unitPrice: 100, quantity: 1, subtotal: 100, availableStock: 5, minQuantity: 0.3, quantityStep: 0.05 },
@@ -236,5 +238,46 @@ describe('CheckoutPage', () => {
     const proceedBtn = await screen.findByRole('button', { name: 'checkout.proceed' });
     expect(proceedBtn).toBeDisabled();
     expect(screen.getByText('checkout.noShippingRate')).toBeInTheDocument();
+  });
+
+  it('buys gift cards without an address or shipping', async () => {
+    getProfile.mockResolvedValue({ ...profile(), addresses: [] });
+    mockCart.cart = {
+      ...cartWithItems(), isGiftCardPurchase: true, total: 45, amountDue: 45,
+      items: [{ id: 2, productName: 'Tarjeta regalo', productCode: 'TARJETA-REGALO', originalUnitPrice: 45, unitPrice: 45, quantity: 1, subtotal: 45, availableStock: 1, minQuantity: 1, quantityStep: 1,
+        giftCard: { recipientName: 'Ana', senderName: 'Luis' } }],
+    };
+    checkout.mockResolvedValue(checkoutResponse);
+    render(<CheckoutPage />);
+
+    expect(await screen.findByText('checkout.giftCardDelivery')).toBeInTheDocument();
+    expect(screen.queryByText('checkout.noAddresses')).not.toBeInTheDocument();
+    expect(screen.queryByText('checkout.shipping')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'checkout.proceed' }));
+
+    await waitFor(() => expect(checkout).toHaveBeenCalledWith(expect.objectContaining({ shippingAddressId: undefined })));
+    expect(getApplicableShippingRate).not.toHaveBeenCalled();
+  });
+
+  it('a gift card covering everything places the order without going to Redsys', async () => {
+    mockCart.cart = { ...cartWithItems(), giftCardCode: 'ABCD-EFGH-JKLM', giftCardAvailable: 200, giftCardAmount: 20, amountDue: 0 };
+    checkout.mockResolvedValue({ ...checkoutResponse, merchantParameters: '', amount: 0, giftCardAmount: 25, orderId: 9 });
+    render(<CheckoutPage />);
+
+    const confirm = await screen.findByRole('button', { name: 'checkout.confirmWithGiftCard' });
+    await waitFor(() => expect(confirm).not.toBeDisabled());
+    fireEvent.click(confirm);
+
+    await waitFor(() => expect(navigate).toHaveBeenCalledWith('/checkout/success'));
+    expect(HTMLFormElement.prototype.submit).not.toHaveBeenCalled();
+  });
+
+  it('a gift card covering part shows what is left to pay', async () => {
+    mockCart.cart = { ...cartWithItems(), giftCardCode: 'ABCD-EFGH-JKLM', giftCardAvailable: 10, giftCardAmount: 10, amountDue: 10 };
+    render(<CheckoutPage />);
+
+    // 20 + 5 shipping − 10 from the card
+    await waitFor(() => expect(screen.getByText('15,00 €')).toBeInTheDocument());
+    expect(screen.getByRole('button', { name: 'checkout.proceed' })).toBeInTheDocument();
   });
 });
