@@ -7,7 +7,10 @@ export function pageUrl(type: string, slug: string): string {
   return `/${slug}`;
 }
 
-/** Menu link modifier: the Ofertas page stands out (bold red) wherever it sits in the menu. */
-export function offersClass(item: { type: string }): string {
-  return item.type === 'Offers' ? ' is-offers' : '';
+/** Menu link modifier: Ofertas (bold red) and Tarjeta regalo (bold brand green) stand out
+ *  wherever they sit in the menu. */
+export function menuItemClass(item: { type: string }): string {
+  if (item.type === 'Offers') return ' is-offers';
+  if (item.type === 'GiftCards') return ' is-gift-cards';
+  return '';
 }

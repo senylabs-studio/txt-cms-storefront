@@ -141,13 +141,17 @@ const FeaturedProductsBlock: React.FC<{ config: HomeFeaturedProductsBlockConfig 
 // ─── Image + Text ─────────────────────────────────────────────────────────────
 // Rendered as one card (image flush to its edge + text) on a plain section, so the block reads as a
 // single piece between the surrounding blocks. Its backgroundColor tints the card, not the section
-// (see BlockRenderer); unset, it's a soft tint of the brand color.
+// (see BlockRenderer); unset, it's a soft tint of the brand color. The photo fills its half without
+// setting the height — the text does, so the card stays compact whatever the image's proportions.
 const ImageTextBlock: React.FC<{ config: HomeImageTextBlockConfig }> = ({ config }) => {
   const imageLeft = (config.imagePosition ?? 'left') === 'left';
   const align = config.textAlign ?? 'left';
   const textStyle: React.CSSProperties = { textAlign: align };
   if (config.textColor) textStyle.color = config.textColor;
-  const cardStyle: React.CSSProperties = config.backgroundColor ? { backgroundColor: config.backgroundColor } : {};
+  // --card-bg feeds the decorations (cut line, tag hole) so they follow the chosen background.
+  const cardStyle = (config.backgroundColor
+    ? { backgroundColor: config.backgroundColor, '--card-bg': config.backgroundColor }
+    : {}) as React.CSSProperties;
   const hasImage = !!config.imageUrl;
   const deco = config.decoration ?? {};
   const cardClass = [

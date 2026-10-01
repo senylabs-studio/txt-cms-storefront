@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getMenu } from '../../services/pageService';
 import type { StorefrontMenuItem } from '../../types';
-import { pageUrl, offersClass } from '../../utils/pageUrl';
+import { pageUrl, menuItemClass } from '../../utils/pageUrl';
+import MenuItemLabel from './MenuItemLabel';
 
 function resolveHref(item: StorefrontMenuItem): string {
   if (item.externalUrl) return item.externalUrl;
@@ -70,12 +71,12 @@ const MegaPanel: React.FC<{ item: StorefrontMenuItem; onClose: () => void }> = (
                             onFocus={() => setPreviewId(child.id)}
                           >
                             {childExt ? (
-                              <a href={child.externalUrl!} target="_blank" rel="noopener noreferrer" className={`mega-link${offersClass(child)}`} onClick={onClose}>
-                                {child.name}
+                              <a href={child.externalUrl!} target="_blank" rel="noopener noreferrer" className={`mega-link${menuItemClass(child)}`} onClick={onClose}>
+                                <MenuItemLabel item={child} />
                               </a>
                             ) : (
-                              <Link to={childHref} className={`mega-link${offersClass(child)}`} onClick={onClose}>
-                                {child.name}
+                              <Link to={childHref} className={`mega-link${menuItemClass(child)}`} onClick={onClose}>
+                                <MenuItemLabel item={child} />
                               </Link>
                             )}
                           </li>
@@ -176,12 +177,12 @@ const NavMenu: React.FC<NavMenuProps> = ({ leading, trailing }) => {
                 onMouseEnter={() => hasChildren ? handleEnter(item.id) : handleClose()}
               >
                 {isExt ? (
-                  <a href={item.externalUrl!} target="_blank" rel="noopener noreferrer" className={`nav-menu-link${offersClass(item)}`}>
-                    {item.name}
+                  <a href={item.externalUrl!} target="_blank" rel="noopener noreferrer" className={`nav-menu-link${menuItemClass(item)}`}>
+                    <MenuItemLabel item={item} />
                   </a>
                 ) : (
-                  <Link to={href} className={`nav-menu-link${offersClass(item)}`} onClick={handleClose}>
-                    {item.name}
+                  <Link to={href} className={`nav-menu-link${menuItemClass(item)}`} onClick={handleClose}>
+                    <MenuItemLabel item={item} />
                   </Link>
                 )}
                 {hasChildren && <span className="nav-menu-indicator" />}

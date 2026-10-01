@@ -123,3 +123,21 @@ describe('NavMenu Ofertas link', () => {
     expect(screen.getByText('Rebajas').className).toContain('is-offers');
   });
 });
+
+describe('NavMenu special entries', () => {
+  it('shows Ofertas and Tarjeta regalo with their icon, Tarjeta regalo marked to stand out in green', async () => {
+    getMenu.mockResolvedValue([
+      node({ id: 3, name: 'Ofertas', slug: 'ofertas', type: 'Offers' }),
+      node({ id: 5, name: 'Tarjeta regalo', slug: 'tarjeta-regalo', type: 'GiftCards' }),
+      node({ id: 4, name: 'Hogar', slug: 'hogar' }),
+    ]);
+    render(<MemoryRouter><NavMenu /></MemoryRouter>);
+
+    const gift = await screen.findByText('Tarjeta regalo');
+    expect(gift.className).toContain('is-gift-cards');
+    expect(gift).toHaveAttribute('href', '/tarjeta-regalo');
+    expect(gift.querySelector('svg.menu-item-icon')).not.toBeNull();
+    expect(screen.getByText('Ofertas').querySelector('svg.menu-item-icon')).not.toBeNull();
+    expect(screen.getByText('Hogar').querySelector('svg')).toBeNull();
+  });
+});

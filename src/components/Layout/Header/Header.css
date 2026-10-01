@@ -380,6 +380,26 @@
 }
 .mega-link.is-offers:hover { border-bottom-color: var(--bs-danger); }
 
+/* Tarjeta regalo link: bold, in the site's green (the darker text shade of the brand colour, the
+   same as prices — the bright brand green itself is too light to read as text on white). */
+.nav-menu-link.is-gift-cards,
+.nav-menu-link.is-gift-cards:hover,
+.nav-menu-item.is-active .nav-menu-link.is-gift-cards,
+.mega-link.is-gift-cards,
+.mega-link.is-gift-cards:hover,
+.mobile-menu-item.is-gift-cards,
+.mobile-menu-item.is-gift-cards:hover {
+  color: var(--brand-text-color);
+  font-weight: 700;
+}
+
+/* Icon in front of Ofertas / Tarjeta regalo; takes the link's colour. */
+.menu-item-icon {
+  margin-right: 0.35em;
+  vertical-align: -0.1em;
+  font-size: 0.95em;
+}
+
 .mega-body {
   display: flex;
   align-items: flex-start;
