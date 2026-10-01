@@ -11,7 +11,11 @@ const api = vi.hoisted(() => ({
 }));
 vi.mock('../../services/paypalService', () => api);
 
-// Stand-in for PayPal's SDK: buttons that drive the same callbacks PayPal's window would.
+// What createOrder threw, as PayPal's SDK received it.
+const sdk = vi.hoisted(() => ({ createError: undefined as unknown }));
+
+// Stand-in for PayPal's SDK: buttons that drive the same callbacks PayPal's window would. A
+// createOrder rejection reaches onError, as with the real SDK.
 type ButtonProps = {
   createOrder: () => Promise<{ orderId: string }>;
   onApprove: (data: { orderId: string }) => Promise<void>;
@@ -25,7 +29,11 @@ vi.mock('@paypal/react-paypal-js/sdk-v6', () => ({
     const [orderId, setOrderId] = React.useState('');
     return (
       <div>
-        <button disabled={props.disabled} onClick={async () => setOrderId((await props.createOrder().catch(() => ({ orderId: '' }))).orderId)}>create</button>
+        <button disabled={props.disabled} onClick={async () => setOrderId((await props.createOrder().catch(e => {
+          sdk.createError = e;
+          props.onError(e);
+          return { orderId: '' };
+        })).orderId)}>create</button>
         <button onClick={() => props.onApprove({ orderId })}>approve</button>
         <button onClick={() => props.onCancel()}>cancel</button>
       </div>
@@ -101,13 +109,44 @@ describe('PayPalCheckoutButton', () => {
     await waitFor(() => expect(api.cancelPayPalOrder).toHaveBeenCalledWith('PP-1'));
   });
 
-  it('shows the backend message when the order cannot be created', async () => {
+  // Regression test: the backend message was shown, then the same axios error was rethrown to
+  // PayPal's SDK — which either let it go unhandled (the global API-error toaster showed it a
+  // second time) or passed it to onError (which replaced it with the generic "PayPal error").
+  it('shows the backend message once when the order cannot be created', async () => {
     api.createPayPalOrder.mockRejectedValue({ isAxiosError: true, response: { data: { message: 'Stock insuficiente para: Lino' } } });
     const { onError } = setup();
 
     fireEvent.click(await screen.findByText('create'));
 
     await waitFor(() => expect(onError).toHaveBeenCalled());
+    expect(onError).toHaveBeenCalledTimes(1);
+    expect(onError).toHaveBeenCalledWith('Stock insuficiente para: Lino');
+    expect((sdk.createError as { isAxiosError?: boolean }).isAxiosError).toBeUndefined();
+  });
+
+  // Regression tests: leaving the checkout (route change) with PayPal's window still open never
+  // released the cart, so for 5 minutes any payment was refused as "pago en curso".
+  it('releases the cart when the checkout is left with an attempt open', async () => {
+    const { unmount } = render(<PayPalCheckoutButton buildRequest={() => ({ shippingAddressId: 7 })} disabled={false} onPaid={vi.fn()} onError={vi.fn()} />);
+    fireEvent.click(await screen.findByText('create'));
+    await waitFor(() => expect(api.createPayPalOrder).toHaveBeenCalled());
+
+    unmount();
+
+    expect(api.cancelPayPalOrder).toHaveBeenCalledWith('PP-1');
+  });
+
+  it('does not release the cart while the payment is being captured', async () => {
+    api.capturePayPalOrder.mockReturnValue(new Promise(() => {}));
+    const { unmount } = render(<PayPalCheckoutButton buildRequest={() => ({ shippingAddressId: 7 })} disabled={false} onPaid={vi.fn()} onError={vi.fn()} />);
+    fireEvent.click(await screen.findByText('create'));
+    await waitFor(() => expect(api.createPayPalOrder).toHaveBeenCalled());
+    fireEvent.click(screen.getByText('approve'));
+    await waitFor(() => expect(api.capturePayPalOrder).toHaveBeenCalled());
+
+    unmount();
+
+    expect(api.cancelPayPalOrder).not.toHaveBeenCalled();
   });
   // Regression tests: a capture call that got no answer (connection dropped, timeout, 5xx) showed
   // "payment error" although the server may already have captured and created the order. Capture
