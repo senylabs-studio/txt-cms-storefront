@@ -76,6 +76,15 @@ export interface HomeImageTextBlockConfig {
   backgroundColor?: string;
   textAlign?: 'left' | 'center' | 'right';
   textColor?: string;
+  /** Optional touches set in the CMS (same for every language). */
+  decoration?: {
+    /** Edge between photo and text cut like pinking shears. */
+    pinking?: boolean;
+    /** The site icon, large and faint, in the corner of the text side. */
+    watermark?: boolean;
+    /** The eyebrow as a hanging cardboard tag. */
+    tag?: boolean;
+  };
 }
 
 export interface HomeBlockConfigMap {

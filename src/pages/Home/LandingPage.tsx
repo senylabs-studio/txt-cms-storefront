@@ -142,22 +142,35 @@ const FeaturedProductsBlock: React.FC<{ config: HomeFeaturedProductsBlockConfig 
 // single piece between the surrounding blocks. Its backgroundColor tints the card, not the section
 // (see BlockRenderer); unset, it's a soft tint of the brand color.
 const ImageTextBlock: React.FC<{ config: HomeImageTextBlockConfig }> = ({ config }) => {
+  const { faviconUrl, logoUrl } = useSiteSettings();
   const imageLeft = (config.imagePosition ?? 'left') === 'left';
   const align = config.textAlign ?? 'left';
   const textStyle: React.CSSProperties = { textAlign: align };
   if (config.textColor) textStyle.color = config.textColor;
   const cardStyle: React.CSSProperties = config.backgroundColor ? { backgroundColor: config.backgroundColor } : {};
   const hasImage = !!config.imageUrl;
+  const deco = config.decoration ?? {};
+  // The watermark is the site's own icon (the shop's mannequin for Tejidos Pulido), else its logo.
+  const watermarkUrl = deco.watermark ? (faviconUrl || logoUrl) : '';
+  const cardClass = [
+    'home-imagetext-card',
+    hasImage ? '' : 'no-image',
+    imageLeft ? '' : 'image-right',
+    deco.pinking && hasImage ? 'deco-pinking' : '',
+  ].filter(Boolean).join(' ');
   return (
     <Container className="home-imagetext-section">
-      <div className={`home-imagetext-card${hasImage ? '' : ' no-image'}${imageLeft ? '' : ' image-right'}`} style={cardStyle}>
+      <div className={cardClass} style={cardStyle}>
         {hasImage && (
           <div className="home-imagetext-media">
             <img src={config.imageUrl} alt="" />
           </div>
         )}
         <div className={`home-imagetext-body align-${align}`} style={textStyle}>
-          {config.eyebrow && <p className="home-imagetext-eyebrow">{config.eyebrow}</p>}
+          {watermarkUrl && <span className="home-imagetext-watermark" aria-hidden="true" style={{ backgroundImage: `url("${watermarkUrl}")` }} />}
+          {config.eyebrow && (deco.tag
+            ? <p className="home-imagetext-eyebrow is-tag"><span>{config.eyebrow}</span></p>
+            : <p className="home-imagetext-eyebrow">{config.eyebrow}</p>)}
           {config.title && <h2 className="home-imagetext-title">{config.title}</h2>}
           {config.text && <p className="home-imagetext-text">{config.text}</p>}
           {config.buttonText && config.buttonUrl && (
