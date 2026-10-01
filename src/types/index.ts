@@ -115,6 +115,15 @@ export interface CartItem {
   availableStock: number;
   minQuantity: number;
   quantityStep: number;
+  /** Set when the line is a gift card being bought (no product, quantity 1). */
+  giftCard?: CartGiftCard;
+}
+
+export interface CartGiftCard {
+  recipientName: string;
+  recipientEmail?: string;
+  senderName: string;
+  message?: string;
 }
 
 export interface Cart {
@@ -128,6 +137,38 @@ export interface Cart {
   recargoEquivalenciaPercent: number;
   recargoEquivalenciaAmount: number;
   total: number;
+  /** The cart is buying gift cards: no shipping, coupon or gift card payment. */
+  isGiftCardPurchase: boolean;
+  /** Gift card applied as payment. giftCardAvailable is what it can still cover (checkout adds
+   * shipping); giftCardAmount is what it covers of this pre-shipping total. */
+  giftCardCode?: string;
+  giftCardAvailable: number;
+  giftCardAmount: number;
+  giftCardError?: string;
+  amountDue: number;
+}
+
+export interface GiftCardConfig {
+  enabled: boolean;
+  minAmount: number;
+  maxAmount: number;
+  amountStep: number;
+  validityMonths: number;
+}
+
+export interface GiftCardBalance {
+  code: string;
+  balance: number;
+  expiresAt?: string;
+  usable: boolean;
+}
+
+export interface AddGiftCardRequest {
+  amount: number;
+  recipientName: string;
+  recipientEmail?: string;
+  senderName: string;
+  message?: string;
 }
 
 export interface CheckoutRequest {
@@ -153,6 +194,9 @@ export interface CheckoutResponse {
   shippingCost: number;
   couponDiscountAmount: number;
   recargoEquivalenciaAmount: number;
+  giftCardAmount: number;
+  /** Set when the gift card covered everything: the order is already placed, nothing to pay. */
+  orderId?: number;
 }
 
 export interface CustomerAddress {
@@ -208,6 +252,11 @@ export interface StorefrontOrderDetail {
   trackingUrl?: string;
   returnRequestedAt?: string;
   returnRequestReason?: string;
+  /** Part of the total paid with a gift card. */
+  giftCardAmount?: number;
+  giftCardCode?: string;
+  /** The order bought gift cards: no invoice, nothing shipped. */
+  isGiftCardPurchase?: boolean;
   shippingAddress?: AddressSummary;
   billingAddress?: AddressSummary;
   lines: OrderLine[];
@@ -232,6 +281,15 @@ export interface OrderLine {
   /** Null for synthetic lines (shipping/discount adjustments) or a non-variant product purchase —
    *  reviews are only reachable from a variant's own detail page. */
   variantId?: number;
+  /** The gift card this line bought. */
+  giftCard?: {
+    id: number;
+    code: string;
+    recipientName: string;
+    recipientEmail?: string;
+    balance: number;
+    expiresAt?: string;
+  };
 }
 
 export interface StorefrontMenuItem {

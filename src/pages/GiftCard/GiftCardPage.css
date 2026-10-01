@@ -1,0 +1,90 @@
+.gift-card-preview {
+  border: 2px solid var(--brand-color, #06b773);
+  padding: 6px;
+  background: #fff;
+  border-radius: 4px;
+}
+
+.gift-card-preview-inner {
+  border: 1px solid var(--brand-color, #06b773);
+  padding: 2rem 1.5rem;
+  text-align: center;
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
+}
+
+.gift-card-preview-logo {
+  max-height: 48px;
+  max-width: 180px;
+  object-fit: contain;
+  margin: 0 auto;
+}
+
+.gift-card-preview-site {
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--brand-color, #06b773);
+}
+
+.gift-card-preview-title {
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #777;
+  font-size: 0.8rem;
+  margin-top: 1.5rem;
+}
+
+.gift-card-preview-rule {
+  width: 48px;
+  height: 2px;
+  background: var(--brand-color, #06b773);
+  margin: 0.5rem auto 0;
+}
+
+.gift-card-preview-label {
+  color: #777;
+  font-size: 0.85rem;
+  margin-top: 1.5rem;
+}
+
+.gift-card-preview-recipient {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #222;
+  overflow-wrap: anywhere;
+}
+
+.gift-card-preview-amount {
+  font-size: 2.75rem;
+  font-weight: 800;
+  color: var(--brand-color, #06b773);
+  margin-top: 1rem;
+  line-height: 1.1;
+}
+
+.gift-card-preview-message {
+  font-style: italic;
+  color: #444;
+  margin-top: 1.25rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.gift-card-preview-from {
+  color: #777;
+  margin-top: 1rem;
+}
+
+.gift-card-preview-code {
+  margin-top: auto;
+  padding: 0.75rem;
+  background: #f6f6f6;
+  border: 1px solid #ddd;
+  color: #777;
+  font-size: 0.8rem;
+}
+
+.gift-card-amount-presets .btn {
+  min-width: 72px;
+}

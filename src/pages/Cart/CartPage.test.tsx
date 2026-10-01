@@ -34,6 +34,8 @@ const mockCart = vi.hoisted(() => ({
   removeItem: vi.fn(),
   applyCoupon: vi.fn(),
   removeCoupon: vi.fn(),
+  applyGiftCard: vi.fn(),
+  removeGiftCard: vi.fn(),
 }));
 vi.mock('../../contexts/CartContext', () => ({
   useCart: () => mockCart,
@@ -42,7 +44,7 @@ vi.mock('../../contexts/CartContext', () => ({
 const cartWithItems = (overrides: Partial<Cart> = {}): Cart => ({
   id: 1,
   expiresAt: '2099-01-01T00:00:00.000Z',
-  discountPercent: 0, couponDiscountAmount: 0, recargoEquivalenciaPercent: 0, recargoEquivalenciaAmount: 0,
+  discountPercent: 0, couponDiscountAmount: 0, recargoEquivalenciaPercent: 0, recargoEquivalenciaAmount: 0, isGiftCardPurchase: false, giftCardAvailable: 0, giftCardAmount: 0, amountDue: 0,
   total: 20,
   items: [
     { id: 1, productName: 'Tela azul', productCode: 'TA1', originalUnitPrice: 10, unitPrice: 10, quantity: 2, subtotal: 20, availableStock: 5, minQuantity: 0.3, quantityStep: 0.05 },
@@ -80,7 +82,7 @@ describe('CartPage', () => {
   });
 
   it('shows an empty-cart message and navigates to /catalog from it', () => {
-    mockCart.cart = { id: 1, expiresAt: '2099-01-01T00:00:00.000Z', discountPercent: 0, couponDiscountAmount: 0, recargoEquivalenciaPercent: 0, recargoEquivalenciaAmount: 0, total: 0, items: [] };
+    mockCart.cart = { id: 1, expiresAt: '2099-01-01T00:00:00.000Z', discountPercent: 0, couponDiscountAmount: 0, recargoEquivalenciaPercent: 0, recargoEquivalenciaAmount: 0, isGiftCardPurchase: false, giftCardAvailable: 0, giftCardAmount: 0, amountDue: 0, total: 0, items: [] };
     renderCartPage();
 
     expect(screen.getByText('cart.empty')).toBeInTheDocument();
@@ -215,5 +217,38 @@ describe('CartPage', () => {
     renderCartPage();
 
     expect(screen.getByText('Este código ha caducado.')).toBeInTheDocument();
+  });
+
+  it('applies a gift card code and shows what is left to pay', async () => {
+    mockCart.cart = cartWithItems();
+    mockCart.applyGiftCard.mockResolvedValue(undefined);
+    renderCartPage();
+
+    fireEvent.change(screen.getByLabelText('cart.giftCardPlaceholder'), { target: { value: 'abcd-efgh-jklm' } });
+    fireEvent.click(screen.getByText('cart.giftCardApply'));
+    await waitFor(() => expect(mockCart.applyGiftCard).toHaveBeenCalledWith('abcd-efgh-jklm'));
+  });
+
+  it('with a gift card applied, shows its part and the amount due', () => {
+    mockCart.cart = cartWithItems({ giftCardCode: 'ABCD-EFGH-JKLM', giftCardAvailable: 5, giftCardAmount: 5, amountDue: 15 });
+    renderCartPage();
+
+    expect(screen.getByText('−5,00 €')).toBeInTheDocument();
+    expect(screen.getByText('cart.amountDue')).toBeInTheDocument();
+    expect(screen.getByText('15,00 €')).toBeInTheDocument();
+  });
+
+  it('a gift card being bought has no quantity box, coupon or gift card payment', () => {
+    mockCart.cart = cartWithItems({
+      isGiftCardPurchase: true, total: 45, amountDue: 45,
+      items: [{ id: 2, productName: 'Tarjeta regalo', productCode: 'TARJETA-REGALO', originalUnitPrice: 45, unitPrice: 45, quantity: 1, subtotal: 45, availableStock: 1, minQuantity: 1, quantityStep: 1,
+        giftCard: { recipientName: 'Ana', senderName: 'Luis', message: 'Feliz día' } }],
+    });
+    renderCartPage();
+
+    expect(screen.getAllByText('giftCard.lineName').length).toBeGreaterThan(0);
+    expect(screen.queryByRole('spinbutton')).not.toBeInTheDocument();
+    expect(screen.queryByPlaceholderText('cart.couponPlaceholder')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('cart.giftCardPlaceholder')).not.toBeInTheDocument();
   });
 });

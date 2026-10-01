@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Offcanvas, Button, Alert } from 'react-bootstrap';
-import { FaTrash, FaMinus, FaPlus, FaShoppingBag } from 'react-icons/fa';
+import { FaTrash, FaMinus, FaPlus, FaShoppingBag, FaGift } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '../../../contexts/CartContext';
 import { getApiErrorMessage } from '../../../utils/apiError';
 import './CartDrawer.css';
 import { formatPrice } from '../../../utils/pricing';
+import { cartItemName } from '../../../utils/giftCard';
 
 // Avoids floating-point artifacts from repeated +/- quantityStep arithmetic (e.g. 0.5 - 0.05
 // would otherwise become 0.44999999999999996 in JS).
@@ -90,10 +91,11 @@ const CartDrawer: React.FC = () => {
                   <div className="cart-item-img">
                     {item.thumbnailUrl
                       ? <img src={item.thumbnailUrl} alt={item.productName} />
-                      : <div className="cart-item-placeholder">📦</div>}
+                      : <div className="cart-item-placeholder">{item.giftCard ? <FaGift /> : '📦'}</div>}
                   </div>
                   <div className="cart-item-info flex-grow-1">
-                    <div className="cart-item-name">{item.productName}</div>
+                    <div className="cart-item-name">{cartItemName(item, t)}</div>
+                    {item.giftCard && <div className="small text-muted">{t('giftCard.lineFor', { name: item.giftCard.recipientName })}</div>}
                     <div className="cart-item-price">
                       {item.unitPrice < item.originalUnitPrice && (
                         <span style={{ textDecoration: 'line-through', color: '#aaa', marginRight: 4, fontSize: '0.8em' }}>
@@ -104,7 +106,7 @@ const CartDrawer: React.FC = () => {
                         {formatPrice(item.unitPrice)}
                       </span>
                     </div>
-                    <div className="cart-item-qty">
+                    {!item.giftCard && <div className="cart-item-qty">
                       <button className="qty-btn" disabled={loading || item.quantity <= item.minQuantity} onClick={() => handleUpdate(item.id, roundToStep(item.quantity - item.quantityStep))}>
                         <FaMinus size={10} />
                       </button>
@@ -112,7 +114,7 @@ const CartDrawer: React.FC = () => {
                       <button className="qty-btn" disabled={loading || item.quantity + item.quantityStep > item.availableStock} onClick={() => handleUpdate(item.id, roundToStep(item.quantity + item.quantityStep))}>
                         <FaPlus size={10} />
                       </button>
-                    </div>
+                    </div>}
                   </div>
                   <div className="cart-item-subtotal">
                     <div className="fw-semibold">{formatPrice(item.subtotal)}</div>
@@ -141,6 +143,12 @@ const CartDrawer: React.FC = () => {
                 <span>{t('cart.total')}</span>
                 <span>{formatPrice(cart!.total ?? 0)}</span>
               </div>
+              {cart!.giftCardAmount > 0 && (
+                <div className="d-flex justify-content-between small text-success mb-3" style={{ marginTop: '-0.75rem' }}>
+                  <span>{t('cart.giftCardApplied', { code: cart!.giftCardCode })}</span>
+                  <span>−{formatPrice(cart!.giftCardAmount)}</span>
+                </div>
+              )}
               <Button variant="primary" size="lg" className="w-100 mb-2" onClick={() => { closeDrawer(); navigate('/checkout'); }}>
                 {t('cart.checkout')}
               </Button>

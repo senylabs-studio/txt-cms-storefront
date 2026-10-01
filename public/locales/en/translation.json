@@ -51,7 +51,16 @@
     "couponDiscount": "Coupon {{code}}",
     "couponApplyError": "Couldn't apply the coupon.",
     "couponApplySuccess": "Coupon applied successfully.",
-    "recargoEquivalencia": "Equivalence surcharge ({{percent}}%)"
+    "recargoEquivalencia": "Equivalence surcharge ({{percent}}%)",
+    "giftCardTitle": "Have a gift card?",
+    "giftCardPlaceholder": "Gift card code",
+    "giftCardApply": "Use",
+    "giftCardRemove": "Remove",
+    "giftCardApplied": "Gift card {{code}}",
+    "giftCardApplySuccess": "Gift card applied.",
+    "giftCardApplyError": "The gift card couldn't be applied.",
+    "giftCardAvailable": "Available balance: {{amount}}",
+    "amountDue": "To pay"
   },
   "auth": {
     "login": {
@@ -189,7 +198,10 @@
     "orPayWith": "or pay with",
     "paypalDeclined": "PayPal did not accept that payment method. You have not been charged: please try again with another one.",
     "paypalUnconfirmed": "We couldn't confirm your PayPal payment. If it went through, you'll get the order confirmation email in a few minutes and see it under My orders; please don't pay again.",
-    "paypalError": "The PayPal payment could not be completed. You have not been charged."
+    "paypalError": "The PayPal payment could not be completed. You have not been charged.",
+    "giftCardDelivery": "Gift cards are emailed once payment is confirmed: no shipping address needed.",
+    "confirmWithGiftCard": "Place order",
+    "coveredByGiftCard": "Your gift card covers the whole order: there's nothing more to pay."
   },
   "checkoutSuccess": {
     "title": "Order received!",
@@ -335,7 +347,14 @@
     "leaveReview": "Leave a review",
     "downloadError": "Failed to download the invoice.",
     "cancelSuccess": "Order cancelled successfully.",
-    "returnSuccess": "Return request sent."
+    "returnSuccess": "Return request sent.",
+    "giftCardPaid": "Paid with gift card {{code}}",
+    "amountPaid": "Paid with your payment method",
+    "giftCardsBought": "Gift cards",
+    "downloadLetter": "Download letter",
+    "letterError": "The letter couldn't be downloaded.",
+    "cardBalance": "Balance: {{amount}}",
+    "cardSentTo": "Also sent to {{email}}"
   },
   "favorites": {
     "title": "My favourites",
@@ -523,5 +542,47 @@
   },
   "imageRotator": {
     "goTo": "Show image {{n}} of {{total}}"
+  },
+  "giftCard": {
+    "lineName": "Gift card",
+    "lineFor": "For {{name}}",
+    "title": "Gift card",
+    "subtitle": "Give fabric, ideas and projects: choose the amount, write a message and we'll send you a letter ready to print.",
+    "amountLabel": "Amount",
+    "amountHint": "Between {{min}} and {{max}}, in steps of {{step}}.",
+    "decrease": "Lower the amount",
+    "increase": "Raise the amount",
+    "recipientName": "For",
+    "recipientNamePlaceholder": "Name of the person receiving it",
+    "recipientEmail": "Recipient's email (optional)",
+    "recipientEmailHint": "If you add it, we'll also send them the letter directly. If not, it only comes to you so you can print it or forward it.",
+    "senderName": "From",
+    "senderNamePlaceholder": "Your name",
+    "message": "Message (optional)",
+    "messagePlaceholder": "Happy birthday! For that dress you've been dreaming of…",
+    "messageCounter": "{{count}}/500",
+    "addToCart": "Add to basket",
+    "added": "Gift card added to your basket.",
+    "addError": "The gift card couldn't be added.",
+    "loadError": "The gift card details couldn't be loaded.",
+    "unavailable": "Gift cards aren't available right now.",
+    "separatePurchase": "Gift cards are bought separately from products.",
+    "howItWorksTitle": "How it works",
+    "howItWorks1": "Choose the amount and personalise the letter.",
+    "howItWorks2": "Once paid, we email you the letter as a PDF to print or forward.",
+    "howItWorks3": "Whoever receives it can spend the balance over one or several purchases for {{months}} months.",
+    "howItWorks3NoExpiry": "Whoever receives it can spend the balance over one or several purchases.",
+    "previewTitle": "Your letter will look like this",
+    "previewFor": "For",
+    "previewFrom": "From",
+    "previewCode": "The code is created on payment",
+    "balanceTitle": "Already have a card? Check its balance",
+    "balancePlaceholder": "XXXX-XXXX-XXXX",
+    "balanceCheck": "Check",
+    "balanceResult": "Available balance: {{amount}}",
+    "balanceExpires": "Valid until {{date}}",
+    "balanceNotUsable": "This card can't be used right now (expired, deactivated or no balance left).",
+    "balanceError": "The balance couldn't be checked.",
+    "menuLink": "Gift card"
   }
 }
