@@ -36,6 +36,11 @@ export const addGiftCardToCart = async (data: AddGiftCardRequest): Promise<Cart>
   return res.data;
 };
 
+export const updateGiftCardInCart = async (itemId: number, data: AddGiftCardRequest): Promise<Cart> => {
+  const res = await apiClient.put(`/storefront/cart/gift-cards/${itemId}`, data);
+  return res.data;
+};
+
 export const applyGiftCard = async (code: string): Promise<Cart> => {
   const res = await apiClient.post('/storefront/cart/gift-card', { code });
   return res.data;

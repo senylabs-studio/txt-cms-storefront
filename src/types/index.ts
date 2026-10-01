@@ -154,6 +154,8 @@ export interface GiftCardConfig {
   maxAmount: number;
   amountStep: number;
   validityMonths: number;
+  /** Wide banner for the gift card page, set from the CMS. */
+  headerImageUrl?: string | null;
 }
 
 export interface GiftCardBalance {

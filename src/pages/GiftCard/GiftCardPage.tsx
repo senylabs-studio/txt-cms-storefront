@@ -107,8 +107,22 @@ const GiftCardPage: React.FC = () => {
   return (
     <MainLayout>
       <Container className="py-4">
-        <h1 className="fw-bold mb-2"><FaGift className="me-2" />{t('giftCard.title')}</h1>
-        <p className="text-muted mb-4" style={{ maxWidth: 720 }}>{t('giftCard.subtitle')}</p>
+        {config?.headerImageUrl ? (
+          // The banner (set in the CMS) carries no text of its own: the title is laid over its
+          // free side on wide screens and goes under it on phones, so it's always translated.
+          <div className="gift-card-hero mb-4">
+            <img src={config.headerImageUrl} alt="" className="gift-card-hero-img" />
+            <div className="gift-card-hero-text">
+              <h1 className="fw-bold mb-2">{t('giftCard.title')}</h1>
+              <p className="mb-0">{t('giftCard.subtitle')}</p>
+            </div>
+          </div>
+        ) : (
+          <>
+            <h1 className="fw-bold mb-2"><FaGift className="me-2" />{t('giftCard.title')}</h1>
+            <p className="text-muted mb-4" style={{ maxWidth: 720 }}>{t('giftCard.subtitle')}</p>
+          </>
+        )}
 
         {configError && <Alert variant="danger">{configError}</Alert>}
         {!config && !configError && <div className="text-center py-5"><Spinner animation="border" /></div>}

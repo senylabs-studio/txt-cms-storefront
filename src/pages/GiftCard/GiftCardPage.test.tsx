@@ -90,4 +90,12 @@ describe('GiftCardPage', () => {
     expect(await screen.findByTestId('gift-card-balance')).toHaveTextContent('giftCard.balanceResult');
     expect(checkGiftCardBalance).toHaveBeenCalledWith('abcd-efgh-jklm');
   });
+
+  it('shows the banner from the CMS with the translated title over it', async () => {
+    getGiftCardConfig.mockResolvedValue({ ...config, headerImageUrl: 'https://blob.example.com/site/gift-card-header-1.webp' });
+    const { container } = renderPage();
+    await screen.findByLabelText('giftCard.amountLabel');
+    expect(container.querySelector('.gift-card-hero img')).toHaveAttribute('src', 'https://blob.example.com/site/gift-card-header-1.webp');
+    expect(screen.getByRole('heading', { level: 1, name: 'giftCard.title' })).toBeInTheDocument();
+  });
 });

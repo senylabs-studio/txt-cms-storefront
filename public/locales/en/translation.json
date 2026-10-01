@@ -583,6 +583,12 @@
     "balanceExpires": "Valid until {{date}}",
     "balanceNotUsable": "This card can't be used right now (expired, deactivated or no balance left).",
     "balanceError": "The balance couldn't be checked.",
-    "menuLink": "Gift card"
+    "menuLink": "Gift card",
+    "edit": "Edit",
+    "editTitle": "Edit gift card",
+    "editSave": "Save changes",
+    "editSuccess": "Gift card updated.",
+    "editError": "The gift card couldn't be updated.",
+    "editCancel": "Cancel"
   }
 }

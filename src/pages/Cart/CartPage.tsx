@@ -10,6 +10,8 @@ import { useToast } from '../../contexts/ToastContext';
 import { getApiErrorMessage } from '../../utils/apiError';
 import { formatPrice } from '../../utils/pricing';
 import { cartItemName } from '../../utils/giftCard';
+import GiftCardEditModal from '../../components/Cart/GiftCardEditModal/GiftCardEditModal';
+import type { CartItem } from '../../types';
 
 const CartPage: React.FC = () => {
   const { t } = useTranslation();
@@ -25,6 +27,7 @@ const CartPage: React.FC = () => {
   const [giftCardInput, setGiftCardInput] = useState('');
   const [giftCardError, setGiftCardError] = useState('');
   const [giftCardLoading, setGiftCardLoading] = useState(false);
+  const [editingGiftCard, setEditingGiftCard] = useState<CartItem | null>(null);
 
   const handleApplyGiftCard = async () => {
     if (!giftCardInput.trim()) return;
@@ -150,6 +153,9 @@ const CartPage: React.FC = () => {
                           <div className="fw-semibold">{cartItemName(item, t)}</div>
                           <div className="text-muted small">{t('giftCard.lineFor', { name: item.giftCard.recipientName })}</div>
                           {item.giftCard.message && <div className="small fst-italic text-truncate">“{item.giftCard.message}”</div>}
+                          <Button size="sm" variant="link" className="p-0 small" onClick={() => setEditingGiftCard(item)} disabled={loading}>
+                            {t('giftCard.edit')}
+                          </Button>
                         </Col>
                       ) : (
                         <>
@@ -313,6 +319,11 @@ const CartPage: React.FC = () => {
           </Row>
         )}
       </Container>
+      <GiftCardEditModal
+        item={editingGiftCard}
+        onClose={() => setEditingGiftCard(null)}
+        onSaved={() => { setEditingGiftCard(null); showToast('success', t('giftCard.editSuccess')); }}
+      />
     </MainLayout>
   );
 };

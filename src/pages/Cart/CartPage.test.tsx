@@ -36,7 +36,11 @@ const mockCart = vi.hoisted(() => ({
   removeCoupon: vi.fn(),
   applyGiftCard: vi.fn(),
   removeGiftCard: vi.fn(),
+  updateGiftCard: vi.fn(),
 }));
+
+const { getGiftCardConfig } = vi.hoisted(() => ({ getGiftCardConfig: vi.fn() }));
+vi.mock('../../services/giftCardService', () => ({ getGiftCardConfig }));
 vi.mock('../../contexts/CartContext', () => ({
   useCart: () => mockCart,
 }));
@@ -250,5 +254,27 @@ describe('CartPage', () => {
     expect(screen.queryByRole('spinbutton')).not.toBeInTheDocument();
     expect(screen.queryByPlaceholderText('cart.couponPlaceholder')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('cart.giftCardPlaceholder')).not.toBeInTheDocument();
+  });
+
+  it('edits a gift card in the cart without removing it', async () => {
+    getGiftCardConfig.mockResolvedValue({ enabled: true, minAmount: 20, maxAmount: 500, amountStep: 5, validityMonths: 12 });
+    mockCart.updateGiftCard.mockResolvedValue(undefined);
+    mockCart.cart = cartWithItems({
+      isGiftCardPurchase: true, total: 45, amountDue: 45,
+      items: [{ id: 2, productName: 'Tarjeta regalo', productCode: 'TARJETA-REGALO', originalUnitPrice: 45, unitPrice: 45, quantity: 1, subtotal: 45, availableStock: 1, minQuantity: 1, quantityStep: 1,
+        giftCard: { recipientName: 'Ana', senderName: 'Luis', message: 'Feliz día' } }],
+    });
+    renderCartPage();
+
+    fireEvent.click(screen.getByText('giftCard.edit'));
+    const recipient = await screen.findByLabelText('giftCard.recipientName');
+    expect(recipient).toHaveValue('Ana');
+    fireEvent.change(recipient, { target: { value: 'Ana María' } });
+    fireEvent.change(screen.getByLabelText('giftCard.message'), { target: { value: 'Feliz santo' } });
+    fireEvent.click(screen.getByRole('button', { name: 'giftCard.editSave' }));
+
+    await waitFor(() => expect(mockCart.updateGiftCard).toHaveBeenCalledWith(2, {
+      amount: 45, recipientName: 'Ana María', recipientEmail: undefined, senderName: 'Luis', message: 'Feliz santo',
+    }));
   });
 });

@@ -88,3 +88,52 @@
 .gift-card-amount-presets .btn {
   min-width: 72px;
 }
+
+/* Banner from the CMS. Gift on the left of the photo, free space on the right: keep the left
+   edge in frame when it's cropped, and put the title on the free side. */
+.gift-card-hero {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.gift-card-hero-img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: clamp(180px, 30vw, 400px);
+  object-fit: cover;
+  object-position: left center;
+}
+
+.gift-card-hero-text {
+  padding-top: 1rem;
+}
+
+.gift-card-hero-text p {
+  color: var(--bs-secondary-color, #6c757d);
+}
+
+@media (min-width: 768px) {
+  .gift-card-hero-text {
+    position: absolute;
+    inset: 0 0 0 48%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2rem 3rem 2rem 1rem;
+    color: #fff;
+  }
+
+  .gift-card-hero-text h1 {
+    font-size: clamp(2rem, 3.6vw, 3.25rem);
+    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.25);
+  }
+
+  .gift-card-hero-text p {
+    color: rgba(255, 255, 255, 0.92);
+    font-size: 1.15rem;
+    max-width: 30rem;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+  }
+}

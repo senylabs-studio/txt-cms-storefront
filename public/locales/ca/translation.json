@@ -583,6 +583,12 @@
     "balanceExpires": "Vàlida fins al {{date}}",
     "balanceNotUsable": "Aquesta targeta no es pot fer servir ara (caducada, desactivada o sense saldo).",
     "balanceError": "No s'ha pogut consultar el saldo.",
-    "menuLink": "Targeta regal"
+    "menuLink": "Targeta regal",
+    "edit": "Editar",
+    "editTitle": "Editar la targeta regal",
+    "editSave": "Desar els canvis",
+    "editSuccess": "Targeta regal actualitzada.",
+    "editError": "No s'ha pogut actualitzar la targeta regal.",
+    "editCancel": "Cancel·lar"
   }
 }
