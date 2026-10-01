@@ -109,4 +109,34 @@ describe('PayPalCheckoutButton', () => {
 
     await waitFor(() => expect(onError).toHaveBeenCalled());
   });
+  // Regression tests: a capture call that got no answer (connection dropped, timeout, 5xx) showed
+  // "payment error" although the server may already have captured and created the order. Capture
+  // is idempotent on the server, so it is retried once; if still unanswered, the customer is told
+  // the payment couldn't be confirmed (not that it failed) and not to pay again.
+  it('retries an unanswered capture once and reports the payment', async () => {
+    api.capturePayPalOrder
+      .mockRejectedValueOnce({ isAxiosError: true, message: 'Network Error' })
+      .mockResolvedValueOnce({ orderId: 12, restart: false });
+    const { onPaid, onError } = setup();
+
+    fireEvent.click(await screen.findByText('create'));
+    await waitFor(() => expect(api.createPayPalOrder).toHaveBeenCalled());
+    fireEvent.click(screen.getByText('approve'));
+
+    await waitFor(() => expect(onPaid).toHaveBeenCalled());
+    expect(api.capturePayPalOrder).toHaveBeenCalledTimes(2);
+    expect(onError).not.toHaveBeenCalled();
+  });
+
+  it('says the payment could not be confirmed when the capture stays unanswered', async () => {
+    api.capturePayPalOrder.mockRejectedValue({ isAxiosError: true, response: { status: 502, data: {} } });
+    const { onPaid, onError } = setup();
+
+    fireEvent.click(await screen.findByText('create'));
+    await waitFor(() => expect(api.createPayPalOrder).toHaveBeenCalled());
+    fireEvent.click(screen.getByText('approve'));
+
+    await waitFor(() => expect(onError).toHaveBeenCalledWith('checkout.paypalUnconfirmed'));
+    expect(onPaid).not.toHaveBeenCalled();
+  });
 });

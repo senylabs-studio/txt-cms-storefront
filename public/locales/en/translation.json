@@ -188,6 +188,7 @@
     "loadAddressesError": "Failed to load your addresses.",
     "orPayWith": "or pay with",
     "paypalDeclined": "PayPal did not accept that payment method. You have not been charged: please try again with another one.",
+    "paypalUnconfirmed": "We couldn't confirm your PayPal payment. If it went through, you'll get the order confirmation email in a few minutes and see it under My orders; please don't pay again.",
     "paypalError": "The PayPal payment could not be completed. You have not been charged."
   },
   "checkoutSuccess": {

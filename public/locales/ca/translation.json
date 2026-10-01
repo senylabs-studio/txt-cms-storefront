@@ -188,6 +188,7 @@
     "loadAddressesError": "No s'han pogut carregar les teves adreces.",
     "orPayWith": "o paga amb",
     "paypalDeclined": "PayPal no ha acceptat aquest mètode de pagament. No s'ha fet cap càrrec: torna-ho a provar amb un altre.",
+    "paypalUnconfirmed": "No hem pogut confirmar el teu pagament amb PayPal. Si s'ha completat, rebràs el correu de confirmació de la comanda d'aquí a uns minuts i el veuràs a Les meves comandes; no el tornis a pagar.",
     "paypalError": "No s'ha pogut completar el pagament amb PayPal. No s'ha fet cap càrrec."
   },
   "checkoutSuccess": {

@@ -188,6 +188,7 @@
     "loadAddressesError": "No se pudieron cargar tus direcciones.",
     "orPayWith": "o paga con",
     "paypalDeclined": "PayPal no ha aceptado ese método de pago. No se ha hecho ningún cargo: vuelve a intentarlo con otro.",
+    "paypalUnconfirmed": "No hemos podido confirmar tu pago con PayPal. Si se ha completado, recibirás el email de confirmación del pedido en unos minutos y lo verás en Mis pedidos; no vuelvas a pagarlo.",
     "paypalError": "No se ha podido completar el pago con PayPal. No se ha hecho ningún cargo."
   },
   "checkoutSuccess": {

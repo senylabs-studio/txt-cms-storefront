@@ -21,6 +21,13 @@ interface Props {
 
 const SDK_LOCALE: Record<string, string> = { es: 'es-ES', ca: 'es-ES', en: 'en-GB' };
 
+// No answer from our server (connection dropped, timeout) or a 5xx: the capture may still have
+// gone through, so this is "unknown", not "failed".
+const isUnanswered = (err: unknown) => {
+  const status = (err as { response?: { status?: number } } | null)?.response?.status;
+  return status === undefined || status >= 500;
+};
+
 // PayPal inside the storefront: PayPal's own window opens over our page and the customer comes
 // back already paid — no redirect to Redsys. Renders nothing unless PayPal is configured.
 const PayPalCheckoutButton: React.FC<Props> = ({ buildRequest, disabled, onPaid, onError, onBusyChange }) => {
@@ -71,7 +78,10 @@ const PayPalCheckoutButton: React.FC<Props> = ({ buildRequest, disabled, onPaid,
           }}
           onApprove={async ({ orderId }) => {
             try {
-              const result = await capturePayPalOrder(orderId);
+              // The server's capture is idempotent (an order already created is just returned),
+              // so an unanswered call is safe to repeat once.
+              const result = await capturePayPalOrder(orderId)
+                .catch(err => { if (isUnanswered(err)) return capturePayPalOrder(orderId); throw err; });
               currentOrderId.current = null;
               if (result.restart || !result.orderId) {
                 onBusyChange?.(false);
@@ -82,7 +92,7 @@ const PayPalCheckoutButton: React.FC<Props> = ({ buildRequest, disabled, onPaid,
             } catch (err) {
               currentOrderId.current = null;
               onBusyChange?.(false);
-              onError(getApiErrorMessage(err, t('checkout.paypalError')));
+              onError(isUnanswered(err) ? t('checkout.paypalUnconfirmed') : getApiErrorMessage(err, t('checkout.paypalError')));
             }
           }}
           onCancel={releaseAttempt}
