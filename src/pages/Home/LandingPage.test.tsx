@@ -137,6 +137,8 @@ describe('LandingPage ImageText card', () => {
     expect(await screen.findByText('Profesionales')).toHaveClass('home-imagetext-eyebrow');
     const card = screen.getByText('Precios especiales').closest('.home-imagetext-card') as HTMLElement;
     expect(card.style.backgroundColor).toBe('rgb(180, 249, 232)');
+    // The decorations (scissors cut line, tag hole) take their color from the same background.
+    expect(card.style.getPropertyValue('--card-bg')).toBe('#b4f9e8');
     expect((card.closest('.home-imagetext-section')!.parentElement as HTMLElement).style.backgroundColor).toBe('');
   });
 

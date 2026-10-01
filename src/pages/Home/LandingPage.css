@@ -102,21 +102,22 @@
 }
 
 /* ── Image + Text (card) ─────────────────────────────────────────────────── */
-.home-imagetext-section { padding-block: 3rem; }
+.home-imagetext-section { padding-block: 2rem; }
 .home-imagetext-card {
+  --card-bg: color-mix(in srgb, var(--brand-color) 8%, white);
   display: grid;
-  grid-template-columns: 5fr 6fr;
-  background-color: color-mix(in srgb, var(--brand-color) 8%, white);
+  grid-template-columns: 5fr 7fr;
+  background-color: var(--card-bg);
   border-radius: 16px;
   overflow: hidden;
 }
-.home-imagetext-card.image-right { grid-template-columns: 6fr 5fr; }
+.home-imagetext-card.image-right { grid-template-columns: 7fr 5fr; }
 .home-imagetext-card.image-right .home-imagetext-media { order: 2; }
 .home-imagetext-card.no-image { grid-template-columns: 1fr; }
-.home-imagetext-media { min-height: 280px; }
-.home-imagetext-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.home-imagetext-media { position: relative; min-height: 220px; }
+.home-imagetext-media img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
 .home-imagetext-body {
-  padding: 2.75rem 3rem;
+  padding: 2rem 2.5rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -129,11 +130,11 @@
   text-transform: uppercase;
   color: var(--brand-text-color);
 }
-.home-imagetext-title { margin: 0 0 0.75rem; font-size: 2rem; font-weight: 700; line-height: 1.15; text-wrap: balance; }
-.home-imagetext-text { margin: 0 0 1.4rem; line-height: 1.7; white-space: pre-line; max-width: 46ch; }
+.home-imagetext-title { margin: 0 0 0.6rem; font-size: 1.6rem; font-weight: 700; line-height: 1.15; text-wrap: balance; }
+.home-imagetext-text { margin: 0 0 1.1rem; line-height: 1.6; white-space: pre-line; max-width: 46ch; }
 .home-imagetext-body.align-center .home-imagetext-text { margin-inline: auto; }
 .home-imagetext-body.align-right .home-imagetext-text { margin-left: auto; }
-.home-imagetext-btn { padding: 0.65rem 1.4rem; font-weight: 600; }
+.home-imagetext-btn { padding: 0.55rem 1.25rem; font-weight: 600; }
 .home-imagetext-btn::after { content: ' →'; }
 
 @media (max-width: 767.98px) {
@@ -141,7 +142,7 @@
   .home-imagetext-card.image-right .home-imagetext-media { order: 0; }
   .home-imagetext-media { min-height: 0; aspect-ratio: 3 / 2; }
   .home-imagetext-body { padding: 1.6rem 1.4rem 1.9rem; }
-  .home-imagetext-title { font-size: 1.5rem; }
+  .home-imagetext-title { font-size: 1.35rem; }
 }
 
 /* ── Image + Text decorations (chosen per block in the CMS) ──────────────── */
@@ -150,17 +151,24 @@
 .home-imagetext-card.deco-pinking .home-imagetext-media { clip-path: polygon(0 0, 100% 0.000%, calc(100% - 11px) 2.941%, 100% 5.882%, calc(100% - 11px) 8.824%, 100% 11.765%, calc(100% - 11px) 14.706%, 100% 17.647%, calc(100% - 11px) 20.588%, 100% 23.529%, calc(100% - 11px) 26.471%, 100% 29.412%, calc(100% - 11px) 32.353%, 100% 35.294%, calc(100% - 11px) 38.235%, 100% 41.176%, calc(100% - 11px) 44.118%, 100% 47.059%, calc(100% - 11px) 50.000%, 100% 52.941%, calc(100% - 11px) 55.882%, 100% 58.824%, calc(100% - 11px) 61.765%, 100% 64.706%, calc(100% - 11px) 67.647%, 100% 70.588%, calc(100% - 11px) 73.529%, 100% 76.471%, calc(100% - 11px) 79.412%, 100% 82.353%, calc(100% - 11px) 85.294%, 100% 88.235%, calc(100% - 11px) 91.176%, 100% 94.118%, calc(100% - 11px) 97.059%, 100% 100.000%, 0 100%); margin-right: -11px; position: relative; z-index: 1; }
 .home-imagetext-card.deco-pinking.image-right .home-imagetext-media { clip-path: polygon(100% 0, 100% 100%, 0 100.000%, 11px 97.059%, 0 94.118%, 11px 91.176%, 0 88.235%, 11px 85.294%, 0 82.353%, 11px 79.412%, 0 76.471%, 11px 73.529%, 0 70.588%, 11px 67.647%, 0 64.706%, 11px 61.765%, 0 58.824%, 11px 55.882%, 0 52.941%, 11px 50.000%, 0 47.059%, 11px 44.118%, 0 41.176%, 11px 38.235%, 0 35.294%, 11px 32.353%, 0 29.412%, 11px 26.471%, 0 23.529%, 11px 20.588%, 0 17.647%, 11px 14.706%, 0 11.765%, 11px 8.824%, 0 5.882%, 11px 2.941%, 0 0.000%); margin-right: 0; margin-left: -11px; }
 
-/* Cut line: scissors on a dashed "cut here" line along the bottom of the text side. */
+/* Cut line: big scissors on a vertical dashed "cut here" line along the text side's outer edge
+   (opposite the photo). Its color is a deeper shade of the card's own background, so it reads as
+   part of whatever background the CMS picked; the plain color-mix is the fallback for browsers
+   without relative colors. */
 .home-imagetext-body { position: relative; }
 .home-imagetext-cutline {
-  position: absolute; left: 3rem; right: 3rem; bottom: 1.3rem;
-  display: flex; align-items: center; gap: 0.5rem;
-  color: color-mix(in srgb, var(--brand-text-color) 55%, transparent);
+  position: absolute; top: 1.25rem; bottom: 1.25rem; right: 1.5rem;
+  display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+  color: color-mix(in oklch, var(--card-bg) 50%, black);
+  color: oklch(from var(--card-bg) calc(l * 0.62) calc(c * 3 + 0.01) h);
   pointer-events: none;
 }
-.home-imagetext-cutline svg { flex: none; font-size: 1.35rem; }
-.home-imagetext-cutline span { flex: 1; border-top: 2px dashed currentColor; }
-.home-imagetext-body:has(.home-imagetext-cutline) { padding-bottom: 3.75rem; }
+.home-imagetext-cutline svg { flex: none; font-size: 2.1rem; transform: rotate(90deg); }
+.home-imagetext-cutline span { flex: 1; border-left: 2px dashed currentColor; }
+.home-imagetext-body:has(.home-imagetext-cutline) { padding-right: 5rem; }
+.home-imagetext-card.image-right .home-imagetext-cutline { right: auto; left: 1.5rem; }
+.home-imagetext-card.image-right .home-imagetext-cutline svg { transform: rotate(90deg) scaleY(-1); }
+.home-imagetext-card.image-right .home-imagetext-body:has(.home-imagetext-cutline) { padding-right: 2.5rem; padding-left: 5rem; }
 
 /* Tag: the eyebrow on a cardboard price tag (no string). */
 .home-imagetext-eyebrow.is-tag { position: relative; align-self: flex-start; color: #5a4326; }
@@ -173,13 +181,19 @@
 }
 .home-imagetext-eyebrow.is-tag span::before {
   content: ""; position: absolute; left: 11px; top: 50%; width: 7px; height: 7px; margin-top: -3.5px;
-  border-radius: 50%; background: color-mix(in srgb, var(--brand-color) 8%, white);
+  border-radius: 50%; background: var(--card-bg);
   box-shadow: inset 0 0 0 1px rgba(90, 67, 38, 0.35);
 }
 
 @media (max-width: 767.98px) {
   .home-imagetext-card.deco-pinking .home-imagetext-media,
   .home-imagetext-card.deco-pinking.image-right .home-imagetext-media { clip-path: polygon(0 0, 100% 0, 100.000% 100%, 97.059% calc(100% - 11px), 94.118% 100%, 91.176% calc(100% - 11px), 88.235% 100%, 85.294% calc(100% - 11px), 82.353% 100%, 79.412% calc(100% - 11px), 76.471% 100%, 73.529% calc(100% - 11px), 70.588% 100%, 67.647% calc(100% - 11px), 64.706% 100%, 61.765% calc(100% - 11px), 58.824% 100%, 55.882% calc(100% - 11px), 52.941% 100%, 50.000% calc(100% - 11px), 47.059% 100%, 44.118% calc(100% - 11px), 41.176% 100%, 38.235% calc(100% - 11px), 35.294% 100%, 32.353% calc(100% - 11px), 29.412% 100%, 26.471% calc(100% - 11px), 23.529% 100%, 20.588% calc(100% - 11px), 17.647% 100%, 14.706% calc(100% - 11px), 11.765% 100%, 8.824% calc(100% - 11px), 5.882% 100%, 2.941% calc(100% - 11px), 0.000% 100%); margin: 0 0 -11px; }
-  .home-imagetext-cutline { left: 1.4rem; right: 1.4rem; bottom: 1rem; }
-  .home-imagetext-body:has(.home-imagetext-cutline) { padding-bottom: 3rem; }
+  /* Photo on top → the cut line goes horizontal along the bottom, still opposite the photo. */
+  .home-imagetext-cutline,
+  .home-imagetext-card.image-right .home-imagetext-cutline { top: auto; left: 1.4rem; right: 1.4rem; bottom: 1rem; flex-direction: row; }
+  .home-imagetext-cutline svg,
+  .home-imagetext-card.image-right .home-imagetext-cutline svg { font-size: 1.6rem; transform: none; }
+  .home-imagetext-cutline span { border-left: 0; border-top: 2px dashed currentColor; }
+  .home-imagetext-body:has(.home-imagetext-cutline),
+  .home-imagetext-card.image-right .home-imagetext-body:has(.home-imagetext-cutline) { padding: 1.6rem 1.4rem 3.2rem; }
 }
