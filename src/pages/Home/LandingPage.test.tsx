@@ -16,7 +16,7 @@ vi.mock('../../components/Layout/MainLayout', () => ({
 }));
 
 vi.mock('../../contexts/SiteSettingsContext', () => ({
-  useSiteSettings: () => ({ siteName: 'TXT Shop', siteDescription: '', faviconUrl: 'https://blob.example.com/site/favicon-1.png', logoUrl: '' }),
+  useSiteSettings: () => ({ siteName: 'TXT Shop', siteDescription: '' }),
 }));
 
 const { getHomeBlocks } = vi.hoisted(() => ({ getHomeBlocks: vi.fn() }));
@@ -140,20 +140,19 @@ describe('LandingPage ImageText card', () => {
     expect((card.closest('.home-imagetext-section')!.parentElement as HTMLElement).style.backgroundColor).toBe('');
   });
 
-  const decorated = (decoration: { pinking?: boolean; watermark?: boolean; tag?: boolean }): StorefrontHomeBlock => ({
+  const decorated = (decoration: { pinking?: boolean; cutLine?: boolean; tag?: boolean }): StorefrontHomeBlock => ({
     id: 7, title: 'Regalo', type: 'ImageText', isActive: true, sortOrder: 0,
     config: { imageUrl: '/a.jpg', eyebrow: 'Nuevo', title: 'Tarjetas regalo', text: 'Regala tela', imagePosition: 'left', buttonText: '', buttonUrl: '', decoration },
   });
 
-  it('applies the decorations chosen in the CMS: pinking edge, watermark from the site icon, hanging tag', async () => {
-    getHomeBlocks.mockResolvedValue([decorated({ pinking: true, watermark: true, tag: true })]);
+  it('applies the decorations chosen in the CMS: pinking edge, scissors cut line, hanging tag', async () => {
+    getHomeBlocks.mockResolvedValue([decorated({ pinking: true, cutLine: true, tag: true })]);
     const { container } = renderPage();
 
     const eyebrow = await screen.findByText('Nuevo');
     expect(eyebrow.closest('p')).toHaveClass('is-tag');
     expect(container.querySelector('.home-imagetext-card')).toHaveClass('deco-pinking');
-    const watermark = container.querySelector('.home-imagetext-watermark') as HTMLElement;
-    expect(watermark.style.backgroundImage).toContain('https://blob.example.com/site/favicon-1.png');
+    expect(container.querySelector('.home-imagetext-cutline svg')).not.toBeNull();
   });
 
   it('without decorations the card stays as it was', async () => {
@@ -163,7 +162,7 @@ describe('LandingPage ImageText card', () => {
     expect((await screen.findByText('Nuevo'))).toHaveClass('home-imagetext-eyebrow');
     expect(screen.getByText('Nuevo')).not.toHaveClass('is-tag');
     expect(container.querySelector('.home-imagetext-card')).not.toHaveClass('deco-pinking');
-    expect(container.querySelector('.home-imagetext-watermark')).toBeNull();
+    expect(container.querySelector('.home-imagetext-cutline')).toBeNull();
   });
 });
 

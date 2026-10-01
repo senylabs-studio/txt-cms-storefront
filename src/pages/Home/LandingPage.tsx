@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Carousel } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import { FaCut } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { useSiteSettings } from '../../contexts/SiteSettingsContext';
@@ -142,7 +143,6 @@ const FeaturedProductsBlock: React.FC<{ config: HomeFeaturedProductsBlockConfig 
 // single piece between the surrounding blocks. Its backgroundColor tints the card, not the section
 // (see BlockRenderer); unset, it's a soft tint of the brand color.
 const ImageTextBlock: React.FC<{ config: HomeImageTextBlockConfig }> = ({ config }) => {
-  const { faviconUrl, logoUrl } = useSiteSettings();
   const imageLeft = (config.imagePosition ?? 'left') === 'left';
   const align = config.textAlign ?? 'left';
   const textStyle: React.CSSProperties = { textAlign: align };
@@ -150,8 +150,6 @@ const ImageTextBlock: React.FC<{ config: HomeImageTextBlockConfig }> = ({ config
   const cardStyle: React.CSSProperties = config.backgroundColor ? { backgroundColor: config.backgroundColor } : {};
   const hasImage = !!config.imageUrl;
   const deco = config.decoration ?? {};
-  // The watermark is the site's own icon (the shop's mannequin for Tejidos Pulido), else its logo.
-  const watermarkUrl = deco.watermark ? (faviconUrl || logoUrl) : '';
   const cardClass = [
     'home-imagetext-card',
     hasImage ? '' : 'no-image',
@@ -167,7 +165,7 @@ const ImageTextBlock: React.FC<{ config: HomeImageTextBlockConfig }> = ({ config
           </div>
         )}
         <div className={`home-imagetext-body align-${align}`} style={textStyle}>
-          {watermarkUrl && <span className="home-imagetext-watermark" aria-hidden="true" style={{ backgroundImage: `url("${watermarkUrl}")` }} />}
+          {deco.cutLine && <span className="home-imagetext-cutline" aria-hidden="true"><FaCut /><span /></span>}
           {config.eyebrow && (deco.tag
             ? <p className="home-imagetext-eyebrow is-tag"><span>{config.eyebrow}</span></p>
             : <p className="home-imagetext-eyebrow">{config.eyebrow}</p>)}
