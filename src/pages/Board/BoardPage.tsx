@@ -7,6 +7,7 @@ import MainLayout from '../../components/Layout/MainLayout';
 import { getBoard, updateBoardItem, removeBoardItem, type BoardItem } from '../../services/boardService';
 import './BoardPage.css';
 import ScissorsLoader from '../../components/common/ScissorsLoader/ScissorsLoader';
+import IconTooltip from '../../components/common/IconTooltip/IconTooltip';
 
 const MIN_SIZE = 60;
 const MAX_SIZE = 400;
@@ -128,15 +129,17 @@ const BoardPage: React.FC = () => {
                   style={{ left: item.x, top: item.y, width: item.width, height: item.height, zIndex: item.zIndex }}
                   onPointerDown={e => handlePointerDown(e, item, 'move')}
                 >
-                  <button
-                    type="button"
-                    className="board-tile-remove"
-                    onClick={() => handleRemove(item.id)}
-                    onPointerDown={e => e.stopPropagation()}
-                    aria-label={t('board.remove')}
-                  >
-                    <FaTimes size={11} />
-                  </button>
+                  <IconTooltip label={t('board.remove')}>
+                    <button
+                      type="button"
+                      className="board-tile-remove"
+                      onClick={() => handleRemove(item.id)}
+                      onPointerDown={e => e.stopPropagation()}
+                      aria-label={t('board.remove')}
+                    >
+                      <FaTimes size={11} />
+                    </button>
+                  </IconTooltip>
                   {item.isAvailable && (
                     <button
                       type="button"

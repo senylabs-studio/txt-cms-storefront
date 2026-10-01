@@ -107,6 +107,7 @@ const VariantDetailPage: React.FC = () => {
     let cancelled = false;
     setLoading(true);
     setSelectedImage(0);
+    setRulerActive(false);
     setDescExpanded(false);
     getVariantById(Number(id))
       .then(v => { if (!cancelled) { setVariant(v); setQuantity(v.minQuantity); } })
@@ -207,7 +208,9 @@ const VariantDetailPage: React.FC = () => {
   const canMeasure = !!(currentImage?.isRealScale && currentImage.realWidthCm);
   // Only with a real mouse (touch has no hover — a tap opens the viewer instead), and never over
   // the tape measure: magnifying the photo would make its cm marks wrong.
-  const lensEnabled = !!currentImage && !rulerActive && canHover();
+  // Only while the tape is actually shown: a photo without a real scale hides it (and its toggle),
+  // and the magnifier must not stay off for it.
+  const lensEnabled = !!currentImage && !(canMeasure && rulerActive) && canHover();
   const outOfStock = variant.availableStock <= 0;
   const hasDiscount = variant.originalPrice > variant.price;
   const hasGroupDiscount = (variant.discountPercent ?? 0) > 0;
@@ -299,20 +302,24 @@ const VariantDetailPage: React.FC = () => {
 
               {images.length > 1 && (
                 <>
-                  <button
-                    className="vdp-nav-btn vdp-nav-btn--prev"
-                    onClick={() => setSelectedImage(i => (i - 1 + images.length) % images.length)}
-                    aria-label={t('product.previousImage')}
-                  >
-                    <FaChevronLeft size={13} />
-                  </button>
-                  <button
-                    className="vdp-nav-btn vdp-nav-btn--next"
-                    onClick={() => setSelectedImage(i => (i + 1) % images.length)}
-                    aria-label={t('product.nextImage')}
-                  >
-                    <FaChevronRight size={13} />
-                  </button>
+                  <IconTooltip label={t('product.previousImage')}>
+                    <button
+                      className="vdp-nav-btn vdp-nav-btn--prev"
+                      onClick={() => setSelectedImage(i => (i - 1 + images.length) % images.length)}
+                      aria-label={t('product.previousImage')}
+                    >
+                      <FaChevronLeft size={13} />
+                    </button>
+                  </IconTooltip>
+                  <IconTooltip label={t('product.nextImage')}>
+                    <button
+                      className="vdp-nav-btn vdp-nav-btn--next"
+                      onClick={() => setSelectedImage(i => (i + 1) % images.length)}
+                      aria-label={t('product.nextImage')}
+                    >
+                      <FaChevronRight size={13} />
+                    </button>
+                  </IconTooltip>
 
                   <div className="vdp-dots">
                     {images.map((_, i) => (

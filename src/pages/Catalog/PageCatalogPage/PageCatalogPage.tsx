@@ -15,6 +15,7 @@ import { useDocumentMeta } from '../../../hooks/useDocumentMeta';
 import type { StorefrontPageDetail } from '../../../types';
 import { isSafeHttpUrl } from '../../../utils/safeUrl';
 import PageLoader from '../../../components/common/ScissorsLoader/PageLoader';
+import IconTooltip from '../../../components/common/IconTooltip/IconTooltip';
 
 const PAGE_SIZE = 12;
 const EMPTY_FACETS = { minPrice: 0, maxPrice: 0, widths: [], materials: [] };
@@ -125,9 +126,11 @@ const PageCatalogPage: React.FC = () => {
         <div className={`filter-panel${sidebarOpen ? ' is-open' : ''}`}>
           <div className="filter-panel-header">
             <span className="filter-panel-title">{t('filters.title')}</span>
-            <button className="filter-panel-close" onClick={() => setSidebarOpen(false)}>
-              <FaTimes size={16} />
-            </button>
+            <IconTooltip label={t('filters.close')}>
+              <button className="filter-panel-close" onClick={() => setSidebarOpen(false)} aria-label={t('filters.close')}>
+                <FaTimes size={16} />
+              </button>
+            </IconTooltip>
           </div>
           <div className="filter-panel-body">
             <ProductFilters

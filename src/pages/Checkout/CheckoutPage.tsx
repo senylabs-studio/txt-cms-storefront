@@ -276,8 +276,8 @@ const CheckoutPage: React.FC = () => {
 
                 {shippingRate && shippingRate.freeShippingThreshold && !shippingRate.isFree && (
                   <div className="small text-muted mb-2">
-                    {t('checkout.freeShippingFrom', { threshold: shippingRate.freeShippingThreshold.toFixed(2) })}{' '}
-                    {t('checkout.missingForFree', { missing: (shippingRate.freeShippingThreshold - cartSubtotal).toFixed(2) })}
+                    {t('checkout.freeShippingFrom', { threshold: formatPrice(shippingRate.freeShippingThreshold) })}{' '}
+                    {t('checkout.missingForFree', { missing: formatPrice(shippingRate.freeShippingThreshold - cartSubtotal) })}
                   </div>
                 )}
                 {shippingRate === null && shippingId && (

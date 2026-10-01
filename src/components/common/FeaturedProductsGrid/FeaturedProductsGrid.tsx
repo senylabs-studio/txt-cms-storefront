@@ -10,6 +10,7 @@ import { getApiErrorMessage } from '../../../utils/apiError';
 import { getDiscountInfo, formatPrice } from '../../../utils/pricing';
 import NewBadge from '../NewBadge/NewBadge';
 import { variantCardTitle } from '../../../utils/variantTitle';
+import { blockLinkProps } from '../../../utils/blockLinkProps';
 import './FeaturedProductsGrid.css';
 
 /** Shape the backend resolves variantIds/productIds into server-side (see homeService.ts). */
@@ -144,7 +145,10 @@ const FeaturedProductsGrid: React.FC<Props> = ({ title, variants = [], products 
       </Row>
       {moreLink && (
         <div className="text-center mt-4">
-          <Link to={moreLink.to} className="btn btn-outline-primary">{moreLink.label}</Link>
+          {/* The Ofertas page can point at an external URL: only a site path is a router link. */}
+          {moreLink.to.startsWith('/') && !moreLink.to.startsWith('//')
+            ? <Link to={moreLink.to} className="btn btn-outline-primary">{moreLink.label}</Link>
+            : <a {...blockLinkProps(moreLink.to)} className="btn btn-outline-primary">{moreLink.label}</a>}
         </div>
       )}
     </Container>

@@ -176,10 +176,10 @@
     "subtotal": "Subtotal",
     "total": "Total",
     "processing": "Processant...",
-    "pay": "Pagar €{{amount}}",
+    "pay": "Pagar {{amount}}",
     "notAvailable": "No disponible",
-    "freeShippingFrom": "Enviament gratuït a partir de €{{threshold}}",
-    "missingForFree": "(et falten €{{missing}})",
+    "freeShippingFrom": "Enviament gratuït a partir de {{threshold}}",
+    "missingForFree": "(et falten {{missing}})",
     "noShippingRate": "No hi ha tarifa d'enviament disponible per a aquest país. Contacta amb nosaltres.",
     "paymentError": "Error processant el pagament",
     "initError": "Error en iniciar el pagament",
@@ -424,6 +424,7 @@
     "seeAllOffers": "Veure totes les ofertes"
   },
   "filters": {
+    "close": "Tancar filtres",
     "title": "Filtres",
     "sortBy": "Ordenar per",
     "default": "Per defecte",

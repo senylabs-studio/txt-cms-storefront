@@ -176,10 +176,10 @@
     "subtotal": "Subtotal",
     "total": "Total",
     "processing": "Procesando...",
-    "pay": "Pagar €{{amount}}",
+    "pay": "Pagar {{amount}}",
     "notAvailable": "No disponible",
-    "freeShippingFrom": "Envío gratis a partir de €{{threshold}}",
-    "missingForFree": "(te faltan €{{missing}})",
+    "freeShippingFrom": "Envío gratis a partir de {{threshold}}",
+    "missingForFree": "(te faltan {{missing}})",
     "noShippingRate": "No hay tarifa de envío disponible para este país. Contacta con nosotros.",
     "paymentError": "Error procesando el pago",
     "initError": "Error al iniciar el pago",
@@ -424,6 +424,7 @@
     "seeAllOffers": "Ver todas las ofertas"
   },
   "filters": {
+    "close": "Cerrar filtros",
     "title": "Filtros",
     "sortBy": "Ordenar por",
     "default": "Por defecto",

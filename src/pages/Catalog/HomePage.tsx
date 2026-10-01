@@ -15,6 +15,7 @@ import { useSiteSettings } from '../../contexts/SiteSettingsContext';
 import { useDocumentMeta } from '../../hooks/useDocumentMeta';
 import './PageCatalogPage/PageCatalogPage.css';
 import ScissorsLoader from '../../components/common/ScissorsLoader/ScissorsLoader';
+import IconTooltip from '../../components/common/IconTooltip/IconTooltip';
 
 const EMPTY_FACETS: PageFilterFacets = { minPrice: 0, maxPrice: 0, widths: [], materials: [] };
 
@@ -81,9 +82,11 @@ const HomePage: React.FC = () => {
       <div className={`filter-panel${sidebarOpen ? ' is-open' : ''}`}>
         <div className="filter-panel-header">
           <span className="filter-panel-title">{t('filters.title')}</span>
-          <button className="filter-panel-close" onClick={() => setSidebarOpen(false)}>
-            <FaTimes size={16} />
-          </button>
+          <IconTooltip label={t('filters.close')}>
+            <button className="filter-panel-close" onClick={() => setSidebarOpen(false)} aria-label={t('filters.close')}>
+              <FaTimes size={16} />
+            </button>
+          </IconTooltip>
         </div>
         <div className="filter-panel-body">
           <ProductFilters
