@@ -21,6 +21,13 @@ interface Props {
 
 const SDK_LOCALE: Record<string, string> = { es: 'es-ES', ca: 'es-ES', en: 'en-GB' };
 
+// No answer from our server (connection dropped, timeout) or a 5xx: the capture may still have
+// gone through, so this is "unknown", not "failed".
+const isUnanswered = (err: unknown) => {
+  const status = (err as { response?: { status?: number } } | null)?.response?.status;
+  return status === undefined || status >= 500;
+};
+
 // PayPal inside the storefront: PayPal's own window opens over our page and the customer comes
 // back already paid — no redirect to Redsys. Renders nothing unless PayPal is configured.
 const PayPalCheckoutButton: React.FC<Props> = ({ buildRequest, disabled, onPaid, onError, onBusyChange }) => {
@@ -28,11 +35,23 @@ const PayPalCheckoutButton: React.FC<Props> = ({ buildRequest, disabled, onPaid,
   const [config, setConfig] = useState<PayPalConfig | null>(null);
   // The PayPal order of the attempt in progress — onCancel/onError don't receive it.
   const currentOrderId = useRef<string | null>(null);
+  // While the capture is in flight the attempt must not be cancelled: the server may be
+  // creating the order from that very cart.
+  const capturing = useRef(false);
+  // createOrder already showed why it failed; PayPal's onError must not replace that message.
+  const createFailed = useRef(false);
 
   useEffect(() => {
     let active = true;
     getPayPalConfig().then(c => { if (active) setConfig(c); }).catch(() => { /* no PayPal button */ });
     return () => { active = false; };
+  }, []);
+
+  // Leaving the checkout with PayPal's window still open: unlock the cart, or every payment is
+  // refused as "pago en curso" until the in-flight guard expires.
+  useEffect(() => () => {
+    const id = currentOrderId.current;
+    if (id && !capturing.current) cancelPayPalOrder(id).catch(() => { /* expires by itself */ });
   }, []);
 
   if (!config?.enabled || !config.clientId) return null;
@@ -58,6 +77,7 @@ const PayPalCheckoutButton: React.FC<Props> = ({ buildRequest, disabled, onPaid,
         <PayPalOneTimePaymentButton
           disabled={disabled}
           createOrder={async () => {
+            createFailed.current = false;
             try {
               onBusyChange?.(true);
               const { payPalOrderId } = await createPayPalOrder(buildRequest());
@@ -65,13 +85,20 @@ const PayPalCheckoutButton: React.FC<Props> = ({ buildRequest, disabled, onPaid,
               return { orderId: payPalOrderId };
             } catch (err) {
               onBusyChange?.(false);
+              createFailed.current = true;
               onError(getApiErrorMessage(err, t('checkout.initError')));
-              throw err;
+              // Not the axios error itself: unhandled, the global API-error toaster would show
+              // the same message a second time.
+              throw new Error('PayPal order creation failed');
             }
           }}
           onApprove={async ({ orderId }) => {
+            capturing.current = true;
             try {
-              const result = await capturePayPalOrder(orderId);
+              // The server's capture is idempotent (an order already created is just returned),
+              // so an unanswered call is safe to repeat once.
+              const result = await capturePayPalOrder(orderId)
+                .catch(err => { if (isUnanswered(err)) return capturePayPalOrder(orderId); throw err; });
               currentOrderId.current = null;
               if (result.restart || !result.orderId) {
                 onBusyChange?.(false);
@@ -82,13 +109,16 @@ const PayPalCheckoutButton: React.FC<Props> = ({ buildRequest, disabled, onPaid,
             } catch (err) {
               currentOrderId.current = null;
               onBusyChange?.(false);
-              onError(getApiErrorMessage(err, t('checkout.paypalError')));
+              onError(isUnanswered(err) ? t('checkout.paypalUnconfirmed') : getApiErrorMessage(err, t('checkout.paypalError')));
+            } finally {
+              capturing.current = false;
             }
           }}
           onCancel={releaseAttempt}
           onError={() => {
             releaseAttempt();
-            onError(t('checkout.paypalError'));
+            if (createFailed.current) createFailed.current = false;
+            else onError(t('checkout.paypalError'));
           }}
         />
       </PayPalProvider>

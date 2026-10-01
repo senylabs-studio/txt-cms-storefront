@@ -365,6 +365,31 @@ describe('PageBlockRenderer ImageText photos and hours', () => {
     }
   });
 
+  // Regression test: a tap on a phone fires a synthetic mouseenter (never a mouseleave) and
+  // focuses the dot it hit, both of which paused the rotation — for good, on touch screens.
+  it('a tap on a dot does not stop the cross-fade', () => {
+    vi.useFakeTimers();
+    try {
+      const c = renderImageText({
+        title: 'Visítanos', imageUrl: 'fachada.jpg', variant: 'card',
+        images: [{ id: 'a', imageUrl: 'mostrador.jpg', altText: 'Mostrador' }, { id: 'c', imageUrl: 'interior.jpg', altText: 'Interior' }],
+      });
+      const imgs = () => [...c.querySelectorAll('.pbr-rotator img')];
+      const dot = c.querySelectorAll('.pbr-rotator-dots button')[1];
+
+      fireEvent.pointerDown(dot);
+      fireEvent.mouseEnter(c.querySelector('.pbr-rotator')!);
+      fireEvent.focus(dot);
+      fireEvent.click(dot);
+      expect(imgs()[1].classList.contains('is-active')).toBe(true);
+
+      act(() => { vi.advanceTimersByTime(5000); });
+      expect(imgs()[2].classList.contains('is-active')).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('showOpeningHours puts the shop hours inside the card; off by default', () => {
     settings.current = { openingHours: [{ day: 1, ranges: [{ open: '09:30', close: '13:15' }] }] };
     expect(renderImageText({ title: 'T', imageUrl: 'a.jpg', variant: 'card' }).querySelector('.pbr-hours')).toBeNull();

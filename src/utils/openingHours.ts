@@ -24,6 +24,12 @@ export type OpeningStatus =
   | { open: false; opensAt: string; inDays: number; day: number }
   | { open: false; opensAt: null };
 
+// A slot closing at midnight ("00:00", or any close not after its opening) runs to the end of the day.
+const closeMinutes = (range: OpeningHoursRange): number => {
+  const close = toMinutes(range.close);
+  return close <= toMinutes(range.open) ? 24 * 60 : close;
+};
+
 const rangesFor = (hours: OpeningHoursDay[], day: number): OpeningHoursRange[] =>
   [...(hours.find(h => h.day === day)?.ranges ?? [])].sort((a, b) => toMinutes(a.open) - toMinutes(b.open));
 
@@ -31,7 +37,7 @@ export const getOpeningStatus = (hours: OpeningHoursDay[], now: Date): OpeningSt
   const { day, minutes } = madridNow(now);
   const today = rangesFor(hours, day);
 
-  const current = today.find(r => minutes >= toMinutes(r.open) && minutes < toMinutes(r.close));
+  const current = today.find(r => minutes >= toMinutes(r.open) && minutes < closeMinutes(r));
   if (current) return { open: true, closesAt: current.close };
 
   const laterToday = today.find(r => toMinutes(r.open) > minutes);

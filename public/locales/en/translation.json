@@ -176,10 +176,10 @@
     "subtotal": "Subtotal",
     "total": "Total",
     "processing": "Processing...",
-    "pay": "Pay €{{amount}}",
+    "pay": "Pay {{amount}}",
     "notAvailable": "Not available",
-    "freeShippingFrom": "Free shipping from €{{threshold}}",
-    "missingForFree": "(€{{missing}} more for free shipping)",
+    "freeShippingFrom": "Free shipping from {{threshold}}",
+    "missingForFree": "({{missing}} more for free shipping)",
     "noShippingRate": "No shipping rate available for this country. Please contact us.",
     "paymentError": "Payment processing error",
     "initError": "Error initiating payment",
@@ -188,6 +188,7 @@
     "loadAddressesError": "Failed to load your addresses.",
     "orPayWith": "or pay with",
     "paypalDeclined": "PayPal did not accept that payment method. You have not been charged: please try again with another one.",
+    "paypalUnconfirmed": "We couldn't confirm your PayPal payment. If it went through, you'll get the order confirmation email in a few minutes and see it under My orders; please don't pay again.",
     "paypalError": "The PayPal payment could not be completed. You have not been charged."
   },
   "checkoutSuccess": {
@@ -423,6 +424,7 @@
     "seeAllOffers": "See all offers"
   },
   "filters": {
+    "close": "Close filters",
     "title": "Filters",
     "sortBy": "Sort by",
     "default": "Default",

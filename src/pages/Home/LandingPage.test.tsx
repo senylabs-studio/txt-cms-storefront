@@ -160,6 +160,17 @@ describe('LandingPage featured products in offers mode', () => {
     expect(link).toHaveAttribute('href', '/ofertas');
   });
 
+  // Regression test: an Ofertas page with an external URL came through as a router path, so the
+  // button pointed at "/https://…" inside the shop.
+  it('opens an external Ofertas URL as an external link', async () => {
+    getHomeBlocks.mockResolvedValue([offersBlock({ offersUrl: 'https://rebajas.example.com' })]);
+    renderPage();
+
+    const link = await screen.findByText('product.seeAllOffers');
+    expect(link).toHaveAttribute('href', 'https://rebajas.example.com');
+    expect(link).toHaveAttribute('target', '_blank');
+  });
+
   it('uses the link text written in the CMS', async () => {
     getHomeBlocks.mockResolvedValue([offersBlock({ buttonText: 'Todas las rebajas' })]);
     renderPage();

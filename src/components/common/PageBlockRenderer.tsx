@@ -256,6 +256,9 @@ const ImageRotator: React.FC<{ slides: { src: string; alt: string }[]; imgClassN
   const { t } = useTranslation();
   const [index, setIndex] = React.useState(0);
   const [paused, setPaused] = React.useState(false);
+  // Focus that came from a pointer (a tap or click on a dot) isn't a reason to stop: on a phone
+  // nothing would ever blur it again.
+  const pointerFocus = React.useRef(false);
   const reducedMotion = React.useMemo(
     () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true, []);
   React.useEffect(() => {
@@ -266,8 +269,13 @@ const ImageRotator: React.FC<{ slides: { src: string; alt: string }[]; imgClassN
 
   if (slides.length === 1) return <img src={slides[0].src} alt={slides[0].alt} className={imgClassName} />;
   return (
-    <div className="pbr-rotator" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}
-      onFocus={() => setPaused(true)} onBlur={() => setPaused(false)}>
+    // Hover pauses only with a real mouse: a tap fires a synthetic mouseenter with no mouseleave.
+    <div className="pbr-rotator"
+      onPointerEnter={e => { if (e.pointerType === 'mouse') setPaused(true); }}
+      onPointerLeave={e => { if (e.pointerType === 'mouse') setPaused(false); }}
+      onPointerDown={() => { pointerFocus.current = true; }}
+      onFocus={() => { if (!pointerFocus.current) setPaused(true); pointerFocus.current = false; }}
+      onBlur={() => setPaused(false)}>
       {slides.map((s, i) => (
         <img key={i} src={s.src} alt={s.alt} className={`${imgClassName}${i > 0 ? ' pbr-rotator-layer' : ''}${i === index ? ' is-active' : ''}`}
           aria-hidden={i === index ? undefined : true} />

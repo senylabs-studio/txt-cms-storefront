@@ -40,6 +40,14 @@ describe('getOpeningStatus', () => {
     expect(getOpeningStatus(SHOP, madrid('2026-10-03T21:00:00'))).toMatchObject({ open: false, opensAt: '09:30', inDays: 2, day: 1 });
   });
 
+  // Regression test: a slot closing at midnight ("00:00") has close = 0 minutes, so no time of
+  // day was ever inside it and the shop always showed as closed.
+  it('a slot closing at midnight is open until then', () => {
+    const lateShop: OpeningHoursDay[] = [{ day: 1, ranges: [{ open: '17:00', close: '00:00' }] }];
+    expect(getOpeningStatus(lateShop, madrid('2026-09-28T23:30:00'))).toEqual({ open: true, closesAt: '00:00' });
+    expect(getOpeningStatus(lateShop, madrid('2026-09-28T16:00:00'))).toMatchObject({ open: false, opensAt: '17:00', inDays: 0 });
+  });
+
   it('with no hours at all there is nothing to open', () => {
     expect(getOpeningStatus([], madrid('2026-09-28T12:00:00'))).toEqual({ open: false, opensAt: null });
   });
