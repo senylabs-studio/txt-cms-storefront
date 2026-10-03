@@ -63,7 +63,7 @@
   /* Container for the text sizes below: they follow the tile's width (cqi), so a 4-per-row tile
      (~440px) gets a readable title and a 6-per-row or phone tile keeps the compact one. */
   container-type: inline-size;
-  position: relative; display: block; aspect-ratio: 1; overflow: hidden; border-radius: 10px;
+  position: relative; display: block; aspect-ratio: 3 / 2; overflow: hidden; border-radius: 10px;
   color: #fff; text-decoration: none;
   background: color-mix(in srgb, var(--brand-color) 55%, #1c2321);
 }
@@ -84,7 +84,8 @@
   font-size: clamp(0.95rem, 7cqi, 1.9rem); line-height: 1.2; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
 }
 .pbr-mosaic-desc {
-  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 5; overflow: hidden;
+  /* 3 lines: the landscape (3:2) tile is too short for more on a 6-per-row grid. */
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden;
   margin: 0; font-size: clamp(0.8rem, 3.6cqi, 1.05rem); line-height: 1.4;
   max-height: 0; opacity: 0; transition: max-height 0.3s ease, opacity 0.25s ease, margin-top 0.3s ease;
 }

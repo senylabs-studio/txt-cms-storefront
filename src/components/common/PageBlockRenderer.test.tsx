@@ -418,10 +418,10 @@ describe('PageBlockRenderer SubPages mosaic', () => {
     expect(srcs).toEqual(['minky.webp', 'pul.jpg']);
   });
 
-  it('mosaic uses the Columnas setting (3–6) on wide screens, default 6', () => {
+  it('mosaic uses the Columnas setting (3–6) on wide screens, default 4', () => {
     const cols = (config: Record<string, unknown>) => renderSubPages(config).querySelector<HTMLElement>('.pbr-mosaic')!;
-    expect(cols({ variant: 'mosaic', columns: 4 }).style.getPropertyValue('--pbr-mosaic-cols')).toBe('4');
-    expect(cols({ variant: 'mosaic' }).style.getPropertyValue('--pbr-mosaic-cols')).toBe('6');
+    expect(cols({ variant: 'mosaic', columns: 5 }).style.getPropertyValue('--pbr-mosaic-cols')).toBe('5');
+    expect(cols({ variant: 'mosaic' }).style.getPropertyValue('--pbr-mosaic-cols')).toBe('4');
     expect(cols({ variant: 'mosaic', columns: 2 }).classList.contains('pbr-mosaic-3')).toBe(true); // clamped to 3
   });
 

@@ -17,7 +17,8 @@ import { isSafeHttpUrl } from '../../../utils/safeUrl';
 import PageLoader from '../../../components/common/ScissorsLoader/PageLoader';
 import IconTooltip from '../../../components/common/IconTooltip/IconTooltip';
 
-const PAGE_SIZE = 12;
+// 24 fills whole rows at every products-block column count (2, 3, 4 or 6).
+const PAGE_SIZE = 24;
 const EMPTY_FACETS = { minPrice: 0, maxPrice: 0, widths: [], materials: [] };
 
 const PageCatalogPage: React.FC = () => {
