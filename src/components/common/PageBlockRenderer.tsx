@@ -454,7 +454,7 @@ const BannerBlock: React.FC<{ config: BannerBlockConfig }> = ({ config }) => {
 // default 6); narrower screens cap it (see CSS). A block saved before the mosaic existed
 // (no `variant`) stored a card-grid column count (2–4), which means nothing here: default it.
 const subPagesColumns = (config: SubPagesBlockConfig): number =>
-  config.variant === 'mosaic' ? Math.min(6, Math.max(3, config.columns ?? 6)) : 6;
+  config.variant === 'mosaic' ? Math.min(6, Math.max(3, config.columns ?? 4)) : 6;
 
 const SubPagesBlock: React.FC<{ config: SubPagesBlockConfig; pageDetail?: StorefrontPageDetail }> = ({ config, pageDetail }) => {
   const children = pageDetail?.childPages ?? [];
