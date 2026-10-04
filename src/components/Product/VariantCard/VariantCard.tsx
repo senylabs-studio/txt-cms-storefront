@@ -9,6 +9,7 @@ import { useAuthGate } from '../../../contexts/AuthGateContext';
 import FavoriteButton from '../../common/FavoriteButton/FavoriteButton';
 import NotifyMeButton from '../../common/NotifyMeButton/NotifyMeButton';
 import { formatComposition } from '../../../utils/composition';
+import CompositionText from './CompositionText';
 import { getDiscountInfo, formatPrice } from '../../../utils/pricing';
 import { getApiErrorMessage } from '../../../utils/apiError';
 import '../ProductCard/ProductCard.css';
@@ -71,7 +72,9 @@ const VariantCard: React.FC<Props> = ({ variant }) => {
       <div className="product-card-img-wrapper">
         <Link to={`/variant/${variant.id}`} className="product-card-img-link">
           {variant.thumbnailUrl
-            ? <Card.Img variant="top" src={variant.thumbnailUrl} alt={variant.thumbnailAltText || variant.name} className="product-card-img" />
+            // Lazy: a catalog can list hundreds of cards (a phone loads more as it scrolls), and
+            // only the ones near the screen should download.
+            ? <Card.Img variant="top" src={variant.thumbnailUrl} alt={variant.thumbnailAltText || variant.name} className="product-card-img" loading="lazy" decoding="async" />
             : <div className="product-card-placeholder">📦</div>}
           {(hasDiscount || variant.isNew) && (
             <div className="product-card-badges">
@@ -97,7 +100,7 @@ const VariantCard: React.FC<Props> = ({ variant }) => {
           <div className="product-card-meta text-muted">
             {variant.width && variant.width > 0 && <span>{t('product.width')}: {variant.width} {t('product.widthUnit')}</span>}
             {variant.width && variant.width > 0 && variant.composition && <span className="mx-1">·</span>}
-            {formatComposition(variant.composition) && <span>{formatComposition(variant.composition)}</span>}
+            {formatComposition(variant.composition) && <CompositionText json={variant.composition} />}
           </div>
         )}
 
