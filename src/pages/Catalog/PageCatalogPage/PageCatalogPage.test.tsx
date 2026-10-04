@@ -221,3 +221,44 @@ describe('PageCatalogPage cargar más (phone)', () => {
     expect(screen.getByRole('button', { name: /catalog\.loadMore\.button/ })).toBeEnabled();
   });
 });
+
+// Page and filters are in the URL, so browser back from a product returns to the same list.
+describe('PageCatalogPage state from the URL', () => {
+  const renderAt = (url: string) => {
+    const router = createMemoryRouter(
+      [{ path: '/pages/:slug', element: <PageCatalogPage /> }],
+      { initialEntries: [url] },
+    );
+    render(<RouterProvider router={router} />);
+    return router;
+  };
+
+  it('loads the page and filters the URL names', async () => {
+    getPageBySlug.mockReset().mockResolvedValue(pageDetail({ type: 'Category' }));
+    renderAt('/pages/moda?todos=1&pagina=3&orderBy=price_asc&onlyNew=1&minPrice=5');
+    await screen.findByText('Telas de lino');
+    expect(getPageBySlug).toHaveBeenCalledWith('moda', 3, 24, { orderBy: 'price_asc', onlyNew: true, minPrice: 5 }, true);
+  });
+
+  it('on a phone, reloads every page listed before in one request, then goes on from there', async () => {
+    window.scrollTo = vi.fn() as unknown as typeof window.scrollTo;
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: query.includes('max-width'), media: query, addEventListener: vi.fn(), removeEventListener: vi.fn(),
+    })) as unknown as typeof window.matchMedia;
+    try {
+      getPageBySlug.mockReset().mockResolvedValue(pageDetail({ type: 'Category', totalItems: 200, totalPages: 9 }));
+      const router = renderAt('/pages/moda?todos=1&pagina=3');
+
+      fireEvent.click(await screen.findByRole('button', { name: /catalog\.loadMore\.button/ }));
+      await screen.findByText('catalog.loadMore.progress');
+      await new Promise(r => setTimeout(r, 0));
+
+      expect(getPageBySlug).toHaveBeenNthCalledWith(1, 'moda', 1, 72, {}, true);
+      expect(getPageBySlug).toHaveBeenNthCalledWith(2, 'moda', 4, 24, {}, true);
+      expect(getPageBySlug).toHaveBeenCalledTimes(2); // ?pagina=4 set by "Cargar más" doesn't reload
+      expect(router.state.location.search).toContain('pagina=4');
+    } finally {
+      delete (window as { matchMedia?: unknown }).matchMedia;
+    }
+  });
+});

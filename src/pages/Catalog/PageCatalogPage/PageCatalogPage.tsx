@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Container, Alert, Button, Badge, Spinner } from 'react-bootstrap';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigationType, useParams, useSearchParams } from 'react-router-dom';
 import { FaFilter, FaTimes } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import './PageCatalogPage.css';
@@ -23,6 +23,42 @@ import CatalogPagination from '../../../components/common/CatalogPagination/Cata
 // 24 fills whole rows at every products-block column count (2, 3, 4 or 6).
 const PAGE_SIZE = 24;
 const EMPTY_FACETS = { minPrice: 0, maxPrice: 0, widths: [], materials: [] };
+// A phone coming back to a list reloads at most this many pages of it in one request.
+const MAX_RESTORED_PAGES = 20;
+
+// The filters' URL params (same names as the API's).
+const FILTER_PARAMS = ['minPrice', 'maxPrice', 'width', 'material', 'orderBy', 'onlyNew'] as const;
+
+const numberParam = (params: URLSearchParams, name: string): number | undefined => {
+  const raw = params.get(name);
+  if (raw === null || raw === '') return undefined;
+  const value = Number(raw);
+  return Number.isFinite(value) ? value : undefined;
+};
+
+const filtersFromParams = (params: URLSearchParams): PageFilters => {
+  const filters: PageFilters = {};
+  const minPrice = numberParam(params, 'minPrice');
+  const maxPrice = numberParam(params, 'maxPrice');
+  const width = numberParam(params, 'width');
+  if (minPrice !== undefined) filters.minPrice = minPrice;
+  if (maxPrice !== undefined) filters.maxPrice = maxPrice;
+  if (width !== undefined) filters.width = width;
+  if (params.get('material')) filters.material = params.get('material')!;
+  if (params.get('orderBy')) filters.orderBy = params.get('orderBy')!;
+  if (params.get('onlyNew') === '1') filters.onlyNew = true;
+  return filters;
+};
+
+const writeFilterParams = (params: URLSearchParams, f: PageFilters) => {
+  for (const name of FILTER_PARAMS) params.delete(name);
+  if (f.minPrice !== undefined) params.set('minPrice', String(f.minPrice));
+  if (f.maxPrice !== undefined) params.set('maxPrice', String(f.maxPrice));
+  if (f.width !== undefined) params.set('width', String(f.width));
+  if (f.material) params.set('material', f.material);
+  if (f.orderBy) params.set('orderBy', f.orderBy);
+  if (f.onlyNew) params.set('onlyNew', '1');
+};
 
 const PageCatalogPage: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -38,44 +74,71 @@ const PageCatalogPage: React.FC = () => {
     pageDetail ? `${pageDetail.name} — ${siteName}` : siteName,
     pageDetail?.description || undefined,
   );
-  const [currentPage, setCurrentPage] = useState(1);
-  const [filters, setFilters] = useState<PageFilters>({});
+  // Page and filters live in the URL too, so coming back from a product (browser back) lands on
+  // the same page, with the same filters — and, on a phone, with every page loaded so far.
+  const currentPage = Math.max(1, Number.parseInt(searchParams.get('pagina') ?? '', 10) || 1);
+  const filtersKey = FILTER_PARAMS.map(p => searchParams.get(p) ?? '').join('|');
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- rebuilt only when a filter param changes (filtersKey), not on every render
+  const filters = useMemo(() => filtersFromParams(searchParams), [filtersKey]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Phones get "Cargar más" instead of page numbers: each tap adds the next page's products
-  // under the ones already shown. `items` is what's listed so far; `loadedPage` the last page in it.
+  // under the ones already shown, and ?pagina= counts the pages listed.
   const isMobile = useMediaQuery('(max-width: 767.98px)');
   const [items, setItems] = useState<StorefrontPageItem[]>([]);
-  const [loadedPage, setLoadedPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
   const [loadMoreError, setLoadMoreError] = useState(false);
+  // What `items` holds: for which slug/view/filters/language, and how many pages. "Cargar más"
+  // updates ?pagina= itself, so the load below must not fetch those pages again.
+  const listedRef = useRef({ key: '', pages: 0 });
   // Bumped by every main load, so a "Cargar más" still in flight for the previous slug, view,
   // filters or language is dropped instead of appended.
   const loadGeneration = useRef(0);
+  const listKey = [slug, showAll, filtersKey, i18n.language].join('#');
+  const location = useLocation();
+  const navigationType = useNavigationType();
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- another category (slug) or view starts from page 1 with no filters
-    setCurrentPage(1);
-    setFilters({});
-  }, [slug, showAll]);
+  const updateParams = (change: (p: URLSearchParams) => void, replace = false) => {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      change(next);
+      return next;
+    }, { replace });
+  };
+  const setCurrentPage = (page: number) =>
+    updateParams(p => { if (page > 1) p.set('pagina', String(page)); else p.delete('pagina'); });
 
+  // Crossing the phone breakpoint (rotating a tablet) changes what ?pagina= means (page shown vs
+  // pages listed): start over from the first page.
+  const wasMobile = useRef(isMobile);
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- crossing the phone breakpoint (e.g. rotating a tablet) switches between page numbers and "Cargar más": start over from page 1
-    setCurrentPage(1);
+    if (wasMobile.current === isMobile) return;
+    wasMobile.current = isMobile;
+    updateParams(p => p.delete('pagina'), true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only on a breakpoint change
   }, [isMobile]);
 
   useEffect(() => {
     if (!slug) return;
+    if (isMobile && listedRef.current.key === listKey && listedRef.current.pages === currentPage) return;
     let cancelled = false;
     loadGeneration.current += 1;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- data load: setState here is the loading/reset step of an external fetch
+    // On a phone, back on a list with several pages loaded: all of them in one request (capped).
+    const pages = isMobile ? Math.min(currentPage, MAX_RESTORED_PAGES) : 1;
+    // A new page or view (pushed onto history) starts at the top; ScrollToTop only reacts to a new
+    // path, not a new query string. Done here rather than in the click handler so the position
+    // saved for the entry being left stays where the visitor was.
+    if (navigationType === 'PUSH') window.scrollTo(0, 0);
     setLoading(true);
     setNotFound(false);
     setLoadingMore(false);
     setLoadMoreError(false);
-    getPageBySlug(slug, currentPage, PAGE_SIZE, filters, showAll)
+    const request = isMobile
+      ? getPageBySlug(slug, 1, PAGE_SIZE * pages, filters, showAll)
+      : getPageBySlug(slug, currentPage, PAGE_SIZE, filters, showAll);
+    request
       .then(data => {
         if (cancelled) return;
         // externalUrl is an override independent of Type (NavMenu/MobileMenuSheet honor it the
@@ -90,7 +153,8 @@ const PageCatalogPage: React.FC = () => {
         }
         setPageDetail(data);
         setItems(data.items);
-        setLoadedPage(currentPage);
+        listedRef.current = { key: listKey, pages };
+        if (isMobile && pages !== currentPage) updateParams(p => p.set('pagina', String(pages)), true);
       })
       .catch(e => { if (cancelled) return; if (e?.response?.status === 404) setNotFound(true); })
       .finally(() => { if (!cancelled) setLoading(false); });
@@ -99,23 +163,51 @@ const PageCatalogPage: React.FC = () => {
     // filter-state's slower response could resolve after a newer one's and silently overwrite the
     // page with the wrong category's products while the URL/filters still show the new state.
     return () => { cancelled = true; };
-  }, [slug, currentPage, filters, showAll, i18n.language]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- listKey covers slug, view, filters and language; navigationType is read, not a trigger
+  }, [listKey, currentPage, isMobile]);
+
+  // Back from a product: once the list is there again, return to where the visitor was. The
+  // position is kept per history entry; the browser can't restore it itself because the list
+  // isn't rendered yet when it tries.
+  // The path too: a tab's first page always has the key "default", whichever page it is.
+  const scrollKey = `catalog-scroll:${location.key}:${location.pathname}`;
+  // A layout effect so the listener is gone before the next page's (shorter) DOM goes in: a
+  // passive effect's cleanup runs after paint, by when the browser had clamped the scroll and the
+  // listener had saved that instead of where the visitor was.
+  useLayoutEffect(() => {
+    // Not while the loader shows: the page is short then and the browser clamps the scroll.
+    if (loading) return;
+    let frame = 0;
+    const save = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        try { sessionStorage.setItem(scrollKey, String(Math.round(window.scrollY))); } catch { /* storage unavailable: no restore */ }
+      });
+    };
+    window.addEventListener('scroll', save, { passive: true });
+    return () => { cancelAnimationFrame(frame); window.removeEventListener('scroll', save); };
+  }, [scrollKey, loading]);
+  const restoredKey = useRef<string | null>(null);
+  useEffect(() => {
+    if (loading || navigationType !== 'POP' || restoredKey.current === scrollKey) return;
+    restoredKey.current = scrollKey;
+    let saved: string | null = null;
+    try { saved = sessionStorage.getItem(scrollKey); } catch { /* storage unavailable */ }
+    if (saved) window.scrollTo(0, Number(saved));
+  }, [loading, navigationType, scrollKey]);
 
   const setShowAll = (value: boolean) => {
-    setSearchParams(prev => {
-      const next = new URLSearchParams(prev);
-      if (value) next.set('todos', '1');
-      else next.delete('todos');
-      return next;
+    updateParams(p => {
+      for (const name of [...FILTER_PARAMS, 'pagina']) p.delete(name);
+      if (value) p.set('todos', '1');
+      else p.delete('todos');
     });
-    // ScrollToTop only reacts to a new path, not a new query string.
-    window.scrollTo(0, 0);
   };
 
   const loadMore = () => {
     if (!slug || loadingMore) return;
     const generation = loadGeneration.current;
-    const next = loadedPage + 1;
+    const next = listedRef.current.pages + 1;
     setLoadingMore(true);
     setLoadMoreError(false);
     getPageBySlug(slug, next, PAGE_SIZE, filters, showAll)
@@ -126,16 +218,21 @@ const PageCatalogPage: React.FC = () => {
           const listed = new Set(prev.map(i => i.variantId));
           return [...prev, ...data.items.filter(i => !listed.has(i.variantId))];
         });
-        setLoadedPage(next);
+        listedRef.current = { key: listKey, pages: next };
+        // Replace, not push: back should leave the list, not unload it a page at a time.
+        updateParams(p => p.set('pagina', String(next)), true);
         setPageDetail(prev => prev && { ...prev, totalItems: data.totalItems, totalPages: data.totalPages });
       })
       .catch(() => { if (generation === loadGeneration.current) setLoadMoreError(true); })
       .finally(() => { if (generation === loadGeneration.current) setLoadingMore(false); });
   };
 
+  // Replaces the history entry: going back shouldn't step through every filter tried.
   const handleFilterChange = (f: PageFilters) => {
-    setFilters(f);
-    setCurrentPage(1);
+    updateParams(p => {
+      p.delete('pagina');
+      writeFilterParams(p, f);
+    }, true);
   };
 
   if (loading) return (
