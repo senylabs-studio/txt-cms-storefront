@@ -38,7 +38,7 @@ import { sectionAnchor, tocSections, type TocSection } from '../../utils/tableOf
 import { useSiteSettings } from '../../contexts/SiteSettingsContext';
 import { dayName, getOpeningStatus, groupOpeningHours, madridNow, rowLabel, type OpeningStatus } from '../../utils/openingHours';
 import { pageUrl } from '../../utils/pageUrl';
-import VariantCard from '../Product/VariantCard/VariantCard';
+import PageItemsGrid from './PageItemsGrid';
 import FeaturedProductsGrid from './FeaturedProductsGrid/FeaturedProductsGrid';
 import { bannerTextPlacement } from '../../utils/bannerTextPlacement';
 import { blockLinkProps } from '../../utils/blockLinkProps';
@@ -479,37 +479,8 @@ const SubPagesBlock: React.FC<{ config: SubPagesBlockConfig; pageDetail?: Storef
 
 const ProductsBlock: React.FC<{ config: ProductsBlockConfig; pageDetail?: StorefrontPageDetail }> = ({ config, pageDetail }) => {
   const items = pageDetail?.items ?? [];
-  const cols = config.columns ?? 4;
   if (items.length === 0) return null;
-  return (
-    <div className="pbr-products" style={buildStyle(config.style)}>
-      <Row xs={2} sm={cols > 2 ? 3 : 2} md={cols} className="g-3">
-        {items.map(item => (
-          <Col key={item.variantId}>
-            <VariantCard variant={{
-              id: item.variantId,
-              name: item.name,
-              code: item.code,
-              price: item.price,
-              originalPrice: item.originalPrice,
-              discountPercent: 0,
-              availableStock: item.availableStock,
-              thumbnailUrl: item.thumbnailUrl,
-              typeValue: item.typeValue,
-              productId: item.productId,
-              productName: item.productName || item.name,
-              productSlug: item.productSlug,
-              width: item.width,
-              composition: item.composition,
-              minQuantity: item.minQuantity,
-              quantityStep: item.quantityStep,
-              isNew: item.isNew,
-            }} />
-          </Col>
-        ))}
-      </Row>
-    </div>
-  );
+  return <PageItemsGrid items={items} columns={config.columns ?? 4} style={buildStyle(config.style)} />;
 };
 
 const FeaturedProductsBlock: React.FC<{ config: FeaturedProductsBlockConfig }> = ({ config }) => {

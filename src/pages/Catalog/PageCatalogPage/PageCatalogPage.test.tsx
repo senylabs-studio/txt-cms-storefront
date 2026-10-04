@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import PageCatalogPage from './PageCatalogPage';
 import type { StorefrontPageDetail } from '../../../types';
@@ -19,6 +19,9 @@ vi.mock('../../../components/Layout/MainLayout', () => ({
 vi.mock('../../../components/common/PageBlockRenderer', () => ({ default: () => <div /> }));
 vi.mock('../../../components/common/ContactForm/ContactForm', () => ({ default: () => <div /> }));
 vi.mock('../../../components/common/ProductFilters', () => ({ default: () => <div /> }));
+vi.mock('../../../components/Product/VariantCard/VariantCard', () => ({
+  default: ({ variant }: { variant: { id: number } }) => <div data-testid={`variant-card-${variant.id}`} />,
+}));
 vi.mock('../SitemapPage/SitemapContent', () => ({ default: () => <div /> }));
 
 vi.mock('../../../contexts/SiteSettingsContext', () => ({
@@ -88,5 +91,79 @@ describe('PageCatalogPage externalUrl', () => {
 
     expect(await screen.findByText('Telas de lino')).toBeInTheDocument();
     expect((window as unknown as { __pwned?: boolean }).__pwned).toBeUndefined();
+  });
+});
+
+// "Ver todos los productos": a category page whose subpages add products shows a button that
+// lists them all (?todos=1), a page at a time.
+describe('PageCatalogPage ver todos', () => {
+  window.scrollTo = vi.fn() as unknown as typeof window.scrollTo; // jsdom doesn't implement it
+  const item = { variantId: 7, productId: 1, name: 'Bambula azul', productName: 'Bambula', code: 'B1', variantSlug: 'b1', productSlug: 'bambula', price: 9, originalPrice: 9, availableStock: 3, order: 1, isNew: false, width: 140, minQuantity: 1, quantityStep: 1 };
+
+  const renderAt = (url: string) => {
+    const router = createMemoryRouter(
+      [{ path: '/pages/:slug', element: <PageCatalogPage /> }],
+      { initialEntries: [url] },
+    );
+    render(<RouterProvider router={router} />);
+    return router;
+  };
+
+  it('shows no button when the backend sends no count', async () => {
+    getPageBySlug.mockReset().mockResolvedValue(pageDetail({ type: 'Category' }));
+    renderAt('/pages/moda');
+    await screen.findByText('Telas de lino');
+    expect(screen.queryByText('catalog.allProducts.button')).not.toBeInTheDocument();
+  });
+
+  it('switches to the all-products view through the URL and asks the backend for it', async () => {
+    getPageBySlug.mockReset().mockImplementation((_slug: string, _p: number, _s: number, _f: unknown, all: boolean) =>
+      Promise.resolve(all
+        ? pageDetail({ type: 'Category', allProductsCount: 1, items: [item as never], totalItems: 1 })
+        : pageDetail({ type: 'Category', allProductsCount: 1 })));
+    const router = renderAt('/pages/moda');
+
+    fireEvent.click(await screen.findByText('catalog.allProducts.button'));
+
+    expect(await screen.findByText('catalog.allProducts.back')).toBeInTheDocument();
+    expect(router.state.location.search).toBe('?todos=1');
+    expect(getPageBySlug).toHaveBeenLastCalledWith('moda', 1, 24, {}, true);
+    expect(screen.getByTestId('variant-card-7')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('catalog.allProducts.back'));
+    expect(await screen.findByText('catalog.allProducts.button')).toBeInTheDocument();
+    expect(router.state.location.search).toBe('');
+  });
+});
+
+// A section page with only its subpages mosaic showed filters and page numbers for its own
+// products, which it never displays without a Products block.
+describe('PageCatalogPage without a Products block', () => {
+  it('shows neither filters nor page numbers in the normal view', async () => {
+    getPageBySlug.mockReset().mockResolvedValue(pageDetail({ type: 'Category', totalItems: 100, totalPages: 5 }));
+    const router = createMemoryRouter(
+      [{ path: '/pages/:slug', element: <PageCatalogPage /> }],
+      { initialEntries: ['/pages/moda'] },
+    );
+    render(<RouterProvider router={router} />);
+
+    await screen.findByText('Telas de lino');
+    expect(screen.queryByRole('button', { name: /filters\.title/ })).not.toBeInTheDocument();
+    expect(screen.queryByText('5')).not.toBeInTheDocument();
+  });
+
+  it('shows them when the page has a Products block', async () => {
+    getPageBySlug.mockReset().mockResolvedValue(pageDetail({
+      type: 'Category', totalItems: 100, totalPages: 5,
+      blocks: [{ id: 1, type: 'Products', config: {}, sortOrder: 0 } as never],
+    }));
+    const router = createMemoryRouter(
+      [{ path: '/pages/:slug', element: <PageCatalogPage /> }],
+      { initialEntries: ['/pages/moda'] },
+    );
+    render(<RouterProvider router={router} />);
+
+    expect(await screen.findByRole('button', { name: /filters\.title/ })).toBeInTheDocument();
+    expect(screen.getByText('5')).toBeInTheDocument();
   });
 });

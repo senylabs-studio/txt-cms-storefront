@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Pagination, Alert, Button, Badge } from 'react-bootstrap';
-import { useParams } from 'react-router-dom';
+import { Container, Alert, Button, Badge } from 'react-bootstrap';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { FaFilter, FaTimes } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import './PageCatalogPage.css';
@@ -16,6 +16,8 @@ import type { StorefrontPageDetail } from '../../../types';
 import { isSafeHttpUrl } from '../../../utils/safeUrl';
 import PageLoader from '../../../components/common/ScissorsLoader/PageLoader';
 import IconTooltip from '../../../components/common/IconTooltip/IconTooltip';
+import PageItemsGrid from '../../../components/common/PageItemsGrid';
+import CatalogPagination from '../../../components/common/CatalogPagination/CatalogPagination';
 
 // 24 fills whole rows at every products-block column count (2, 3, 4 or 6).
 const PAGE_SIZE = 24;
@@ -24,6 +26,10 @@ const EMPTY_FACETS = { minPrice: 0, maxPrice: 0, widths: [], materials: [] };
 const PageCatalogPage: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
+  // "Ver todos": a category page listing its own products and every subpage's. In the URL so it
+  // can be shared and the browser's back button returns to the subpages.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const showAll = searchParams.get('todos') === '1';
   const { siteName } = useSiteSettings();
 
   const [pageDetail, setPageDetail] = useState<StorefrontPageDetail | null>(null);
@@ -38,10 +44,10 @@ const PageCatalogPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- another category (slug) starts from page 1 with no filters
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- another category (slug) or view starts from page 1 with no filters
     setCurrentPage(1);
     setFilters({});
-  }, [slug]);
+  }, [slug, showAll]);
 
   useEffect(() => {
     if (!slug) return;
@@ -49,7 +55,7 @@ const PageCatalogPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- data load: setState here is the loading/reset step of an external fetch
     setLoading(true);
     setNotFound(false);
-    getPageBySlug(slug, currentPage, PAGE_SIZE, filters)
+    getPageBySlug(slug, currentPage, PAGE_SIZE, filters, showAll)
       .then(data => {
         if (cancelled) return;
         // externalUrl is an override independent of Type (NavMenu/MobileMenuSheet honor it the
@@ -71,7 +77,18 @@ const PageCatalogPage: React.FC = () => {
     // filter-state's slower response could resolve after a newer one's and silently overwrite the
     // page with the wrong category's products while the URL/filters still show the new state.
     return () => { cancelled = true; };
-  }, [slug, currentPage, filters, i18n.language]);
+  }, [slug, currentPage, filters, showAll, i18n.language]);
+
+  const setShowAll = (value: boolean) => {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      if (value) next.set('todos', '1');
+      else next.delete('todos');
+      return next;
+    });
+    // ScrollToTop only reacts to a new path, not a new query string.
+    window.scrollTo(0, 0);
+  };
 
   const handleFilterChange = (f: PageFilters) => {
     setFilters(f);
@@ -105,7 +122,10 @@ const PageCatalogPage: React.FC = () => {
   const facets = pageDetail.facets ?? EMPTY_FACETS;
   const hasActiveFilters = filters.minPrice !== undefined || filters.maxPrice !== undefined
     || filters.width !== undefined || !!filters.material || !!filters.orderBy || !!filters.onlyNew;
-  const showFilters = pageDetail.totalItems > 0 || hasActiveFilters;
+  // The normal view only lists products through a Products block: a section page with only its
+  // subpages mosaic showed filters and page numbers for products it never displays.
+  const listsItems = showAll || (pageDetail.blocks ?? []).some(b => b.type === 'Products');
+  const showFilters = listsItems && (pageDetail.totalItems > 0 || hasActiveFilters);
 
   const CONTENT_TYPES = ['TermsAndConditions', 'PrivacyPolicy', 'WithdrawalPolicy', 'DeliveryInfo', 'CookiePolicy', 'Content', 'Form'];
   const isContentPage = CONTENT_TYPES.includes(pageDetail.type);
@@ -156,47 +176,60 @@ const PageCatalogPage: React.FC = () => {
           </div>
         ) : (
           <>
-            <div className="d-flex align-items-center justify-content-between my-4">
-              <h1 className="fw-bold mb-0">{pageDetail.name}</h1>
+            <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 my-4">
+              <div>
+                <h1 className="fw-bold mb-0">{pageDetail.name}</h1>
+                {showAll && pageDetail.allProductsCount != null && (
+                  <p className="text-muted mb-0">{t('catalog.allProducts.subtitle', { count: pageDetail.allProductsCount })}</p>
+                )}
+              </div>
 
-              {showFilters && (
-                <Button
-                  variant={activeCount > 0 ? 'primary' : 'outline-secondary'}
-                  size="sm"
-                  className="d-flex align-items-center gap-2"
-                  onClick={() => setSidebarOpen(true)}
-                >
-                  <FaFilter />
-                  {t('filters.title')}
-                  {activeCount > 0 && (
-                    <Badge bg="light" text="dark" pill>{activeCount}</Badge>
-                  )}
-                </Button>
-              )}
+              <div className="d-flex align-items-center gap-2">
+                {showAll ? (
+                  <Button variant="outline-secondary" size="sm" onClick={() => setShowAll(false)}>
+                    {t('catalog.allProducts.back')}
+                  </Button>
+                ) : pageDetail.allProductsCount != null && (
+                  <Button variant="outline-primary" size="sm" onClick={() => setShowAll(true)}>
+                    {t('catalog.allProducts.button', { count: pageDetail.allProductsCount })}
+                  </Button>
+                )}
+
+                {showFilters && (
+                  <Button
+                    variant={activeCount > 0 ? 'primary' : 'outline-secondary'}
+                    size="sm"
+                    className="d-flex align-items-center gap-2"
+                    onClick={() => setSidebarOpen(true)}
+                  >
+                    <FaFilter />
+                    {t('filters.title')}
+                    {activeCount > 0 && (
+                      <Badge bg="light" text="dark" pill>{activeCount}</Badge>
+                    )}
+                  </Button>
+                )}
+              </div>
             </div>
 
-            {pageDetail.totalItems === 0 && hasActiveFilters && (
+            {listsItems && pageDetail.totalItems === 0 && hasActiveFilters && (
               <p className="text-muted py-5 text-center">
                 {t('filters.noResults')}
               </p>
             )}
 
-            {pageDetail.blocks?.length > 0 && (
+            {showAll ? (
+              // Just the products: the page's blocks (intro, subpages mosaic…) belong to its
+              // normal view, and its Products block may not exist on a section page.
+              pageDetail.items.length > 0
+                ? <PageItemsGrid items={pageDetail.items} />
+                : !hasActiveFilters && <p className="text-muted py-5 text-center">{t('catalog.allProducts.empty')}</p>
+            ) : pageDetail.blocks?.length > 0 && (
               <PageBlockRenderer blocks={pageDetail.blocks} pageDetail={pageDetail} />
             )}
 
-            {pageDetail.totalPages > 1 && (
-              <div className="d-flex justify-content-center mt-4">
-                <Pagination>
-                  <Pagination.Prev disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)} />
-                  {Array.from({ length: pageDetail.totalPages }, (_, i) => (
-                    <Pagination.Item key={i + 1} active={i + 1 === currentPage} onClick={() => setCurrentPage(i + 1)}>
-                      {i + 1}
-                    </Pagination.Item>
-                  ))}
-                  <Pagination.Next disabled={currentPage === pageDetail.totalPages} onClick={() => setCurrentPage(p => p + 1)} />
-                </Pagination>
-              </div>
+            {listsItems && (
+              <CatalogPagination currentPage={currentPage} totalPages={pageDetail.totalPages} onChange={setCurrentPage} />
             )}
           </>
         )}
