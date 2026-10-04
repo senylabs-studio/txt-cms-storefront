@@ -498,6 +498,11 @@
       "subtitle": "Todos los productos de la sección · {{count}}",
       "back": "Ver subcategorías",
       "empty": "Esta sección todavía no tiene productos."
+    },
+    "loadMore": {
+      "button": "Cargar más",
+      "progress": "{{shown}} de {{total}} productos",
+      "error": "No se han podido cargar más productos. Inténtalo de nuevo."
     }
   },
   "sitemap": {

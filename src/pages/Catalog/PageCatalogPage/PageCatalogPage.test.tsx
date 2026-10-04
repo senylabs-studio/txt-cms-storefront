@@ -1,5 +1,5 @@
 import React from 'react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import PageCatalogPage from './PageCatalogPage';
@@ -165,5 +165,59 @@ describe('PageCatalogPage without a Products block', () => {
 
     expect(await screen.findByRole('button', { name: /filters\.title/ })).toBeInTheDocument();
     expect(screen.getByText('5')).toBeInTheDocument();
+  });
+});
+
+// Phones: "Cargar más" adds the next page's products under the ones already listed, instead of
+// page numbers.
+describe('PageCatalogPage cargar más (phone)', () => {
+  const card = (id: number) => ({ variantId: id, productId: 1, name: `V${id}`, productName: 'P', code: `V${id}`, variantSlug: `v${id}`, productSlug: 'p', price: 9, originalPrice: 9, availableStock: 3, order: id, isNew: false, width: 140, minQuantity: 1, quantityStep: 1 });
+  const pageOf = (page: number) => pageDetail({
+    type: 'Category', allProductsCount: 3, totalItems: 3, totalPages: 2, currentPage: page,
+    items: (page === 1 ? [card(1), card(2)] : [card(3)]) as never[],
+  });
+
+  beforeEach(() => {
+    window.scrollTo = vi.fn() as unknown as typeof window.scrollTo;
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: query.includes('max-width'), media: query,
+      addEventListener: vi.fn(), removeEventListener: vi.fn(),
+    })) as unknown as typeof window.matchMedia;
+  });
+  afterEach(() => {
+    delete (window as { matchMedia?: unknown }).matchMedia;
+  });
+
+  const renderAll = () => {
+    const router = createMemoryRouter(
+      [{ path: '/pages/:slug', element: <PageCatalogPage /> }],
+      { initialEntries: ['/pages/moda?todos=1'] },
+    );
+    render(<RouterProvider router={router} />);
+  };
+
+  it('appends the next page and hides the button once everything is listed', async () => {
+    getPageBySlug.mockReset().mockImplementation((_s: string, page: number) => Promise.resolve(pageOf(page)));
+    renderAll();
+
+    fireEvent.click(await screen.findByRole('button', { name: /catalog\.loadMore\.button/ }));
+
+    expect(await screen.findByTestId('variant-card-3')).toBeInTheDocument();
+    expect(screen.getByTestId('variant-card-1')).toBeInTheDocument(); // still there: appended, not replaced
+    expect(getPageBySlug).toHaveBeenLastCalledWith('moda', 2, 24, {}, true);
+    expect(screen.queryByRole('button', { name: /catalog\.loadMore\.button/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('list', { name: /pagination/i })).not.toBeInTheDocument();
+  });
+
+  it('keeps what is listed and says so when loading more fails', async () => {
+    getPageBySlug.mockReset().mockImplementation((_s: string, page: number) =>
+      page === 1 ? Promise.resolve(pageOf(1)) : Promise.reject(new Error('network')));
+    renderAll();
+
+    fireEvent.click(await screen.findByRole('button', { name: /catalog\.loadMore\.button/ }));
+
+    expect(await screen.findByText('catalog.loadMore.error')).toBeInTheDocument();
+    expect(screen.getByTestId('variant-card-2')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /catalog\.loadMore\.button/ })).toBeEnabled();
   });
 });

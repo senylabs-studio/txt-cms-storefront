@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Container, Alert, Button, Badge } from 'react-bootstrap';
+import React, { useEffect, useRef, useState } from 'react';
+import { Container, Alert, Button, Badge, Spinner } from 'react-bootstrap';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { FaFilter, FaTimes } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
@@ -12,7 +12,8 @@ import SitemapContent from '../SitemapPage/SitemapContent';
 import { getPageBySlug, type PageFilters } from '../../../services/pageService';
 import { useSiteSettings } from '../../../contexts/SiteSettingsContext';
 import { useDocumentMeta } from '../../../hooks/useDocumentMeta';
-import type { StorefrontPageDetail } from '../../../types';
+import type { StorefrontPageDetail, StorefrontPageItem } from '../../../types';
+import { useMediaQuery } from '../../../hooks/useMediaQuery';
 import { isSafeHttpUrl } from '../../../utils/safeUrl';
 import PageLoader from '../../../components/common/ScissorsLoader/PageLoader';
 import IconTooltip from '../../../components/common/IconTooltip/IconTooltip';
@@ -43,6 +44,17 @@ const PageCatalogPage: React.FC = () => {
   const [notFound, setNotFound] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Phones get "Cargar más" instead of page numbers: each tap adds the next page's products
+  // under the ones already shown. `items` is what's listed so far; `loadedPage` the last page in it.
+  const isMobile = useMediaQuery('(max-width: 767.98px)');
+  const [items, setItems] = useState<StorefrontPageItem[]>([]);
+  const [loadedPage, setLoadedPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [loadMoreError, setLoadMoreError] = useState(false);
+  // Bumped by every main load, so a "Cargar más" still in flight for the previous slug, view,
+  // filters or language is dropped instead of appended.
+  const loadGeneration = useRef(0);
+
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- another category (slug) or view starts from page 1 with no filters
     setCurrentPage(1);
@@ -50,11 +62,19 @@ const PageCatalogPage: React.FC = () => {
   }, [slug, showAll]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- crossing the phone breakpoint (e.g. rotating a tablet) switches between page numbers and "Cargar más": start over from page 1
+    setCurrentPage(1);
+  }, [isMobile]);
+
+  useEffect(() => {
     if (!slug) return;
     let cancelled = false;
+    loadGeneration.current += 1;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- data load: setState here is the loading/reset step of an external fetch
     setLoading(true);
     setNotFound(false);
+    setLoadingMore(false);
+    setLoadMoreError(false);
     getPageBySlug(slug, currentPage, PAGE_SIZE, filters, showAll)
       .then(data => {
         if (cancelled) return;
@@ -69,6 +89,8 @@ const PageCatalogPage: React.FC = () => {
           return;
         }
         setPageDetail(data);
+        setItems(data.items);
+        setLoadedPage(currentPage);
       })
       .catch(e => { if (cancelled) return; if (e?.response?.status === 404) setNotFound(true); })
       .finally(() => { if (!cancelled) setLoading(false); });
@@ -88,6 +110,27 @@ const PageCatalogPage: React.FC = () => {
     });
     // ScrollToTop only reacts to a new path, not a new query string.
     window.scrollTo(0, 0);
+  };
+
+  const loadMore = () => {
+    if (!slug || loadingMore) return;
+    const generation = loadGeneration.current;
+    const next = loadedPage + 1;
+    setLoadingMore(true);
+    setLoadMoreError(false);
+    getPageBySlug(slug, next, PAGE_SIZE, filters, showAll)
+      .then(data => {
+        if (generation !== loadGeneration.current) return;
+        // Skips one already listed, should the catalog have shifted between the two requests.
+        setItems(prev => {
+          const listed = new Set(prev.map(i => i.variantId));
+          return [...prev, ...data.items.filter(i => !listed.has(i.variantId))];
+        });
+        setLoadedPage(next);
+        setPageDetail(prev => prev && { ...prev, totalItems: data.totalItems, totalPages: data.totalPages });
+      })
+      .catch(() => { if (generation === loadGeneration.current) setLoadMoreError(true); })
+      .finally(() => { if (generation === loadGeneration.current) setLoadingMore(false); });
   };
 
   const handleFilterChange = (f: PageFilters) => {
@@ -119,6 +162,8 @@ const PageCatalogPage: React.FC = () => {
     );
   }
 
+  // What the products grid / Products block list: on a phone, every page loaded so far.
+  const listed: StorefrontPageDetail = isMobile ? { ...pageDetail, items } : pageDetail;
   const facets = pageDetail.facets ?? EMPTY_FACETS;
   const hasActiveFilters = filters.minPrice !== undefined || filters.maxPrice !== undefined
     || filters.width !== undefined || !!filters.material || !!filters.orderBy || !!filters.onlyNew;
@@ -221,16 +266,31 @@ const PageCatalogPage: React.FC = () => {
             {showAll ? (
               // Just the products: the page's blocks (intro, subpages mosaic…) belong to its
               // normal view, and its Products block may not exist on a section page.
-              pageDetail.items.length > 0
-                ? <PageItemsGrid items={pageDetail.items} />
+              listed.items.length > 0
+                ? <PageItemsGrid items={listed.items} />
                 : !hasActiveFilters && <p className="text-muted py-5 text-center">{t('catalog.allProducts.empty')}</p>
             ) : pageDetail.blocks?.length > 0 && (
-              <PageBlockRenderer blocks={pageDetail.blocks} pageDetail={pageDetail} />
+              <PageBlockRenderer blocks={pageDetail.blocks} pageDetail={listed} />
             )}
 
-            {listsItems && (
+            {listsItems && (isMobile ? (
+              listed.items.length < pageDetail.totalItems && (
+                <div className="d-flex flex-column align-items-center gap-2 mt-4">
+                  {loadMoreError && (
+                    <Alert variant="danger" className="mb-0 py-2 text-center">{t('catalog.loadMore.error')}</Alert>
+                  )}
+                  <Button variant="outline-primary" onClick={loadMore} disabled={loadingMore} className="d-flex align-items-center gap-2">
+                    {loadingMore && <Spinner animation="border" size="sm" />}
+                    {t('catalog.loadMore.button')}
+                  </Button>
+                  <small className="text-muted">
+                    {t('catalog.loadMore.progress', { shown: listed.items.length, total: pageDetail.totalItems })}
+                  </small>
+                </div>
+              )
+            ) : (
               <CatalogPagination currentPage={currentPage} totalPages={pageDetail.totalPages} onChange={setCurrentPage} />
-            )}
+            ))}
           </>
         )}
       </Container>
