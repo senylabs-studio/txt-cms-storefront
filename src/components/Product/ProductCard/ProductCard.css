@@ -36,5 +36,9 @@
 .product-card-meta { font-size: 0.72rem; line-height: 1.4; margin-bottom: 0.35rem; }
 /* each fact stays whole ("100% Algodón" used to split across lines on phones) */
 .product-card-meta > span { white-space: nowrap; }
+.product-card-meta abbr[title] { text-decoration: none; cursor: help; }
+/* the composition's last resort: break between materials, never inside one */
+.product-card-meta > .product-card-composition.is-wrapping { white-space: normal; }
+.product-card-composition-part { white-space: nowrap; }
 .product-card-group-price { font-size: 0.75rem; }
 .variant-qty-input { min-width: 0; }

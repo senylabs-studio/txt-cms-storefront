@@ -122,7 +122,12 @@ const PageCatalogPage: React.FC = () => {
 
   useEffect(() => {
     if (!slug) return;
-    if (isMobile && listedRef.current.key === listKey && listedRef.current.pages === currentPage) return;
+    // Already listed: ?pagina= was set by "Cargar más", or lags behind it (the router applies the
+    // URL change after the next page may already have loaded by itself).
+    if (isMobile && listedRef.current.key === listKey && listedRef.current.pages >= currentPage) {
+      setLoading(false);
+      return;
+    }
     let cancelled = false;
     loadGeneration.current += 1;
     // On a phone, back on a list with several pages loaded: all of them in one request (capped).
@@ -153,7 +158,8 @@ const PageCatalogPage: React.FC = () => {
         }
         setPageDetail(data);
         setItems(data.items);
-        listedRef.current = { key: listKey, pages };
+        // Only a phone's list grows by pages; a desktop page must never pass for one.
+        listedRef.current = isMobile ? { key: listKey, pages } : { key: '', pages: 0 };
         if (isMobile && pages !== currentPage) updateParams(p => p.set('pagina', String(pages)), true);
       })
       .catch(e => { if (cancelled) return; if (e?.response?.status === 404) setNotFound(true); })
@@ -171,30 +177,38 @@ const PageCatalogPage: React.FC = () => {
   // isn't rendered yet when it tries.
   // The path too: a tab's first page always has the key "default", whichever page it is.
   const scrollKey = `catalog-scroll:${location.key}:${location.pathname}`;
-  // A layout effect so the listener is gone before the next page's (shorter) DOM goes in: a
-  // passive effect's cleanup runs after paint, by when the browser had clamped the scroll and the
-  // listener had saved that instead of where the visitor was.
-  useLayoutEffect(() => {
-    // Not while the loader shows: the page is short then and the browser clamps the scroll.
-    if (loading) return;
-    let frame = 0;
-    const save = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        try { sessionStorage.setItem(scrollKey, String(Math.round(window.scrollY))); } catch { /* storage unavailable: no restore */ }
-      });
-    };
-    window.addEventListener('scroll', save, { passive: true });
-    return () => { cancelAnimationFrame(frame); window.removeEventListener('scroll', save); };
-  }, [scrollKey, loading]);
+  // Back here: once the list is rendered again, return to the saved position. A layout effect,
+  // declared before the saving one below, so it reads the position before that one records the
+  // current (not yet restored) scroll for this entry.
   const restoredKey = useRef<string | null>(null);
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (loading || navigationType !== 'POP' || restoredKey.current === scrollKey) return;
     restoredKey.current = scrollKey;
     let saved: string | null = null;
     try { saved = sessionStorage.getItem(scrollKey); } catch { /* storage unavailable */ }
     if (saved) window.scrollTo(0, Number(saved));
   }, [loading, navigationType, scrollKey]);
+
+  // Saving: a layout effect so the listener is gone before the next page's (shorter) DOM goes in —
+  // a passive effect's cleanup runs after paint, by when the browser had clamped the scroll and the
+  // listener had saved that instead of where the visitor was.
+  useLayoutEffect(() => {
+    // Not while the loader shows: the page is short then and the browser clamps the scroll.
+    if (loading) return;
+    const write = () => {
+      try { sessionStorage.setItem(scrollKey, String(Math.round(window.scrollY))); } catch { /* storage unavailable: no restore */ }
+    };
+    // Right away too: "Cargar más" replaces the history entry (a new key), and the visitor may
+    // not scroll again before leaving.
+    write();
+    let frame = 0;
+    const save = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(write);
+    };
+    window.addEventListener('scroll', save, { passive: true });
+    return () => { cancelAnimationFrame(frame); window.removeEventListener('scroll', save); };
+  }, [scrollKey, loading]);
 
   const setShowAll = (value: boolean) => {
     updateParams(p => {
@@ -204,8 +218,11 @@ const PageCatalogPage: React.FC = () => {
     });
   };
 
+  // A ref as well as the state: the observer can fire again before a re-render shows loadingMore.
+  const loadingMoreRef = useRef(false);
   const loadMore = () => {
-    if (!slug || loadingMore) return;
+    if (!slug || loadingMoreRef.current) return;
+    loadingMoreRef.current = true;
     const generation = loadGeneration.current;
     const next = listedRef.current.pages + 1;
     setLoadingMore(true);
@@ -224,8 +241,28 @@ const PageCatalogPage: React.FC = () => {
         setPageDetail(prev => prev && { ...prev, totalItems: data.totalItems, totalPages: data.totalPages });
       })
       .catch(() => { if (generation === loadGeneration.current) setLoadMoreError(true); })
-      .finally(() => { if (generation === loadGeneration.current) setLoadingMore(false); });
+      .finally(() => {
+        loadingMoreRef.current = false;
+        if (generation === loadGeneration.current) setLoadingMore(false);
+      });
   };
+
+  // On a phone the next products load by themselves as the end of the list nears (600px ahead,
+  // so they're usually in before the visitor gets there). It stops after a failed load — the
+  // visitor retries with the button — and where IntersectionObserver is missing the button is
+  // all there is. Re-armed after every load, so a list still too short to fill the screen keeps
+  // loading.
+  const autoLoad = typeof IntersectionObserver !== 'undefined';
+  const [sentinel, setSentinel] = useState<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!sentinel || loadingMore || loadMoreError) return;
+    const observer = new IntersectionObserver(entries => {
+      if (entries.some(e => e.isIntersecting)) loadMore();
+    }, { rootMargin: '600px 0px' });
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- loadMore is rebuilt each render; re-armed on every load instead
+  }, [sentinel, loadingMore, loadMoreError, items.length]);
 
   // Replaces the history entry: going back shouldn't step through every filter tried.
   const handleFilterChange = (f: PageFilters) => {
@@ -372,14 +409,20 @@ const PageCatalogPage: React.FC = () => {
 
             {listsItems && (isMobile ? (
               listed.items.length < pageDetail.totalItems && (
-                <div className="d-flex flex-column align-items-center gap-2 mt-4">
+                <div ref={autoLoad ? setSentinel : undefined} className="d-flex flex-column align-items-center gap-2 mt-4">
                   {loadMoreError && (
                     <Alert variant="danger" className="mb-0 py-2 text-center">{t('catalog.loadMore.error')}</Alert>
                   )}
-                  <Button variant="outline-primary" onClick={loadMore} disabled={loadingMore} className="d-flex align-items-center gap-2">
-                    {loadingMore && <Spinner animation="border" size="sm" />}
-                    {t('catalog.loadMore.button')}
-                  </Button>
+                  {!autoLoad || loadMoreError ? (
+                    <Button variant="outline-primary" onClick={loadMore} disabled={loadingMore} className="d-flex align-items-center gap-2">
+                      {loadingMore && <Spinner animation="border" size="sm" />}
+                      {loadMoreError ? t('catalog.loadMore.retry') : t('catalog.loadMore.button')}
+                    </Button>
+                  ) : loadingMore && (
+                    <Spinner animation="border" size="sm" role="status">
+                      <span className="visually-hidden">{t('catalog.loadMore.loading')}</span>
+                    </Spinner>
+                  )}
                   <small className="text-muted">
                     {t('catalog.loadMore.progress', { shown: listed.items.length, total: pageDetail.totalItems })}
                   </small>

@@ -209,6 +209,29 @@ describe('PageCatalogPage cargar más (phone)', () => {
     expect(screen.queryByRole('list', { name: /pagination/i })).not.toBeInTheDocument();
   });
 
+  it('loads the next page by itself when the end of the list comes near', async () => {
+    let fire: (() => void) | undefined;
+    const original = window.IntersectionObserver;
+    window.IntersectionObserver = class {
+      constructor(cb: (e: { isIntersecting: boolean }[]) => void) { fire = () => cb([{ isIntersecting: true }]); }
+      observe() {}
+      disconnect() {}
+    } as unknown as typeof IntersectionObserver;
+    try {
+      getPageBySlug.mockReset().mockImplementation((_s: string, page: number) => Promise.resolve(pageOf(page)));
+      renderAll();
+      await screen.findByTestId('variant-card-2');
+      expect(screen.queryByRole('button', { name: /catalog\.loadMore\.button/ })).not.toBeInTheDocument();
+
+      fire!();
+
+      expect(await screen.findByTestId('variant-card-3')).toBeInTheDocument();
+      expect(getPageBySlug).toHaveBeenLastCalledWith('moda', 2, 24, {}, true);
+    } finally {
+      window.IntersectionObserver = original;
+    }
+  });
+
   it('keeps what is listed and says so when loading more fails', async () => {
     getPageBySlug.mockReset().mockImplementation((_s: string, page: number) =>
       page === 1 ? Promise.resolve(pageOf(1)) : Promise.reject(new Error('network')));
@@ -218,7 +241,7 @@ describe('PageCatalogPage cargar más (phone)', () => {
 
     expect(await screen.findByText('catalog.loadMore.error')).toBeInTheDocument();
     expect(screen.getByTestId('variant-card-2')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /catalog\.loadMore\.button/ })).toBeEnabled();
+    expect(screen.getByRole('button', { name: /catalog\.loadMore\.retry/ })).toBeEnabled();
   });
 });
 

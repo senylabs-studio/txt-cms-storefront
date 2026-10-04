@@ -502,7 +502,9 @@
     "loadMore": {
       "button": "Load more",
       "progress": "{{shown}} of {{total}} products",
-      "error": "Couldn't load more products. Please try again."
+      "error": "Couldn't load more products. Please try again.",
+      "retry": "Try again",
+      "loading": "Loading more products…"
     }
   },
   "sitemap": {
