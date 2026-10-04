@@ -502,7 +502,9 @@
     "loadMore": {
       "button": "Carregar-ne més",
       "progress": "{{shown}} de {{total}} productes",
-      "error": "No s'han pogut carregar més productes. Torna-ho a provar."
+      "error": "No s'han pogut carregar més productes. Torna-ho a provar.",
+      "retry": "Torna-ho a provar",
+      "loading": "Carregant més productes…"
     }
   },
   "sitemap": {
