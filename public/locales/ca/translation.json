@@ -492,6 +492,17 @@
       "noResultsFor": "No s'han trobat productes per a \"{{search}}\".",
       "viewAll": "Veure tots",
       "loadError": "No s'han pogut carregar els productes."
+    },
+    "allProducts": {
+      "button": "Veure tots els productes ({{count}})",
+      "subtitle": "Tots els productes de la secció · {{count}}",
+      "back": "Veure subcategories",
+      "empty": "Aquesta secció encara no té productes."
+    },
+    "loadMore": {
+      "button": "Carregar-ne més",
+      "progress": "{{shown}} de {{total}} productes",
+      "error": "No s'han pogut carregar més productes. Torna-ho a provar."
     }
   },
   "sitemap": {

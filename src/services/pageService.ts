@@ -20,7 +20,9 @@ export const getPageBySlug = async (
   slug: string,
   page = 1,
   pageSize = 12,
-  filters: PageFilters = {}
+  filters: PageFilters = {},
+  /** "Ver todos": a category page's products and those of every subpage under it. */
+  all = false
 ): Promise<StorefrontPageDetail> => {
   const params: Record<string, string | number> = { page, pageSize };
   if (filters.minPrice !== undefined) params.minPrice = filters.minPrice;
@@ -29,6 +31,7 @@ export const getPageBySlug = async (
   if (filters.material) params.material = filters.material;
   if (filters.orderBy) params.orderBy = filters.orderBy;
   if (filters.onlyNew) params.onlyNew = 'true';
+  if (all) params.all = 'true';
   const res = await apiClient.get(`/storefront/pages/${slug}`, { params });
   return res.data;
 };

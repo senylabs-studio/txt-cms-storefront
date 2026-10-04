@@ -631,6 +631,9 @@ export interface StorefrontPageDetail {
   blocks: StorefrontPageBlock[];
   childPages: StorefrontChildPage[];
   facets?: PageFilterFacets;
+  /** Products in the "ver todos" view (this page's and all its subpages'); null — no button —
+   *  unless it's a category page whose subpages add products to its own. */
+  allProductsCount?: number | null;
 }
 
 export interface PaginatedResponse<T> {

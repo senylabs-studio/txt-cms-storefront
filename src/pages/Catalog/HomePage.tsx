@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Form, InputGroup, Button, Pagination, Badge, Alert } from 'react-bootstrap';
+import { Container, Row, Col, Form, InputGroup, Button, Badge, Alert } from 'react-bootstrap';
 import { FaSearch, FaFilter, FaTimes } from 'react-icons/fa';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +16,7 @@ import { useDocumentMeta } from '../../hooks/useDocumentMeta';
 import './PageCatalogPage/PageCatalogPage.css';
 import ScissorsLoader from '../../components/common/ScissorsLoader/ScissorsLoader';
 import IconTooltip from '../../components/common/IconTooltip/IconTooltip';
+import CatalogPagination from '../../components/common/CatalogPagination/CatalogPagination';
 
 const EMPTY_FACETS: PageFilterFacets = { minPrice: 0, maxPrice: 0, widths: [], materials: [] };
 
@@ -149,19 +150,7 @@ const HomePage: React.FC = () => {
           </Row>
         )}
 
-        {totalPages > 1 && (
-          <div className="d-flex justify-content-center mt-4">
-            <Pagination>
-              <Pagination.Prev disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)} />
-              {Array.from({ length: totalPages }, (_, i) => (
-                <Pagination.Item key={i + 1} active={i + 1 === currentPage} onClick={() => setCurrentPage(i + 1)}>
-                  {i + 1}
-                </Pagination.Item>
-              ))}
-              <Pagination.Next disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)} />
-            </Pagination>
-          </div>
-        )}
+        <CatalogPagination currentPage={currentPage} totalPages={totalPages} onChange={setCurrentPage} />
       </Container>
     </MainLayout>
   );

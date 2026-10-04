@@ -492,6 +492,17 @@
       "noResultsFor": "No products found for \"{{search}}\".",
       "viewAll": "View all",
       "loadError": "Failed to load the products."
+    },
+    "allProducts": {
+      "button": "View all products ({{count}})",
+      "subtitle": "All products in this section · {{count}}",
+      "back": "View subcategories",
+      "empty": "This section has no products yet."
+    },
+    "loadMore": {
+      "button": "Load more",
+      "progress": "{{shown}} of {{total}} products",
+      "error": "Couldn't load more products. Please try again."
     }
   },
   "sitemap": {
