@@ -402,6 +402,7 @@
     "alsoBought": "Qui va comprar això també va comprar",
     "youMightAlsoLike": "També et pot interessar",
     "recentlyViewed": "Vistos recentment",
+    "goesWith": "Combina amb",
     "reviewCount": "({{count}} ressenyes)",
     "reviewsTitle": "Ressenyes de clients",
     "noReviews": "Aquest producte encara no té ressenyes.",

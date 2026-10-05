@@ -402,6 +402,7 @@
     "alsoBought": "Customers who bought this also bought",
     "youMightAlsoLike": "You might also like",
     "recentlyViewed": "Recently viewed",
+    "goesWith": "Goes well with",
     "reviewCount": "({{count}} reviews)",
     "reviewsTitle": "Customer reviews",
     "noReviews": "This product has no reviews yet.",
