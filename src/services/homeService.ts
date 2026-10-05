@@ -121,7 +121,8 @@ export interface HomeReview {
   rating: number;
   comment: string;
   createdAt: string;
-  product: { name: string; slug: string; thumbnailUrl?: string | null } | null;
+  /** The fabric reviewed; variantId/variantName set when the review is of a variant (all new ones are). */
+  product: { name: string; slug: string; thumbnailUrl?: string | null; variantId?: number | null; variantName?: string | null } | null;
 }
 
 /** Latest good customer reviews. Empty `reviews` (fewer than 3 good ones) = nothing shown. */

@@ -281,9 +281,9 @@ const ReviewsBlock: React.FC<{ config: HomeReviewsBlockConfig }> = ({ config }) 
               <div className="home-review-footer">
                 <span className="home-review-author">{r.customerName}</span>
                 {r.product && (
-                  <Link to={`/product/${r.product.slug}`} className="home-review-product">
+                  <Link to={r.product.variantId ? `/variant/${r.product.variantId}` : `/product/${r.product.slug}`} className="home-review-product">
                     {r.product.thumbnailUrl && <img src={r.product.thumbnailUrl} alt="" loading="lazy" />}
-                    <span>{r.product.name}</span>
+                    <span>{r.product.variantName ? `${r.product.name} · ${r.product.variantName}` : r.product.name}</span>
                   </Link>
                 )}
               </div>

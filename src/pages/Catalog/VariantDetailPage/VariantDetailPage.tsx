@@ -11,7 +11,7 @@ import ImageLightbox from '../../../components/common/ImageLightbox/ImageLightbo
 import IconTooltip from '../../../components/common/IconTooltip/IconTooltip';
 import MainLayout from '../../../components/Layout/MainLayout';
 import { getVariantById, getVariantMatches, getVariantsBatch } from '../../../services/productService';
-import { getProductReviews, getMyReview, submitReview } from '../../../services/reviewService';
+import { getVariantReviews, getMyReview, submitReview } from '../../../services/reviewService';
 import VariantCard from '../../../components/Product/VariantCard/VariantCard';
 import type { StorefrontVariantDetail, StorefrontVariant, ProductReview, MyReviewStatus } from '../../../types';
 import { recordVariantView, getRecentlyViewedIds } from '../../../utils/recentlyViewed';
@@ -141,12 +141,12 @@ const VariantDetailPage: React.FC = () => {
   }, [id, i18n.language]);
 
   useEffect(() => {
-    if (!variant?.productSlug) return;
+    if (!variant?.id) return;
     let cancelled = false;
-    // "Also bought"/"recently viewed" links switch to another product without unmounting this
-    // page — everything review-related must start clean, or the previous product's reviews and
-    // (worse) the customer's own rating/comment for it would stay in the form and could be
-    // submitted as a review of this product.
+    // Reviews are per variant. Sibling/"also bought"/"recently viewed" links switch to another
+    // variant without unmounting this page — everything review-related must start clean, or the
+    // previous variant's reviews and (worse) the customer's own rating/comment for it would stay
+    // in the form and could be submitted as a review of this one.
     setReviews([]);
     setReviewsPage(1);
     setReviewsTotalPages(0);
@@ -155,14 +155,14 @@ const VariantDetailPage: React.FC = () => {
     setReviewRating(0);
     setReviewComment('');
     setReviewMsg(null);
-    getProductReviews(variant.productSlug, 1).then(r => {
+    getVariantReviews(variant.id, 1).then(r => {
       if (cancelled) return;
       setReviews(r.items);
       setReviewsTotalPages(r.totalPages);
     }).catch(err => { if (!cancelled) setReviewsError(getApiErrorMessage(err, t('product.reviewsLoadError'))); });
 
     if (isAuthenticated) {
-      getMyReview(variant.productSlug).then(status => {
+      getMyReview(variant.id).then(status => {
         if (cancelled) return;
         setMyReview(status);
         if (status.review) { setReviewRating(status.review.rating); setReviewComment(status.review.comment ?? ''); }
@@ -170,7 +170,7 @@ const VariantDetailPage: React.FC = () => {
     }
     return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps -- t only formats the load-error message; re-running would reset the review form
-  }, [variant?.productSlug, isAuthenticated]);
+  }, [variant?.id, isAuthenticated]);
 
   useEffect(() => {
     if (!variant) return;
@@ -190,21 +190,21 @@ const VariantDetailPage: React.FC = () => {
   }, [variant?.id]);
 
   const changeReviewsPage = (page: number) => {
-    if (!variant?.productSlug) return;
+    if (!variant?.id) return;
     setReviewsPage(page);
     setReviewsError('');
-    getProductReviews(variant.productSlug, page).then(r => {
+    getVariantReviews(variant.id, page).then(r => {
       setReviews(r.items);
       setVariant(prev => prev ? { ...prev, averageRating: r.averageRating ?? undefined, reviewCount: r.reviewCount } : prev);
     }).catch(err => setReviewsError(getApiErrorMessage(err, t('product.reviewsLoadError'))));
   };
 
   const handleSubmitReview = async () => {
-    if (!variant?.productSlug || reviewRating < 1) return;
+    if (!variant?.id || reviewRating < 1) return;
     setSubmittingReview(true);
     setReviewMsg(null);
     try {
-      const saved = await submitReview(variant.productSlug, reviewRating, reviewComment.trim() || undefined);
+      const saved = await submitReview(variant.id, reviewRating, reviewComment.trim() || undefined);
       setMyReview(prev => prev ? { ...prev, review: saved } : { hasPurchased: true, review: saved });
       setReviewMsg({ type: 'success', text: t('product.reviewSaved') });
       changeReviewsPage(1);
