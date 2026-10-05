@@ -1,0 +1,18 @@
+.newsletter-signup {
+  max-width: 640px;
+  margin: 0 auto;
+  text-align: center;
+}
+.newsletter-signup-icon { font-size: 2rem; color: var(--brand-text-color); margin-bottom: 0.5rem; }
+.newsletter-signup-title { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.5rem; }
+.newsletter-signup-text { margin-bottom: 1.25rem; opacity: 0.85; }
+.newsletter-signup-row { display: flex; gap: 0.5rem; }
+.newsletter-signup-row .form-control { flex: 1 1 auto; min-width: 0; }
+.newsletter-signup-row .btn { flex: 0 0 auto; }
+.newsletter-signup-consent { text-align: left; display: inline-block; margin-top: 0.6rem; font-size: 0.85rem; }
+.newsletter-signup-done { text-align: left; }
+
+@media (max-width: 575.98px) {
+  .newsletter-signup-row { flex-direction: column; }
+  .newsletter-signup-row .btn { width: 100%; }
+}

@@ -126,6 +126,10 @@
   .home-feature-desc { font-size: 0.75rem; }
 }
 
+/* ── Newsletter sign-up ─────────────────────────────────────────────────────── */
+.home-newsletter { padding: 3rem 0; }
+@media (max-width: 767.98px) { .home-newsletter { padding: 2rem 0; } }
+
 /* ── Image Grid ──────────────────────────────────────────────────────────── */
 .home-image-grid-item {
   position: relative;

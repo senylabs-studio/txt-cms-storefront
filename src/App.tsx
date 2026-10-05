@@ -32,6 +32,7 @@ import ResetPasswordPage from './pages/Auth/ResetPasswordPage';
 import GuestAccessRequestPage from './pages/Auth/GuestAccessRequestPage';
 import GuestAccessVerifyPage from './pages/Auth/GuestAccessVerifyPage';
 import UnsubscribePage from './pages/Auth/UnsubscribePage';
+import NewsletterConfirmPage from './pages/Auth/NewsletterConfirmPage';
 import AccountPage from './pages/Account/AccountPage';
 import OrdersPage from './pages/Account/OrdersPage';
 import OrderDetailPage from './pages/Account/OrderDetailPage';
@@ -70,6 +71,7 @@ function App() {
               <Route path="/guest-access" element={<GuestAccessRequestPage />} />
               <Route path="/guest-access/verify" element={<GuestAccessVerifyPage />} />
               <Route path="/unsubscribe" element={<UnsubscribePage />} />
+              <Route path="/newsletter/confirmar" element={<NewsletterConfirmPage />} />
 
               {/* Protected (Customer) */}
               <Route element={<ProtectedRoute />}>

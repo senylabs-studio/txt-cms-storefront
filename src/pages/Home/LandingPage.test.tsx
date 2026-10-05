@@ -302,3 +302,18 @@ describe('LandingPage new arrivals block', () => {
     expect(link.closest('a')).toHaveAttribute('href', '/catalog?novedades=1');
   });
 });
+
+describe('LandingPage newsletter block', () => {
+  it('shows the sign-up box with the texts from the CMS', async () => {
+    const block: StorefrontHomeBlock = {
+      id: 9, title: 'Newsletter', type: 'Newsletter', isActive: true, sortOrder: 0,
+      config: { title: 'Apúntate', text: 'Ofertas antes que nadie', buttonText: 'Quiero' },
+    };
+    getHomeBlocks.mockResolvedValue([block]);
+    renderPage();
+
+    expect(await screen.findByText('Apúntate')).toBeInTheDocument();
+    expect(screen.getByText('Ofertas antes que nadie')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Quiero' })).toBeInTheDocument();
+  });
+});

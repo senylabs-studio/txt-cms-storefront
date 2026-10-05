@@ -1,7 +1,7 @@
 import apiClient from '../apiClient';
 import type { AuthResponse } from '../types';
 
-export const register = async (data: { name: string; email: string; password: string; phone?: string; taxId?: string }): Promise<AuthResponse> => {
+export const register = async (data: { name: string; email: string; password: string; phone?: string; taxId?: string; subscribeToNewsletter?: boolean }): Promise<AuthResponse> => {
   const res = await apiClient.post('/storefront/auth/register', data);
   return res.data;
 };

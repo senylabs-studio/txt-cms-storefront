@@ -26,6 +26,11 @@ export const updatePreferredLanguage = async (languageCode: string): Promise<voi
   await apiClient.put('/storefront/profile/language', { languageCode });
 };
 
+/** "Mi cuenta" newsletter switch; off also cancels a home-page subscription with the same email. */
+export const updateNewsletterSubscription = async (subscribed: boolean): Promise<void> => {
+  await apiClient.put('/storefront/profile/newsletter', { subscribed });
+};
+
 export const addAddress = async (data: Partial<CustomerAddress>): Promise<CustomerAddress> => {
   const res = await apiClient.post('/storefront/profile/addresses', data);
   return res.data;

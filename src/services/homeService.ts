@@ -1,6 +1,6 @@
 import apiClient from '../apiClient';
 
-export type StorefrontHomeBlockType = 'Banner' | 'ImageGrid' | 'FeaturedProducts' | 'ImageText' | 'Features';
+export type StorefrontHomeBlockType = 'Banner' | 'ImageGrid' | 'FeaturedProducts' | 'ImageText' | 'Features' | 'Newsletter';
 
 export interface HomeBannerSlide {
   imageUrl?: string;
@@ -106,12 +106,22 @@ export interface HomeFeaturesBlockConfig {
   textColor?: string;
 }
 
+/** Newsletter sign-up box. Empty texts fall back to the storefront's defaults. */
+export interface HomeNewsletterBlockConfig {
+  title?: string;
+  text?: string;
+  buttonText?: string;
+  backgroundColor?: string;
+  textColor?: string;
+}
+
 export interface HomeBlockConfigMap {
   Banner: HomeBannerBlockConfig;
   ImageGrid: HomeImageGridBlockConfig;
   FeaturedProducts: HomeFeaturedProductsBlockConfig;
   ImageText: HomeImageTextBlockConfig;
   Features: HomeFeaturesBlockConfig;
+  Newsletter: HomeNewsletterBlockConfig;
 }
 
 export type HomeBlockConfig = HomeBlockConfigMap[StorefrontHomeBlockType];

@@ -19,6 +19,7 @@ import {
   type HomeImageTextBlockConfig,
   type HomeFeaturesBlockConfig,
   type HomeFeatureIcon,
+  type HomeNewsletterBlockConfig,
 } from '../../services/homeService';
 import FeaturedProductsGrid from '../../components/common/FeaturedProductsGrid/FeaturedProductsGrid';
 import { bannerTextPlacement } from '../../utils/bannerTextPlacement';
@@ -26,6 +27,7 @@ import { blockLinkProps } from '../../utils/blockLinkProps';
 import './LandingPage.css';
 import PageLoader from '../../components/common/ScissorsLoader/PageLoader';
 import BannerSlideLink from '../../components/common/BannerSlideLink/BannerSlideLink';
+import NewsletterSignup from '../../components/common/NewsletterSignup/NewsletterSignup';
 import { NEW_ARRIVALS_PARAM } from '../../utils/catalogParams';
 
 // ─── Banner (carousel) ────────────────────────────────────────────────────────
@@ -248,6 +250,15 @@ const FeaturesBlock: React.FC<{ config: HomeFeaturesBlockConfig }> = ({ config }
   );
 };
 
+// ─── Newsletter sign-up ───────────────────────────────────────────────────────
+const NewsletterBlock: React.FC<{ config: HomeNewsletterBlockConfig }> = ({ config }) => (
+  <section className="home-newsletter" style={config.textColor ? { color: config.textColor } : undefined}>
+    <Container>
+      <NewsletterSignup title={config.title} text={config.text} buttonText={config.buttonText} />
+    </Container>
+  </section>
+);
+
 // ─── Block renderer with backgroundColor wrapper ──────────────────────────────
 const BlockRenderer: React.FC<{ block: StorefrontHomeBlock }> = ({ block }) => {
   // ImageText applies its backgroundColor to its own card instead of the full-width section;
@@ -262,6 +273,7 @@ const BlockRenderer: React.FC<{ block: StorefrontHomeBlock }> = ({ block }) => {
     case 'FeaturedProducts': content = <FeaturedProductsBlock config={block.config} />; break;
     case 'ImageText':        content = <ImageTextBlock config={block.config} />; break;
     case 'Features':         content = <FeaturesBlock config={block.config} />; break;
+    case 'Newsletter':       content = <NewsletterBlock config={block.config} />; break;
     default:                 return null;
   }
 

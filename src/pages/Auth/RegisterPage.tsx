@@ -17,6 +17,7 @@ const RegisterPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
+  const [newsletter, setNewsletter] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
@@ -31,7 +32,7 @@ const RegisterPage: React.FC = () => {
     setError('');
     setFieldErrors({});
     try {
-      const data = await registerService({ name, email, password, phone: phone || undefined });
+      const data = await registerService({ name, email, password, phone: phone || undefined, subscribeToNewsletter: newsletter });
       login(data);
       navigate('/catalog', { replace: true });
     } catch (e) {
@@ -94,7 +95,7 @@ const RegisterPage: React.FC = () => {
                 <Form.Control.Feedback type="invalid">{fieldErrors.password}</Form.Control.Feedback>
               </Form.Group>
 
-              <Form.Group className="mb-4">
+              <Form.Group className="mb-3">
                 <Form.Label>{t('auth.register.phone')} <span className="text-muted">{t('auth.register.phoneOptional')}</span></Form.Label>
                 <Form.Control
                   type="tel"
@@ -103,6 +104,13 @@ const RegisterPage: React.FC = () => {
                   placeholder={t('auth.register.phonePlaceholder')}
                 />
               </Form.Group>
+
+              {/* Unticked by default: consent to marketing email must be given, not assumed (RGPD). */}
+              <Form.Check
+                id="register-newsletter" type="checkbox" className="mb-4"
+                checked={newsletter} onChange={e => setNewsletter(e.target.checked)}
+                label={t('auth.register.newsletter')}
+              />
 
               <Button type="submit" variant="primary" className="w-100" disabled={loading}>
                 {loading ? <><Spinner size="sm" animation="border" className="me-2" />{t('auth.register.loading')}</> : t('auth.register.submit')}
