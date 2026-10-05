@@ -82,7 +82,7 @@
   position: relative;
   overflow: hidden;
   border-radius: 8px;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 3 / 2; /* the page/fabric photos' own shape: they show whole */
   background: #f8f9fa;
 }
 
@@ -101,7 +101,8 @@
   right: 0;
   background: rgba(0,0,0,0.55);
   color: #fff;
-  font-size: 13px;
+  font-size: 15px;
+  font-weight: 600;
   padding: 8px 12px;
   text-align: center;
 }

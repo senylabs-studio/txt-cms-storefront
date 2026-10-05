@@ -90,13 +90,15 @@ const BannerBlock: React.FC<{ config: HomeBannerBlockConfig }> = ({ config }) =>
 const ImageGridBlock: React.FC<{ config: HomeImageGridBlockConfig }> = ({ config }) => {
   const images = config.images ?? [];
   if (images.length === 0) return null;
-  const colSize = Math.max(2, Math.floor(12 / images.length)) as 2 | 3 | 4 | 6 | 12;
+  // Up to 4 tiles share one row; more wrap 4 per row (4+3 for the 7 sections) and the last row is
+  // centered, instead of 12/n columns that left a lone tile on its own row (6+1).
+  const colSize = Math.max(3, Math.floor(12 / images.length)) as 3 | 4 | 6 | 12;
   const titleStyle: React.CSSProperties = { textAlign: config.textAlign ?? 'center' };
   if (config.textColor) titleStyle.color = config.textColor;
   return (
     <Container className="py-4">
       {config.title && <h2 className="mb-4 fw-bold" style={titleStyle}>{config.title}</h2>}
-      <Row className="g-3">
+      <Row className="g-3 justify-content-center">
         {images.map((img, i) => (
           <Col key={i} xs={6} sm={4} md={colSize}>
             {img.linkUrl ? (
