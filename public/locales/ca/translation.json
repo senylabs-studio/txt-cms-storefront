@@ -441,7 +441,8 @@
     "reviewsLoadError": "No s'han pogut carregar les ressenyes.",
     "cancelAdd": "Cancel·lar",
     "new": "Nou",
-    "seeAllOffers": "Veure totes les ofertes"
+    "seeAllOffers": "Veure totes les ofertes",
+    "seeAllNew": "Veure totes les novetats"
   },
   "filters": {
     "close": "Tancar filtres",

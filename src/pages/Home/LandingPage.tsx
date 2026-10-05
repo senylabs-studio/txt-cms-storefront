@@ -26,6 +26,7 @@ import { blockLinkProps } from '../../utils/blockLinkProps';
 import './LandingPage.css';
 import PageLoader from '../../components/common/ScissorsLoader/PageLoader';
 import BannerSlideLink from '../../components/common/BannerSlideLink/BannerSlideLink';
+import { NEW_ARRIVALS_PARAM } from '../../utils/catalogParams';
 
 // ─── Banner (carousel) ────────────────────────────────────────────────────────
 // The subtitle has its own fixed max-width + auto margins (see LandingPage.css) so it reads as a
@@ -133,7 +134,9 @@ const ImageGridBlock: React.FC<{ config: HomeImageGridBlockConfig }> = ({ config
 
 // ─── Featured Products ────────────────────────────────────────────────────────
 // In offers mode the backend picks the variants and, while the Ofertas page is visible, sends its
-// URL for a "see all offers" link. Nothing on sale → no cards → the grid renders nothing at all.
+// URL for a "see all offers" link. In new mode it picks the newest products' variants, and the
+// link goes to the catalog filtered to new arrivals. Nothing on sale / nothing new → no cards →
+// the grid renders nothing at all.
 const FeaturedProductsBlock: React.FC<{ config: HomeFeaturedProductsBlockConfig }> = ({ config }) => {
   const { t } = useTranslation();
   return (
@@ -145,7 +148,9 @@ const FeaturedProductsBlock: React.FC<{ config: HomeFeaturedProductsBlockConfig 
       titleColor={config.textColor}
       moreLink={config.source === 'offers' && config.offersUrl
         ? { to: config.offersUrl, label: config.buttonText?.trim() || t('product.seeAllOffers') }
-        : undefined}
+        : config.source === 'new'
+          ? { to: `/catalog?${NEW_ARRIVALS_PARAM}=1`, label: config.buttonText?.trim() || t('product.seeAllNew') }
+          : undefined}
     />
   );
 };

@@ -441,7 +441,8 @@
     "reviewsLoadError": "Failed to load the reviews.",
     "cancelAdd": "Cancel",
     "new": "New",
-    "seeAllOffers": "See all offers"
+    "seeAllOffers": "See all offers",
+    "seeAllNew": "See all new arrivals"
   },
   "filters": {
     "close": "Close filters",

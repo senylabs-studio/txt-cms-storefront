@@ -54,7 +54,7 @@ export interface HomeFeaturedProductsBlockConfig {
   variants?: HomeFeaturedItem[];
   products?: HomeFeaturedItem[];
   /** Offers mode ('offers'): the variants are a random pick of those on sale, chosen by the backend. */
-  source?: 'manual' | 'offers';
+  source?: 'manual' | 'offers' | 'new';
   /** Offers mode: link to the Ofertas page, set by the backend only while that page is visible. */
   offersUrl?: string | null;
   /** Offers mode: text for that link; empty = the default "see all offers". */

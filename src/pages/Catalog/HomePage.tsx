@@ -17,6 +17,7 @@ import './PageCatalogPage/PageCatalogPage.css';
 import ScissorsLoader from '../../components/common/ScissorsLoader/ScissorsLoader';
 import IconTooltip from '../../components/common/IconTooltip/IconTooltip';
 import CatalogPagination from '../../components/common/CatalogPagination/CatalogPagination';
+import { NEW_ARRIVALS_PARAM } from '../../utils/catalogParams';
 
 const EMPTY_FACETS: PageFilterFacets = { minPrice: 0, maxPrice: 0, widths: [], materials: [] };
 
@@ -38,7 +39,8 @@ const HomePage: React.FC = () => {
   useEffect(() => {
     setSearch(searchParams.get('search') ?? '');
   }, [searchParams]);
-  const [filters, setFilters] = useState<PageFilters>({});
+  // ?novedades=1 (the home "new arrivals" block's link) opens with the "only new" filter on.
+  const [filters, setFilters] = useState<PageFilters>(() => searchParams.get(NEW_ARRIVALS_PARAM) === '1' ? { onlyNew: true } : {});
   const [currentPage, setCurrentPage] = useState(1);
   const debouncedSearch = useDebounce(search, 400);
 
@@ -58,14 +60,27 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-    if (debouncedSearch) setSearchParams({ search: debouncedSearch });
-    else setSearchParams({});
+    // Only the search term lives here; keep the rest of the query (e.g. ?novedades=1).
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      if (debouncedSearch) next.set('search', debouncedSearch);
+      else next.delete('search');
+      return next;
+    });
   // eslint-disable-next-line react-hooks/exhaustive-deps -- setSearchParams changes identity on every navigation, so listing it would loop; sync only when the debounced search changes
   }, [debouncedSearch]);
 
   const handleFilterChange = (f: PageFilters) => {
     setFilters(f);
     setCurrentPage(1);
+    // Turning "only new" off drops ?novedades=1 too, so a reload doesn't switch it back on.
+    if (!f.onlyNew && searchParams.has(NEW_ARRIVALS_PARAM)) {
+      setSearchParams(prev => {
+        const next = new URLSearchParams(prev);
+        next.delete(NEW_ARRIVALS_PARAM);
+        return next;
+      });
+    }
   };
 
   const activeCount = [

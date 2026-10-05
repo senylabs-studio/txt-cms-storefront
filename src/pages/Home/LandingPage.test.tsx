@@ -288,3 +288,17 @@ describe('LandingPage features strip', () => {
     expect((document.querySelector('.home-features') as HTMLElement).style.getPropertyValue('--home-features-cols')).toBe('2');
   });
 });
+
+describe('LandingPage new arrivals block', () => {
+  it('links to the catalog filtered to new arrivals, with the default text when none is set', async () => {
+    const block: StorefrontHomeBlock = {
+      id: 8, title: 'Novedades', type: 'FeaturedProducts', isActive: true, sortOrder: 0,
+      config: { title: 'Novedades', source: 'new', variants: [{ id: 1, name: 'Coralina' } as never], products: [] },
+    };
+    getHomeBlocks.mockResolvedValue([block]);
+    renderPage();
+
+    const link = await screen.findByText('product.seeAllNew');
+    expect(link.closest('a')).toHaveAttribute('href', '/catalog?novedades=1');
+  });
+});

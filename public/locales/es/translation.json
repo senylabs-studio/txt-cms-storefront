@@ -441,7 +441,8 @@
     "reviewsLoadError": "No se pudieron cargar las reseñas.",
     "cancelAdd": "Cancelar",
     "new": "Nuevo",
-    "seeAllOffers": "Ver todas las ofertas"
+    "seeAllOffers": "Ver todas las ofertas",
+    "seeAllNew": "Ver todas las novedades"
   },
   "filters": {
     "close": "Cerrar filtros",
