@@ -182,6 +182,37 @@ describe('VariantDetailPage reviews', () => {
   });
 });
 
+describe('VariantDetailPage reviews across variants', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    getMyReview.mockResolvedValue({ hasPurchased: false, review: null });
+    getVariantById.mockImplementation((id: number) => Promise.resolve(id === 1 ? variant() : variant({ id: 2, name: 'Lino Verde' })));
+  });
+
+  // Reviews are per variant: a reviews page still loading for the previous variant must not land
+  // on the one the customer moved to (page links keep this component mounted).
+  it('ignores a reviews page that arrives after moving to another variant', async () => {
+    let resolveLate!: (v: unknown) => void;
+    getVariantReviews.mockImplementation((variantId: number, page: number) => {
+      if (variantId === 1 && page === 2) return new Promise(r => { resolveLate = r; });
+      if (variantId === 1) return Promise.resolve(reviewsPage([{ id: 1, customerName: 'Jane', rating: 5, createdAt: '2026-01-01T00:00:00.000Z' }], { totalPages: 2 }));
+      return Promise.resolve(reviewsPage([]));
+    });
+    const router = createMemoryRouter([{ path: '/variant/:id', element: <VariantDetailPage /> }], { initialEntries: ['/variant/1'] });
+    render(<RouterProvider router={router} />);
+    await screen.findByText('Jane');
+    fireEvent.click(screen.getByText('product.nextPage'));
+
+    router.navigate('/variant/2');
+    await screen.findByText('Lino Verde');
+    resolveLate({ ...reviewsPage([{ id: 9, customerName: 'Bob', rating: 1, createdAt: '2026-01-02T00:00:00.000Z' }], { totalPages: 2, currentPage: 2 }), reviewCount: 7 });
+    await new Promise(r => setTimeout(r, 0));
+
+    expect(screen.queryByText('Bob')).not.toBeInTheDocument();
+    expect(screen.queryByText('product.reviewCount(7)')).not.toBeInTheDocument();
+  });
+});
+
 describe('VariantDetailPage alsoBought', () => {
   beforeEach(() => {
     vi.clearAllMocks();

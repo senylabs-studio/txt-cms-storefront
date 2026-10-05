@@ -68,6 +68,10 @@ const VariantDetailPage: React.FC = () => {
   const { siteName } = useSiteSettings();
 
   const [variant, setVariant] = useState<StorefrontVariantDetail | null>(null);
+  // The variant the page is showing now (the route id). Reviews are per variant, so a reviews
+  // page or a submit answered after moving to another variant must be dropped.
+  const currentIdRef = useRef(Number(id));
+  currentIdRef.current = Number(id);
   useDocumentMeta(
     variant ? `${variant.name} — ${siteName}` : siteName,
     variant?.description || undefined,
@@ -189,27 +193,32 @@ const VariantDetailPage: React.FC = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed on the variant id on purpose: the variant object changes on every rating refresh
   }, [variant?.id]);
 
-  const changeReviewsPage = (page: number) => {
-    if (!variant?.id) return;
+  const changeReviewsPage = (page: number, variantId = variant?.id) => {
+    if (!variantId) return;
     setReviewsPage(page);
     setReviewsError('');
-    getVariantReviews(variant.id, page).then(r => {
+    getVariantReviews(variantId, page).then(r => {
+      if (currentIdRef.current !== variantId) return;
       setReviews(r.items);
-      setVariant(prev => prev ? { ...prev, averageRating: r.averageRating ?? undefined, reviewCount: r.reviewCount } : prev);
-    }).catch(err => setReviewsError(getApiErrorMessage(err, t('product.reviewsLoadError'))));
+      setVariant(prev => prev && prev.id === variantId ? { ...prev, averageRating: r.averageRating ?? undefined, reviewCount: r.reviewCount } : prev);
+    }).catch(err => {
+      if (currentIdRef.current === variantId) setReviewsError(getApiErrorMessage(err, t('product.reviewsLoadError')));
+    });
   };
 
   const handleSubmitReview = async () => {
-    if (!variant?.id || reviewRating < 1) return;
+    const variantId = variant?.id;
+    if (!variantId || reviewRating < 1) return;
     setSubmittingReview(true);
     setReviewMsg(null);
     try {
-      const saved = await submitReview(variant.id, reviewRating, reviewComment.trim() || undefined);
+      const saved = await submitReview(variantId, reviewRating, reviewComment.trim() || undefined);
+      if (currentIdRef.current !== variantId) return; // saved, but the customer is on another variant now
       setMyReview(prev => prev ? { ...prev, review: saved } : { hasPurchased: true, review: saved });
       setReviewMsg({ type: 'success', text: t('product.reviewSaved') });
-      changeReviewsPage(1);
+      changeReviewsPage(1, variantId);
     } catch (err) {
-      setReviewMsg({ type: 'danger', text: getApiErrorMessage(err, t('product.reviewSaveError')) });
+      if (currentIdRef.current === variantId) setReviewMsg({ type: 'danger', text: getApiErrorMessage(err, t('product.reviewSaveError')) });
     } finally {
       setSubmittingReview(false);
     }
