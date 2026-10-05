@@ -631,5 +631,9 @@
     "editSuccess": "Gift card updated.",
     "editError": "The gift card couldn't be updated.",
     "editCancel": "Cancel"
+  },
+  "homeReviews": {
+    "defaultTitle": "What our customers say",
+    "rating": "{{rating}} out of 5 stars"
   }
 }

@@ -631,5 +631,9 @@
     "editSuccess": "Targeta regal actualitzada.",
     "editError": "No s'ha pogut actualitzar la targeta regal.",
     "editCancel": "Cancel·lar"
+  },
+  "homeReviews": {
+    "defaultTitle": "El que diuen els nostres clients",
+    "rating": "{{rating}} de 5 estrelles"
   }
 }

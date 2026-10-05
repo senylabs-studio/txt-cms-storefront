@@ -1,6 +1,6 @@
 import apiClient from '../apiClient';
 
-export type StorefrontHomeBlockType = 'Banner' | 'ImageGrid' | 'FeaturedProducts' | 'ImageText' | 'Features' | 'Newsletter';
+export type StorefrontHomeBlockType = 'Banner' | 'ImageGrid' | 'FeaturedProducts' | 'ImageText' | 'Features' | 'Newsletter' | 'Reviews';
 
 export interface HomeBannerSlide {
   imageUrl?: string;
@@ -115,6 +115,23 @@ export interface HomeNewsletterBlockConfig {
   textColor?: string;
 }
 
+/** One review as the backend picks them for the home: 4-5 stars with a comment, first name only. */
+export interface HomeReview {
+  customerName: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  product: { name: string; slug: string; thumbnailUrl?: string | null } | null;
+}
+
+/** Latest good customer reviews. Empty `reviews` (fewer than 3 good ones) = nothing shown. */
+export interface HomeReviewsBlockConfig {
+  title?: string;
+  limit?: number;
+  backgroundColor?: string;
+  reviews?: HomeReview[];
+}
+
 export interface HomeBlockConfigMap {
   Banner: HomeBannerBlockConfig;
   ImageGrid: HomeImageGridBlockConfig;
@@ -122,6 +139,7 @@ export interface HomeBlockConfigMap {
   ImageText: HomeImageTextBlockConfig;
   Features: HomeFeaturesBlockConfig;
   Newsletter: HomeNewsletterBlockConfig;
+  Reviews: HomeReviewsBlockConfig;
 }
 
 export type HomeBlockConfig = HomeBlockConfigMap[StorefrontHomeBlockType];

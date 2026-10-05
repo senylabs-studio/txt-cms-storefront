@@ -631,5 +631,9 @@
     "editSuccess": "Tarjeta regalo actualizada.",
     "editError": "No se ha podido actualizar la tarjeta regalo.",
     "editCancel": "Cancelar"
+  },
+  "homeReviews": {
+    "defaultTitle": "Lo que dicen nuestros clientes",
+    "rating": "{{rating}} de 5 estrellas"
   }
 }
