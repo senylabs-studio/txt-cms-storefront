@@ -90,7 +90,7 @@
       "hasAccount": "Ja tens compte?",
       "loginLink": "Inicia sessió",
       "error": "Error en crear el compte",
-      "newsletter": "Vull rebre novetats i ofertes per correu"
+      "newsletter": "Vull rebre novetats i ofertes per correu (t'enviarem un correu per confirmar-ho)"
     },
     "forgotPasswordLink": "Has oblidat la contrasenya?",
     "forgotPassword": {
@@ -319,7 +319,8 @@
     "newsletterHint": "Et pots donar de baixa quan vulguis des d'aquí o des de qualsevol correu.",
     "newsletterOn": "T'has apuntat al butlletí.",
     "newsletterOff": "Ja no rebràs el butlletí.",
-    "newsletterError": "No s'ha pogut desar. Torna-ho a provar."
+    "newsletterError": "No s'ha pogut desar. Torna-ho a provar.",
+    "newsletterPending": "T'hem enviat un correu per confirmar la subscripció. Fes clic a l'enllaç per començar a rebre el butlletí."
   },
   "orders": {
     "backToAccount": "Tornar al meu compte",

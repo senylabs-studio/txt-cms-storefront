@@ -90,7 +90,7 @@
       "hasAccount": "Already have an account?",
       "loginLink": "Log in",
       "error": "Error creating account",
-      "newsletter": "Send me news and offers by email"
+      "newsletter": "Send me news and offers by email (we'll email you to confirm)"
     },
     "forgotPasswordLink": "Forgot your password?",
     "forgotPassword": {
@@ -319,7 +319,8 @@
     "newsletterHint": "You can unsubscribe at any time here or from any email.",
     "newsletterOn": "You've signed up to the newsletter.",
     "newsletterOff": "You won't receive the newsletter any more.",
-    "newsletterError": "Couldn't save. Please try again."
+    "newsletterError": "Couldn't save. Please try again.",
+    "newsletterPending": "We've sent you an email to confirm. Click the link in it to start receiving the newsletter."
   },
   "orders": {
     "backToAccount": "Back to my account",
