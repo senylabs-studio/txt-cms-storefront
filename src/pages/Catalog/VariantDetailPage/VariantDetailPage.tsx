@@ -10,7 +10,7 @@ import RulerOverlay from '../../../components/common/RulerOverlay/RulerOverlay';
 import ImageLightbox from '../../../components/common/ImageLightbox/ImageLightbox';
 import IconTooltip from '../../../components/common/IconTooltip/IconTooltip';
 import MainLayout from '../../../components/Layout/MainLayout';
-import { getVariantById, getVariantsBatch } from '../../../services/productService';
+import { getVariantById, getVariantMatches, getVariantsBatch } from '../../../services/productService';
 import { getProductReviews, getMyReview, submitReview } from '../../../services/reviewService';
 import VariantCard from '../../../components/Product/VariantCard/VariantCard';
 import type { StorefrontVariantDetail, StorefrontVariant, ProductReview, MyReviewStatus } from '../../../types';
@@ -101,6 +101,24 @@ const VariantDetailPage: React.FC = () => {
 
   // Recently viewed
   const [recentlyViewed, setRecentlyViewed] = useState<StorefrontVariant[]>([]);
+  // "Combina con", both ways round, without repeats
+  const [goesWith, setGoesWith] = useState<StorefrontVariant[]>([]);
+
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    setGoesWith([]);
+    getVariantMatches(Number(id))
+      .then(({ matches, matchedBy }) => {
+        if (cancelled) return;
+        const seen = new Set(matches.map(v => v.id));
+        setGoesWith([...matches, ...matchedBy.filter(v => !seen.has(v.id))]);
+      })
+      // A suggestion rail: on failure it just doesn't show, like "recently viewed".
+      .catch(() => { if (!cancelled) setGoesWith([]); });
+    // Same stale-response guard as the main variant fetch: in-page links keep this component mounted.
+    return () => { cancelled = true; };
+  }, [id, i18n.language]);
 
   useEffect(() => {
     if (!id) return;
@@ -478,6 +496,18 @@ const VariantDetailPage: React.FC = () => {
             )}
           </Col>
         </Row>
+
+        {/* "Combina con" — picked by hand in the CMS (e.g. a print's Cretona lisa colours) */}
+        {goesWith.length > 0 && (
+          <div className="vdp-related">
+            <SectionTitle>{t('product.goesWith')}</SectionTitle>
+            <Row xs={2} sm={2} md={3} lg={4} className="g-3 mt-1">
+              {goesWith.map(s => (
+                <Col key={s.id}><VariantCard variant={s} /></Col>
+              ))}
+            </Row>
+          </div>
+        )}
 
         {/* Related variants (same product) */}
         {variant.siblings && variant.siblings.length > 0 && (

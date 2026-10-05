@@ -55,4 +55,25 @@ describe('HomePage catalog', () => {
     expect(screen.getByText('Lino Natural')).toBeInTheDocument();
     expect(screen.queryByText('Algodón Blanco')).not.toBeInTheDocument();
   });
+
+  it('opens with the "only new" filter on from ?novedades=1 (the home block link), and keeps it while searching', async () => {
+    getVariantsPaged.mockResolvedValue(pageOf('Coralina'));
+    render(<MemoryRouter initialEntries={['/catalog?novedades=1']}><HomePage /></MemoryRouter>);
+
+    await screen.findByText('Coralina');
+    expect(getVariantsPaged.mock.calls[0][6]).toEqual(expect.objectContaining({ onlyNew: true }));
+
+    fireEvent.change(screen.getByPlaceholderText('catalog.home.searchPlaceholder'), { target: { value: 'lino' } });
+    await screen.findByText('Coralina');
+    expect(getVariantsPaged.mock.lastCall![2]).toBe('lino');
+    expect(getVariantsPaged.mock.lastCall![6]).toEqual(expect.objectContaining({ onlyNew: true }));
+  });
+
+  it('opens with no filter without the parameter', async () => {
+    getVariantsPaged.mockResolvedValue(pageOf('Coralina'));
+    render(<MemoryRouter initialEntries={['/catalog']}><HomePage /></MemoryRouter>);
+
+    await screen.findByText('Coralina');
+    expect(getVariantsPaged.mock.calls[0][6]).toEqual({});
+  });
 });

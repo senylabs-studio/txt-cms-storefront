@@ -89,7 +89,8 @@
       "submit": "Crear cuenta",
       "hasAccount": "¿Ya tienes cuenta?",
       "loginLink": "Inicia sesión",
-      "error": "Error al crear la cuenta"
+      "error": "Error al crear la cuenta",
+      "newsletter": "Quiero recibir novedades y ofertas por email"
     },
     "forgotPasswordLink": "¿Olvidaste tu contraseña?",
     "forgotPassword": {
@@ -159,6 +160,26 @@
       "success": "Te has dado de baja correctamente. Ya no recibirás más comunicaciones por email.",
       "invalidLink": "Este enlace no es válido.",
       "error": "No se pudo procesar la solicitud. Inténtalo de nuevo.",
+      "backToHome": "Volver al inicio"
+    },
+    "signup": {
+      "defaultTitle": "Apúntate a nuestra newsletter",
+      "defaultText": "Novedades, ofertas e ideas para tus proyectos, directamente en tu email. Sin spam: puedes darte de baja cuando quieras.",
+      "emailLabel": "Tu email",
+      "emailPlaceholder": "tu@email.com",
+      "submit": "Suscribirme",
+      "sending": "Enviando...",
+      "success": "¡Casi está! Te hemos enviado un email: pulsa el enlace para confirmar la suscripción.",
+      "error": "No se ha podido completar la suscripción. Inténtalo de nuevo."
+    },
+    "confirm": {
+      "title": "Confirmar suscripción",
+      "instructions": "Pulsa el botón para confirmar que quieres recibir nuestra newsletter.",
+      "confirm": "Confirmar suscripción",
+      "loading": "Confirmando...",
+      "success": "¡Suscripción confirmada! Pronto recibirás nuestras novedades.",
+      "invalidLink": "Este enlace no es válido.",
+      "error": "El enlace no es válido o ha caducado. Puedes volver a apuntarte desde la página de inicio.",
       "backToHome": "Volver al inicio"
     }
   },
@@ -292,7 +313,13 @@
     "deletionRequestSuccess": "Solicitud de eliminación de cuenta enviada.",
     "exportDataSuccess": "Tus datos se han descargado correctamente.",
     "loadError": "No se pudo cargar tu cuenta.",
-    "retry": "Reintentar"
+    "retry": "Reintentar",
+    "newsletterTitle": "Newsletter",
+    "newsletterLabel": "Recibir novedades y ofertas por email",
+    "newsletterHint": "Puedes darte de baja cuando quieras desde aquí o desde cualquier email.",
+    "newsletterOn": "Te has apuntado a la newsletter.",
+    "newsletterOff": "Ya no recibirás la newsletter.",
+    "newsletterError": "No se ha podido guardar. Inténtalo de nuevo."
   },
   "orders": {
     "backToAccount": "Volver a mi cuenta",
@@ -402,6 +429,7 @@
     "alsoBought": "Quienes compraron esto también compraron",
     "youMightAlsoLike": "También te puede interesar",
     "recentlyViewed": "Vistos recientemente",
+    "goesWith": "Combina con",
     "reviewCount": "({{count}} reseñas)",
     "reviewsTitle": "Reseñas de clientes",
     "noReviews": "Este producto aún no tiene reseñas.",
@@ -440,7 +468,8 @@
     "reviewsLoadError": "No se pudieron cargar las reseñas.",
     "cancelAdd": "Cancelar",
     "new": "Nuevo",
-    "seeAllOffers": "Ver todas las ofertas"
+    "seeAllOffers": "Ver todas las ofertas",
+    "seeAllNew": "Ver todas las novedades"
   },
   "filters": {
     "close": "Cerrar filtros",

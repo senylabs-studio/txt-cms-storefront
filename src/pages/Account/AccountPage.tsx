@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert, Spinner, Badge, Modal } from 'react-bootstrap';
-import { FaPlus, FaEdit, FaTrash, FaMapMarkerAlt, FaUser, FaLock, FaShieldAlt } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaMapMarkerAlt, FaUser, FaLock, FaShieldAlt, FaEnvelope } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import {
-  getProfile, updateProfile, changePassword, updateEmail, addAddress, updateAddress, deleteAddress,
+  getProfile, updateProfile, changePassword, updateEmail, addAddress, updateAddress, deleteAddress, updateNewsletterSubscription,
   downloadMyDataExport, requestAccountDeletion,
 } from '../../services/profileService';
 import { getVisibleCountries, type VisibleCountry } from '../../services/countryService';
@@ -35,6 +35,21 @@ const AccountPage: React.FC = () => {
   const [taxId, setTaxId] = useState('');
   const [saving, setSaving] = useState(false);
   const [profileMsg, setProfileMsg] = useState<{ type: 'success' | 'danger'; text: string } | null>(null);
+
+  // Newsletter switch
+  const [newsletterSaving, setNewsletterSaving] = useState(false);
+  const handleNewsletterChange = async (subscribed: boolean) => {
+    setNewsletterSaving(true);
+    try {
+      await updateNewsletterSubscription(subscribed);
+      setProfile(p => (p ? { ...p, isSubscribedToNewsletter: subscribed } : p));
+      showToast('success', t(subscribed ? 'account.newsletterOn' : 'account.newsletterOff'));
+    } catch (err) {
+      showToast('danger', getApiErrorMessage(err, t('account.newsletterError')));
+    } finally {
+      setNewsletterSaving(false);
+    }
+  };
 
   // Change password form
   const [currentPassword, setCurrentPassword] = useState('');
@@ -333,6 +348,21 @@ const AccountPage: React.FC = () => {
                       {pwdSaving ? <Spinner size="sm" animation="border" /> : t('account.changePassword')}
                     </Button>
                   </Form>
+                </Card.Body>
+              </Card>
+            )}
+
+            {profile && (
+              <Card className="mt-4">
+                <Card.Body>
+                  <h5 className="fw-semibold mb-3"><FaEnvelope className="me-2" />{t('account.newsletterTitle')}</h5>
+                  <Form.Check
+                    type="switch" id="account-newsletter" disabled={newsletterSaving}
+                    checked={!!profile.isSubscribedToNewsletter}
+                    onChange={e => handleNewsletterChange(e.target.checked)}
+                    label={t('account.newsletterLabel')}
+                  />
+                  <p className="text-muted small mb-0 mt-2">{t('account.newsletterHint')}</p>
                 </Card.Body>
               </Card>
             )}

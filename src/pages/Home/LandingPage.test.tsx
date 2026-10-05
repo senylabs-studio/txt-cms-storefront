@@ -222,3 +222,98 @@ describe('LandingPage featured products in offers mode', () => {
     expect(screen.queryByText('product.seeAllOffers')).toBeNull();
   });
 });
+
+describe('LandingPage banner whole-slide link', () => {
+  it('stretches the slide link over the photo, hidden from keyboard/readers next to its button', async () => {
+    const block: StorefrontHomeBlock = {
+      id: 4, title: 'Hero', type: 'Banner', isActive: true, sortOrder: 0,
+      config: { slides: [{ imageUrl: '/a.jpg', title: 'Halloween', buttonText: 'Ver telas', buttonUrl: '/halloween' }] },
+    };
+    getHomeBlocks.mockResolvedValue([block]);
+    renderPage();
+
+    const slide = (await screen.findByText('Halloween')).closest('.home-banner') as HTMLElement;
+    const cover = slide.querySelector('a.banner-slide-link')!;
+    expect(cover).toHaveAttribute('href', '/halloween');
+    expect(cover).toHaveAttribute('tabindex', '-1');
+    expect(cover).toHaveAttribute('aria-hidden', 'true');
+    // The only link screen readers get is the button.
+    expect(screen.getAllByRole('link')).toHaveLength(1);
+  });
+
+  it('labels the slide link with the title when the slide has no button text', async () => {
+    const block: StorefrontHomeBlock = {
+      id: 5, title: 'Hero', type: 'Banner', isActive: true, sortOrder: 0,
+      config: { slides: [{ imageUrl: '/a.jpg', title: 'Navidad', buttonUrl: '/telas-de-navidad' }] },
+    };
+    getHomeBlocks.mockResolvedValue([block]);
+    renderPage();
+
+    const link = await screen.findByRole('link', { name: 'Navidad' });
+    expect(link).toHaveAttribute('href', '/telas-de-navidad');
+  });
+
+  it('adds no link to a slide without a URL', async () => {
+    const block: StorefrontHomeBlock = {
+      id: 6, title: 'Hero', type: 'Banner', isActive: true, sortOrder: 0,
+      config: { slides: [{ imageUrl: '/a.jpg', title: 'Solo foto' }] },
+    };
+    getHomeBlocks.mockResolvedValue([block]);
+    renderPage();
+
+    await screen.findByText('Solo foto');
+    expect(document.querySelector('a.banner-slide-link')).toBeNull();
+  });
+});
+
+describe('LandingPage features strip', () => {
+  it('shows each selling point with its text, the linked ones as links, and skips empty items', async () => {
+    const block: StorefrontHomeBlock = {
+      id: 7, title: 'Ventajas', type: 'Features', isActive: true, sortOrder: 0,
+      config: { items: [
+        { id: 'a', icon: 'truck', title: 'Envío gratis', text: 'desde 50 €', linkUrl: '/condiciones-de-envio' },
+        { id: 'b', icon: 'lock', title: 'Pago seguro' },
+        { id: 'c', icon: 'gift' },
+      ] },
+    };
+    getHomeBlocks.mockResolvedValue([block]);
+    renderPage();
+
+    const shipping = await screen.findByText('Envío gratis');
+    expect(screen.getByText('desde 50 €')).toBeInTheDocument();
+    expect(shipping.closest('a')).toHaveAttribute('href', '/condiciones-de-envio');
+    expect(screen.getByText('Pago seguro').closest('a')).toBeNull();
+    // The icon-only item (no title, no text) is left out.
+    expect(document.querySelectorAll('.home-features-list > li')).toHaveLength(2);
+    expect((document.querySelector('.home-features') as HTMLElement).style.getPropertyValue('--home-features-cols')).toBe('2');
+  });
+});
+
+describe('LandingPage new arrivals block', () => {
+  it('links to the catalog filtered to new arrivals, with the default text when none is set', async () => {
+    const block: StorefrontHomeBlock = {
+      id: 8, title: 'Novedades', type: 'FeaturedProducts', isActive: true, sortOrder: 0,
+      config: { title: 'Novedades', source: 'new', variants: [{ id: 1, name: 'Coralina' } as never], products: [] },
+    };
+    getHomeBlocks.mockResolvedValue([block]);
+    renderPage();
+
+    const link = await screen.findByText('product.seeAllNew');
+    expect(link.closest('a')).toHaveAttribute('href', '/catalog?novedades=1');
+  });
+});
+
+describe('LandingPage newsletter block', () => {
+  it('shows the sign-up box with the texts from the CMS', async () => {
+    const block: StorefrontHomeBlock = {
+      id: 9, title: 'Newsletter', type: 'Newsletter', isActive: true, sortOrder: 0,
+      config: { title: 'Apúntate', text: 'Ofertas antes que nadie', buttonText: 'Quiero' },
+    };
+    getHomeBlocks.mockResolvedValue([block]);
+    renderPage();
+
+    expect(await screen.findByText('Apúntate')).toBeInTheDocument();
+    expect(screen.getByText('Ofertas antes que nadie')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Quiero' })).toBeInTheDocument();
+  });
+});

@@ -89,7 +89,8 @@
       "submit": "Crear compte",
       "hasAccount": "Ja tens compte?",
       "loginLink": "Inicia sessió",
-      "error": "Error en crear el compte"
+      "error": "Error en crear el compte",
+      "newsletter": "Vull rebre novetats i ofertes per correu"
     },
     "forgotPasswordLink": "Has oblidat la contrasenya?",
     "forgotPassword": {
@@ -159,6 +160,26 @@
       "success": "T'has donat de baixa correctament. Ja no rebràs més comunicacions per email.",
       "invalidLink": "Aquest enllaç no és vàlid.",
       "error": "No s'ha pogut processar la sol·licitud. Torna-ho a provar.",
+      "backToHome": "Tornar a l'inici"
+    },
+    "signup": {
+      "defaultTitle": "Apunta't al nostre butlletí",
+      "defaultText": "Novetats, ofertes i idees per als teus projectes, directament al teu correu. Sense correu brossa: et pots donar de baixa quan vulguis.",
+      "emailLabel": "El teu correu",
+      "emailPlaceholder": "tu@correu.com",
+      "submit": "Subscriure'm",
+      "sending": "Enviant...",
+      "success": "Ja gairebé està! T'hem enviat un correu: prem l'enllaç per confirmar la subscripció.",
+      "error": "No s'ha pogut completar la subscripció. Torna-ho a provar."
+    },
+    "confirm": {
+      "title": "Confirmar la subscripció",
+      "instructions": "Prem el botó per confirmar que vols rebre el nostre butlletí.",
+      "confirm": "Confirmar la subscripció",
+      "loading": "Confirmant...",
+      "success": "Subscripció confirmada! Aviat rebràs les nostres novetats.",
+      "invalidLink": "Aquest enllaç no és vàlid.",
+      "error": "L'enllaç no és vàlid o ha caducat. Pots tornar a apuntar-t'hi des de la pàgina d'inici.",
       "backToHome": "Tornar a l'inici"
     }
   },
@@ -292,7 +313,13 @@
     "deletionRequestSuccess": "Sol·licitud d'eliminació de compte enviada.",
     "exportDataSuccess": "Les teves dades s'han descarregat correctament.",
     "loadError": "No s'ha pogut carregar el teu compte.",
-    "retry": "Reintentar"
+    "retry": "Reintentar",
+    "newsletterTitle": "Butlletí",
+    "newsletterLabel": "Rebre novetats i ofertes per correu",
+    "newsletterHint": "Et pots donar de baixa quan vulguis des d'aquí o des de qualsevol correu.",
+    "newsletterOn": "T'has apuntat al butlletí.",
+    "newsletterOff": "Ja no rebràs el butlletí.",
+    "newsletterError": "No s'ha pogut desar. Torna-ho a provar."
   },
   "orders": {
     "backToAccount": "Tornar al meu compte",
@@ -402,6 +429,7 @@
     "alsoBought": "Qui va comprar això també va comprar",
     "youMightAlsoLike": "També et pot interessar",
     "recentlyViewed": "Vistos recentment",
+    "goesWith": "Combina amb",
     "reviewCount": "({{count}} ressenyes)",
     "reviewsTitle": "Ressenyes de clients",
     "noReviews": "Aquest producte encara no té ressenyes.",
@@ -440,7 +468,8 @@
     "reviewsLoadError": "No s'han pogut carregar les ressenyes.",
     "cancelAdd": "Cancel·lar",
     "new": "Nou",
-    "seeAllOffers": "Veure totes les ofertes"
+    "seeAllOffers": "Veure totes les ofertes",
+    "seeAllNew": "Veure totes les novetats"
   },
   "filters": {
     "close": "Tancar filtres",

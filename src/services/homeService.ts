@@ -1,6 +1,6 @@
 import apiClient from '../apiClient';
 
-export type StorefrontHomeBlockType = 'Banner' | 'ImageGrid' | 'FeaturedProducts' | 'ImageText';
+export type StorefrontHomeBlockType = 'Banner' | 'ImageGrid' | 'FeaturedProducts' | 'ImageText' | 'Features' | 'Newsletter';
 
 export interface HomeBannerSlide {
   imageUrl?: string;
@@ -54,7 +54,7 @@ export interface HomeFeaturedProductsBlockConfig {
   variants?: HomeFeaturedItem[];
   products?: HomeFeaturedItem[];
   /** Offers mode ('offers'): the variants are a random pick of those on sale, chosen by the backend. */
-  source?: 'manual' | 'offers';
+  source?: 'manual' | 'offers' | 'new';
   /** Offers mode: link to the Ofertas page, set by the backend only while that page is visible. */
   offersUrl?: string | null;
   /** Offers mode: text for that link; empty = the default "see all offers". */
@@ -87,11 +87,41 @@ export interface HomeImageTextBlockConfig {
   };
 }
 
+/** Icons a Features item can show (keys shared with the CMS's FEATURE_ICONS). */
+export type HomeFeatureIcon = 'truck' | 'return' | 'lock' | 'scissors' | 'store' | 'gift' | 'phone' | 'ruler' | 'leaf' | 'star' | 'card' | 'clock';
+
+export interface HomeFeatureItem {
+  id?: string;
+  icon?: HomeFeatureIcon;
+  title?: string;
+  text?: string;
+  /** Optional: the whole item links here (page links are resolved by the backend). */
+  linkUrl?: string;
+}
+
+/** Strip of selling points (free shipping, returns, secure payment…), right under the banner. */
+export interface HomeFeaturesBlockConfig {
+  items: HomeFeatureItem[];
+  backgroundColor?: string;
+  textColor?: string;
+}
+
+/** Newsletter sign-up box. Empty texts fall back to the storefront's defaults. */
+export interface HomeNewsletterBlockConfig {
+  title?: string;
+  text?: string;
+  buttonText?: string;
+  backgroundColor?: string;
+  textColor?: string;
+}
+
 export interface HomeBlockConfigMap {
   Banner: HomeBannerBlockConfig;
   ImageGrid: HomeImageGridBlockConfig;
   FeaturedProducts: HomeFeaturedProductsBlockConfig;
   ImageText: HomeImageTextBlockConfig;
+  Features: HomeFeaturesBlockConfig;
+  Newsletter: HomeNewsletterBlockConfig;
 }
 
 export type HomeBlockConfig = HomeBlockConfigMap[StorefrontHomeBlockType];

@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Carousel } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { FaCut } from 'react-icons/fa';
+import {
+  FaCut, FaTruck, FaUndoAlt, FaLock, FaStore, FaGift, FaPhoneAlt, FaRulerHorizontal, FaLeaf, FaStar, FaCreditCard, FaClock,
+} from 'react-icons/fa';
+import type { IconType } from 'react-icons';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { useSiteSettings } from '../../contexts/SiteSettingsContext';
@@ -14,12 +17,18 @@ import {
   type HomeImageGridBlockConfig,
   type HomeFeaturedProductsBlockConfig,
   type HomeImageTextBlockConfig,
+  type HomeFeaturesBlockConfig,
+  type HomeFeatureIcon,
+  type HomeNewsletterBlockConfig,
 } from '../../services/homeService';
 import FeaturedProductsGrid from '../../components/common/FeaturedProductsGrid/FeaturedProductsGrid';
 import { bannerTextPlacement } from '../../utils/bannerTextPlacement';
 import { blockLinkProps } from '../../utils/blockLinkProps';
 import './LandingPage.css';
 import PageLoader from '../../components/common/ScissorsLoader/PageLoader';
+import BannerSlideLink from '../../components/common/BannerSlideLink/BannerSlideLink';
+import NewsletterSignup from '../../components/common/NewsletterSignup/NewsletterSignup';
+import { NEW_ARRIVALS_PARAM } from '../../utils/catalogParams';
 
 // ─── Banner (carousel) ────────────────────────────────────────────────────────
 // The subtitle has its own fixed max-width + auto margins (see LandingPage.css) so it reads as a
@@ -37,7 +46,7 @@ const BannerSlideContent: React.FC<{ slide: HomeBannerSlide }> = ({ slide }) => 
   if (slide.textColor) overlayStyle.color = slide.textColor;
 
   return (
-    <div className="home-banner-overlay" style={overlayStyle}>
+    <div className="home-banner-overlay banner-slide-content" style={overlayStyle}>
       {slide.title && <h1 className="home-banner-title">{slide.title}</h1>}
       {slide.subtitle && <p className="home-banner-subtitle" style={subtitleMarginForAlign(slide.textAlign)}>{slide.subtitle}</p>}
       {/* Admin-authored URL (may be internal or external) — plain <a>, not <Link>, which
@@ -52,7 +61,9 @@ const BannerSlideContent: React.FC<{ slide: HomeBannerSlide }> = ({ slide }) => 
 
 const BannerBlock: React.FC<{ config: HomeBannerBlockConfig }> = ({ config }) => {
   const slides = config.slides ?? [];
-  const height = config.height ?? 500;
+  // The CMS height is a desktop height: passed as a CSS variable (not an inline min-height) so
+  // LandingPage.css can cap it on phones, where 500px would fill the whole screen.
+  const heightVar = { '--home-banner-h': `${config.height ?? 500}px` } as React.CSSProperties;
 
   if (slides.length === 0) return null;
 
@@ -61,21 +72,23 @@ const BannerBlock: React.FC<{ config: HomeBannerBlockConfig }> = ({ config }) =>
     return (
       <div
         className="home-banner"
-        style={{ backgroundImage: slide.imageUrl ? `url(${slide.imageUrl})` : undefined, minHeight: height, ...bannerTextPlacement(slide.textAlign, slide.textVerticalAlign) }}
+        style={{ backgroundImage: slide.imageUrl ? `url(${slide.imageUrl})` : undefined, ...heightVar, ...bannerTextPlacement(slide.textAlign, slide.textVerticalAlign) }}
       >
+        <BannerSlideLink url={slide.buttonUrl} hasButton={!!slide.buttonText} label={slide.title || slide.subtitle} />
         <BannerSlideContent slide={slide} />
       </div>
     );
   }
 
   return (
-    <Carousel fade interval={(config.intervalSeconds ?? 5) * 1000} className="home-carousel" style={{ minHeight: height }}>
+    <Carousel fade interval={(config.intervalSeconds ?? 5) * 1000} className="home-carousel" style={heightVar}>
       {slides.map((slide, i) => (
-        <Carousel.Item key={i} style={{ minHeight: height }}>
+        <Carousel.Item key={i}>
           <div
             className="home-banner"
-            style={{ backgroundImage: slide.imageUrl ? `url(${slide.imageUrl})` : undefined, minHeight: height, ...bannerTextPlacement(slide.textAlign, slide.textVerticalAlign) }}
+            style={{ backgroundImage: slide.imageUrl ? `url(${slide.imageUrl})` : undefined, ...heightVar, ...bannerTextPlacement(slide.textAlign, slide.textVerticalAlign) }}
           >
+            <BannerSlideLink url={slide.buttonUrl} hasButton={!!slide.buttonText} label={slide.title || slide.subtitle} />
             <BannerSlideContent slide={slide} />
           </div>
         </Carousel.Item>
@@ -88,13 +101,15 @@ const BannerBlock: React.FC<{ config: HomeBannerBlockConfig }> = ({ config }) =>
 const ImageGridBlock: React.FC<{ config: HomeImageGridBlockConfig }> = ({ config }) => {
   const images = config.images ?? [];
   if (images.length === 0) return null;
-  const colSize = Math.max(2, Math.floor(12 / images.length)) as 2 | 3 | 4 | 6 | 12;
+  // Up to 4 tiles share one row; more wrap 4 per row (4+3 for the 7 sections) and the last row is
+  // centered, instead of 12/n columns that left a lone tile on its own row (6+1).
+  const colSize = Math.max(3, Math.floor(12 / images.length)) as 3 | 4 | 6 | 12;
   const titleStyle: React.CSSProperties = { textAlign: config.textAlign ?? 'center' };
   if (config.textColor) titleStyle.color = config.textColor;
   return (
     <Container className="py-4">
       {config.title && <h2 className="mb-4 fw-bold" style={titleStyle}>{config.title}</h2>}
-      <Row className="g-3">
+      <Row className="g-3 justify-content-center">
         {images.map((img, i) => (
           <Col key={i} xs={6} sm={4} md={colSize}>
             {img.linkUrl ? (
@@ -121,7 +136,9 @@ const ImageGridBlock: React.FC<{ config: HomeImageGridBlockConfig }> = ({ config
 
 // ─── Featured Products ────────────────────────────────────────────────────────
 // In offers mode the backend picks the variants and, while the Ofertas page is visible, sends its
-// URL for a "see all offers" link. Nothing on sale → no cards → the grid renders nothing at all.
+// URL for a "see all offers" link. In new mode it picks the newest products' variants, and the
+// link goes to the catalog filtered to new arrivals. Nothing on sale / nothing new → no cards →
+// the grid renders nothing at all.
 const FeaturedProductsBlock: React.FC<{ config: HomeFeaturedProductsBlockConfig }> = ({ config }) => {
   const { t } = useTranslation();
   return (
@@ -133,7 +150,9 @@ const FeaturedProductsBlock: React.FC<{ config: HomeFeaturedProductsBlockConfig 
       titleColor={config.textColor}
       moreLink={config.source === 'offers' && config.offersUrl
         ? { to: config.offersUrl, label: config.buttonText?.trim() || t('product.seeAllOffers') }
-        : undefined}
+        : config.source === 'new'
+          ? { to: `/catalog?${NEW_ARRIVALS_PARAM}=1`, label: config.buttonText?.trim() || t('product.seeAllNew') }
+          : undefined}
     />
   );
 };
@@ -188,10 +207,63 @@ const ImageTextBlock: React.FC<{ config: HomeImageTextBlockConfig }> = ({ config
   );
 };
 
+// ─── Features (selling points strip) ──────────────────────────────────────────
+const FEATURE_ICONS: Record<HomeFeatureIcon, IconType> = {
+  truck: FaTruck, return: FaUndoAlt, lock: FaLock, scissors: FaCut, store: FaStore, gift: FaGift,
+  phone: FaPhoneAlt, ruler: FaRulerHorizontal, leaf: FaLeaf, star: FaStar, card: FaCreditCard, clock: FaClock,
+};
+
+const FeaturesBlock: React.FC<{ config: HomeFeaturesBlockConfig }> = ({ config }) => {
+  const items = (config.items ?? []).filter(item => item.title || item.text);
+  if (items.length === 0) return null;
+  const style = {
+    '--home-features-cols': Math.min(items.length, 4),
+    ...(config.backgroundColor ? { backgroundColor: config.backgroundColor } : {}),
+    ...(config.textColor ? { color: config.textColor } : {}),
+  } as React.CSSProperties;
+  return (
+    <section className="home-features" style={style}>
+      <Container>
+        <ul className="home-features-list">
+          {items.map((item, i) => {
+            const Icon = item.icon ? FEATURE_ICONS[item.icon] : undefined;
+            const content = (
+              <>
+                {Icon && <span className="home-feature-icon" aria-hidden="true"><Icon /></span>}
+                <span className="home-feature-text">
+                  {item.title && <strong className="home-feature-title">{item.title}</strong>}
+                  {item.text && <span className="home-feature-desc">{item.text}</span>}
+                </span>
+              </>
+            );
+            return (
+              <li key={item.id ?? i}>
+                {item.linkUrl
+                  ? <a {...blockLinkProps(item.linkUrl)} className="home-feature home-feature-link">{content}</a>
+                  : <div className="home-feature">{content}</div>}
+              </li>
+            );
+          })}
+        </ul>
+      </Container>
+    </section>
+  );
+};
+
+// ─── Newsletter sign-up ───────────────────────────────────────────────────────
+const NewsletterBlock: React.FC<{ config: HomeNewsletterBlockConfig }> = ({ config }) => (
+  <section className="home-newsletter" style={config.textColor ? { color: config.textColor } : undefined}>
+    <Container>
+      <NewsletterSignup title={config.title} text={config.text} buttonText={config.buttonText} />
+    </Container>
+  </section>
+);
+
 // ─── Block renderer with backgroundColor wrapper ──────────────────────────────
 const BlockRenderer: React.FC<{ block: StorefrontHomeBlock }> = ({ block }) => {
-  // ImageText applies its backgroundColor to its own card instead of the full-width section.
-  const bg = block.type === 'ImageText' ? undefined : block.config?.backgroundColor;
+  // ImageText applies its backgroundColor to its own card instead of the full-width section;
+  // Features to its own strip (which has a default tint when none is set).
+  const bg = block.type === 'ImageText' || block.type === 'Features' ? undefined : block.config?.backgroundColor;
   const wrapperStyle = bg ? { backgroundColor: bg } : undefined;
 
   let content: React.ReactNode = null;
@@ -200,6 +272,8 @@ const BlockRenderer: React.FC<{ block: StorefrontHomeBlock }> = ({ block }) => {
     case 'ImageGrid':        content = <ImageGridBlock config={block.config} />; break;
     case 'FeaturedProducts': content = <FeaturedProductsBlock config={block.config} />; break;
     case 'ImageText':        content = <ImageTextBlock config={block.config} />; break;
+    case 'Features':         content = <FeaturesBlock config={block.config} />; break;
+    case 'Newsletter':       content = <NewsletterBlock config={block.config} />; break;
     default:                 return null;
   }
 

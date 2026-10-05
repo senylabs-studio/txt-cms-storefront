@@ -89,7 +89,8 @@
       "submit": "Create account",
       "hasAccount": "Already have an account?",
       "loginLink": "Log in",
-      "error": "Error creating account"
+      "error": "Error creating account",
+      "newsletter": "Send me news and offers by email"
     },
     "forgotPasswordLink": "Forgot your password?",
     "forgotPassword": {
@@ -159,6 +160,26 @@
       "success": "You've been unsubscribed. You won't receive any more email communications.",
       "invalidLink": "This link isn't valid.",
       "error": "Could not process the request. Please try again.",
+      "backToHome": "Back to home"
+    },
+    "signup": {
+      "defaultTitle": "Sign up to our newsletter",
+      "defaultText": "News, offers and ideas for your projects, straight to your inbox. No spam: unsubscribe whenever you like.",
+      "emailLabel": "Your email",
+      "emailPlaceholder": "you@email.com",
+      "submit": "Subscribe",
+      "sending": "Sending...",
+      "success": "Almost there! We've sent you an email: click the link to confirm your subscription.",
+      "error": "We couldn't complete your subscription. Please try again."
+    },
+    "confirm": {
+      "title": "Confirm subscription",
+      "instructions": "Press the button to confirm you want to receive our newsletter.",
+      "confirm": "Confirm subscription",
+      "loading": "Confirming...",
+      "success": "Subscription confirmed! You'll hear from us soon.",
+      "invalidLink": "This link is not valid.",
+      "error": "The link is invalid or has expired. You can sign up again from the home page.",
       "backToHome": "Back to home"
     }
   },
@@ -292,7 +313,13 @@
     "deletionRequestSuccess": "Account deletion request sent.",
     "exportDataSuccess": "Your data has been downloaded successfully.",
     "loadError": "Failed to load your account.",
-    "retry": "Retry"
+    "retry": "Retry",
+    "newsletterTitle": "Newsletter",
+    "newsletterLabel": "Receive news and offers by email",
+    "newsletterHint": "You can unsubscribe at any time here or from any email.",
+    "newsletterOn": "You've signed up to the newsletter.",
+    "newsletterOff": "You won't receive the newsletter any more.",
+    "newsletterError": "Couldn't save. Please try again."
   },
   "orders": {
     "backToAccount": "Back to my account",
@@ -402,6 +429,7 @@
     "alsoBought": "Customers who bought this also bought",
     "youMightAlsoLike": "You might also like",
     "recentlyViewed": "Recently viewed",
+    "goesWith": "Goes well with",
     "reviewCount": "({{count}} reviews)",
     "reviewsTitle": "Customer reviews",
     "noReviews": "This product has no reviews yet.",
@@ -440,7 +468,8 @@
     "reviewsLoadError": "Failed to load the reviews.",
     "cancelAdd": "Cancel",
     "new": "New",
-    "seeAllOffers": "See all offers"
+    "seeAllOffers": "See all offers",
+    "seeAllNew": "See all new arrivals"
   },
   "filters": {
     "close": "Close filters",

@@ -26,6 +26,13 @@ export const getVariantById = async (variantId: number): Promise<StorefrontVaria
   return res.data;
 };
 
+// "Combina con": the variants picked for this one in the CMS (e.g. a print's Cretona lisa colours)
+// and, the other way round, the ones that picked it. Already visible-only and in display order.
+export const getVariantMatches = async (variantId: number): Promise<{ matches: StorefrontVariant[]; matchedBy: StorefrontVariant[] }> => {
+  const res = await apiClient.get(`/storefront/products/variants/${variantId}/matches`);
+  return res.data;
+};
+
 export const getVariantsBatch = async (variantIds: number[]): Promise<StorefrontVariant[]> => {
   if (variantIds.length === 0) return [];
   const res = await apiClient.get('/storefront/products/variants/batch', {

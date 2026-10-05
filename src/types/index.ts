@@ -223,6 +223,8 @@ export interface StorefrontProfile {
   isGuest: boolean;
   deletionRequested: boolean;
   customerGroupName?: string;
+  /** Gets the newsletter: their own switch, or confirmed with the same email from the home page box. */
+  isSubscribedToNewsletter?: boolean;
   addresses: CustomerAddress[];
   paymentMethods: PaymentMethod[];
 }

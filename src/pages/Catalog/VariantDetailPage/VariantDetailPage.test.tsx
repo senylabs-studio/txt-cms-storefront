@@ -39,8 +39,12 @@ vi.mock('../../../contexts/CartContext', () => ({ useCart: () => mockCart }));
 
 vi.mock('../../../contexts/SiteSettingsContext', () => ({ useSiteSettings: () => ({ siteName: 'TXT Shop' }) }));
 
-const { getVariantById, getVariantsBatch } = vi.hoisted(() => ({ getVariantById: vi.fn(), getVariantsBatch: vi.fn().mockResolvedValue([]) }));
-vi.mock('../../../services/productService', () => ({ getVariantById, getVariantsBatch }));
+const { getVariantById, getVariantsBatch, getVariantMatches } = vi.hoisted(() => ({
+  getVariantById: vi.fn(),
+  getVariantsBatch: vi.fn().mockResolvedValue([]),
+  getVariantMatches: vi.fn().mockResolvedValue({ matches: [], matchedBy: [] }),
+}));
+vi.mock('../../../services/productService', () => ({ getVariantById, getVariantsBatch, getVariantMatches }));
 
 const { getProductReviews, getMyReview, submitReview } = vi.hoisted(() => ({
   getProductReviews: vi.fn(),
@@ -348,5 +352,36 @@ describe('VariantDetailPage description placement', () => {
     expect(underPhotos).toHaveClass('vdp-desc--below-images', 'd-none', 'd-md-block');
     expect(underPhotos.parentElement!.querySelector('.vdp-img-container')).not.toBeNull();
     expect(inInfo).toHaveClass('d-md-none');
+  });
+});
+
+describe('VariantDetailPage "Combina con"', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    getProductReviews.mockResolvedValue(reviewsPage([]));
+    getMyReview.mockResolvedValue({ hasPurchased: false, review: null });
+    getVariantById.mockResolvedValue(variant());
+    getVariantMatches.mockResolvedValue({ matches: [], matchedBy: [] });
+  });
+
+  it('lists the picked variants first, then the ones that picked this one, without repeats', async () => {
+    const card = (id: number, name: string) => ({ id, name }) as never;
+    getVariantMatches.mockResolvedValue({
+      matches: [card(10, 'Cretona Rojo'), card(11, 'Cretona Azul')],
+      matchedBy: [card(11, 'Cretona Azul'), card(20, 'Patchwork Flores')],
+    });
+    renderPage();
+
+    expect(await screen.findByText('product.goesWith')).toBeInTheDocument();
+    const names = ['Cretona Rojo', 'Cretona Azul', 'Patchwork Flores'].map(n => screen.getAllByText(n));
+    expect(names.map(n => n.length)).toEqual([1, 1, 1]);
+    expect(names[0][0].compareDocumentPosition(names[2][0]) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('hides the section when nothing goes with the variant', async () => {
+    renderPage();
+
+    await screen.findByText('Tela Azul');
+    expect(screen.queryByText('product.goesWith')).not.toBeInTheDocument();
   });
 });
