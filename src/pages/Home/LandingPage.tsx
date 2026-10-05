@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Carousel } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { FaCut } from 'react-icons/fa';
+import {
+  FaCut, FaTruck, FaUndoAlt, FaLock, FaStore, FaGift, FaPhoneAlt, FaRulerHorizontal, FaLeaf, FaStar, FaCreditCard, FaClock,
+} from 'react-icons/fa';
+import type { IconType } from 'react-icons';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { useSiteSettings } from '../../contexts/SiteSettingsContext';
@@ -14,6 +17,8 @@ import {
   type HomeImageGridBlockConfig,
   type HomeFeaturedProductsBlockConfig,
   type HomeImageTextBlockConfig,
+  type HomeFeaturesBlockConfig,
+  type HomeFeatureIcon,
 } from '../../services/homeService';
 import FeaturedProductsGrid from '../../components/common/FeaturedProductsGrid/FeaturedProductsGrid';
 import { bannerTextPlacement } from '../../utils/bannerTextPlacement';
@@ -195,10 +200,54 @@ const ImageTextBlock: React.FC<{ config: HomeImageTextBlockConfig }> = ({ config
   );
 };
 
+// ─── Features (selling points strip) ──────────────────────────────────────────
+const FEATURE_ICONS: Record<HomeFeatureIcon, IconType> = {
+  truck: FaTruck, return: FaUndoAlt, lock: FaLock, scissors: FaCut, store: FaStore, gift: FaGift,
+  phone: FaPhoneAlt, ruler: FaRulerHorizontal, leaf: FaLeaf, star: FaStar, card: FaCreditCard, clock: FaClock,
+};
+
+const FeaturesBlock: React.FC<{ config: HomeFeaturesBlockConfig }> = ({ config }) => {
+  const items = (config.items ?? []).filter(item => item.title || item.text);
+  if (items.length === 0) return null;
+  const style = {
+    '--home-features-cols': Math.min(items.length, 4),
+    ...(config.backgroundColor ? { backgroundColor: config.backgroundColor } : {}),
+    ...(config.textColor ? { color: config.textColor } : {}),
+  } as React.CSSProperties;
+  return (
+    <section className="home-features" style={style}>
+      <Container>
+        <ul className="home-features-list">
+          {items.map((item, i) => {
+            const Icon = item.icon ? FEATURE_ICONS[item.icon] : undefined;
+            const content = (
+              <>
+                {Icon && <span className="home-feature-icon" aria-hidden="true"><Icon /></span>}
+                <span className="home-feature-text">
+                  {item.title && <strong className="home-feature-title">{item.title}</strong>}
+                  {item.text && <span className="home-feature-desc">{item.text}</span>}
+                </span>
+              </>
+            );
+            return (
+              <li key={item.id ?? i}>
+                {item.linkUrl
+                  ? <a {...blockLinkProps(item.linkUrl)} className="home-feature home-feature-link">{content}</a>
+                  : <div className="home-feature">{content}</div>}
+              </li>
+            );
+          })}
+        </ul>
+      </Container>
+    </section>
+  );
+};
+
 // ─── Block renderer with backgroundColor wrapper ──────────────────────────────
 const BlockRenderer: React.FC<{ block: StorefrontHomeBlock }> = ({ block }) => {
-  // ImageText applies its backgroundColor to its own card instead of the full-width section.
-  const bg = block.type === 'ImageText' ? undefined : block.config?.backgroundColor;
+  // ImageText applies its backgroundColor to its own card instead of the full-width section;
+  // Features to its own strip (which has a default tint when none is set).
+  const bg = block.type === 'ImageText' || block.type === 'Features' ? undefined : block.config?.backgroundColor;
   const wrapperStyle = bg ? { backgroundColor: bg } : undefined;
 
   let content: React.ReactNode = null;
@@ -207,6 +256,7 @@ const BlockRenderer: React.FC<{ block: StorefrontHomeBlock }> = ({ block }) => {
     case 'ImageGrid':        content = <ImageGridBlock config={block.config} />; break;
     case 'FeaturedProducts': content = <FeaturedProductsBlock config={block.config} />; break;
     case 'ImageText':        content = <ImageTextBlock config={block.config} />; break;
+    case 'Features':         content = <FeaturesBlock config={block.config} />; break;
     default:                 return null;
   }
 

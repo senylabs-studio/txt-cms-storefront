@@ -265,3 +265,26 @@ describe('LandingPage banner whole-slide link', () => {
     expect(document.querySelector('a.banner-slide-link')).toBeNull();
   });
 });
+
+describe('LandingPage features strip', () => {
+  it('shows each selling point with its text, the linked ones as links, and skips empty items', async () => {
+    const block: StorefrontHomeBlock = {
+      id: 7, title: 'Ventajas', type: 'Features', isActive: true, sortOrder: 0,
+      config: { items: [
+        { id: 'a', icon: 'truck', title: 'Envío gratis', text: 'desde 50 €', linkUrl: '/condiciones-de-envio' },
+        { id: 'b', icon: 'lock', title: 'Pago seguro' },
+        { id: 'c', icon: 'gift' },
+      ] },
+    };
+    getHomeBlocks.mockResolvedValue([block]);
+    renderPage();
+
+    const shipping = await screen.findByText('Envío gratis');
+    expect(screen.getByText('desde 50 €')).toBeInTheDocument();
+    expect(shipping.closest('a')).toHaveAttribute('href', '/condiciones-de-envio');
+    expect(screen.getByText('Pago seguro').closest('a')).toBeNull();
+    // The icon-only item (no title, no text) is left out.
+    expect(document.querySelectorAll('.home-features-list > li')).toHaveLength(2);
+    expect((document.querySelector('.home-features') as HTMLElement).style.getPropertyValue('--home-features-cols')).toBe('2');
+  });
+});
