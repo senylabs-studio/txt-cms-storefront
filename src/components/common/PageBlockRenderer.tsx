@@ -41,6 +41,7 @@ import { pageUrl } from '../../utils/pageUrl';
 import PageItemsGrid from './PageItemsGrid';
 import FeaturedProductsGrid from './FeaturedProductsGrid/FeaturedProductsGrid';
 import { bannerTextPlacement } from '../../utils/bannerTextPlacement';
+import BannerSlideLink from './BannerSlideLink/BannerSlideLink';
 import { blockLinkProps } from '../../utils/blockLinkProps';
 import './PageBlockRenderer.css';
 
@@ -436,7 +437,8 @@ const BannerBlock: React.FC<{ config: BannerBlockConfig }> = ({ config }) => {
             }}
           >
             {slide.imageUrl && <div className="pbr-banner-overlay" />}
-            <div className="pbr-banner-content" style={{ textAlign: slide.textAlign ?? 'center' }}>
+            <BannerSlideLink url={slide.buttonUrl} hasButton={!!slide.buttonText} label={slide.title || slide.subtitle} />
+            <div className="pbr-banner-content banner-slide-content" style={{ textAlign: slide.textAlign ?? 'center' }}>
               {slide.title && <h2 className="pbr-banner-title">{slide.title}</h2>}
               {slide.subtitle && <p className="pbr-banner-subtitle">{slide.subtitle}</p>}
               {slide.buttonText && slide.buttonUrl && (

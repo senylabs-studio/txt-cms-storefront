@@ -22,6 +22,7 @@
 /* ── Banner ───────────────────────────────────────────────────────────────────── */
 .pbr-banner {
   position: relative;
+  isolation: isolate; /* keeps the whole-slide link under the carousel arrows/dots */
   min-height: 300px;
   display: flex;
   align-items: center;

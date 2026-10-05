@@ -460,3 +460,19 @@ describe('PageBlockRenderer ImageText alignment', () => {
   });
 });
 
+
+describe('PageBlockRenderer banner whole-slide link', () => {
+  it('stretches the slide link over the photo, like the home banner', () => {
+    const block = {
+      id: 1, type: 'Banner', sortOrder: 0,
+      config: { slides: [{ imageUrl: '/a.jpg', title: 'Halloween', buttonText: 'Ver telas', buttonUrl: '/halloween' }] },
+    } as StorefrontPageBlock;
+
+    const { container } = render(<PageBlockRenderer blocks={[block]} />);
+
+    const cover = container.querySelector('.pbr-banner a.banner-slide-link')!;
+    expect(cover).toHaveAttribute('href', '/halloween');
+    expect(cover).toHaveAttribute('aria-hidden', 'true');
+    expect(container.querySelector('.pbr-banner-content a.btn')).toHaveAttribute('href', '/halloween');
+  });
+});

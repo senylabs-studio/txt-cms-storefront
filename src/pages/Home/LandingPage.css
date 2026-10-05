@@ -24,6 +24,7 @@
 /* ── Banner ──────────────────────────────────────────────────────────────── */
 .home-banner {
   position: relative;
+  isolation: isolate; /* keeps the whole-slide link under the carousel arrows/dots */
   min-height: var(--home-banner-h, 500px);
   background-color: #1a1a2e;
   background-size: cover;

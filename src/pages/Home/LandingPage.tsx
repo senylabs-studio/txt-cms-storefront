@@ -20,6 +20,7 @@ import { bannerTextPlacement } from '../../utils/bannerTextPlacement';
 import { blockLinkProps } from '../../utils/blockLinkProps';
 import './LandingPage.css';
 import PageLoader from '../../components/common/ScissorsLoader/PageLoader';
+import BannerSlideLink from '../../components/common/BannerSlideLink/BannerSlideLink';
 
 // ─── Banner (carousel) ────────────────────────────────────────────────────────
 // The subtitle has its own fixed max-width + auto margins (see LandingPage.css) so it reads as a
@@ -37,7 +38,7 @@ const BannerSlideContent: React.FC<{ slide: HomeBannerSlide }> = ({ slide }) => 
   if (slide.textColor) overlayStyle.color = slide.textColor;
 
   return (
-    <div className="home-banner-overlay" style={overlayStyle}>
+    <div className="home-banner-overlay banner-slide-content" style={overlayStyle}>
       {slide.title && <h1 className="home-banner-title">{slide.title}</h1>}
       {slide.subtitle && <p className="home-banner-subtitle" style={subtitleMarginForAlign(slide.textAlign)}>{slide.subtitle}</p>}
       {/* Admin-authored URL (may be internal or external) — plain <a>, not <Link>, which
@@ -65,6 +66,7 @@ const BannerBlock: React.FC<{ config: HomeBannerBlockConfig }> = ({ config }) =>
         className="home-banner"
         style={{ backgroundImage: slide.imageUrl ? `url(${slide.imageUrl})` : undefined, ...heightVar, ...bannerTextPlacement(slide.textAlign, slide.textVerticalAlign) }}
       >
+        <BannerSlideLink url={slide.buttonUrl} hasButton={!!slide.buttonText} label={slide.title || slide.subtitle} />
         <BannerSlideContent slide={slide} />
       </div>
     );
@@ -78,6 +80,7 @@ const BannerBlock: React.FC<{ config: HomeBannerBlockConfig }> = ({ config }) =>
             className="home-banner"
             style={{ backgroundImage: slide.imageUrl ? `url(${slide.imageUrl})` : undefined, ...heightVar, ...bannerTextPlacement(slide.textAlign, slide.textVerticalAlign) }}
           >
+            <BannerSlideLink url={slide.buttonUrl} hasButton={!!slide.buttonText} label={slide.title || slide.subtitle} />
             <BannerSlideContent slide={slide} />
           </div>
         </Carousel.Item>

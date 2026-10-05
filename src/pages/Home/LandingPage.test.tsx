@@ -222,3 +222,46 @@ describe('LandingPage featured products in offers mode', () => {
     expect(screen.queryByText('product.seeAllOffers')).toBeNull();
   });
 });
+
+describe('LandingPage banner whole-slide link', () => {
+  it('stretches the slide link over the photo, hidden from keyboard/readers next to its button', async () => {
+    const block: StorefrontHomeBlock = {
+      id: 4, title: 'Hero', type: 'Banner', isActive: true, sortOrder: 0,
+      config: { slides: [{ imageUrl: '/a.jpg', title: 'Halloween', buttonText: 'Ver telas', buttonUrl: '/halloween' }] },
+    };
+    getHomeBlocks.mockResolvedValue([block]);
+    renderPage();
+
+    const slide = (await screen.findByText('Halloween')).closest('.home-banner') as HTMLElement;
+    const cover = slide.querySelector('a.banner-slide-link')!;
+    expect(cover).toHaveAttribute('href', '/halloween');
+    expect(cover).toHaveAttribute('tabindex', '-1');
+    expect(cover).toHaveAttribute('aria-hidden', 'true');
+    // The only link screen readers get is the button.
+    expect(screen.getAllByRole('link')).toHaveLength(1);
+  });
+
+  it('labels the slide link with the title when the slide has no button text', async () => {
+    const block: StorefrontHomeBlock = {
+      id: 5, title: 'Hero', type: 'Banner', isActive: true, sortOrder: 0,
+      config: { slides: [{ imageUrl: '/a.jpg', title: 'Navidad', buttonUrl: '/telas-de-navidad' }] },
+    };
+    getHomeBlocks.mockResolvedValue([block]);
+    renderPage();
+
+    const link = await screen.findByRole('link', { name: 'Navidad' });
+    expect(link).toHaveAttribute('href', '/telas-de-navidad');
+  });
+
+  it('adds no link to a slide without a URL', async () => {
+    const block: StorefrontHomeBlock = {
+      id: 6, title: 'Hero', type: 'Banner', isActive: true, sortOrder: 0,
+      config: { slides: [{ imageUrl: '/a.jpg', title: 'Solo foto' }] },
+    };
+    getHomeBlocks.mockResolvedValue([block]);
+    renderPage();
+
+    await screen.findByText('Solo foto');
+    expect(document.querySelector('a.banner-slide-link')).toBeNull();
+  });
+});

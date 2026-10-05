@@ -1,0 +1,6 @@
+/* Stretched over the slide (which must be position: relative and, with isolation: isolate, its
+   own stacking context, so this never rises above the carousel's arrows and dots). */
+.banner-slide-link { position: absolute; inset: 0; z-index: 2; }
+/* The slide's text sits above the link but lets taps through to it; its button stays clickable. */
+.banner-slide-content { position: relative; z-index: 3; pointer-events: none; }
+.banner-slide-content a, .banner-slide-content button { pointer-events: auto; }
