@@ -24,6 +24,7 @@
 /* ── Banner ──────────────────────────────────────────────────────────────── */
 .home-banner {
   position: relative;
+  min-height: var(--home-banner-h, 500px);
   background-color: #1a1a2e;
   background-size: cover;
   background-position: center;
@@ -63,6 +64,17 @@
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
+}
+
+/* The CMS height is meant for desktop; on phones cap it so the products below show on the
+   first screen (svh: the visible height with the browser bars shown; vh is the fallback). */
+@media (max-width: 767.98px) {
+  .home-banner {
+    min-height: min(var(--home-banner-h, 500px), 45vh);
+    min-height: min(var(--home-banner-h, 500px), 45svh);
+  }
+  .home-banner-overlay { padding: 1.5rem 1.25rem; }
+  .home-banner-subtitle { margin-bottom: 1.25rem; }
 }
 
 /* ── Image Grid ──────────────────────────────────────────────────────────── */

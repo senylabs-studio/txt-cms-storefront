@@ -52,7 +52,9 @@ const BannerSlideContent: React.FC<{ slide: HomeBannerSlide }> = ({ slide }) => 
 
 const BannerBlock: React.FC<{ config: HomeBannerBlockConfig }> = ({ config }) => {
   const slides = config.slides ?? [];
-  const height = config.height ?? 500;
+  // The CMS height is a desktop height: passed as a CSS variable (not an inline min-height) so
+  // LandingPage.css can cap it on phones, where 500px would fill the whole screen.
+  const heightVar = { '--home-banner-h': `${config.height ?? 500}px` } as React.CSSProperties;
 
   if (slides.length === 0) return null;
 
@@ -61,7 +63,7 @@ const BannerBlock: React.FC<{ config: HomeBannerBlockConfig }> = ({ config }) =>
     return (
       <div
         className="home-banner"
-        style={{ backgroundImage: slide.imageUrl ? `url(${slide.imageUrl})` : undefined, minHeight: height, ...bannerTextPlacement(slide.textAlign, slide.textVerticalAlign) }}
+        style={{ backgroundImage: slide.imageUrl ? `url(${slide.imageUrl})` : undefined, ...heightVar, ...bannerTextPlacement(slide.textAlign, slide.textVerticalAlign) }}
       >
         <BannerSlideContent slide={slide} />
       </div>
@@ -69,12 +71,12 @@ const BannerBlock: React.FC<{ config: HomeBannerBlockConfig }> = ({ config }) =>
   }
 
   return (
-    <Carousel fade interval={(config.intervalSeconds ?? 5) * 1000} className="home-carousel" style={{ minHeight: height }}>
+    <Carousel fade interval={(config.intervalSeconds ?? 5) * 1000} className="home-carousel" style={heightVar}>
       {slides.map((slide, i) => (
-        <Carousel.Item key={i} style={{ minHeight: height }}>
+        <Carousel.Item key={i}>
           <div
             className="home-banner"
-            style={{ backgroundImage: slide.imageUrl ? `url(${slide.imageUrl})` : undefined, minHeight: height, ...bannerTextPlacement(slide.textAlign, slide.textVerticalAlign) }}
+            style={{ backgroundImage: slide.imageUrl ? `url(${slide.imageUrl})` : undefined, ...heightVar, ...bannerTextPlacement(slide.textAlign, slide.textVerticalAlign) }}
           >
             <BannerSlideContent slide={slide} />
           </div>
