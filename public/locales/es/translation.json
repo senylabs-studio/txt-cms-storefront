@@ -90,7 +90,7 @@
       "hasAccount": "¿Ya tienes cuenta?",
       "loginLink": "Inicia sesión",
       "error": "Error al crear la cuenta",
-      "newsletter": "Quiero recibir novedades y ofertas por email"
+      "newsletter": "Quiero recibir novedades y ofertas por email (te enviaremos un email para confirmarlo)"
     },
     "forgotPasswordLink": "¿Olvidaste tu contraseña?",
     "forgotPassword": {
@@ -319,7 +319,8 @@
     "newsletterHint": "Puedes darte de baja cuando quieras desde aquí o desde cualquier email.",
     "newsletterOn": "Te has apuntado a la newsletter.",
     "newsletterOff": "Ya no recibirás la newsletter.",
-    "newsletterError": "No se ha podido guardar. Inténtalo de nuevo."
+    "newsletterError": "No se ha podido guardar. Inténtalo de nuevo.",
+    "newsletterPending": "Te hemos enviado un email para confirmar la suscripción. Pulsa el enlace para empezar a recibir la newsletter."
   },
   "orders": {
     "backToAccount": "Volver a mi cuenta",
@@ -432,7 +433,7 @@
     "goesWith": "Combina con",
     "reviewCount": "({{count}} reseñas)",
     "reviewsTitle": "Reseñas de clientes",
-    "noReviews": "Este producto aún no tiene reseñas.",
+    "noReviews": "Esta tela aún no tiene reseñas.",
     "writeReview": "Escribe una reseña",
     "editYourReview": "Tu reseña",
     "reviewCommentPlaceholder": "Cuéntanos qué te ha parecido (opcional)",
@@ -631,5 +632,9 @@
     "editSuccess": "Tarjeta regalo actualizada.",
     "editError": "No se ha podido actualizar la tarjeta regalo.",
     "editCancel": "Cancelar"
+  },
+  "homeReviews": {
+    "defaultTitle": "Lo que dicen nuestros clientes",
+    "rating": "{{rating}} de 5 estrellas"
   }
 }

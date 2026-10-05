@@ -41,9 +41,11 @@ const AccountPage: React.FC = () => {
   const handleNewsletterChange = async (subscribed: boolean) => {
     setNewsletterSaving(true);
     try {
-      await updateNewsletterSubscription(subscribed);
-      setProfile(p => (p ? { ...p, isSubscribedToNewsletter: subscribed } : p));
-      showToast('success', t(subscribed ? 'account.newsletterOn' : 'account.newsletterOff'));
+      const { pendingConfirmation } = await updateNewsletterSubscription(subscribed);
+      // Pending = a confirmation email went out; the switch stays off until it's clicked.
+      setProfile(p => (p ? { ...p, isSubscribedToNewsletter: subscribed && !pendingConfirmation } : p));
+      showToast(pendingConfirmation ? 'info' : 'success',
+        t(pendingConfirmation ? 'account.newsletterPending' : subscribed ? 'account.newsletterOn' : 'account.newsletterOff'));
     } catch (err) {
       showToast('danger', getApiErrorMessage(err, t('account.newsletterError')));
     } finally {

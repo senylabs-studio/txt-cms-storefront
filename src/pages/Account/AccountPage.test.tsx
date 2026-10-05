@@ -4,6 +4,7 @@ import { render, screen, fireEvent, waitFor, within } from '@testing-library/rea
 import { MemoryRouter } from 'react-router-dom';
 import AccountPage from './AccountPage';
 import { ToastProvider } from '../../contexts/ToastContext';
+import GlobalToast from '../../components/common/GlobalToast/GlobalToast';
 import type { StorefrontProfile } from '../../types';
 
 vi.mock('react-i18next', () => ({
@@ -17,7 +18,8 @@ vi.mock('../../components/Layout/MainLayout', () => ({
   default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
-const { getProfile, updateProfile, changePassword, addAddress, updateAddress, deleteAddress, downloadMyDataExport, requestAccountDeletion } = vi.hoisted(() => ({
+const { getProfile, updateProfile, changePassword, addAddress, updateAddress, deleteAddress, downloadMyDataExport, requestAccountDeletion, updateNewsletterSubscription } = vi.hoisted(() => ({
+  updateNewsletterSubscription: vi.fn(),
   getProfile: vi.fn(),
   updateProfile: vi.fn(),
   changePassword: vi.fn(),
@@ -28,7 +30,7 @@ const { getProfile, updateProfile, changePassword, addAddress, updateAddress, de
   requestAccountDeletion: vi.fn(),
 }));
 vi.mock('../../services/profileService', () => ({
-  getProfile, updateProfile, changePassword, addAddress, updateAddress, deleteAddress, downloadMyDataExport, requestAccountDeletion,
+  getProfile, updateProfile, changePassword, addAddress, updateAddress, deleteAddress, downloadMyDataExport, requestAccountDeletion, updateNewsletterSubscription,
 }));
 
 const { getVisibleCountries } = vi.hoisted(() => ({ getVisibleCountries: vi.fn() }));
@@ -351,5 +353,26 @@ describe('AccountPage', () => {
     await screen.findByDisplayValue('Jane');
 
     expect(screen.queryByText('account.changePasswordTitle')).not.toBeInTheDocument();
+  });
+});
+
+// Double opt-in: switching the newsletter on only emails a confirmation link.
+describe('AccountPage newsletter switch', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    getProfile.mockResolvedValue(profile());
+    getVisibleCountries.mockResolvedValue([{ isoCode: 'ES', name: 'España' }]);
+  });
+
+  it('says a confirmation email was sent and leaves the switch off', async () => {
+    updateNewsletterSubscription.mockResolvedValue({ pendingConfirmation: true });
+    render(<AccountPage />, { wrapper: ({ children }) => <AllProviders>{children}<GlobalToast /></AllProviders> });
+    const toggle = await screen.findByLabelText('account.newsletterLabel');
+
+    fireEvent.click(toggle);
+
+    expect(await screen.findByText('account.newsletterPending')).toBeInTheDocument();
+    await waitFor(() => expect(toggle).not.toBeChecked());
+    expect(updateNewsletterSubscription).toHaveBeenCalledWith(true);
   });
 });

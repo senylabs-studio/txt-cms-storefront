@@ -130,6 +130,60 @@
 .home-newsletter { padding: 3rem 0; }
 @media (max-width: 767.98px) { .home-newsletter { padding: 2rem 0; } }
 
+/* ── Customer reviews ─────────────────────────────────────────────────────────
+   3 cards per row on desktop; on phones a row that scrolls sideways (snap), so six opinions
+   don't stack into one long column. */
+.home-reviews { padding: 2.5rem 0; }
+.home-reviews-title { text-align: center; font-weight: 700; margin-bottom: 1.5rem; }
+.home-reviews-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.home-review {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 10px;
+  padding: 1.25rem 1.25rem 1rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+.home-review-quote { position: absolute; top: 1rem; right: 1.1rem; font-size: 1.6rem; color: color-mix(in srgb, var(--brand-color) 25%, white); }
+.home-review-stars { display: flex; gap: 2px; color: #d9d9d9; margin-bottom: 0.6rem; }
+.home-review-stars .is-on { color: #f5b301; }
+.home-review-comment {
+  flex: 1 1 auto;
+  margin: 0 0 1rem;
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.home-review-footer { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; font-size: 0.85rem; }
+.home-review-author { font-weight: 700; }
+.home-review-product { display: inline-flex; align-items: center; gap: 0.45rem; min-width: 0; color: inherit; text-decoration: none; opacity: 0.8; }
+.home-review-product:hover { opacity: 1; text-decoration: underline; }
+.home-review-product img { width: 36px; height: 24px; object-fit: cover; border-radius: 4px; flex: 0 0 auto; }
+.home-review-product span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+@media (max-width: 767.98px) {
+  .home-reviews { padding: 2rem 0; }
+  .home-reviews-list {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: 82%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 0.5rem;
+  }
+  .home-review { scroll-snap-align: start; }
+}
+
 /* ── Image Grid ──────────────────────────────────────────────────────────── */
 .home-image-grid-item {
   position: relative;

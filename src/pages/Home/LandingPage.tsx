@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Carousel } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import {
-  FaCut, FaTruck, FaUndoAlt, FaLock, FaStore, FaGift, FaPhoneAlt, FaRulerHorizontal, FaLeaf, FaStar, FaCreditCard, FaClock,
+  FaCut, FaQuoteLeft, FaTruck, FaUndoAlt, FaLock, FaStore, FaGift, FaPhoneAlt, FaRulerHorizontal, FaLeaf, FaStar, FaCreditCard, FaClock,
 } from 'react-icons/fa';
 import type { IconType } from 'react-icons';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +20,7 @@ import {
   type HomeFeaturesBlockConfig,
   type HomeFeatureIcon,
   type HomeNewsletterBlockConfig,
+  type HomeReviewsBlockConfig,
 } from '../../services/homeService';
 import FeaturedProductsGrid from '../../components/common/FeaturedProductsGrid/FeaturedProductsGrid';
 import { bannerTextPlacement } from '../../utils/bannerTextPlacement';
@@ -259,6 +260,41 @@ const NewsletterBlock: React.FC<{ config: HomeNewsletterBlockConfig }> = ({ conf
   </section>
 );
 
+// ─── Customer reviews ─────────────────────────────────────────────────────────
+// The backend sends only 4-5 star reviews with a comment, and none until there are at least 3.
+const ReviewsBlock: React.FC<{ config: HomeReviewsBlockConfig }> = ({ config }) => {
+  const { t } = useTranslation();
+  const reviews = config.reviews ?? [];
+  if (reviews.length === 0) return null;
+  return (
+    <section className="home-reviews">
+      <Container>
+        <h2 className="home-reviews-title">{config.title?.trim() || t('homeReviews.defaultTitle')}</h2>
+        <ul className="home-reviews-list">
+          {reviews.map((r, i) => (
+            <li key={i} className="home-review">
+              <FaQuoteLeft className="home-review-quote" aria-hidden="true" />
+              <div className="home-review-stars" role="img" aria-label={t('homeReviews.rating', { rating: r.rating })}>
+                {[1, 2, 3, 4, 5].map(n => <FaStar key={n} className={n <= r.rating ? 'is-on' : undefined} aria-hidden="true" />)}
+              </div>
+              <p className="home-review-comment">{r.comment}</p>
+              <div className="home-review-footer">
+                <span className="home-review-author">{r.customerName}</span>
+                {r.product && (
+                  <Link to={r.product.variantId ? `/variant/${r.product.variantId}` : `/product/${r.product.slug}`} className="home-review-product">
+                    {r.product.thumbnailUrl && <img src={r.product.thumbnailUrl} alt="" loading="lazy" />}
+                    <span>{r.product.variantName ? `${r.product.name} · ${r.product.variantName}` : r.product.name}</span>
+                  </Link>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </Container>
+    </section>
+  );
+};
+
 // ─── Block renderer with backgroundColor wrapper ──────────────────────────────
 const BlockRenderer: React.FC<{ block: StorefrontHomeBlock }> = ({ block }) => {
   // ImageText applies its backgroundColor to its own card instead of the full-width section;
@@ -274,6 +310,7 @@ const BlockRenderer: React.FC<{ block: StorefrontHomeBlock }> = ({ block }) => {
     case 'ImageText':        content = <ImageTextBlock config={block.config} />; break;
     case 'Features':         content = <FeaturesBlock config={block.config} />; break;
     case 'Newsletter':       content = <NewsletterBlock config={block.config} />; break;
+    case 'Reviews':          content = <ReviewsBlock config={block.config} />; break;
     default:                 return null;
   }
 

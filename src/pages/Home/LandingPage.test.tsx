@@ -317,3 +317,30 @@ describe('LandingPage newsletter block', () => {
     expect(screen.getByRole('button', { name: 'Quiero' })).toBeInTheDocument();
   });
 });
+
+describe('LandingPage reviews block', () => {
+  const review = (i: number) => ({ customerName: `Cliente${i}`, rating: i === 2 ? 4 : 5, comment: `Opinión número ${i} muy buena`, createdAt: '2026-10-05T08:00:00Z', product: { name: `Tela ${i}`, slug: `tela-${i}`, thumbnailUrl: null } });
+
+  it('shows each review with its stars, first name and a link to the fabric', async () => {
+    const block: StorefrontHomeBlock = {
+      id: 10, title: 'Opiniones', type: 'Reviews', isActive: true, sortOrder: 0,
+      config: { reviews: [review(1), review(2), review(3)] },
+    };
+    getHomeBlocks.mockResolvedValue([block]);
+    renderPage();
+
+    expect(await screen.findByText('homeReviews.defaultTitle')).toBeInTheDocument();
+    expect(screen.getByText('Opinión número 2 muy buena')).toBeInTheDocument();
+    expect(screen.getByText('Cliente2')).toBeInTheDocument();
+    expect(screen.getByText('Tela 3').closest('a')).toHaveAttribute('href', '/product/tela-3');
+    expect(screen.getAllByRole('img', { name: 'homeReviews.rating' })).toHaveLength(3);
+  });
+
+  it('shows nothing while there are no reviews to show', async () => {
+    const block: StorefrontHomeBlock = { id: 11, title: 'Opiniones', type: 'Reviews', isActive: true, sortOrder: 0, config: { reviews: [] } };
+    getHomeBlocks.mockResolvedValue([block]);
+    const { container } = renderPage();
+    await new Promise(r => setTimeout(r, 0));
+    expect(container.querySelector('.home-reviews')).toBeNull();
+  });
+});

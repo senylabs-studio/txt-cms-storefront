@@ -26,9 +26,11 @@ export const updatePreferredLanguage = async (languageCode: string): Promise<voi
   await apiClient.put('/storefront/profile/language', { languageCode });
 };
 
-/** "Mi cuenta" newsletter switch; off also cancels a home-page subscription with the same email. */
-export const updateNewsletterSubscription = async (subscribed: boolean): Promise<void> => {
-  await apiClient.put('/storefront/profile/newsletter', { subscribed });
+/** "Mi cuenta" newsletter switch; off also cancels a home-page subscription with the same email.
+ *  On sends a confirmation email (double opt-in): pendingConfirmation is true until it's clicked. */
+export const updateNewsletterSubscription = async (subscribed: boolean): Promise<{ pendingConfirmation: boolean }> => {
+  const res = await apiClient.put('/storefront/profile/newsletter', { subscribed });
+  return { pendingConfirmation: !!res.data?.pendingConfirmation };
 };
 
 export const addAddress = async (data: Partial<CustomerAddress>): Promise<CustomerAddress> => {

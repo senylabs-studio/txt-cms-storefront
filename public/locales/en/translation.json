@@ -90,7 +90,7 @@
       "hasAccount": "Already have an account?",
       "loginLink": "Log in",
       "error": "Error creating account",
-      "newsletter": "Send me news and offers by email"
+      "newsletter": "Send me news and offers by email (we'll email you to confirm)"
     },
     "forgotPasswordLink": "Forgot your password?",
     "forgotPassword": {
@@ -319,7 +319,8 @@
     "newsletterHint": "You can unsubscribe at any time here or from any email.",
     "newsletterOn": "You've signed up to the newsletter.",
     "newsletterOff": "You won't receive the newsletter any more.",
-    "newsletterError": "Couldn't save. Please try again."
+    "newsletterError": "Couldn't save. Please try again.",
+    "newsletterPending": "We've sent you an email to confirm. Click the link in it to start receiving the newsletter."
   },
   "orders": {
     "backToAccount": "Back to my account",
@@ -432,7 +433,7 @@
     "goesWith": "Goes well with",
     "reviewCount": "({{count}} reviews)",
     "reviewsTitle": "Customer reviews",
-    "noReviews": "This product has no reviews yet.",
+    "noReviews": "This fabric has no reviews yet.",
     "writeReview": "Write a review",
     "editYourReview": "Your review",
     "reviewCommentPlaceholder": "Tell us what you thought (optional)",
@@ -631,5 +632,9 @@
     "editSuccess": "Gift card updated.",
     "editError": "The gift card couldn't be updated.",
     "editCancel": "Cancel"
+  },
+  "homeReviews": {
+    "defaultTitle": "What our customers say",
+    "rating": "{{rating}} out of 5 stars"
   }
 }

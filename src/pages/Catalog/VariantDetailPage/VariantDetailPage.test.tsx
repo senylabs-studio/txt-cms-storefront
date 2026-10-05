@@ -46,12 +46,12 @@ const { getVariantById, getVariantsBatch, getVariantMatches } = vi.hoisted(() =>
 }));
 vi.mock('../../../services/productService', () => ({ getVariantById, getVariantsBatch, getVariantMatches }));
 
-const { getProductReviews, getMyReview, submitReview } = vi.hoisted(() => ({
-  getProductReviews: vi.fn(),
+const { getVariantReviews, getMyReview, submitReview } = vi.hoisted(() => ({
+  getVariantReviews: vi.fn(),
   getMyReview: vi.fn(),
   submitReview: vi.fn(),
 }));
-vi.mock('../../../services/reviewService', () => ({ getProductReviews, getMyReview, submitReview }));
+vi.mock('../../../services/reviewService', () => ({ getVariantReviews, getMyReview, submitReview }));
 
 const renderPage = (variantId = '1') => render(
   <MemoryRouter initialEntries={[`/variant/${variantId}`]}>
@@ -76,7 +76,7 @@ describe('VariantDetailPage reviews', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockAuth.isAuthenticated = true;
-    getProductReviews.mockResolvedValue(reviewsPage([]));
+    getVariantReviews.mockResolvedValue(reviewsPage([]));
     getMyReview.mockResolvedValue({ hasPurchased: false, review: null });
   });
 
@@ -97,7 +97,7 @@ describe('VariantDetailPage reviews', () => {
 
   it('lists the reviews returned for the product', async () => {
     getVariantById.mockResolvedValue(variant());
-    getProductReviews.mockResolvedValue(reviewsPage([
+    getVariantReviews.mockResolvedValue(reviewsPage([
       { id: 1, customerName: 'Jane', rating: 5, comment: 'Excelente calidad', createdAt: '2026-01-15T00:00:00.000Z' },
     ]));
     renderPage();
@@ -145,7 +145,7 @@ describe('VariantDetailPage reviews', () => {
     fireEvent.change(screen.getByPlaceholderText('product.reviewCommentPlaceholder'), { target: { value: 'Bien' } });
     fireEvent.click(screen.getByText('product.submitReview'));
 
-    await waitFor(() => expect(submitReview).toHaveBeenCalledWith('tela', 4, 'Bien'));
+    await waitFor(() => expect(submitReview).toHaveBeenCalledWith(1, 4, 'Bien'));
     expect(await screen.findByText('product.reviewSaved')).toBeInTheDocument();
   });
 
@@ -163,7 +163,7 @@ describe('VariantDetailPage reviews', () => {
 
   it('paginates through review pages', async () => {
     getVariantById.mockResolvedValue(variant());
-    getProductReviews
+    getVariantReviews
       .mockResolvedValueOnce(reviewsPage(
         [{ id: 1, customerName: 'Jane', rating: 5, createdAt: '2026-01-01T00:00:00.000Z' }],
         { totalPages: 2 },
@@ -178,7 +178,38 @@ describe('VariantDetailPage reviews', () => {
     fireEvent.click(screen.getByText('product.nextPage'));
 
     expect(await screen.findByText('Bob')).toBeInTheDocument();
-    expect(getProductReviews).toHaveBeenCalledWith('tela', 2);
+    expect(getVariantReviews).toHaveBeenCalledWith(1, 2);
+  });
+});
+
+describe('VariantDetailPage reviews across variants', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    getMyReview.mockResolvedValue({ hasPurchased: false, review: null });
+    getVariantById.mockImplementation((id: number) => Promise.resolve(id === 1 ? variant() : variant({ id: 2, name: 'Lino Verde' })));
+  });
+
+  // Reviews are per variant: a reviews page still loading for the previous variant must not land
+  // on the one the customer moved to (page links keep this component mounted).
+  it('ignores a reviews page that arrives after moving to another variant', async () => {
+    let resolveLate!: (v: unknown) => void;
+    getVariantReviews.mockImplementation((variantId: number, page: number) => {
+      if (variantId === 1 && page === 2) return new Promise(r => { resolveLate = r; });
+      if (variantId === 1) return Promise.resolve(reviewsPage([{ id: 1, customerName: 'Jane', rating: 5, createdAt: '2026-01-01T00:00:00.000Z' }], { totalPages: 2 }));
+      return Promise.resolve(reviewsPage([]));
+    });
+    const router = createMemoryRouter([{ path: '/variant/:id', element: <VariantDetailPage /> }], { initialEntries: ['/variant/1'] });
+    render(<RouterProvider router={router} />);
+    await screen.findByText('Jane');
+    fireEvent.click(screen.getByText('product.nextPage'));
+
+    router.navigate('/variant/2');
+    await screen.findByText('Lino Verde');
+    resolveLate({ ...reviewsPage([{ id: 9, customerName: 'Bob', rating: 1, createdAt: '2026-01-02T00:00:00.000Z' }], { totalPages: 2, currentPage: 2 }), reviewCount: 7 });
+    await new Promise(r => setTimeout(r, 0));
+
+    expect(screen.queryByText('Bob')).not.toBeInTheDocument();
+    expect(screen.queryByText('product.reviewCount(7)')).not.toBeInTheDocument();
   });
 });
 
@@ -186,7 +217,7 @@ describe('VariantDetailPage alsoBought', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockAuth.isAuthenticated = true;
-    getProductReviews.mockResolvedValue(reviewsPage([]));
+    getVariantReviews.mockResolvedValue(reviewsPage([]));
     getMyReview.mockResolvedValue({ hasPurchased: false, review: null });
   });
 
@@ -232,7 +263,7 @@ describe('VariantDetailPage stale-response guard', () => {
     vi.clearAllMocks();
     localStorage.clear();
     mockAuth.isAuthenticated = true;
-    getProductReviews.mockResolvedValue(reviewsPage([]));
+    getVariantReviews.mockResolvedValue(reviewsPage([]));
     getMyReview.mockResolvedValue({ hasPurchased: false, review: null });
   });
 
@@ -304,15 +335,14 @@ describe('VariantDetailPage stale-response guard', () => {
     expect(screen.queryByText('Reciente Viejo')).not.toBeInTheDocument();
   });
 
-  // Regression test: following an "also bought"/"recently viewed" link to a DIFFERENT product
-  // doesn't unmount the page. The customer's own rating/comment for the previous product stayed
-  // in the form whenever the new product had no review of theirs yet, ready to be submitted as a
-  // review of the wrong product.
-  it('does not carry the previous product\'s own review into the form after navigating to another product', async () => {
+  // Regression test: following a link to a DIFFERENT variant doesn't unmount the page. The
+  // customer's own rating/comment for the previous variant stayed in the form whenever the new one
+  // had no review of theirs yet, ready to be submitted as a review of the wrong variant.
+  it('does not carry the previous variant\'s own review into the form after navigating to another variant', async () => {
     getVariantById.mockImplementation((id: number) => Promise.resolve(id === 1
       ? variant()
       : variant({ id: 2, name: 'Lino Verde', productId: 2, productSlug: 'lino' })));
-    getMyReview.mockImplementation((slug: string) => Promise.resolve(slug === 'tela'
+    getMyReview.mockImplementation((variantId: number) => Promise.resolve(variantId === 1
       ? { hasPurchased: true, review: { id: 1, customerName: 'Jane', rating: 5, comment: 'Genial', createdAt: '2026-01-01T00:00:00.000Z' } }
       : { hasPurchased: true, review: null }));
     const router = createMemoryRouter(
@@ -324,7 +354,7 @@ describe('VariantDetailPage stale-response guard', () => {
 
     router.navigate('/variant/2');
     await screen.findByText('Lino Verde');
-    await waitFor(() => expect(getMyReview).toHaveBeenCalledWith('lino'));
+    await waitFor(() => expect(getMyReview).toHaveBeenCalledWith(2));
     await new Promise(r => setTimeout(r, 0));
 
     expect(screen.queryByDisplayValue('Genial')).not.toBeInTheDocument();
@@ -338,7 +368,7 @@ describe('VariantDetailPage description placement', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockAuth.isAuthenticated = true;
-    getProductReviews.mockResolvedValue(reviewsPage([]));
+    getVariantReviews.mockResolvedValue(reviewsPage([]));
     getMyReview.mockResolvedValue({ hasPurchased: false, review: null });
   });
 
@@ -358,7 +388,7 @@ describe('VariantDetailPage description placement', () => {
 describe('VariantDetailPage "Combina con"', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    getProductReviews.mockResolvedValue(reviewsPage([]));
+    getVariantReviews.mockResolvedValue(reviewsPage([]));
     getMyReview.mockResolvedValue({ hasPurchased: false, review: null });
     getVariantById.mockResolvedValue(variant());
     getVariantMatches.mockResolvedValue({ matches: [], matchedBy: [] });
