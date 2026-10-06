@@ -12,7 +12,7 @@ function resolveHref(item: StorefrontMenuItem): string {
   return pageUrl(item.type, item.slug);
 }
 
-const COLS = 4; // max columns in the mega panel
+const COLS = 5; // max columns in the mega panel (5 keeps big sections like Patchwork short)
 
 const MegaPanel: React.FC<{ item: StorefrontMenuItem; onClose: () => void }> = ({ item, onClose }) => {
   const { t } = useTranslation();
