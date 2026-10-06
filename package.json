@@ -5,12 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node scripts/write-server-config.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "start": "npx serve -s dist"
+    "start": "node server/server.mjs"
   },
   "dependencies": {
     "@paypal/react-paypal-js": "^10.5.1",

@@ -36,14 +36,19 @@ jobs:
       - name: Build
         run: npm run build
 
+      # The built site plus its tiny Node server (share previews, see server/server.mjs), laid
+      # out as the package root: dist/ + server.mjs + meta.mjs. Azure startup command:
+      # `node /home/site/wwwroot/server.mjs`.
+      - name: Assemble package
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: mkdir package && cp -r dist package/dist && cp server/server.mjs server/meta.mjs package/
+
       - name: Upload artifact for deployment job
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
-          # Only the built site (see txt-cms-frontend's workflow): Azure serves it with
-          # `pm2 serve /home/site/wwwroot/dist --no-daemon --spa`.
           name: storefront-app
-          path: dist
+          path: package
 
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -58,7 +63,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: storefront-app
-          path: dist
+          path: package
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -72,4 +77,4 @@ jobs:
         with:
           app-name: 'txt-cms-storefront'
           slot-name: 'Production'
-          package: .
+          package: package
