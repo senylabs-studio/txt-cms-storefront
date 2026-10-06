@@ -21,6 +21,7 @@ import {
   type HomeFeatureIcon,
   type HomeNewsletterBlockConfig,
   type HomeReviewsBlockConfig,
+  type HomeDividerBlockConfig,
 } from '../../services/homeService';
 import FeaturedProductsGrid from '../../components/common/FeaturedProductsGrid/FeaturedProductsGrid';
 import { bannerTextPlacement } from '../../utils/bannerTextPlacement';
@@ -295,6 +296,24 @@ const ReviewsBlock: React.FC<{ config: HomeReviewsBlockConfig }> = ({ config }) 
   );
 };
 
+// ─── Divider ──────────────────────────────────────────────────────────────────
+// A dashed "pespunte" like the one on the ImageText card's cut line, centred within the content
+// width; or a thin line, or just space. Decorative: hidden from screen readers.
+const DividerBlock: React.FC<{ config: HomeDividerBlockConfig }> = ({ config }) => {
+  const variant = config.variant ?? 'stitch';
+  return (
+    <div className={`home-divider home-divider-${config.spacing ?? 'md'}`} aria-hidden="true">
+      {variant !== 'space' && (
+        <Container>
+          <div className={`home-divider-line home-divider-${variant === 'line' ? 'plainline' : variant}`}>
+            {variant === 'stitch' && <FaCut />}
+          </div>
+        </Container>
+      )}
+    </div>
+  );
+};
+
 // ─── Block renderer with backgroundColor wrapper ──────────────────────────────
 const BlockRenderer: React.FC<{ block: StorefrontHomeBlock }> = ({ block }) => {
   // ImageText applies its backgroundColor to its own card instead of the full-width section;
@@ -311,6 +330,7 @@ const BlockRenderer: React.FC<{ block: StorefrontHomeBlock }> = ({ block }) => {
     case 'Features':         content = <FeaturesBlock config={block.config} />; break;
     case 'Newsletter':       content = <NewsletterBlock config={block.config} />; break;
     case 'Reviews':          content = <ReviewsBlock config={block.config} />; break;
+    case 'Divider':          content = <DividerBlock config={block.config} />; break;
     default:                 return null;
   }
 
