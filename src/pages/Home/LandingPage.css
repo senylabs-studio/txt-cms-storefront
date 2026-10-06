@@ -316,3 +316,25 @@
   .home-imagetext-body:has(.home-imagetext-cutline) { padding: 1.6rem 3.4rem 1.9rem 1.4rem; }
   .home-imagetext-card.image-right .home-imagetext-body:has(.home-imagetext-cutline) { padding: 1.6rem 1.4rem 1.9rem 3.4rem; }
 }
+
+/* ─── Divider ─────────────────────────────────────────────────────────────── */
+/* Space above and below (with "space only" this padding is the whole block). */
+.home-divider-sm { padding: 0.5rem 0; }
+.home-divider-md { padding: 1.25rem 0; }
+.home-divider-lg { padding: 2.5rem 0; }
+.home-divider-line {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: 720px;
+  margin: 0 auto;
+  color: var(--brand-color);
+}
+.home-divider-line::before,
+.home-divider-line::after { content: ''; flex: 1; border-top: 2px dashed currentColor; opacity: 0.5; }
+.home-divider-stitch svg { flex: none; font-size: 1.15rem; transform: rotate(-90deg); }
+/* Without scissors the two halves meet as one continuous stitch. */
+.home-divider-stitchPlain { gap: 0; }
+.home-divider-line.home-divider-plainline { gap: 0; color: #dfe3e1; }
+.home-divider-plainline::before,
+.home-divider-plainline::after { border-top: 1px solid currentColor; opacity: 1; }

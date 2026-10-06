@@ -1,6 +1,6 @@
 import apiClient from '../apiClient';
 
-export type StorefrontHomeBlockType = 'Banner' | 'ImageGrid' | 'FeaturedProducts' | 'ImageText' | 'Features' | 'Newsletter' | 'Reviews';
+export type StorefrontHomeBlockType = 'Banner' | 'ImageGrid' | 'FeaturedProducts' | 'ImageText' | 'Features' | 'Newsletter' | 'Reviews' | 'Divider';
 
 export interface HomeBannerSlide {
   imageUrl?: string;
@@ -133,6 +133,13 @@ export interface HomeReviewsBlockConfig {
   reviews?: HomeReview[];
 }
 
+/** Separator between sections: dashed "pespunte" (stitch = with scissors), thin line or just space. */
+export interface HomeDividerBlockConfig {
+  variant?: 'stitch' | 'stitchPlain' | 'line' | 'space';
+  spacing?: 'sm' | 'md' | 'lg';
+  backgroundColor?: string;
+}
+
 export interface HomeBlockConfigMap {
   Banner: HomeBannerBlockConfig;
   ImageGrid: HomeImageGridBlockConfig;
@@ -141,6 +148,7 @@ export interface HomeBlockConfigMap {
   Features: HomeFeaturesBlockConfig;
   Newsletter: HomeNewsletterBlockConfig;
   Reviews: HomeReviewsBlockConfig;
+  Divider: HomeDividerBlockConfig;
 }
 
 export type HomeBlockConfig = HomeBlockConfigMap[StorefrontHomeBlockType];

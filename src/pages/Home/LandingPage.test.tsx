@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import LandingPage from './LandingPage';
 import type { StorefrontHomeBlock } from '../../services/homeService';
@@ -342,5 +342,27 @@ describe('LandingPage reviews block', () => {
     const { container } = renderPage();
     await new Promise(r => setTimeout(r, 0));
     expect(container.querySelector('.home-reviews')).toBeNull();
+  });
+});
+
+describe('LandingPage divider', () => {
+  const divider = (config: object): StorefrontHomeBlock => ({ id: 9, title: '', type: 'Divider', isActive: true, sortOrder: 0, config } as StorefrontHomeBlock);
+
+  it('draws the stitch with scissors by default, decorative only', async () => {
+    getHomeBlocks.mockResolvedValue([divider({})]);
+    const { container } = renderPage();
+
+    await waitFor(() => expect(container.querySelector('.home-divider-stitch')).not.toBeNull());
+    expect(container.querySelector('.home-divider-stitch svg')).not.toBeNull();
+    expect(container.querySelector('.home-divider-md')).toHaveAttribute('aria-hidden', 'true');
+  });
+
+  it('is only space when set so, and a plain stitch has no scissors', async () => {
+    getHomeBlocks.mockResolvedValue([divider({ variant: 'space', spacing: 'lg' }), divider({ variant: 'stitchPlain', spacing: 'sm' })]);
+    const { container } = renderPage();
+
+    await waitFor(() => expect(container.querySelector('.home-divider-lg')).not.toBeNull());
+    expect(container.querySelector('.home-divider-lg')!.children).toHaveLength(0);
+    expect(container.querySelector('.home-divider-stitchPlain svg')).toBeNull();
   });
 });
