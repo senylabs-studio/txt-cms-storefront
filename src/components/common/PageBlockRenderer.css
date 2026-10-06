@@ -242,6 +242,9 @@
 .pbr-divider-stitch::after { content: ''; flex: 1; border-top: 2px dashed currentColor; opacity: 0.55; }
 .pbr-divider-stitch svg { transform: rotate(-90deg); }
 
+/* Automatic separator between a page's subpages mosaic and its products */
+.pbr-section-separator { margin: 2.5rem 0 1.5rem; border: 0; border-top: 2px dashed var(--brand-color); opacity: 0.55; }
+
 /* ImageText · card */
 .pbr-image-text-card {
   background: #fff;

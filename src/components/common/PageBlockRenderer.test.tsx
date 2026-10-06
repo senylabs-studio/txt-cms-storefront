@@ -6,6 +6,8 @@ import type { StorefrontPageBlock, StorefrontPageDetail } from '../../types';
 const settings = vi.hoisted(() => ({ current: {} as Record<string, unknown> }));
 vi.mock('../../contexts/SiteSettingsContext', () => ({ useSiteSettings: () => settings.current }));
 
+vi.mock('./PageItemsGrid', () => ({ default: () => <div className="items-grid-stub" /> }));
+
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'es', resolvedLanguage: 'es' } }),
   // FeaturedProductsBlock/VariantCard transitively import src/i18n.ts, whose module-level
@@ -441,6 +443,38 @@ describe('PageBlockRenderer SubPages mosaic', () => {
     const c = renderSubPages({ columns: 3 });
     expect(c.querySelectorAll('.pbr-mosaic a.pbr-mosaic-tile')).toHaveLength(2);
     expect(c.querySelector<HTMLElement>('.pbr-mosaic')!.style.getPropertyValue('--pbr-mosaic-cols')).toBe('6');
+  });
+});
+
+describe('PageBlockRenderer separator between subpages and products', () => {
+  const detail = (childPages: number, items: number) => ({
+    childPages: Array.from({ length: childPages }, (_, i) => ({ id: i + 10, name: `Sub ${i}`, slug: `sub-${i}`, description: '', type: 'Category' })),
+    items: Array.from({ length: items }, (_, i) => ({ id: i })),
+  }) as unknown as StorefrontPageDetail;
+  const block = (id: number, type: string) => ({ id, type, config: {}, sortOrder: id }) as StorefrontPageBlock;
+  const separators = (blocks: StorefrontPageBlock[], pageDetail: StorefrontPageDetail) =>
+    [...render(<PageBlockRenderer blocks={blocks} pageDetail={pageDetail} />).container.querySelectorAll('.pbr-section-separator')];
+
+  it('a page with subpages and products gets a separator between the two sections', () => {
+    const c = render(<PageBlockRenderer blocks={[block(1, 'SubPages'), block(2, 'Products')]} pageDetail={detail(2, 3)} />).container;
+    const sep = c.querySelector('.pbr-section-separator')!;
+    expect(sep.textContent).toBe('');
+    expect(sep.previousElementSibling!.querySelector('.pbr-mosaic')).not.toBeNull();
+    expect(sep.nextElementSibling!.querySelector('.items-grid-stub')).not.toBeNull();
+  });
+
+  it('products first, then subpages: still one separator between them', () => {
+    expect(separators([block(1, 'Products'), block(2, 'SubPages')], detail(2, 3))).toHaveLength(1);
+  });
+
+  it('no separator when one of the two sections renders nothing', () => {
+    expect(separators([block(1, 'SubPages'), block(2, 'Products')], detail(0, 3))).toHaveLength(0);
+    expect(separators([block(1, 'SubPages'), block(2, 'Products')], detail(2, 0))).toHaveLength(0);
+    expect(separators([block(1, 'SubPages')], detail(2, 3))).toHaveLength(0);
+  });
+
+  it('no extra separator when the editor already put a Divider between them', () => {
+    expect(separators([block(1, 'SubPages'), block(2, 'Divider'), block(3, 'Products')], detail(2, 3))).toHaveLength(0);
   });
 });
 
