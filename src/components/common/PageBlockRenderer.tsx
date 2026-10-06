@@ -651,6 +651,22 @@ const RENDERERS = {
   TableOfContents: ({ config }: { config: TableOfContentsBlockConfig }) => <TableOfContentsBlock config={config} />,
 } as unknown as Record<StorefrontPageBlockType, React.FC<{ config: PageBlockConfig; pageDetail?: StorefrontPageDetail }>>;
 
+/** Where an automatic separator goes on a page that shows both its subpages mosaic and its
+ *  products: before whichever of the two comes second, so the tiles (links to other pages)
+ *  and the product cards don't read as one grid. Skipped when either renders nothing or the
+ *  editor already put a Divider between them. */
+function sectionSeparatorBefore(blocks: StorefrontPageBlock[], pageDetail?: StorefrontPageDetail): StorefrontPageBlock['id'] | null {
+  if (!pageDetail?.childPages?.length || !pageDetail.items?.length) return null;
+  const sub = blocks.findIndex(b => b.type === 'SubPages');
+  const prod = blocks.findIndex(b => b.type === 'Products');
+  if (sub < 0 || prod < 0) return null;
+  const [first, second] = sub < prod ? [sub, prod] : [prod, sub];
+  if (blocks.slice(first + 1, second).some(b => b.type === 'Divider')) return null;
+  return blocks[second].id;
+}
+
+const SectionSeparator: React.FC = () => <hr className="pbr-section-separator" />;
+
 // ─── Main export ──────────────────────────────────────────────────────────────
 interface PageBlockRendererProps {
   blocks: StorefrontPageBlock[];
@@ -666,6 +682,7 @@ const PageBlockRenderer: React.FC<PageBlockRendererProps> = ({ blocks, pageDetai
   // A numbered index numbers the headings too (CSS counters on .is-numbered), so "3" in the
   // index and "3" above the section always agree, whatever blocks sit in between.
   const numbered = (blocks ?? []).some(b => b.type === 'TableOfContents' && b.config.variant === 'numbered');
+  const separatorBefore = sectionSeparatorBefore(blocks ?? [], pageDetail);
   if (!blocks || blocks.length === 0) return null;
 
   return (
@@ -677,14 +694,16 @@ const PageBlockRenderer: React.FC<PageBlockRendererProps> = ({ blocks, pageDetai
         if (!Renderer || faq.hidden.has(block.id)) return null;
         const bgColor = block.config.style?.backgroundColor;
         return (
+          <React.Fragment key={block.id}>
+          {block.id === separatorBefore && <SectionSeparator />}
           <div
-            key={block.id}
             id={sectionIds.has(block.id) ? sectionAnchor(block.id) : undefined}
             className={sectionIds.has(block.id) ? 'pbr-section' : undefined}
             style={bgColor ? { backgroundColor: bgColor } : undefined}
           >
             <Renderer config={block.config} pageDetail={pageDetail} />
           </div>
+          </React.Fragment>
         );
       })}
     </div>
