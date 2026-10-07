@@ -510,3 +510,23 @@ describe('PageBlockRenderer banner whole-slide link', () => {
     expect(container.querySelector('.pbr-banner-content a.btn')).toHaveAttribute('href', '/halloween');
   });
 });
+
+// /guia-de-tejidos#fibra-co: the accordion with that anchor (or one of its anchors) opens itself.
+describe('PageBlockRenderer accordion anchors', () => {
+  const accordion = (id: number, anchor: string, headerText: string): StorefrontPageBlock =>
+    ({ id, type: 'HeaderParagraph', sortOrder: id, config: { headerText, paragraphText: '<p>x</p>', variant: 'accordion', anchor } } as unknown as StorefrontPageBlock);
+
+  it('opens the accordion the URL points at, by its first or a further anchor', () => {
+    Element.prototype.scrollIntoView = vi.fn();
+    window.history.replaceState(null, '', '/guia-de-tejidos#fibra-ju');
+    const { container } = render(<PageBlockRenderer blocks={[accordion(1, 'fibra-co', 'Algodón'), accordion(2, 'fibra-ra,fibra-ju', 'Ramio y yute')]} />);
+
+    const [co, ra] = Array.from(container.querySelectorAll('details'));
+    expect(co.id).toBe('fibra-co');
+    expect(co.open).toBe(false);
+    expect(ra.id).toBe('fibra-ra');
+    expect(ra.open).toBe(true);
+    expect(ra.querySelector('#fibra-ju')).not.toBeNull();
+    window.history.replaceState(null, '', '/');
+  });
+});

@@ -44,6 +44,12 @@ const { getVariantById, getVariantsBatch, getVariantMatches } = vi.hoisted(() =>
   getVariantsBatch: vi.fn().mockResolvedValue([]),
   getVariantMatches: vi.fn().mockResolvedValue({ matches: [], matchedBy: [] }),
 }));
+const { fibreCodes, guide } = vi.hoisted(() => ({ fibreCodes: { map: new Map<string, string>() }, guide: { exists: false } }));
+vi.mock('../../../hooks/useMaterialAbbreviations', () => ({ useMaterialAbbreviations: () => fibreCodes.map }));
+vi.mock('../../../hooks/useFabricGuide', () => ({
+  useFabricGuide: () => guide.exists,
+  fabricGuideFibreHref: (code: string) => `/guia-de-tejidos#fibra-${code.toLowerCase()}`,
+}));
 vi.mock('../../../services/productService', () => ({ getVariantById, getVariantsBatch, getVariantMatches }));
 
 const { getVariantReviews, getMyReview, submitReview } = vi.hoisted(() => ({
@@ -413,5 +419,32 @@ describe('VariantDetailPage "Combina con"', () => {
 
     await screen.findByText('Tela Azul');
     expect(screen.queryByText('product.goesWith')).not.toBeInTheDocument();
+  });
+});
+
+describe('VariantDetailPage composition', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    getVariantReviews.mockResolvedValue(reviewsPage([]));
+    getMyReview.mockResolvedValue({ hasPurchased: false, review: null });
+    fibreCodes.map = new Map([['algodón', 'CO'], ['elastano', 'EL']]);
+  });
+
+  it('links each fibre to its section of the fabric guide', async () => {
+    guide.exists = true;
+    getVariantById.mockResolvedValue(variant({ composition: '[{"material":"Algodón","percentage":95},{"material":"Elastano","percentage":5}]' }));
+    renderPage();
+
+    expect((await screen.findByText('Algodón')).closest('a')).toHaveAttribute('href', '/guia-de-tejidos#fibra-co');
+    expect(screen.getByText('Elastano').closest('a')).toHaveAttribute('href', '/guia-de-tejidos#fibra-el');
+  });
+
+  it('shows plain names when the shop has no fabric guide', async () => {
+    guide.exists = false;
+    getVariantById.mockResolvedValue(variant({ composition: '[{"material":"Algodón","percentage":100}]' }));
+    renderPage();
+
+    const value = await screen.findByText('100% Algodón');
+    expect(value.querySelector('a')).toBeNull();
   });
 });

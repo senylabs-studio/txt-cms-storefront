@@ -146,6 +146,8 @@
 
 /* HeaderParagraph · accordion */
 .pbr-accordion {
+  /* Clear the sticky header when opened from a link (#fibra-co). */
+  scroll-margin-top: 140px;
   background: #fff;
   border: 1px solid #e3e6e4;
   border-radius: 10px;

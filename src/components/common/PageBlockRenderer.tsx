@@ -145,8 +145,34 @@ const FaqSearchBlock: React.FC<{ config: FaqSearchBlockConfig }> = ({ config }) 
   );
 };
 
+/** The URL's #fragment, kept current on in-page anchor jumps (the index links). Read from window,
+ *  not the router: these blocks also render outside one. */
+const useLocationHash = () => {
+  const [hash, setHash] = React.useState(() => (typeof window !== 'undefined' ? window.location.hash : ''));
+  React.useEffect(() => {
+    const onChange = () => setHash(window.location.hash);
+    window.addEventListener('hashchange', onChange);
+    return () => window.removeEventListener('hashchange', onChange);
+  }, []);
+  return hash;
+};
+
+/** An accordion's anchors ("fibra-ra, fibra-ju" → ["fibra-ra", "fibra-ju"]). */
+const accordionAnchors = (anchor?: string) =>
+  (anchor ?? '').split(',').map(a => a.trim()).filter(Boolean);
+
 const HeaderParagraphBlock: React.FC<{ config: HeaderParagraphBlockConfig }> = ({ config }) => {
   const searching = React.useContext(FaqSearchContext).query.trim() !== '';
+  // Linked from elsewhere (/guia-de-tejidos#fibra-co): open this accordion and bring it into view.
+  const hash = useLocationHash();
+  const detailsRef = React.useRef<HTMLDetailsElement>(null);
+  const anchors = accordionAnchors(config.anchor);
+  const targeted = !!hash && anchors.includes(decodeURIComponent(hash.slice(1)));
+  React.useEffect(() => {
+    if (!targeted || !detailsRef.current) return;
+    detailsRef.current.open = true;
+    detailsRef.current.scrollIntoView({ block: 'start' });
+  }, [targeted]);
   const lvl = config.level;
   let Tag: keyof JSX.IntrinsicElements = 'h2';
   if (typeof lvl === 'number') {
@@ -162,11 +188,13 @@ const HeaderParagraphBlock: React.FC<{ config: HeaderParagraphBlockConfig }> = (
   if (config.variant === 'accordion') {
     return (
       // While a FaqSearch query is active every remaining answer is shown expanded.
-      <details className="pbr-accordion" style={boxStyle(config.style)} open={searching || undefined}>
+      <details ref={detailsRef} id={anchors[0]} className="pbr-accordion" style={boxStyle(config.style)} open={searching || undefined}>
         <summary>
           <Tag className="pbr-accordion-title">{headerText}</Tag>
           <FaChevronDown className="pbr-accordion-chevron" aria-hidden="true" />
         </summary>
+        {/* Any further anchors land on the same accordion (summary stays the first child). */}
+        {anchors.slice(1).map(a => <span key={a} id={a} />)}
         {paragraphText && <div className="rich-text pbr-accordion-body" dangerouslySetInnerHTML={{ __html: sanitizeRichText(paragraphText) }} />}
       </details>
     );

@@ -470,7 +470,8 @@
     "cancelAdd": "Cancel·lar",
     "new": "Nou",
     "seeAllOffers": "Veure totes les ofertes",
-    "seeAllNew": "Veure totes les novetats"
+    "seeAllNew": "Veure totes les novetats",
+    "fibreGuideLink": "Què és {{material}}: veure-ho a la guia de teixits"
   },
   "filters": {
     "close": "Tancar filtres",

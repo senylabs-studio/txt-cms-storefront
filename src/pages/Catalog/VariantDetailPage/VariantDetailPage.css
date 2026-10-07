@@ -135,7 +135,7 @@
 }
 
 .vdp-thumb--active {
-  border-color: #0d6efd;
+  border-color: var(--brand-color);
 }
 
 .vdp-thumb img {
@@ -314,7 +314,7 @@
   padding: 6px 0 0;
   font-size: 0.82rem;
   font-weight: 600;
-  color: #0d6efd;
+  color: var(--brand-text-color);
   cursor: pointer;
 }
 
@@ -357,3 +357,7 @@
 .vdp-related {
   margin-top: 56px;
 }
+
+/* A fibre in the composition, linking to the fabric guide. */
+.vdp-fibre-link { color: inherit; text-decoration: underline dotted; text-underline-offset: 3px; }
+.vdp-fibre-link:hover { color: var(--brand-text-color); text-decoration-style: solid; }
