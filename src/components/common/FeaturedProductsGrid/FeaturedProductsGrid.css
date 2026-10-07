@@ -66,5 +66,5 @@
 }
 
 .home-featured-name a:hover {
-  color: var(--bs-primary);
+  color: var(--brand-text-color);
 }

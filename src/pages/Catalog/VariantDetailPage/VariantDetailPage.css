@@ -135,7 +135,7 @@
 }
 
 .vdp-thumb--active {
-  border-color: #0d6efd;
+  border-color: var(--brand-color);
 }
 
 .vdp-thumb img {
@@ -314,7 +314,7 @@
   padding: 6px 0 0;
   font-size: 0.82rem;
   font-weight: 600;
-  color: #0d6efd;
+  color: var(--brand-text-color);
   cursor: pointer;
 }
 

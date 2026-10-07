@@ -21,18 +21,18 @@ const sliderCss = `
   .prs input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none; appearance: none;
     width: ${THUMB}px; height: ${THUMB}px; border-radius: 50%;
-    background: #0d6efd; border: 2px solid #fff;
+    background: var(--brand-color); border: 2px solid #fff;
     box-shadow: 0 1px 5px rgba(0,0,0,.25);
     cursor: pointer; pointer-events: all;
     margin-top: -${THUMB / 2}px;
     transition: box-shadow .15s;
   }
   .prs input[type=range]:active::-webkit-slider-thumb {
-    box-shadow: 0 0 0 5px rgba(13,110,253,.2);
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--brand-color) 20%, transparent);
   }
   .prs input[type=range]::-moz-range-thumb {
     width: ${THUMB}px; height: ${THUMB}px; border-radius: 50%;
-    background: #0d6efd; border: 2px solid #fff;
+    background: var(--brand-color); border: 2px solid #fff;
     box-shadow: 0 1px 5px rgba(0,0,0,.25);
     cursor: pointer; pointer-events: all;
   }
@@ -64,7 +64,7 @@ const PriceRangeSlider: React.FC<SliderProps> = ({ min, max, valueMin, valueMax,
       <div style={{
         position: 'absolute', top: 'calc(50% - 4px)', transform: 'translateY(-50%)',
         left: `${lPct}%`, right: `${rPct}%`,
-        height: 4, background: '#0d6efd', borderRadius: 4,
+        height: 4, background: 'var(--brand-color)', borderRadius: 4,
       }} />
       <input type="range" min={min} max={max} step={1} value={valueMin} onChange={onMin}
         style={{ zIndex: valueMin > max - range * 0.1 ? 5 : 3 }} />
@@ -172,7 +172,7 @@ const ProductFilters: React.FC<Props> = ({ facets, filters, onChange, onClose })
         <div>
           <div style={{ ...labelStyle, display: 'flex', justifyContent: 'space-between' }}>
             <span>{t('filters.price')}</span>
-            <span style={{ color: '#0d6efd', fontWeight: 700, textTransform: 'none', letterSpacing: 0 }}>
+            <span style={{ color: 'var(--brand-text-color)', fontWeight: 700, textTransform: 'none', letterSpacing: 0 }}>
               {localMin} € – {localMax} €
             </span>
           </div>

@@ -21,7 +21,7 @@
 
 .product-card-product { font-size: 11px; color: #6c757d; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
 .product-card-name a { color: #212529; text-decoration: none; font-weight: 600; font-size: 17px; line-height: 1.25; }
-.product-card-name a:hover { color: var(--bs-primary); }
+.product-card-name a:hover { color: var(--brand-text-color); }
 
 .product-card-img-wrapper { position: relative; }
 .product-card-fav { position: absolute; top: 8px; right: 8px; z-index: 2; }
