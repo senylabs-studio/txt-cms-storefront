@@ -470,7 +470,8 @@
     "cancelAdd": "Cancelar",
     "new": "Nuevo",
     "seeAllOffers": "Ver todas las ofertas",
-    "seeAllNew": "Ver todas las novedades"
+    "seeAllNew": "Ver todas las novedades",
+    "fibreGuideLink": "Qué es {{material}}: ver en la guía de tejidos"
   },
   "filters": {
     "close": "Cerrar filtros",

@@ -400,6 +400,8 @@ export interface HeaderParagraphBlockConfig {
   icon?: CalloutIcon;
   buttonText?: string;
   buttonUrl?: string;
+  /** Accordion only: fixed anchor(s), comma-separated — /guia-de-tejidos#fibra-co opens this one. */
+  anchor?: string;
   style?: BlockStyle;
 }
 

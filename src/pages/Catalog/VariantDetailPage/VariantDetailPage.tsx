@@ -23,6 +23,8 @@ import { useDocumentMeta } from '../../../hooks/useDocumentMeta';
 import CareLabels from '../../../components/common/CareLabels';
 import { getApiErrorMessage } from '../../../utils/apiError';
 import NewBadge from '../../../components/common/NewBadge/NewBadge';
+import { useMaterialAbbreviations } from '../../../hooks/useMaterialAbbreviations';
+import { useFabricGuide, fabricGuideFibreHref } from '../../../hooks/useFabricGuide';
 import './VariantDetailPage.css';
 import PageLoader from '../../../components/common/ScissorsLoader/PageLoader';
 import { formatPrice } from '../../../utils/pricing';
@@ -78,6 +80,9 @@ const VariantDetailPage: React.FC = () => {
   );
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  // Each fibre in the composition links to its section of the fabric guide (when the shop has one).
+  const fibreCodes = useMaterialAbbreviations();
+  const hasFabricGuide = useFabricGuide();
   const [selectedImage, setSelectedImage] = useState(0);
   const [rulerActive, setRulerActive] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -254,11 +259,22 @@ const VariantDetailPage: React.FC = () => {
   };
 
   // Composition
-  let compositionText: string | null = null;
+  let compositionText: React.ReactNode = null;
   if (variant.composition) {
     try {
       const items: { material: string; percentage: number }[] = JSON.parse(variant.composition);
-      if (items.length) compositionText = items.map(i => `${i.percentage}% ${i.material}`).join(' · ');
+      if (items.length) compositionText = items.map((i, n) => {
+        const code = hasFabricGuide ? fibreCodes.get(i.material.toLowerCase()) : undefined;
+        return (
+          <React.Fragment key={n}>
+            {n > 0 && ' · '}
+            {i.percentage}%{' '}
+            {code
+              ? <Link to={fabricGuideFibreHref(code)} className="vdp-fibre-link" title={t('product.fibreGuideLink', { material: i.material })}>{i.material}</Link>
+              : i.material}
+          </React.Fragment>
+        );
+      });
     } catch { /* ignore */ }
   }
 

@@ -357,3 +357,7 @@
 .vdp-related {
   margin-top: 56px;
 }
+
+/* A fibre in the composition, linking to the fabric guide. */
+.vdp-fibre-link { color: inherit; text-decoration: underline dotted; text-underline-offset: 3px; }
+.vdp-fibre-link:hover { color: var(--brand-text-color); text-decoration-style: solid; }

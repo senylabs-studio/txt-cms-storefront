@@ -470,7 +470,8 @@
     "cancelAdd": "Cancel",
     "new": "New",
     "seeAllOffers": "See all offers",
-    "seeAllNew": "See all new arrivals"
+    "seeAllNew": "See all new arrivals",
+    "fibreGuideLink": "What is {{material}}: see the fabric guide"
   },
   "filters": {
     "close": "Close filters",
