@@ -76,7 +76,6 @@ export interface StorefrontVariantDetail {
   composition: string;
   fall?: string;
   texture?: string;
-  fabricType?: string;
   /** "Diseño": null/absent = not classified. */
   pattern?: FabricPattern | null;
   careLabels?: number;
