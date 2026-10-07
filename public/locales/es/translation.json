@@ -491,7 +491,12 @@
     "noResults": "No hay productos que coincidan con los filtros seleccionados.",
     "onlyNew": "Solo novedades",
     "onlyOffers": "Solo ofertas",
-    "pattern": "Diseño"
+    "pattern": "Diseño",
+    "active": "Filtros aplicados",
+    "remove": "Quitar filtro: {{filter}}",
+    "clearAll": "Quitar todos",
+    "from": "desde {{value}}",
+    "upTo": "hasta {{value}}"
   },
   "careLabels": {
     "wash30": "Lavar a máquina máx. 30°C",

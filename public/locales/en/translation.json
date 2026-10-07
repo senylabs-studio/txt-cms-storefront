@@ -491,7 +491,12 @@
     "noResults": "No products match the selected filters.",
     "onlyNew": "New arrivals only",
     "onlyOffers": "On sale only",
-    "pattern": "Design"
+    "pattern": "Design",
+    "active": "Active filters",
+    "remove": "Remove filter: {{filter}}",
+    "clearAll": "Clear all",
+    "from": "from {{value}}",
+    "upTo": "up to {{value}}"
   },
   "careLabels": {
     "wash30": "Machine wash max. 30°C",

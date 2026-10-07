@@ -491,7 +491,12 @@
     "noResults": "No hi ha productes que coincideixin amb els filtres seleccionats.",
     "onlyNew": "Només novetats",
     "onlyOffers": "Només ofertes",
-    "pattern": "Disseny"
+    "pattern": "Disseny",
+    "active": "Filtres aplicats",
+    "remove": "Treure el filtre: {{filter}}",
+    "clearAll": "Treure-los tots",
+    "from": "des de {{value}}",
+    "upTo": "fins a {{value}}"
   },
   "careLabels": {
     "wash30": "Rentar a màquina màx. 30°C",

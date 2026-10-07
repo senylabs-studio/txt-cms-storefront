@@ -18,6 +18,7 @@ import ScissorsLoader from '../../components/common/ScissorsLoader/ScissorsLoade
 import IconTooltip from '../../components/common/IconTooltip/IconTooltip';
 import CatalogPagination from '../../components/common/CatalogPagination/CatalogPagination';
 import { NEW_ARRIVALS_PARAM } from '../../utils/catalogParams';
+import ActiveFilters from '../../components/common/ActiveFilters/ActiveFilters';
 
 const EMPTY_FACETS: PageFilterFacets = { minPrice: 0, maxPrice: 0, widths: [], materials: [] };
 
@@ -147,6 +148,8 @@ const HomePage: React.FC = () => {
             </Button>
           </Col>
         </Row>
+
+        <ActiveFilters filters={filters} onChange={handleFilterChange} />
 
         {loading ? (
           <div className="text-center py-5"><ScissorsLoader /></div>
