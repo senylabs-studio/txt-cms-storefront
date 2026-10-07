@@ -60,6 +60,32 @@
   box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--brand-color) 35%, transparent);
 }
 .bg-primary     { background-color: var(--brand-color) !important; }
+
+/* Paginator (catalog pages, orders): separate rounded buttons in the brand colour instead of
+   Bootstrap's joined blue bar; the "…" gap is plain text, not a disabled button. */
+.pagination { gap: 6px; flex-wrap: wrap; justify-content: center; }
+.pagination .page-link {
+  min-width: 40px; height: 40px; padding: 0 10px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid #dee2e6; border-radius: 8px !important; margin: 0;
+  background: #fff; color: #343a40; font-weight: 600;
+  transition: background-color .15s, border-color .15s, color .15s;
+}
+.pagination .page-link:hover {
+  background: color-mix(in srgb, var(--brand-color) 10%, white);
+  border-color: color-mix(in srgb, var(--brand-color) 45%, white);
+  color: var(--brand-text-color);
+}
+.pagination .page-link:focus-visible {
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--brand-color) 35%, transparent);
+}
+.pagination .page-item.active .page-link {
+  background: var(--brand-color); border-color: var(--brand-color); color: #fff;
+}
+.pagination .page-item.disabled .page-link { background: #fff; color: #ced4da; }
+.pagination .page-item.disabled:not(:first-child):not(:last-child) .page-link {
+  border-color: transparent; background: transparent; color: #868e96; min-width: 24px; padding: 0;
+}
 .text-primary   { color: var(--brand-color) !important; }
 .border-primary { border-color: var(--brand-color) !important; }
 .badge.bg-primary { background-color: var(--brand-color) !important; }
