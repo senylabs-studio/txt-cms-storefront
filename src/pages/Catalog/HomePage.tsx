@@ -87,6 +87,7 @@ const HomePage: React.FC = () => {
     filters.minPrice !== undefined || filters.maxPrice !== undefined,
     filters.width !== undefined,
     !!filters.material,
+    !!filters.pattern,
     !!filters.orderBy,
     !!filters.onlyNew,
   ].filter(Boolean).length;

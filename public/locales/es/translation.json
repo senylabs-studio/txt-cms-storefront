@@ -471,7 +471,8 @@
     "new": "Nuevo",
     "seeAllOffers": "Ver todas las ofertas",
     "seeAllNew": "Ver todas las novedades",
-    "fibreGuideLink": "Qué es {{material}}: ver en la guía de tejidos"
+    "fibreGuideLink": "Qué es {{material}}: ver en la guía de tejidos",
+    "pattern": "Diseño"
   },
   "filters": {
     "close": "Cerrar filtros",
@@ -489,7 +490,8 @@
     "clear": "Limpiar",
     "viewResults": "Ver resultados",
     "noResults": "No hay productos que coincidan con los filtros seleccionados.",
-    "onlyNew": "Solo novedades"
+    "onlyNew": "Solo novedades",
+    "pattern": "Diseño"
   },
   "careLabels": {
     "wash30": "Lavar a máquina máx. 30°C",
@@ -637,5 +639,12 @@
   "homeReviews": {
     "defaultTitle": "Lo que dicen nuestros clientes",
     "rating": "{{rating}} de 5 estrellas"
+  },
+  "fabricPatterns": {
+    "Plain": "Lisa",
+    "Printed": "Estampada",
+    "Stripes": "Rayas",
+    "Checks": "Cuadros",
+    "Dots": "Topos"
   }
 }

@@ -500,13 +500,14 @@ const VariantDetailPage: React.FC = () => {
             {descriptionBlock('d-md-none')}
 
             {/* Information */}
-            {(variant.width > 0 || variant.weight > 0 || compositionText || variant.fabricType || variant.fall || variant.texture) && (
+            {(variant.width > 0 || variant.weight > 0 || compositionText || variant.fabricType || variant.pattern || variant.fall || variant.texture) && (
               <div>
                 <SectionTitle>{t('product.info')}</SectionTitle>
                 {variant.width > 0 && <InfoRow label={t('product.width')} value={`${variant.width} ${t('product.widthUnit')}`} />}
                 {variant.weight > 0 && <InfoRow label={t('product.weightApprox')} value={`${variant.weight} ${t('product.weightUnit')}`} />}
                 {compositionText && <InfoRow label={t('product.composition')} value={compositionText} />}
                 {variant.fabricType && <InfoRow label={t('product.fabricType')} value={variant.fabricType} />}
+                {variant.pattern && <InfoRow label={t('product.pattern')} value={t(`fabricPatterns.${variant.pattern}`)} />}
                 {variant.fall && <InfoRow label={t('product.fall')} value={variant.fall} />}
                 {variant.texture && <InfoRow label={t('product.texture')} value={variant.texture} />}
               </div>

@@ -4,6 +4,7 @@ import { FaTimes } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import type { PageFilterFacets } from '../../types';
 import type { PageFilters } from '../../services/pageService';
+import { parseFabricPattern } from '../../utils/fabricPatterns';
 
 // ─── Dual range slider ────────────────────────────────────────────────────────
 
@@ -119,7 +120,7 @@ const ProductFilters: React.FC<Props> = ({ facets, filters, onChange, onClose })
   };
 
   const hasActive = draft.minPrice !== undefined || draft.maxPrice !== undefined
-    || draft.width !== undefined || !!draft.material || !!draft.orderBy || !!draft.onlyNew;
+    || draft.width !== undefined || !!draft.material || !!draft.pattern || !!draft.orderBy || !!draft.onlyNew;
 
   const reset = () => {
     setDraft({});
@@ -185,6 +186,19 @@ const ProductFilters: React.FC<Props> = ({ facets, filters, onChange, onClose })
             <span>{absMin} €</span>
             <span>{absMax} €</span>
           </div>
+        </div>
+      </>}
+
+      {/* Design */}
+      {(facets.patterns?.length ?? 0) > 0 && <>
+        {sep}
+        <div>
+          <div style={labelStyle}>{t('filters.pattern')}</div>
+          <Form.Select size="sm" aria-label={t('filters.pattern')} value={draft.pattern ?? ''}
+            onChange={e => setDraft(d => ({ ...d, pattern: parseFabricPattern(e.target.value) }))}>
+            <option value="">{t('filters.all')}</option>
+            {facets.patterns!.map(p => <option key={p} value={p}>{t(`fabricPatterns.${p}`)}</option>)}
+          </Form.Select>
         </div>
       </>}
 

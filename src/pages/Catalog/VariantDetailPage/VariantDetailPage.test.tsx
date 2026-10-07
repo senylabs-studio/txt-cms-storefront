@@ -447,4 +447,13 @@ describe('VariantDetailPage composition', () => {
     const value = await screen.findByText('100% Algodón');
     expect(value.querySelector('a')).toBeNull();
   });
+
+  it('shows the design among the fabric details', async () => {
+    guide.exists = false;
+    getVariantById.mockResolvedValue(variant({ pattern: 'Checks' }));
+    renderPage();
+
+    expect(await screen.findByText('fabricPatterns.Checks')).toBeInTheDocument();
+    expect(screen.getByText('product.pattern')).toBeInTheDocument();
+  });
 });
