@@ -20,6 +20,7 @@ import IconTooltip from '../../../components/common/IconTooltip/IconTooltip';
 import PageItemsGrid from '../../../components/common/PageItemsGrid';
 import CatalogPagination from '../../../components/common/CatalogPagination/CatalogPagination';
 import { parseFabricPattern } from '../../../utils/fabricPatterns';
+import ActiveFilters from '../../../components/common/ActiveFilters/ActiveFilters';
 
 // 24 fills whole rows at every products-block column count (2, 3, 4 or 6).
 const PAGE_SIZE = 24;
@@ -398,6 +399,8 @@ const PageCatalogPage: React.FC = () => {
                 )}
               </div>
             </div>
+
+            {showFilters && <ActiveFilters filters={filters} onChange={handleFilterChange} />}
 
             {listsItems && pageDetail.totalItems === 0 && hasActiveFilters && (
               <p className="text-muted py-5 text-center">
