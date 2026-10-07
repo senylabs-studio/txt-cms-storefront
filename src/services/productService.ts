@@ -17,6 +17,7 @@ export const getVariantsPaged = async (
       minPrice: filters.minPrice, maxPrice: filters.maxPrice, width: filters.width, material: filters.material,
       pattern: filters.pattern,
       onlyNew: filters.onlyNew || undefined,
+      onlyOffers: filters.onlyOffers || undefined,
     }
   });
   return res.data;

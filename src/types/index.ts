@@ -343,6 +343,8 @@ export interface PageFilterFacets {
   patterns?: FabricPattern[];
   /** Some item in the unfiltered set is new — offer the "Novedades" filter. */
   hasNew?: boolean;
+  /** Some item in the unfiltered set is on sale — offer the "Solo ofertas" filter. */
+  hasOffers?: boolean;
 }
 
 export interface BlockStyle {

@@ -10,7 +10,7 @@ vi.mock('react-i18next', () => ({
 const facets = (patterns?: PageFilterFacets['patterns']): PageFilterFacets =>
   ({ minPrice: 5, maxPrice: 20, widths: [140, 280], materials: ['Algodón'], patterns });
 
-describe('ProductFilters — Diseño', () => {
+describe('ProductFilters — Diseño and offers', () => {
   it('offers only the designs the page has, and applies the chosen one', () => {
     const onChange = vi.fn();
     render(<ProductFilters facets={facets(['Plain', 'Stripes'])} filters={{}} onChange={onChange} onClose={vi.fn()} />);
@@ -28,5 +28,18 @@ describe('ProductFilters — Diseño', () => {
   it('has no design filter when no item on the page is classified', () => {
     render(<ProductFilters facets={facets([])} filters={{}} onChange={vi.fn()} />);
     expect(screen.queryByLabelText('filters.pattern')).toBeNull();
+  });
+
+  it('offers "only on sale" when the page has offers, and applies it', () => {
+    const onChange = vi.fn();
+    render(<ProductFilters facets={{ ...facets(), hasOffers: true }} filters={{}} onChange={onChange} onClose={vi.fn()} />);
+    fireEvent.click(screen.getByLabelText('filters.onlyOffers'));
+    fireEvent.click(screen.getByText('filters.viewResults'));
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ onlyOffers: true }));
+  });
+
+  it('has no "only on sale" switch when nothing on the page is on sale', () => {
+    render(<ProductFilters facets={facets()} filters={{}} onChange={vi.fn()} />);
+    expect(screen.queryByLabelText('filters.onlyOffers')).toBeNull();
   });
 });

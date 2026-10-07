@@ -90,6 +90,7 @@ const HomePage: React.FC = () => {
     !!filters.pattern,
     !!filters.orderBy,
     !!filters.onlyNew,
+    !!filters.onlyOffers,
   ].filter(Boolean).length;
 
   return (

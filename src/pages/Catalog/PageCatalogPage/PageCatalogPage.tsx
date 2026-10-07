@@ -28,7 +28,7 @@ const EMPTY_FACETS = { minPrice: 0, maxPrice: 0, widths: [], materials: [] };
 const MAX_RESTORED_PAGES = 20;
 
 // The filters' URL params (same names as the API's).
-const FILTER_PARAMS = ['minPrice', 'maxPrice', 'width', 'material', 'pattern', 'orderBy', 'onlyNew'] as const;
+const FILTER_PARAMS = ['minPrice', 'maxPrice', 'width', 'material', 'pattern', 'orderBy', 'onlyNew', 'onlyOffers'] as const;
 
 const numberParam = (params: URLSearchParams, name: string): number | undefined => {
   const raw = params.get(name);
@@ -50,6 +50,7 @@ const filtersFromParams = (params: URLSearchParams): PageFilters => {
   if (pattern) filters.pattern = pattern;
   if (params.get('orderBy')) filters.orderBy = params.get('orderBy')!;
   if (params.get('onlyNew') === '1') filters.onlyNew = true;
+  if (params.get('onlyOffers') === '1') filters.onlyOffers = true;
   return filters;
 };
 
@@ -62,6 +63,7 @@ const writeFilterParams = (params: URLSearchParams, f: PageFilters) => {
   if (f.pattern) params.set('pattern', f.pattern);
   if (f.orderBy) params.set('orderBy', f.orderBy);
   if (f.onlyNew) params.set('onlyNew', '1');
+  if (f.onlyOffers) params.set('onlyOffers', '1');
 };
 
 const PageCatalogPage: React.FC = () => {
@@ -304,7 +306,7 @@ const PageCatalogPage: React.FC = () => {
   const listed: StorefrontPageDetail = isMobile ? { ...pageDetail, items } : pageDetail;
   const facets = pageDetail.facets ?? EMPTY_FACETS;
   const hasActiveFilters = filters.minPrice !== undefined || filters.maxPrice !== undefined
-    || filters.width !== undefined || !!filters.material || !!filters.pattern || !!filters.orderBy || !!filters.onlyNew;
+    || filters.width !== undefined || !!filters.material || !!filters.pattern || !!filters.orderBy || !!filters.onlyNew || !!filters.onlyOffers;
   // The normal view only lists products through a Products block: a section page with only its
   // subpages mosaic showed filters and page numbers for products it never displays.
   const listsItems = showAll || (pageDetail.blocks ?? []).some(b => b.type === 'Products');
@@ -320,6 +322,7 @@ const PageCatalogPage: React.FC = () => {
     !!filters.pattern,
     !!filters.orderBy,
     !!filters.onlyNew,
+    !!filters.onlyOffers,
   ].filter(Boolean).length;
 
   return (
