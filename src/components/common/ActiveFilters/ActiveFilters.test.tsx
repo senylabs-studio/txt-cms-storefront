@@ -42,4 +42,11 @@ describe('ActiveFilters', () => {
     render(<ActiveFilters filters={{ minPrice: 8 }} onChange={vi.fn()} />);
     expect(screen.getByText('filters.price: filters.from(8 €)')).toBeInTheDocument();
   });
+
+  it('shows a chip per colour and removes just that colour', () => {
+    const onChange = vi.fn();
+    render(<ActiveFilters filters={{ colors: ['Blue', 'Green'] }} onChange={onChange} />);
+    fireEvent.click(screen.getByText('filters.color: fabricColors.Blue'));
+    expect(onChange).toHaveBeenLastCalledWith({ colors: ['Green'] });
+  });
 });

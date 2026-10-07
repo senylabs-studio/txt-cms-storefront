@@ -28,6 +28,7 @@ import { useFabricGuide, fabricGuideFibreHref } from '../../../hooks/useFabricGu
 import './VariantDetailPage.css';
 import PageLoader from '../../../components/common/ScissorsLoader/PageLoader';
 import { formatPrice } from '../../../utils/pricing';
+import { parseFabricColors } from '../../../utils/fabricColors';
 
 const DEFAULT_MIN_QTY = 0.3;
 const DESC_THRESHOLD = 300;
@@ -507,6 +508,9 @@ const VariantDetailPage: React.FC = () => {
                 {variant.weight > 0 && <InfoRow label={t('product.weightApprox')} value={`${variant.weight} ${t('product.weightUnit')}`} />}
                 {compositionText && <InfoRow label={t('product.composition')} value={compositionText} />}
                 {variant.pattern && <InfoRow label={t('product.pattern')} value={t(`fabricPatterns.${variant.pattern}`)} />}
+                {parseFabricColors(variant.colors).length > 0 && (
+                  <InfoRow label={t('product.colors')} value={parseFabricColors(variant.colors).map(c => t(`fabricColors.${c}`)).join(', ')} />
+                )}
                 {variant.fall && <InfoRow label={t('product.fall')} value={variant.fall} />}
                 {variant.texture && <InfoRow label={t('product.texture')} value={variant.texture} />}
               </div>

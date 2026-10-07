@@ -263,6 +263,13 @@ describe('PageCatalogPage state from the URL', () => {
     expect(getPageBySlug).toHaveBeenCalledWith('moda', 3, 24, { orderBy: 'price_asc', onlyNew: true, minPrice: 5 }, true);
   });
 
+  it('reads the colour filter from the URL, keeping only real colours', async () => {
+    getPageBySlug.mockReset().mockResolvedValue(pageDetail({ type: 'Category' }));
+    renderAt('/pages/moda?todos=1&colors=Blue,Fucsia,Green');
+    await screen.findByText('Telas de lino');
+    expect(getPageBySlug).toHaveBeenCalledWith('moda', 1, 24, { colors: ['Green', 'Blue'] }, true);
+  });
+
   it('reads the design filter from the URL, ignoring a value that is not a design', async () => {
     getPageBySlug.mockReset().mockResolvedValue(pageDetail({ type: 'Category' }));
     renderAt('/pages/moda?todos=1&pattern=Stripes');

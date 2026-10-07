@@ -471,7 +471,8 @@
     "seeAllOffers": "Ver todas las ofertas",
     "seeAllNew": "Ver todas las novedades",
     "fibreGuideLink": "Qué es {{material}}: ver en la guía de tejidos",
-    "pattern": "Diseño"
+    "pattern": "Diseño",
+    "colors": "Colores"
   },
   "filters": {
     "close": "Cerrar filtros",
@@ -496,7 +497,9 @@
     "remove": "Quitar filtro: {{filter}}",
     "clearAll": "Quitar todos",
     "from": "desde {{value}}",
-    "upTo": "hasta {{value}}"
+    "upTo": "hasta {{value}}",
+    "color": "Color",
+    "colors": "Colores"
   },
   "careLabels": {
     "wash30": "Lavar a máquina máx. 30°C",
@@ -651,5 +654,21 @@
     "Stripes": "Rayas",
     "Checks": "Cuadros",
     "Dots": "Topos"
+  },
+  "fabricColors": {
+    "Red": "Rojo",
+    "Orange": "Naranja",
+    "Yellow": "Amarillo",
+    "Green": "Verde",
+    "Blue": "Azul",
+    "Purple": "Lila",
+    "Pink": "Rosa",
+    "Brown": "Marrón",
+    "Beige": "Beige",
+    "White": "Blanco",
+    "Grey": "Gris",
+    "Black": "Negro",
+    "Gold": "Dorado",
+    "Silver": "Plateado"
   }
 }
