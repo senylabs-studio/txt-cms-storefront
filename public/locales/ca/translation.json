@@ -421,7 +421,6 @@
     "width": "Amplada",
     "weightApprox": "Pes aproximat",
     "composition": "Composició",
-    "fabricType": "Tipus de teixit",
     "fall": "Caiguda",
     "texture": "Textura",
     "careInstructions": "Instruccions de cura",
@@ -471,7 +470,8 @@
     "new": "Nou",
     "seeAllOffers": "Veure totes les ofertes",
     "seeAllNew": "Veure totes les novetats",
-    "fibreGuideLink": "Què és {{material}}: veure-ho a la guia de teixits"
+    "fibreGuideLink": "Què és {{material}}: veure-ho a la guia de teixits",
+    "pattern": "Disseny"
   },
   "filters": {
     "close": "Tancar filtres",
@@ -489,7 +489,8 @@
     "clear": "Netejar",
     "viewResults": "Veure resultats",
     "noResults": "No hi ha productes que coincideixin amb els filtres seleccionats.",
-    "onlyNew": "Només novetats"
+    "onlyNew": "Només novetats",
+    "pattern": "Disseny"
   },
   "careLabels": {
     "wash30": "Rentar a màquina màx. 30°C",
@@ -637,5 +638,12 @@
   "homeReviews": {
     "defaultTitle": "El que diuen els nostres clients",
     "rating": "{{rating}} de 5 estrelles"
+  },
+  "fabricPatterns": {
+    "Plain": "Llisa",
+    "Printed": "Estampada",
+    "Stripes": "Ratlles",
+    "Checks": "Quadres",
+    "Dots": "Pics"
   }
 }

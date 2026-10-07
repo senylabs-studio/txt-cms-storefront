@@ -1,11 +1,14 @@
 import apiClient from '../apiClient';
 import type { StorefrontMenuItem, StorefrontPageDetail } from '../types';
+import type { FabricPattern } from '../utils/fabricPatterns';
 
 export interface PageFilters {
   minPrice?: number;
   maxPrice?: number;
   width?: number;
   material?: string;
+  /** "Diseño" filter. */
+  pattern?: FabricPattern;
   orderBy?: string;
   /** Only products still showing the "Nuevo" badge. */
   onlyNew?: boolean;
@@ -29,6 +32,7 @@ export const getPageBySlug = async (
   if (filters.maxPrice !== undefined) params.maxPrice = filters.maxPrice;
   if (filters.width !== undefined) params.width = filters.width;
   if (filters.material) params.material = filters.material;
+  if (filters.pattern) params.pattern = filters.pattern;
   if (filters.orderBy) params.orderBy = filters.orderBy;
   if (filters.onlyNew) params.onlyNew = 'true';
   if (all) params.all = 'true';

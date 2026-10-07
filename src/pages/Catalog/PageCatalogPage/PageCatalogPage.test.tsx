@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import PageCatalogPage from './PageCatalogPage';
 import type { StorefrontPageDetail } from '../../../types';
@@ -261,6 +261,17 @@ describe('PageCatalogPage state from the URL', () => {
     renderAt('/pages/moda?todos=1&pagina=3&orderBy=price_asc&onlyNew=1&minPrice=5');
     await screen.findByText('Telas de lino');
     expect(getPageBySlug).toHaveBeenCalledWith('moda', 3, 24, { orderBy: 'price_asc', onlyNew: true, minPrice: 5 }, true);
+  });
+
+  it('reads the design filter from the URL, ignoring a value that is not a design', async () => {
+    getPageBySlug.mockReset().mockResolvedValue(pageDetail({ type: 'Category' }));
+    renderAt('/pages/moda?todos=1&pattern=Stripes');
+    await screen.findByText('Telas de lino');
+    expect(getPageBySlug).toHaveBeenCalledWith('moda', 1, 24, { pattern: 'Stripes' }, true);
+
+    getPageBySlug.mockClear();
+    renderAt('/pages/moda?todos=1&pattern=flores');
+    await waitFor(() => expect(getPageBySlug).toHaveBeenCalledWith('moda', 1, 24, {}, true));
   });
 
   it('on a phone, reloads every page listed before in one request, then goes on from there', async () => {

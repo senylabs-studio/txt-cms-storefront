@@ -1,3 +1,5 @@
+import type { FabricPattern } from '../utils/fabricPatterns';
+
 export interface StorefrontProduct {
   id: number;
   code: string;
@@ -74,7 +76,8 @@ export interface StorefrontVariantDetail {
   composition: string;
   fall?: string;
   texture?: string;
-  fabricType?: string;
+  /** "Diseño": null/absent = not classified. */
+  pattern?: FabricPattern | null;
   careLabels?: number;
   productTypeName?: string;
   minQuantity: number;
@@ -336,6 +339,8 @@ export interface PageFilterFacets {
   maxPrice: number;
   widths: number[];
   materials: string[];
+  /** Designs present in the unfiltered set (FABRIC_PATTERNS order). Empty/absent = no "Diseño" filter. */
+  patterns?: FabricPattern[];
   /** Some item in the unfiltered set is new — offer the "Novedades" filter. */
   hasNew?: boolean;
 }

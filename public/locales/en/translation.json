@@ -421,7 +421,6 @@
     "width": "Width",
     "weightApprox": "Approx. weight",
     "composition": "Composition",
-    "fabricType": "Fabric type",
     "fall": "Drape",
     "texture": "Texture",
     "careInstructions": "Care instructions",
@@ -471,7 +470,8 @@
     "new": "New",
     "seeAllOffers": "See all offers",
     "seeAllNew": "See all new arrivals",
-    "fibreGuideLink": "What is {{material}}: see the fabric guide"
+    "fibreGuideLink": "What is {{material}}: see the fabric guide",
+    "pattern": "Design"
   },
   "filters": {
     "close": "Close filters",
@@ -489,7 +489,8 @@
     "clear": "Clear",
     "viewResults": "View results",
     "noResults": "No products match the selected filters.",
-    "onlyNew": "New arrivals only"
+    "onlyNew": "New arrivals only",
+    "pattern": "Design"
   },
   "careLabels": {
     "wash30": "Machine wash max. 30°C",
@@ -637,5 +638,12 @@
   "homeReviews": {
     "defaultTitle": "What our customers say",
     "rating": "{{rating}} out of 5 stars"
+  },
+  "fabricPatterns": {
+    "Plain": "Plain",
+    "Printed": "Printed",
+    "Stripes": "Stripes",
+    "Checks": "Checks",
+    "Dots": "Dots"
   }
 }
