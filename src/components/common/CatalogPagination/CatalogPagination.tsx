@@ -15,7 +15,7 @@ const CatalogPagination: React.FC<Props> = ({ currentPage, totalPages, onChange 
       <Pagination>
         <Pagination.Prev disabled={currentPage === 1} onClick={() => onChange(currentPage - 1)} />
         {pageWindow(currentPage, totalPages).map((p, i) => p === 'gap'
-          ? <Pagination.Ellipsis key={`gap-${i}`} disabled />
+          ? <Pagination.Ellipsis className="page-gap" key={`gap-${i}`} disabled />
           : (
             <Pagination.Item key={p} active={p === currentPage} onClick={() => onChange(p)}>
               {p}

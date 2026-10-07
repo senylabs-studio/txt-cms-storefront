@@ -83,7 +83,7 @@
   background: var(--brand-color); border-color: var(--brand-color); color: #fff;
 }
 .pagination .page-item.disabled .page-link { background: #fff; color: #ced4da; }
-.pagination .page-item.disabled:not(:first-child):not(:last-child) .page-link {
+.pagination .page-item.page-gap .page-link {
   border-color: transparent; background: transparent; color: #868e96; min-width: 24px; padding: 0;
 }
 .text-primary   { color: var(--brand-color) !important; }
