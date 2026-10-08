@@ -275,6 +275,8 @@
     "aliasPlaceholder": "Home, Work...",
     "recipient": "Recipient",
     "street": "Street",
+    "streetSearchPlaceholder": "Start typing your street and number",
+    "streetSuggestionsError": "Suggestions could not be loaded; type the address by hand.",
     "postalCode": "Post code",
     "city": "City",
     "province": "Province",

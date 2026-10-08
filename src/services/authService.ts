@@ -40,10 +40,11 @@ export const confirmEmail = async (userId: string, token: string): Promise<void>
   await apiClient.post('/storefront/auth/confirm-email', { userId, token });
 };
 
-/** Applies the change and signs in: the change ended every session of the account. */
-export const confirmEmailChange = async (userId: string, email: string, token: string): Promise<AuthResponse> => {
+/** Applies the change and signs in (the change ended every session of the account). Null when
+ *  the change had already been applied (a second click): confirmed, but no session comes back. */
+export const confirmEmailChange = async (userId: string, email: string, token: string): Promise<AuthResponse | null> => {
   const res = await apiClient.post('/storefront/auth/confirm-email-change', { userId, email, token });
-  return res.data;
+  return res.data?.token ? res.data : null;
 };
 
 export const verifyGuestAccessLink = async (token: string): Promise<AuthResponse> => {

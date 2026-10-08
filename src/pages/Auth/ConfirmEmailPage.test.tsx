@@ -55,4 +55,15 @@ describe('ConfirmEmailPage', () => {
     expect(screen.getByText('emailConfirm.invalidLink')).toBeInTheDocument();
     expect(screen.queryByRole('button')).toBeNull();
   });
+
+  // A second click: the change is already applied, so the backend confirms without a session.
+  it('an already-applied change shows success without signing in', async () => {
+    api.confirmEmailChange.mockResolvedValue(null);
+    renderAt('/email/cambio?user=u1&email=new%40example.com&token=abc', true);
+
+    fireEvent.click(screen.getByRole('button', { name: 'emailConfirm.changeConfirm' }));
+
+    expect(await screen.findByText('emailConfirm.changeSuccess')).toBeInTheDocument();
+    expect(auth.login).not.toHaveBeenCalled();
+  });
 });

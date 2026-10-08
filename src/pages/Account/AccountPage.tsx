@@ -17,6 +17,7 @@ import { meetsPasswordRules } from '../../utils/password';
 import IconTooltip from '../../components/common/IconTooltip/IconTooltip';
 import PageLoader from '../../components/common/ScissorsLoader/PageLoader';
 import { countryName } from '../../utils/locale';
+import AddressAutocomplete from '../../components/common/AddressAutocomplete/AddressAutocomplete';
 
 const emptyAddress: Partial<CustomerAddress> = {
   alias: '', recipientName: '', street: '', city: '', postalCode: '', province: '', country: 'ES', phone: '', isDefault: false,
@@ -536,14 +537,43 @@ const AccountPage: React.FC = () => {
               </Form.Group>
             </Col>
           </Row>
+          {/* Country first: the street suggestions search in the chosen country. */}
+          <Row>
+            <Col sm={6}>
+              <Form.Group className="mb-2">
+                <Form.Label>{t('account.country')}</Form.Label>
+                <Form.Select
+                  value={addrForm.country ?? 'ES'}
+                  onChange={e => setAddrForm(f => ({ ...f, country: e.target.value }))}
+                  isInvalid={!!addrFieldErrors.country}
+                >
+                  <option value="">{t('account.selectCountry')}</option>
+                  {countries.map(c => (
+                    <option key={c.isoCode} value={c.isoCode}>{countryName(c.isoCode)}</option>
+                  ))}
+                </Form.Select>
+                <Form.Control.Feedback type="invalid">{addrFieldErrors.country}</Form.Control.Feedback>
+              </Form.Group>
+            </Col>
+          </Row>
           <Form.Group className="mb-2">
             <Form.Label>{t('account.street')}</Form.Label>
-            <Form.Control
+            <AddressAutocomplete
               value={addrForm.street ?? ''}
-              onChange={e => setAddrForm(f => ({ ...f, street: e.target.value }))}
+              onChange={street => setAddrForm(f => ({ ...f, street }))}
+              onSelect={a => setAddrForm(f => ({
+                ...f,
+                street: a.street,
+                postalCode: a.postalCode || f.postalCode,
+                city: a.city || f.city,
+                province: a.province || f.province,
+                // Only a country the shop ships to; otherwise keep the one already chosen.
+                country: countries.some(c => c.isoCode === a.country) ? a.country : f.country,
+              }))}
+              regionCodes={addrForm.country ? [addrForm.country] : []}
               isInvalid={!!addrFieldErrors.street}
+              feedback={<Form.Control.Feedback type="invalid">{addrFieldErrors.street}</Form.Control.Feedback>}
             />
-            <Form.Control.Feedback type="invalid">{addrFieldErrors.street}</Form.Control.Feedback>
           </Form.Group>
           <Row>
             <Col sm={4}>
@@ -578,25 +608,11 @@ const AccountPage: React.FC = () => {
             </Col>
             <Col sm={6}>
               <Form.Group className="mb-2">
-                <Form.Label>{t('account.country')}</Form.Label>
-                <Form.Select
-                  value={addrForm.country ?? 'ES'}
-                  onChange={e => setAddrForm(f => ({ ...f, country: e.target.value }))}
-                  isInvalid={!!addrFieldErrors.country}
-                >
-                  <option value="">{t('account.selectCountry')}</option>
-                  {countries.map(c => (
-                    <option key={c.isoCode} value={c.isoCode}>{countryName(c.isoCode)}</option>
-                  ))}
-                </Form.Select>
-                <Form.Control.Feedback type="invalid">{addrFieldErrors.country}</Form.Control.Feedback>
+                <Form.Label>{t('account.phone')}</Form.Label>
+                <Form.Control value={addrForm.phone ?? ''} onChange={e => setAddrForm(f => ({ ...f, phone: e.target.value }))} />
               </Form.Group>
             </Col>
           </Row>
-          <Form.Group className="mb-2">
-            <Form.Label>{t('account.phone')}</Form.Label>
-            <Form.Control value={addrForm.phone ?? ''} onChange={e => setAddrForm(f => ({ ...f, phone: e.target.value }))} />
-          </Form.Group>
           <Form.Check
             type="checkbox"
             label={t('account.defaultAddress')}

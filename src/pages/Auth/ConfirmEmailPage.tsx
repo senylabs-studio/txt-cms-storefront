@@ -29,7 +29,10 @@ const ConfirmEmailPage: React.FC<{ change?: boolean }> = ({ change = false }) =>
     setLoading(true);
     setError('');
     try {
-      if (change) login(await confirmEmailChange(userId, email, token));
+      if (change) {
+        const session = await confirmEmailChange(userId, email, token);
+        if (session) login(session);
+      }
       else await confirmEmail(userId, token);
       setDone(true);
     } catch (err) {

@@ -8,7 +8,7 @@ import GlobalToast from '../../components/common/GlobalToast/GlobalToast';
 import type { StorefrontProfile } from '../../types';
 
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
+  useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'es' } }),
 }));
 
 const mockAuth = vi.hoisted(() => ({ login: vi.fn(), updateUser: vi.fn() }));
