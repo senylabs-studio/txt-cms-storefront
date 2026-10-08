@@ -128,23 +128,26 @@ const AddressAutocomplete: React.FC<Props> = ({ id, value, onChange, onSelect, r
       />
       {feedback}
       {showList && (
-        <ListGroup id={listId} role="listbox" className="address-autocomplete__list shadow-sm">
-          {suggestions.map((s, i) => (
-            <ListGroup.Item
-              key={s.placeId}
-              role="option"
-              aria-selected={i === active}
-              active={i === active}
-              action
-              // mousedown, not click: the input's blur would close the list first.
-              onMouseDown={e => { e.preventDefault(); void choose(s); }}
-            >
-              <div>{s.mainText?.text ?? s.text.text}</div>
-              {s.secondaryText && <div className="small text-muted">{s.secondaryText.text}</div>}
-            </ListGroup.Item>
-          ))}
-          <ListGroup.Item className="address-autocomplete__attribution small text-muted text-end">Google Maps</ListGroup.Item>
-        </ListGroup>
+        <div className="address-autocomplete__dropdown shadow-sm">
+          <ListGroup id={listId} role="listbox" className="address-autocomplete__list">
+            {suggestions.map((s, i) => (
+              <ListGroup.Item
+                key={s.placeId}
+                role="option"
+                aria-selected={i === active}
+                active={i === active}
+                action
+                // mousedown, not click: the input's blur would close the list first.
+                onMouseDown={e => { e.preventDefault(); void choose(s); }}
+              >
+                <div>{s.mainText?.text ?? s.text.text}</div>
+                {s.secondaryText && <div className="small text-muted">{s.secondaryText.text}</div>}
+              </ListGroup.Item>
+            ))}
+          </ListGroup>
+          {/* Required by Google's terms when suggestions are shown without a map. */}
+          <div className="address-autocomplete__attribution small text-muted text-end">Google Maps</div>
+        </div>
       )}
       {error && <Form.Text className="text-muted">{t('account.streetSuggestionsError')}</Form.Text>}
     </div>
