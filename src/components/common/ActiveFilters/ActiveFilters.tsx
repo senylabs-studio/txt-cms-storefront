@@ -32,6 +32,10 @@ const ActiveFilters: React.FC<Props> = ({ filters, onChange }) => {
     chips.push({ key: 'price', label: `${t('filters.price')}: ${range}`, remove: () => without('minPrice', 'maxPrice') });
   }
   if (filters.pattern) chips.push({ key: 'pattern', label: `${t('filters.pattern')}: ${t(`fabricPatterns.${filters.pattern}`)}`, remove: () => without('pattern') });
+  for (const color of filters.colors ?? []) {
+    chips.push({ key: `color-${color}`, label: `${t('filters.color')}: ${t(`fabricColors.${color}`)}`,
+      remove: () => { const rest = filters.colors!.filter(c => c !== color); onChange({ ...filters, colors: rest.length ? rest : undefined }); } });
+  }
   if (filters.width !== undefined) chips.push({ key: 'width', label: `${t('filters.width')}: ${filters.width} cm`, remove: () => without('width') });
   if (filters.material) chips.push({ key: 'material', label: `${t('filters.composition')}: ${filters.material}`, remove: () => without('material') });
   if (filters.onlyNew) chips.push({ key: 'onlyNew', label: t('filters.onlyNew'), remove: () => without('onlyNew') });

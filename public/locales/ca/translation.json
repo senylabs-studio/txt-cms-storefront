@@ -471,7 +471,8 @@
     "seeAllOffers": "Veure totes les ofertes",
     "seeAllNew": "Veure totes les novetats",
     "fibreGuideLink": "Què és {{material}}: veure-ho a la guia de teixits",
-    "pattern": "Disseny"
+    "pattern": "Disseny",
+    "colors": "Colors"
   },
   "filters": {
     "close": "Tancar filtres",
@@ -496,7 +497,9 @@
     "remove": "Treure el filtre: {{filter}}",
     "clearAll": "Treure-los tots",
     "from": "des de {{value}}",
-    "upTo": "fins a {{value}}"
+    "upTo": "fins a {{value}}",
+    "color": "Color",
+    "colors": "Colors"
   },
   "careLabels": {
     "wash30": "Rentar a màquina màx. 30°C",
@@ -651,5 +654,21 @@
     "Stripes": "Ratlles",
     "Checks": "Quadres",
     "Dots": "Pics"
+  },
+  "fabricColors": {
+    "Red": "Vermell",
+    "Orange": "Taronja",
+    "Yellow": "Groc",
+    "Green": "Verd",
+    "Blue": "Blau",
+    "Purple": "Lila",
+    "Pink": "Rosa",
+    "Brown": "Marró",
+    "Beige": "Beix",
+    "White": "Blanc",
+    "Grey": "Gris",
+    "Black": "Negre",
+    "Gold": "Daurat",
+    "Silver": "Platejat"
   }
 }

@@ -16,6 +16,7 @@ export const getVariantsPaged = async (
       page, pageSize, search, productTypeId, orderBy, orderDir,
       minPrice: filters.minPrice, maxPrice: filters.maxPrice, width: filters.width, material: filters.material,
       pattern: filters.pattern,
+      colors: filters.colors?.length ? filters.colors.join(',') : undefined,
       onlyNew: filters.onlyNew || undefined,
       onlyOffers: filters.onlyOffers || undefined,
     }

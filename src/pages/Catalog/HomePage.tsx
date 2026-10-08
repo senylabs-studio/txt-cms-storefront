@@ -89,6 +89,7 @@ const HomePage: React.FC = () => {
     filters.width !== undefined,
     !!filters.material,
     !!filters.pattern,
+    !!filters.colors?.length,
     !!filters.orderBy,
     !!filters.onlyNew,
     !!filters.onlyOffers,

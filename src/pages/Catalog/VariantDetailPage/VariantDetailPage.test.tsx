@@ -450,10 +450,11 @@ describe('VariantDetailPage composition', () => {
 
   it('shows the design among the fabric details', async () => {
     guide.exists = false;
-    getVariantById.mockResolvedValue(variant({ pattern: 'Checks' }));
+    getVariantById.mockResolvedValue(variant({ pattern: 'Checks', colors: 'Red, White' }));
     renderPage();
 
     expect(await screen.findByText('fabricPatterns.Checks')).toBeInTheDocument();
+    expect(screen.getByText('fabricColors.Red, fabricColors.White')).toBeInTheDocument();
     expect(screen.getByText('product.pattern')).toBeInTheDocument();
   });
 });

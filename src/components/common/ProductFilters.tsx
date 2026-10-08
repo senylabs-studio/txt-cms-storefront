@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 import type { PageFilterFacets } from '../../types';
 import type { PageFilters } from '../../services/pageService';
 import { parseFabricPattern } from '../../utils/fabricPatterns';
+import { FABRIC_COLORS } from '../../utils/fabricColors';
+import './ProductFilters.css';
 
 // ─── Dual range slider ────────────────────────────────────────────────────────
 
@@ -120,7 +122,7 @@ const ProductFilters: React.FC<Props> = ({ facets, filters, onChange, onClose })
   };
 
   const hasActive = draft.minPrice !== undefined || draft.maxPrice !== undefined
-    || draft.width !== undefined || !!draft.material || !!draft.pattern || !!draft.orderBy || !!draft.onlyNew || !!draft.onlyOffers;
+    || draft.width !== undefined || !!draft.material || !!draft.pattern || !!draft.colors?.length || !!draft.orderBy || !!draft.onlyNew || !!draft.onlyOffers;
 
   const reset = () => {
     setDraft({});
@@ -211,6 +213,30 @@ const ProductFilters: React.FC<Props> = ({ facets, filters, onChange, onClose })
             <option value="">{t('filters.all')}</option>
             {facets.patterns!.map(p => <option key={p} value={p}>{t(`fabricPatterns.${p}`)}</option>)}
           </Form.Select>
+        </div>
+      </>}
+
+      {/* Colours — several can be on (any of them) */}
+      {(facets.colors?.length ?? 0) > 0 && <>
+        {sep}
+        <div>
+          <div style={labelStyle}>{t('filters.colors')}</div>
+          <div className="pf-colors" role="group" aria-label={t('filters.colors')}>
+            {FABRIC_COLORS.filter(c => facets.colors!.includes(c.value)).map(c => {
+              const on = !!draft.colors?.includes(c.value);
+              const name = t(`fabricColors.${c.value}`);
+              return (
+                <button key={c.value} type="button" className={`pf-color${on ? ' is-on' : ''}`}
+                  aria-pressed={on} aria-label={name} title={name}
+                  onClick={() => setDraft(d => {
+                    const next = on ? (d.colors ?? []).filter(x => x !== c.value) : [...(d.colors ?? []), c.value];
+                    return { ...d, colors: next.length ? next : undefined };
+                  })}>
+                  <span className="pf-color-swatch" style={{ background: c.swatch }} />
+                </button>
+              );
+            })}
+          </div>
         </div>
       </>}
 

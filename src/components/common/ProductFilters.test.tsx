@@ -42,4 +42,15 @@ describe('ProductFilters — Diseño and offers', () => {
     render(<ProductFilters facets={facets()} filters={{}} onChange={vi.fn()} />);
     expect(screen.queryByLabelText('filters.onlyOffers')).toBeNull();
   });
+
+  it('offers a swatch per colour present and applies several at once', () => {
+    const onChange = vi.fn();
+    render(<ProductFilters facets={{ ...facets(), colors: ['Red', 'Blue', 'White'] }} filters={{}} onChange={onChange} onClose={vi.fn()} />);
+    expect(screen.getAllByRole('button', { pressed: false }).map(b => b.getAttribute('aria-label')))
+      .toEqual(['fabricColors.Red', 'fabricColors.Blue', 'fabricColors.White']);
+    fireEvent.click(screen.getByLabelText('fabricColors.Blue'));
+    fireEvent.click(screen.getByLabelText('fabricColors.Red'));
+    fireEvent.click(screen.getByText('filters.viewResults'));
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ colors: ['Blue', 'Red'] }));
+  });
 });
