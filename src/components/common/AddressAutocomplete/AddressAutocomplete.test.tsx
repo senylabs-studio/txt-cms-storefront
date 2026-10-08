@@ -149,6 +149,19 @@ describe('AddressAutocomplete', () => {
     await waitFor(() => expect(screen.getAllByRole('option').map(o => o.firstChild?.textContent)).toEqual(['Calle Mayor, 12']));
   });
 
+  it('says so when Google finds nothing, and the hint goes away on the next search', async () => {
+    places.fetchSuggestions
+      .mockResolvedValueOnce({ suggestions: [] })
+      .mockResolvedValueOnce({ suggestions: [{ placePrediction: prediction('p1', 'Calle Mayor, 10', 'Madrid') }] });
+    render(<Harness onSelect={vi.fn()} />);
+    const input = screen.getByRole('combobox');
+    fireEvent.change(input, { target: { value: 'calle inventada 99' } });
+    expect(await screen.findByText('account.streetNoSuggestions')).toBeTruthy();
+    fireEvent.change(input, { target: { value: 'calle mayor 10' } });
+    await screen.findByRole('option', { name: /Calle Mayor, 10/ });
+    expect(screen.queryByText('account.streetNoSuggestions')).toBeNull();
+  });
+
   it('tells the user to type by hand when Google fails', async () => {
     places.load.mockRejectedValue(new Error('blocked'));
     render(<Harness onSelect={vi.fn()} />);

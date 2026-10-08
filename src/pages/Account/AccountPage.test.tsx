@@ -127,6 +127,24 @@ describe('AccountPage', () => {
     expect(screen.queryByText('account.newAddress')).not.toBeInTheDocument();
   });
 
+  it('clears a field\'s "required" message as soon as it is filled in', async () => {
+    getProfile.mockResolvedValue(profile());
+    renderAccount();
+    await screen.findByDisplayValue('Jane');
+
+    fireEvent.click(screen.getByText('account.add'));
+    const dialog = screen.getByRole('dialog');
+    fireEvent.click(within(dialog).getByRole('button', { name: 'account.save' }));
+    expect(within(dialog).getAllByText('common.fieldRequired')).toHaveLength(5);
+
+    const [alias, , street] = within(dialog).getAllByRole('textbox');
+    fireEvent.change(alias, { target: { value: 'Casa' } });
+    fireEvent.change(street, { target: { value: 'Calle Mayor, 10' } });
+    expect(within(dialog).getAllByText('common.fieldRequired')).toHaveLength(3);
+    expect(alias).not.toHaveClass('is-invalid');
+    expect(addAddress).not.toHaveBeenCalled();
+  });
+
   it('opens the edit modal prefilled and updates the address', async () => {
     updateAddress.mockResolvedValue(undefined);
     renderAccount();

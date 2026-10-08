@@ -277,6 +277,7 @@
     "street": "Carrer",
     "streetSearchPlaceholder": "Comença a escriure el carrer i el número",
     "streetSuggestionsError": "No s'han pogut carregar suggeriments; escriu l'adreça a mà.",
+    "streetNoSuggestions": "No hi ha suggeriments per a aquesta adreça; pots escriure-la a mà.",
     "postalCode": "CP",
     "city": "Ciutat",
     "province": "Província",
