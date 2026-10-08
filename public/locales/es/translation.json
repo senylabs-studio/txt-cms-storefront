@@ -275,6 +275,8 @@
     "aliasPlaceholder": "Casa, Trabajo...",
     "recipient": "Destinatario",
     "street": "Calle",
+    "streetSearchPlaceholder": "Empieza a escribir tu calle y número",
+    "streetSuggestionsError": "No se pudieron cargar sugerencias; escribe la dirección a mano.",
     "postalCode": "CP",
     "city": "Ciudad",
     "province": "Provincia",

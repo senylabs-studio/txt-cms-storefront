@@ -1,0 +1,18 @@
+.address-autocomplete {
+  position: relative;
+}
+
+.address-autocomplete__list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1060;
+  max-height: 18rem;
+  overflow-y: auto;
+}
+
+.address-autocomplete__attribution {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
