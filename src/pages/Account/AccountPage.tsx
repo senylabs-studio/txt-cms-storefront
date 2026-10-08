@@ -16,6 +16,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { meetsPasswordRules } from '../../utils/password';
 import IconTooltip from '../../components/common/IconTooltip/IconTooltip';
 import PageLoader from '../../components/common/ScissorsLoader/PageLoader';
+import { countryName } from '../../utils/locale';
 
 const emptyAddress: Partial<CustomerAddress> = {
   alias: '', recipientName: '', street: '', city: '', postalCode: '', province: '', country: 'ES', phone: '', isDefault: false,
@@ -418,7 +419,7 @@ const AccountPage: React.FC = () => {
                         </div>
                         <div className="text-muted small">{a.recipientName}</div>
                         <div className="text-muted small">{a.street}, {a.postalCode} {a.city}{a.province ? `, ${a.province}` : ''}</div>
-                        <div className="text-muted small">{a.country}{a.phone ? ` · ${a.phone}` : ''}</div>
+                        <div className="text-muted small">{countryName(a.country)}{a.phone ? ` · ${a.phone}` : ''}</div>
                       </div>
                       <div className="d-flex gap-1 ms-2">
                         <Button size="sm" variant="outline-secondary" onClick={() => openEditAddr(a)}><FaEdit /></Button>
@@ -559,7 +560,7 @@ const AccountPage: React.FC = () => {
                 >
                   <option value="">{t('account.selectCountry')}</option>
                   {countries.map(c => (
-                    <option key={c.isoCode} value={c.isoCode}>{c.name}</option>
+                    <option key={c.isoCode} value={c.isoCode}>{countryName(c.isoCode)}</option>
                   ))}
                 </Form.Select>
                 <Form.Control.Feedback type="invalid">{addrFieldErrors.country}</Form.Control.Feedback>

@@ -12,6 +12,7 @@ import { getApiErrorMessage } from '../../utils/apiError';
 import PageLoader from '../../components/common/ScissorsLoader/PageLoader';
 import { formatPrice } from '../../utils/pricing';
 import { downloadGiftCardLetter } from '../../services/giftCardService';
+import { formatDate, countryName } from '../../utils/locale';
 
 const OrderDetailPage: React.FC = () => {
   const { t } = useTranslation();
@@ -158,7 +159,7 @@ const OrderDetailPage: React.FC = () => {
         </div>
 
         {order.returnRequestedAt && (
-          <Alert variant="info">{t('orderDetail.returnRequested', { date: new Date(order.returnRequestedAt).toLocaleDateString() })}</Alert>
+          <Alert variant="info">{t('orderDetail.returnRequested', { date: formatDate(order.returnRequestedAt) })}</Alert>
         )}
 
         <Row className="mb-4">
@@ -166,7 +167,7 @@ const OrderDetailPage: React.FC = () => {
             <Card className="h-100">
               <Card.Body>
                 <h6 className="fw-semibold mb-2">{t('orderDetail.info')}</h6>
-                <div className="text-muted small">{t('orderDetail.date')} {new Date(order.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}</div>
+                <div className="text-muted small">{t('orderDetail.date')} {formatDate(order.createdAt, { day: 'numeric', month: 'long', year: 'numeric' })}</div>
                 {order.trackingNumber && (
                   <div className="text-muted small mt-1">
                     {t('orderDetail.trackingNumber')}{' '}
@@ -192,7 +193,7 @@ const OrderDetailPage: React.FC = () => {
                     <div>{order.shippingAddress.recipientName}</div>
                     <div>{order.shippingAddress.street}</div>
                     <div>{order.shippingAddress.postalCode} {order.shippingAddress.city}</div>
-                    <div>{order.shippingAddress.country}</div>
+                    <div>{countryName(order.shippingAddress.country)}</div>
                   </div>
                 </Card.Body>
               </Card>

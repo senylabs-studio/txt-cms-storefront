@@ -529,4 +529,10 @@ describe('PageBlockRenderer accordion anchors', () => {
     expect(ra.querySelector('#fibra-ju')).not.toBeNull();
     window.history.replaceState(null, '', '/');
   });
+  it('does not crash on a malformed fragment', () => {
+    window.history.replaceState(null, '', '/guia-de-tejidos#%E0');
+    const { container } = render(<PageBlockRenderer blocks={[accordion(1, 'fibra-co', 'Algodón')]} />);
+    expect(container.querySelector('details')!.open).toBe(false);
+    window.history.replaceState(null, '', '/');
+  });
 });

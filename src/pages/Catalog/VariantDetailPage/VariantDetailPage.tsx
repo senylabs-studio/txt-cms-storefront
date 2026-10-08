@@ -29,6 +29,7 @@ import './VariantDetailPage.css';
 import PageLoader from '../../../components/common/ScissorsLoader/PageLoader';
 import { formatPrice } from '../../../utils/pricing';
 import { parseFabricColors } from '../../../utils/fabricColors';
+import { formatDate } from '../../../utils/locale';
 
 const DEFAULT_MIN_QTY = 0.3;
 const DESC_THRESHOLD = 300;
@@ -611,7 +612,7 @@ const VariantDetailPage: React.FC = () => {
                   <div className="d-flex align-items-center gap-2">
                     <StarRating value={r.rating} size={13} />
                     <span className="fw-semibold small">{r.customerName}</span>
-                    <span className="text-muted small">{new Date(r.createdAt).toLocaleDateString()}</span>
+                    <span className="text-muted small">{formatDate(r.createdAt)}</span>
                   </div>
                   {r.comment && <p className="mb-0 mt-1 small">{r.comment}</p>}
                 </div>

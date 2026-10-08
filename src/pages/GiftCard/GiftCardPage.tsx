@@ -13,6 +13,7 @@ import { formatPrice } from '../../utils/pricing';
 import { giftCardPresets, snapGiftCardAmount } from '../../utils/giftCard';
 import type { GiftCardBalance, GiftCardConfig } from '../../types';
 import './GiftCardPage.css';
+import { formatDate } from '../../utils/locale';
 
 const MESSAGE_MAX = 500;
 
@@ -263,7 +264,7 @@ const GiftCardPage: React.FC = () => {
               <div className="mt-2" data-testid="gift-card-balance">
                 <div className="fw-semibold">{t('giftCard.balanceResult', { amount: formatPrice(balance.balance) })}</div>
                 {balance.expiresAt && (
-                  <div className="small text-muted">{t('giftCard.balanceExpires', { date: new Date(balance.expiresAt).toLocaleDateString() })}</div>
+                  <div className="small text-muted">{t('giftCard.balanceExpires', { date: formatDate(balance.expiresAt) })}</div>
                 )}
                 {!balance.usable && <div className="small text-warning">{t('giftCard.balanceNotUsable')}</div>}
               </div>

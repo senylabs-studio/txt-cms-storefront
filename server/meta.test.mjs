@@ -41,4 +41,17 @@ describe('share preview meta', () => {
   it('cuts long descriptions on one line', () => {
     expect(cleanText('a\n\n' + 'x'.repeat(300))).toHaveLength(200);
   });
+
+  // Audit 2026-10-08: "$'" / "$&" in a CMS title were replacement patterns and spliced index.html in.
+  it('writes a title with $ patterns literally', () => {
+    const html = '<head><title>TXT Shop</title>\n<meta name="description" content="x" /></head><body><script src="/a.js"></script></body>';
+    const out = injectMeta(html, { siteName: 'S', title: "Oferta 2x1 $' y $&", description: "desc $'", type: 'website', image: null }, null);
+    expect(out).toMatch(/<title>Oferta 2x1 \$(&#39;|') y \$&amp;<\/title>/);
+    expect(out.match(/<script/g)).toHaveLength(1);
+  });
+
+  it('does not throw on a malformed percent-escape in the path', async () => {
+    const meta = await buildMeta('/guia-de-tejidos%E0', api({}));
+    expect(meta.title).toBe('Tejidos Pulido');
+  });
 });
