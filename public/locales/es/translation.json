@@ -90,7 +90,8 @@
       "hasAccount": "¿Ya tienes cuenta?",
       "loginLink": "Inicia sesión",
       "error": "Error al crear la cuenta",
-      "newsletter": "Quiero recibir novedades y ofertas por email (te enviaremos un email para confirmarlo)"
+      "newsletter": "Quiero recibir novedades y ofertas por email (te enviaremos un email para confirmarlo)",
+      "confirmEmailSent": "¡Cuenta creada! Te hemos enviado un enlace a {{email}} para confirmar tu email."
     },
     "forgotPasswordLink": "¿Olvidaste tu contraseña?",
     "forgotPassword": {
@@ -320,7 +321,14 @@
     "newsletterOn": "Te has apuntado a la newsletter.",
     "newsletterOff": "Ya no recibirás la newsletter.",
     "newsletterError": "No se ha podido guardar. Inténtalo de nuevo.",
-    "newsletterPending": "Te hemos enviado un email para confirmar la suscripción. Pulsa el enlace para empezar a recibir la newsletter."
+    "newsletterPending": "Te hemos enviado un email para confirmar la suscripción. Pulsa el enlace para empezar a recibir la newsletter.",
+    "emailChangePending": "Te hemos enviado un enlace a {{email}}. El email de tu cuenta cambiará cuando lo confirmes.",
+    "emailNotConfirmed": "Aún no has confirmado tu email.",
+    "resendConfirmation": "Reenviar el enlace",
+    "confirmationSent": "Te hemos enviado el enlace de confirmación. Revisa tu correo (y la carpeta de spam).",
+    "confirmationRecentlySent": "Ya te lo enviamos hace poco. Revisa tu correo o vuelve a intentarlo en unos minutos.",
+    "confirmationAlready": "Tu email ya está confirmado.",
+    "confirmationError": "No se ha podido enviar el enlace. Inténtalo de nuevo."
   },
   "orders": {
     "backToAccount": "Volver a mi cuenta",
@@ -670,5 +678,21 @@
     "Black": "Negro",
     "Gold": "Dorado",
     "Silver": "Plateado"
+  },
+  "emailConfirm": {
+    "title": "Confirmar email",
+    "instructions": "Pulsa el botón para confirmar que este email es tuyo.",
+    "confirm": "Confirmar mi email",
+    "loading": "Confirmando…",
+    "success": "¡Listo! Tu email está confirmado.",
+    "invalidLink": "El enlace no es válido o está incompleto.",
+    "error": "No se ha podido confirmar el email. Puede que el enlace haya caducado: pide otro desde Mi cuenta.",
+    "changeTitle": "Confirmar el nuevo email",
+    "changeInstructions": "Pulsa el botón para cambiar el email de tu cuenta a {{email}}.",
+    "changeConfirm": "Confirmar el cambio",
+    "changeSuccess": "¡Listo! El email de tu cuenta ahora es {{email}}.",
+    "changeError": "No se ha podido cambiar el email. Puede que el enlace haya caducado: vuelve a pedir el cambio desde Mi cuenta.",
+    "goToAccount": "Ir a Mi cuenta",
+    "backToHome": "Volver a la tienda"
   }
 }

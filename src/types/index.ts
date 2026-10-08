@@ -227,6 +227,8 @@ export interface StorefrontProfile {
   phone?: string;
   taxId?: string;
   isGuest: boolean;
+  /** Registered customer who clicked the emailed confirmation link (always false for a guest). */
+  emailConfirmed?: boolean;
   deletionRequested: boolean;
   customerGroupName?: string;
   /** Gets the newsletter: their own switch, or confirmed with the same email from the home page box. */

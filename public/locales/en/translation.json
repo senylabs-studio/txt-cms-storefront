@@ -90,7 +90,8 @@
       "hasAccount": "Already have an account?",
       "loginLink": "Log in",
       "error": "Error creating account",
-      "newsletter": "Send me news and offers by email (we'll email you to confirm)"
+      "newsletter": "Send me news and offers by email (we'll email you to confirm)",
+      "confirmEmailSent": "Account created! We've sent a link to {{email}} to confirm your email."
     },
     "forgotPasswordLink": "Forgot your password?",
     "forgotPassword": {
@@ -320,7 +321,14 @@
     "newsletterOn": "You've signed up to the newsletter.",
     "newsletterOff": "You won't receive the newsletter any more.",
     "newsletterError": "Couldn't save. Please try again.",
-    "newsletterPending": "We've sent you an email to confirm. Click the link in it to start receiving the newsletter."
+    "newsletterPending": "We've sent you an email to confirm. Click the link in it to start receiving the newsletter.",
+    "emailChangePending": "We've sent a link to {{email}}. Your account email will change once you confirm it.",
+    "emailNotConfirmed": "You haven't confirmed your email yet.",
+    "resendConfirmation": "Resend the link",
+    "confirmationSent": "We've sent you the confirmation link. Check your inbox (and spam folder).",
+    "confirmationRecentlySent": "We sent it a moment ago. Check your inbox or try again in a few minutes.",
+    "confirmationAlready": "Your email is already confirmed.",
+    "confirmationError": "The link couldn't be sent. Please try again."
   },
   "orders": {
     "backToAccount": "Back to my account",
@@ -670,5 +678,21 @@
     "Black": "Black",
     "Gold": "Gold",
     "Silver": "Silver"
+  },
+  "emailConfirm": {
+    "title": "Confirm email",
+    "instructions": "Press the button to confirm this email address is yours.",
+    "confirm": "Confirm my email",
+    "loading": "Confirming…",
+    "success": "Done! Your email is confirmed.",
+    "invalidLink": "The link is invalid or incomplete.",
+    "error": "Your email couldn't be confirmed. The link may have expired: request a new one from My account.",
+    "changeTitle": "Confirm your new email",
+    "changeInstructions": "Press the button to change your account email to {{email}}.",
+    "changeConfirm": "Confirm the change",
+    "changeSuccess": "Done! Your account email is now {{email}}.",
+    "changeError": "Your email couldn't be changed. The link may have expired: request the change again from My account.",
+    "goToAccount": "Go to My account",
+    "backToHome": "Back to the shop"
   }
 }
