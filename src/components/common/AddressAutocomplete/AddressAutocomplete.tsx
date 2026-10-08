@@ -10,7 +10,7 @@ interface Props {
   onChange: (value: string) => void;
   /** A suggestion was picked: the street plus whatever else Google knows about it. */
   onSelect: (address: ParsedAddress) => void;
-  /** Countries to search in (ISO codes, max 15 are used). Empty → anywhere. */
+  /** Countries to search in (ISO codes; Google takes at most 15). Empty → anywhere. */
   regionCodes: string[];
   isInvalid?: boolean;
   /** Rendered right after the input, so Bootstrap's `.is-invalid ~ .invalid-feedback` still applies. */

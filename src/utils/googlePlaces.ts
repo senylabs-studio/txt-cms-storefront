@@ -33,20 +33,36 @@ export interface ParsedAddress {
 
 type Component = Pick<google.maps.places.AddressComponent, 'longText' | 'shortText' | 'types'>;
 
+// How the house number goes with the street name, by country. Anything not listed uses the
+// Spanish style ("Calle Mayor, 10"), which is also how Portugal and Italy write it.
+const NUMBER_FIRST = new Set(['FR', 'LU', 'MC', 'GB', 'IE', 'US', 'CA', 'AU', 'NZ']);     // "10 Rue de Rivoli"
+const NUMBER_AFTER_NO_COMMA = new Set(['DE', 'AT', 'CH', 'NL', 'BE', 'DK', 'SE', 'NO', 'FI', 'PL', 'CZ', 'SK']); // "Hauptstraße 10"
+// Countries whose "province" is Google's level 2 (Spain, Italy: provincia; France: département;
+// UK: county). Elsewhere level 1 is the useful one (Portugal: distrito; Germany: Land; US: state).
+const PROVINCE_IS_LEVEL_2 = new Set(['ES', 'IT', 'FR', 'GB']);
+
 /** Turns Google's address components into our form fields ("Calle Mayor, 10", 28013, Madrid, Madrid, ES). */
 export const parseAddressComponents = (components: Component[]): ParsedAddress => {
   const get = (type: string, short = false) => {
     const c = components.find(x => x.types.includes(type));
     return (short ? c?.shortText : c?.longText) ?? '';
   };
+  const country = get('country', true).toUpperCase();
   const route = get('route');
   const number = get('street_number');
+  let street = route || get('premise');
+  if (route && number) {
+    street = NUMBER_FIRST.has(country) ? `${number} ${route}`
+      : NUMBER_AFTER_NO_COMMA.has(country) ? `${route} ${number}`
+      : `${route}, ${number}`;
+  }
+  const level1 = get('administrative_area_level_1');
+  const level2 = get('administrative_area_level_2');
   return {
-    street: route && number ? `${route}, ${number}` : route || get('premise'),
+    street,
     postalCode: get('postal_code'),
-    city: get('locality') || get('postal_town') || get('administrative_area_level_3') || get('administrative_area_level_2'),
-    // In Spain level 2 is the province (level 1 is the autonomous community).
-    province: get('administrative_area_level_2') || get('administrative_area_level_1'),
-    country: get('country', true).toUpperCase(),
+    city: get('locality') || get('postal_town') || get('administrative_area_level_3') || level2,
+    province: PROVINCE_IS_LEVEL_2.has(country) ? level2 || level1 : level1 || level2,
+    country,
   };
 };

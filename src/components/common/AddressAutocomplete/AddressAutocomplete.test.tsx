@@ -64,6 +64,45 @@ describe('parseAddressComponents', () => {
   });
 });
 
+describe('parseAddressComponents outside Spain', () => {
+  it('puts the number first in France and keeps the département', () => {
+    const r = parseAddressComponents([
+      comp(['street_number'], '10'), comp(['route'], 'Rue de Rivoli'), comp(['locality'], 'Paris'),
+      comp(['administrative_area_level_2'], 'Paris'), comp(['administrative_area_level_1'], 'Île-de-France'),
+      comp(['country'], 'France', 'FR'), comp(['postal_code'], '75004'),
+    ]);
+    expect(r).toEqual({ street: '10 Rue de Rivoli', postalCode: '75004', city: 'Paris', province: 'Paris', country: 'FR' });
+  });
+
+  it('writes German streets without a comma and uses the Land', () => {
+    const r = parseAddressComponents([
+      comp(['street_number'], '5'), comp(['route'], 'Hauptstraße'), comp(['locality'], 'Berlin'),
+      comp(['administrative_area_level_1'], 'Berlin'), comp(['country'], 'Deutschland', 'DE'), comp(['postal_code'], '10827'),
+    ]);
+    expect(r.street).toBe('Hauptstraße 5');
+    expect(r.province).toBe('Berlin');
+  });
+
+  it('uses the distrito (level 1) in Portugal, not the concelho', () => {
+    const r = parseAddressComponents([
+      comp(['street_number'], '20'), comp(['route'], 'Rua Augusta'), comp(['locality'], 'Lisboa'),
+      comp(['administrative_area_level_2'], 'Lisboa (concelho)'), comp(['administrative_area_level_1'], 'Lisboa'),
+      comp(['country'], 'Portugal', 'PT'), comp(['postal_code'], '1100-053'),
+    ]);
+    expect(r.street).toBe('Rua Augusta, 20');
+    expect(r.province).toBe('Lisboa');
+  });
+
+  it('uses the post town in the UK', () => {
+    const r = parseAddressComponents([
+      comp(['street_number'], '221B'), comp(['route'], 'Baker Street'), comp(['postal_town'], 'London'),
+      comp(['administrative_area_level_2'], 'Greater London'), comp(['administrative_area_level_1'], 'England'),
+      comp(['country'], 'United Kingdom', 'GB'), comp(['postal_code'], 'NW1 6XE'),
+    ]);
+    expect(r).toEqual({ street: '221B Baker Street', postalCode: 'NW1 6XE', city: 'London', province: 'Greater London', country: 'GB' });
+  });
+});
+
 describe('AddressAutocomplete', () => {
   it('is a plain field without an API key and never loads Google', async () => {
     places.enabled = false;
