@@ -40,7 +40,8 @@ export async function buildMeta(pathname, getJson) {
     type: 'website',
   };
   const titled = (name) => `${name} — ${siteName}`;
-  const segments = pathname.split('/').filter(Boolean).map(decodeURIComponent);
+  // A malformed %-escape (hand-typed or mangled link) must not throw: keep that segment raw.
+  const segments = pathname.split('/').filter(Boolean).map(safeDecode);
 
   try {
     if (segments[0] === 'variant' && /^\d+$/.test(segments[1] ?? '')) {
@@ -72,6 +73,11 @@ export async function buildMeta(pathname, getJson) {
   return base;
 }
 
+/** decodeURIComponent that leaves a malformed segment as it is instead of throwing. */
+export function safeDecode(segment) {
+  try { return decodeURIComponent(segment); } catch { return segment; }
+}
+
 /** Writes the preview into index.html: replaces <title> and the description, adds og:/twitter: tags. */
 export function injectMeta(html, meta, url) {
   const tags = [
@@ -84,7 +90,9 @@ export function injectMeta(html, meta, url) {
     meta.image ? `<meta property="og:image" content="${escapeHtml(meta.image)}" />` : '',
     `<meta name="twitter:card" content="${meta.image ? 'summary_large_image' : 'summary'}" />`,
   ].filter(Boolean).join('\n    ');
+  // Replacer functions, not strings: a "$'" or "$&" in a CMS title is a replacement pattern in a
+  // string and used to splice parts of index.html into the <title> (audit 2026-10-08).
   return html
-    .replace(/<title>[\s\S]*?<\/title>/, `<title>${escapeHtml(meta.title)}</title>`)
-    .replace(/<meta name="description"[^>]*>/, tags);
+    .replace(/<title>[\s\S]*?<\/title>/, () => `<title>${escapeHtml(meta.title)}</title>`)
+    .replace(/<meta name="description"[^>]*>/, () => tags);
 }

@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import {
-  getProfile, updateProfile, changePassword, updateEmail, addAddress, updateAddress, deleteAddress, updateNewsletterSubscription,
+  getProfile, updateProfile, changePassword, updateEmail, resendEmailConfirmation, addAddress, updateAddress, deleteAddress, updateNewsletterSubscription,
   downloadMyDataExport, requestAccountDeletion,
 } from '../../services/profileService';
 import { getVisibleCountries, type VisibleCountry } from '../../services/countryService';
@@ -16,6 +16,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { meetsPasswordRules } from '../../utils/password';
 import IconTooltip from '../../components/common/IconTooltip/IconTooltip';
 import PageLoader from '../../components/common/ScissorsLoader/PageLoader';
+import { countryName } from '../../utils/locale';
 
 const emptyAddress: Partial<CustomerAddress> = {
   alias: '', recipientName: '', street: '', city: '', postalCode: '', province: '', country: 'ES', phone: '', isDefault: false,
@@ -50,6 +51,22 @@ const AccountPage: React.FC = () => {
       showToast('danger', getApiErrorMessage(err, t('account.newsletterError')));
     } finally {
       setNewsletterSaving(false);
+    }
+  };
+
+  // "Resend the confirmation link" under an unconfirmed email
+  const [resending, setResending] = useState(false);
+  const handleResendConfirmation = async () => {
+    setResending(true);
+    try {
+      const { sent, alreadyConfirmed } = await resendEmailConfirmation();
+      if (alreadyConfirmed) setProfile(p => (p ? { ...p, emailConfirmed: true } : p));
+      showToast(sent ? 'success' : 'info',
+        t(alreadyConfirmed ? 'account.confirmationAlready' : sent ? 'account.confirmationSent' : 'account.confirmationRecentlySent'));
+    } catch (err) {
+      showToast('danger', getApiErrorMessage(err, t('account.confirmationError')));
+    } finally {
+      setResending(false);
     }
   };
 
@@ -131,13 +148,15 @@ const AccountPage: React.FC = () => {
     setEmailFieldErrors({});
     setEmailSaving(true);
     try {
-      const refreshed = await updateEmail(newEmail, profile?.isGuest ? undefined : emailPassword);
-      // A registered customer's old token was just invalidated (security stamp rotated) — use
-      // the new one, or the next request would log them out as "session expired".
-      if (refreshed) login(refreshed);
-      else updateUser({ email: newEmail });
-      setProfile(p => p ? { ...p, email: newEmail } : p);
+      const { pendingConfirmation } = await updateEmail(newEmail, profile?.isGuest ? undefined : emailPassword);
       setShowEmailModal(false);
+      // Registered: nothing changes until the link sent to the new address is clicked.
+      if (pendingConfirmation) {
+        showToast('info', t('account.emailChangePending', { email: newEmail }));
+        return;
+      }
+      updateUser({ email: newEmail });
+      setProfile(p => p ? { ...p, email: newEmail } : p);
       showToast('success', t('account.emailChangeSuccess'));
     } catch (e) {
       const fe = parseFieldErrors(e);
@@ -293,6 +312,14 @@ const AccountPage: React.FC = () => {
                         </Button>
                       </IconTooltip>
                     </div>
+                    {!profile.isGuest && profile.emailConfirmed === false && (
+                      <Form.Text className="text-warning-emphasis d-block mt-1">
+                        {t('account.emailNotConfirmed')}{' '}
+                        <Button variant="link" size="sm" className="p-0 align-baseline" onClick={handleResendConfirmation} disabled={resending}>
+                          {t('account.resendConfirmation')}
+                        </Button>
+                      </Form.Text>
+                    )}
                   </Form.Group>
                   <Form.Group className="mb-3">
                     <Form.Label>{t('account.phone')}</Form.Label>
@@ -418,7 +445,7 @@ const AccountPage: React.FC = () => {
                         </div>
                         <div className="text-muted small">{a.recipientName}</div>
                         <div className="text-muted small">{a.street}, {a.postalCode} {a.city}{a.province ? `, ${a.province}` : ''}</div>
-                        <div className="text-muted small">{a.country}{a.phone ? ` · ${a.phone}` : ''}</div>
+                        <div className="text-muted small">{countryName(a.country)}{a.phone ? ` · ${a.phone}` : ''}</div>
                       </div>
                       <div className="d-flex gap-1 ms-2">
                         <Button size="sm" variant="outline-secondary" onClick={() => openEditAddr(a)}><FaEdit /></Button>
@@ -559,7 +586,7 @@ const AccountPage: React.FC = () => {
                 >
                   <option value="">{t('account.selectCountry')}</option>
                   {countries.map(c => (
-                    <option key={c.isoCode} value={c.isoCode}>{c.name}</option>
+                    <option key={c.isoCode} value={c.isoCode}>{countryName(c.isoCode)}</option>
                   ))}
                 </Form.Select>
                 <Form.Control.Feedback type="invalid">{addrFieldErrors.country}</Form.Control.Feedback>

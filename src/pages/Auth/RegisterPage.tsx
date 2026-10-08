@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { register as registerService } from '../../services/authService';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
 import { getApiErrorMessage, parseFieldErrors, type FieldErrors } from '../../utils/apiError';
 import { meetsPasswordRules } from '../../utils/password';
 
@@ -12,6 +13,7 @@ const RegisterPage: React.FC = () => {
   const { t } = useTranslation();
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -34,6 +36,7 @@ const RegisterPage: React.FC = () => {
     try {
       const data = await registerService({ name, email, password, phone: phone || undefined, subscribeToNewsletter: newsletter });
       login(data);
+      showToast('info', t('auth.register.confirmEmailSent', { email }));
       navigate('/catalog', { replace: true });
     } catch (e) {
       const fe = parseFieldErrors(e);

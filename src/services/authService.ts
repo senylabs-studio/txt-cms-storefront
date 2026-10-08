@@ -36,6 +36,16 @@ export const requestGuestAccessLink = async (data: { email: string; orderNumber:
   return res.data;
 };
 
+export const confirmEmail = async (userId: string, token: string): Promise<void> => {
+  await apiClient.post('/storefront/auth/confirm-email', { userId, token });
+};
+
+/** Applies the change and signs in: the change ended every session of the account. */
+export const confirmEmailChange = async (userId: string, email: string, token: string): Promise<AuthResponse> => {
+  const res = await apiClient.post('/storefront/auth/confirm-email-change', { userId, email, token });
+  return res.data;
+};
+
 export const verifyGuestAccessLink = async (token: string): Promise<AuthResponse> => {
   const res = await apiClient.post('/storefront/auth/guest/access-link/verify', { token });
   return res.data;

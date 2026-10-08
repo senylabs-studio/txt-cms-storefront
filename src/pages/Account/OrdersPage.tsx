@@ -10,6 +10,7 @@ import type { StorefrontOrder } from '../../types';
 import { ORDER_STATUS_VARIANT } from '../../utils/orderStatus';
 import ScissorsLoader from '../../components/common/ScissorsLoader/ScissorsLoader';
 import { formatPrice } from '../../utils/pricing';
+import { formatDate } from '../../utils/locale';
 
 const OrdersPage: React.FC = () => {
   const { t } = useTranslation();
@@ -68,7 +69,7 @@ const OrdersPage: React.FC = () => {
                 {orders.map(o => (
                   <tr key={o.id}>
                     <td className="fw-semibold">#{o.id}</td>
-                    <td>{new Date(o.createdAt).toLocaleDateString('es-ES')}</td>
+                    <td>{formatDate(o.createdAt)}</td>
                     <td>
                       <Badge bg={ORDER_STATUS_VARIANT[o.status] ?? 'secondary'}>
                         {t(`orders.statuses.${o.status}`, { defaultValue: o.status })}

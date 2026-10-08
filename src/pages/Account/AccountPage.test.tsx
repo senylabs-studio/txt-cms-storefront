@@ -18,8 +18,10 @@ vi.mock('../../components/Layout/MainLayout', () => ({
   default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
-const { getProfile, updateProfile, changePassword, addAddress, updateAddress, deleteAddress, downloadMyDataExport, requestAccountDeletion, updateNewsletterSubscription } = vi.hoisted(() => ({
+const { getProfile, updateProfile, changePassword, addAddress, updateAddress, deleteAddress, downloadMyDataExport, requestAccountDeletion, updateNewsletterSubscription, updateEmail, resendEmailConfirmation } = vi.hoisted(() => ({
   updateNewsletterSubscription: vi.fn(),
+  updateEmail: vi.fn(),
+  resendEmailConfirmation: vi.fn(),
   getProfile: vi.fn(),
   updateProfile: vi.fn(),
   changePassword: vi.fn(),
@@ -31,6 +33,7 @@ const { getProfile, updateProfile, changePassword, addAddress, updateAddress, de
 }));
 vi.mock('../../services/profileService', () => ({
   getProfile, updateProfile, changePassword, addAddress, updateAddress, deleteAddress, downloadMyDataExport, requestAccountDeletion, updateNewsletterSubscription,
+  updateEmail, resendEmailConfirmation,
 }));
 
 const { getVisibleCountries } = vi.hoisted(() => ({ getVisibleCountries: vi.fn() }));
@@ -374,5 +377,53 @@ describe('AccountPage newsletter switch', () => {
     expect(await screen.findByText('account.newsletterPending')).toBeInTheDocument();
     await waitFor(() => expect(toggle).not.toBeChecked());
     expect(updateNewsletterSubscription).toHaveBeenCalledWith(true);
+  });
+});
+
+// Decision 2026-10-08: a registered customer's email only changes once the new address is confirmed.
+describe('AccountPage account email', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    getVisibleCountries.mockResolvedValue([{ isoCode: 'ES', name: 'España' }]);
+  });
+
+  const renderWithToasts = () =>
+    render(<AccountPage />, { wrapper: ({ children }) => <AllProviders>{children}<GlobalToast /></AllProviders> });
+
+  it('a requested change keeps the current email and says a link went to the new one', async () => {
+    getProfile.mockResolvedValue(profile({ emailConfirmed: true }));
+    updateEmail.mockResolvedValue({ pendingConfirmation: true });
+    renderWithToasts();
+
+    fireEvent.click(await screen.findByRole('button', { name: 'account.changeEmailTitle' }));
+    const dialog = screen.getByRole('dialog');
+    const [emailInput] = within(dialog).getAllByRole('textbox');
+    fireEvent.change(emailInput, { target: { value: 'jane.new@example.com' } });
+    fireEvent.change(dialog.querySelector('input[type="password"]')!, { target: { value: 'P@ssw0rd123!' } });
+    fireEvent.submit(dialog.querySelector('form')!);
+
+    expect(await screen.findByText('account.emailChangePending')).toBeInTheDocument();
+    expect(updateEmail).toHaveBeenCalledWith('jane.new@example.com', 'P@ssw0rd123!');
+    expect(screen.getByDisplayValue('jane@example.com')).toBeInTheDocument();
+    expect(mockAuth.updateUser).not.toHaveBeenCalled();
+  });
+
+  it('offers to resend the link while the email is unconfirmed', async () => {
+    getProfile.mockResolvedValue(profile({ emailConfirmed: false }));
+    resendEmailConfirmation.mockResolvedValue({ sent: true, alreadyConfirmed: false });
+    renderWithToasts();
+
+    expect(await screen.findByText(/account.emailNotConfirmed/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'account.resendConfirmation' }));
+
+    expect(await screen.findByText('account.confirmationSent')).toBeInTheDocument();
+  });
+
+  it('says nothing about confirming once the email is confirmed', async () => {
+    getProfile.mockResolvedValue(profile({ emailConfirmed: true }));
+    renderWithToasts();
+
+    await screen.findByDisplayValue('jane@example.com');
+    expect(screen.queryByText(/account.emailNotConfirmed/)).toBeNull();
   });
 });

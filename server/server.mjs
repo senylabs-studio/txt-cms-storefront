@@ -8,7 +8,7 @@ import { existsSync } from 'node:fs';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildMeta, injectMeta } from './meta.mjs';
+import { buildMeta, injectMeta, safeDecode } from './meta.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 // Deployed next to dist/ (Azure package root); in the repo it lives in server/, beside ../dist.
@@ -50,16 +50,29 @@ async function sendFile(res, file) {
   const body = await readFile(file);
   const hashedAsset = file.startsWith(join(DIST, 'assets') + '/');
   res.writeHead(200, {
+    ...SECURITY_HEADERS,
     'Content-Type': TYPES[extname(file).toLowerCase()] || 'application/octet-stream',
     'Cache-Control': hashedAsset ? 'public, max-age=31536000, immutable' : 'public, max-age=300',
   });
   res.end(body);
 }
 
+// Audit 2026-10-08: no one may frame the shop (clickjacking), sniff files as another type or
+// read full URLs (reset links) from the Referer. A full script CSP is left out on purpose: the
+// PayPal SDK loads its scripts dynamically.
+const SECURITY_HEADERS = {
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'Content-Security-Policy': "frame-ancestors 'none'",
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Strict-Transport-Security': 'max-age=31536000',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+};
+
 createServer(async (req, res) => {
   try {
     const url = new URL(req.url, 'http://localhost');
-    const filePath = normalize(join(DIST, decodeURIComponent(url.pathname)));
+    const filePath = normalize(join(DIST, safeDecode(url.pathname)));
     if (filePath.startsWith(DIST + '/') && filePath !== join(DIST, 'index.html')) {
       const info = await stat(filePath).catch(() => null);
       if (info?.isFile()) return await sendFile(res, filePath);
@@ -69,7 +82,7 @@ createServer(async (req, res) => {
     const meta = await buildMeta(url.pathname, getJson);
     const host = req.headers['x-forwarded-host'] || req.headers.host;
     const pageUrl = host ? `https://${host}${url.pathname}` : null;
-    res.writeHead(200, { 'Content-Type': TYPES['.html'], 'Cache-Control': 'no-cache' });
+    res.writeHead(200, { ...SECURITY_HEADERS, 'Content-Type': TYPES['.html'], 'Cache-Control': 'no-cache' });
     res.end(req.method === 'HEAD' ? undefined : injectMeta(indexHtml, meta, pageUrl));
   } catch (err) {
     console.error(err);

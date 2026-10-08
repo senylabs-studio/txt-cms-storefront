@@ -158,6 +158,10 @@ const useLocationHash = () => {
 };
 
 /** An accordion's anchors ("fibra-ra, fibra-ju" → ["fibra-ra", "fibra-ju"]). */
+// A malformed fragment ("#%", "#%E0") must not crash the page.
+const safeDecodeHash = (hash: string) => {
+  try { return decodeURIComponent(hash.slice(1)); } catch { return hash.slice(1); }
+};
 const accordionAnchors = (anchor?: string) =>
   (anchor ?? '').split(',').map(a => a.trim()).filter(Boolean);
 
@@ -167,7 +171,7 @@ const HeaderParagraphBlock: React.FC<{ config: HeaderParagraphBlockConfig }> = (
   const hash = useLocationHash();
   const detailsRef = React.useRef<HTMLDetailsElement>(null);
   const anchors = accordionAnchors(config.anchor);
-  const targeted = !!hash && anchors.includes(decodeURIComponent(hash.slice(1)));
+  const targeted = !!hash && anchors.includes(safeDecodeHash(hash));
   React.useEffect(() => {
     if (!targeted || !detailsRef.current) return;
     detailsRef.current.open = true;

@@ -90,7 +90,8 @@
       "hasAccount": "Ja tens compte?",
       "loginLink": "Inicia sessió",
       "error": "Error en crear el compte",
-      "newsletter": "Vull rebre novetats i ofertes per correu (t'enviarem un correu per confirmar-ho)"
+      "newsletter": "Vull rebre novetats i ofertes per correu (t'enviarem un correu per confirmar-ho)",
+      "confirmEmailSent": "Compte creat! T'hem enviat un enllaç a {{email}} per confirmar el teu correu."
     },
     "forgotPasswordLink": "Has oblidat la contrasenya?",
     "forgotPassword": {
@@ -313,14 +314,21 @@
     "deletionRequestSuccess": "Sol·licitud d'eliminació de compte enviada.",
     "exportDataSuccess": "Les teves dades s'han descarregat correctament.",
     "loadError": "No s'ha pogut carregar el teu compte.",
-    "retry": "Reintentar",
+    "retry": "Torna-ho a provar",
     "newsletterTitle": "Butlletí",
     "newsletterLabel": "Rebre novetats i ofertes per correu",
     "newsletterHint": "Et pots donar de baixa quan vulguis des d'aquí o des de qualsevol correu.",
     "newsletterOn": "T'has apuntat al butlletí.",
     "newsletterOff": "Ja no rebràs el butlletí.",
     "newsletterError": "No s'ha pogut desar. Torna-ho a provar.",
-    "newsletterPending": "T'hem enviat un correu per confirmar la subscripció. Fes clic a l'enllaç per començar a rebre el butlletí."
+    "newsletterPending": "T'hem enviat un correu per confirmar la subscripció. Fes clic a l'enllaç per començar a rebre el butlletí.",
+    "emailChangePending": "T'hem enviat un enllaç a {{email}}. El correu del teu compte canviarà quan el confirmis.",
+    "emailNotConfirmed": "Encara no has confirmat el teu correu.",
+    "resendConfirmation": "Tornar a enviar l'enllaç",
+    "confirmationSent": "T'hem enviat l'enllaç de confirmació. Revisa el correu (i la carpeta de correu brossa).",
+    "confirmationRecentlySent": "Ja te l'hem enviat fa poc. Revisa el correu o torna-ho a provar d'aquí a uns minuts.",
+    "confirmationAlready": "El teu correu ja està confirmat.",
+    "confirmationError": "No s'ha pogut enviar l'enllaç. Torna-ho a provar."
   },
   "orders": {
     "backToAccount": "Tornar al meu compte",
@@ -670,5 +678,21 @@
     "Black": "Negre",
     "Gold": "Daurat",
     "Silver": "Platejat"
+  },
+  "emailConfirm": {
+    "title": "Confirmar el correu",
+    "instructions": "Prem el botó per confirmar que aquest correu és teu.",
+    "confirm": "Confirmar el meu correu",
+    "loading": "Confirmant…",
+    "success": "Fet! El teu correu està confirmat.",
+    "invalidLink": "L'enllaç no és vàlid o està incomplet.",
+    "error": "No s'ha pogut confirmar el correu. Potser l'enllaç ha caducat: demana'n un altre des de El meu compte.",
+    "changeTitle": "Confirmar el nou correu",
+    "changeInstructions": "Prem el botó per canviar el correu del teu compte a {{email}}.",
+    "changeConfirm": "Confirmar el canvi",
+    "changeSuccess": "Fet! El correu del teu compte ara és {{email}}.",
+    "changeError": "No s'ha pogut canviar el correu. Potser l'enllaç ha caducat: torna a demanar el canvi des de El meu compte.",
+    "goToAccount": "Anar a El meu compte",
+    "backToHome": "Tornar a la botiga"
   }
 }

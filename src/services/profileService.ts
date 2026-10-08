@@ -10,16 +10,24 @@ export const updateProfile = async (data: { name: string; phone?: string; taxId?
   await apiClient.put('/storefront/profile', data);
 };
 
-// Both rotate the account's security stamp on the backend, which invalidates the current token —
-// so they return a fresh one to keep this session signed in (none for a guest's email change).
+// Rotates the account's security stamp on the backend, which invalidates the current token —
+// so it returns a fresh one to keep this session signed in.
 export const changePassword = async (currentPassword: string, newPassword: string): Promise<AuthResponse> => {
   const res = await apiClient.put('/storefront/profile/password', { currentPassword, newPassword });
   return res.data;
 };
 
-export const updateEmail = async (newEmail: string, currentPassword?: string): Promise<AuthResponse | null> => {
+/** A registered customer's change only applies once they click the link emailed to the new
+ *  address (pendingConfirmation); a guest's applies straight away. */
+export const updateEmail = async (newEmail: string, currentPassword?: string): Promise<{ pendingConfirmation: boolean }> => {
   const res = await apiClient.put('/storefront/profile/email', { newEmail, currentPassword });
-  return res.data || null;
+  return { pendingConfirmation: !!res.data?.pendingConfirmation };
+};
+
+/** "Resend the link" in Mi cuenta: sent is false when one went out moments ago. */
+export const resendEmailConfirmation = async (): Promise<{ sent: boolean; alreadyConfirmed: boolean }> => {
+  const res = await apiClient.post('/storefront/profile/email/confirmation');
+  return { sent: !!res.data?.sent, alreadyConfirmed: !!res.data?.alreadyConfirmed };
 };
 
 export const updatePreferredLanguage = async (languageCode: string): Promise<void> => {
