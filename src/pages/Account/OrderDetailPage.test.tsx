@@ -74,6 +74,31 @@ describe('OrderDetailPage', () => {
     expect(screen.getByText('orderDetail.free')).toBeInTheDocument();
   });
 
+  // The page must add up: lines − coupon + shipping + recargo = total, and what was refunded.
+  it('shows the coupon, the recargo and the refunded amount', async () => {
+    getOrderDetail.mockResolvedValue(order({ couponCode: 'SAVE10', couponDiscountAmount: 10, recargoEquivalenciaAmount: 2.6, refundedAmount: 5 }));
+    renderDetail();
+
+    expect(await screen.findByText('orderDetail.coupon')).toBeInTheDocument();
+    expect(screen.getByText('−10,00 €')).toBeInTheDocument();
+    expect(screen.getByText('orderDetail.recargo')).toBeInTheDocument();
+    expect(screen.getByText('2,60 €')).toBeInTheDocument();
+    expect(screen.getByText('orderDetail.refunded')).toBeInTheDocument();
+    expect(screen.getByText('5,00 €')).toBeInTheDocument();
+  });
+
+  it('offers the invoice of a cancelled order only if it had been issued', async () => {
+    getOrderDetail.mockResolvedValue(order({ status: 'Cancelled', hasInvoice: true }));
+    const { unmount } = renderDetail();
+    expect(await screen.findByText('orderDetail.downloadInvoice')).toBeInTheDocument();
+    unmount();
+
+    getOrderDetail.mockResolvedValue(order({ status: 'Cancelled', hasInvoice: false }));
+    renderDetail();
+    await screen.findByText('Tela azul');
+    expect(screen.queryByText('orderDetail.downloadInvoice')).not.toBeInTheDocument();
+  });
+
   it('renders the shipping address block only when present', async () => {
     getOrderDetail.mockResolvedValue(order({
       shippingAddress: { recipientName: 'Jane', street: 'Calle 1', city: 'Madrid', postalCode: '28001', country: 'ES' },
