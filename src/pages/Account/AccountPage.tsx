@@ -573,11 +573,13 @@ const AccountPage: React.FC = () => {
             <AddressAutocomplete
               value={addrForm.street ?? ''}
               onChange={street => updateAddr({ street })}
+              // The picked address replaces the old one's parts: a part Google doesn't know stays
+              // empty (and is asked for on save) rather than keeping the previous address's.
               onSelect={a => updateAddr({
                 street: a.street,
-                postalCode: a.postalCode || addrForm.postalCode,
-                city: a.city || addrForm.city,
-                province: a.province || addrForm.province,
+                postalCode: a.postalCode,
+                city: a.city,
+                province: a.province,
                 // Only a country the shop ships to; otherwise keep the one already chosen.
                 country: countries.some(c => c.isoCode === a.country) ? a.country : addrForm.country,
               })}

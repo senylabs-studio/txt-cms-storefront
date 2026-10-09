@@ -101,6 +101,14 @@ const PageCatalogPage: React.FC = () => {
   const [items, setItems] = useState<StorefrontPageItem[]>([]);
   const [loadingMore, setLoadingMore] = useState(false);
   const [loadMoreError, setLoadMoreError] = useState(false);
+  // Pages left to fetch, by the server's page count — not by comparing the count of listed items
+  // with totalItems: if the catalog shifts mid-session (a product added, a price or an offer
+  // changed), a later page repeats one already listed, the count never catches up and the
+  // auto-load would keep asking for empty pages past the end.
+  const [moreToLoad, setMoreToLoad] = useState(false);
+  // Also as a ref: an observer callback from an earlier render must not load past the end.
+  const moreToLoadRef = useRef(false);
+  const setMore = (value: boolean) => { moreToLoadRef.current = value; setMoreToLoad(value); };
   // What `items` holds: for which slug/view/filters/language, and how many pages. "Cargar más"
   // updates ?pagina= itself, so the load below must not fetch those pages again.
   const listedRef = useRef({ key: '', pages: 0 });
@@ -169,6 +177,7 @@ const PageCatalogPage: React.FC = () => {
         }
         setPageDetail(data);
         setItems(data.items);
+        setMore(pages < data.totalPages);
         // Only a phone's list grows by pages; a desktop page must never pass for one.
         listedRef.current = isMobile ? { key: listKey, pages } : { key: '', pages: 0 };
         if (isMobile && pages !== currentPage) updateParams(p => p.set('pagina', String(pages)), true);
@@ -232,7 +241,7 @@ const PageCatalogPage: React.FC = () => {
   // A ref as well as the state: the observer can fire again before a re-render shows loadingMore.
   const loadingMoreRef = useRef(false);
   const loadMore = () => {
-    if (!slug || loadingMoreRef.current) return;
+    if (!slug || loadingMoreRef.current || !moreToLoadRef.current) return;
     loadingMoreRef.current = true;
     const generation = loadGeneration.current;
     const next = listedRef.current.pages + 1;
@@ -247,6 +256,7 @@ const PageCatalogPage: React.FC = () => {
           return [...prev, ...data.items.filter(i => !listed.has(i.variantId))];
         });
         listedRef.current = { key: listKey, pages: next };
+        setMore(next < data.totalPages);
         // Replace, not push: back should leave the list, not unload it a page at a time.
         updateParams(p => p.set('pagina', String(next)), true);
         setPageDetail(prev => prev && { ...prev, totalItems: data.totalItems, totalPages: data.totalPages });
@@ -424,7 +434,7 @@ const PageCatalogPage: React.FC = () => {
             )}
 
             {listsItems && (isMobile ? (
-              listed.items.length < pageDetail.totalItems && (
+              moreToLoad && listed.items.length < pageDetail.totalItems && (
                 <div ref={autoLoad ? setSentinel : undefined} className="d-flex flex-column align-items-center gap-2 mt-4">
                   {loadMoreError && (
                     <Alert variant="danger" className="mb-0 py-2 text-center">{t('catalog.loadMore.error')}</Alert>

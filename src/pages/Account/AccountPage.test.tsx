@@ -18,6 +18,20 @@ vi.mock('../../components/Layout/MainLayout', () => ({
   default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
+// The street field as a plain input plus a button that "picks" a Google suggestion.
+const picked = vi.hoisted(() => ({ address: { street: 'Carrer Gran, 5', postalCode: '', city: 'Barcelona', province: '', country: 'ES' } }));
+vi.mock('../../components/common/AddressAutocomplete/AddressAutocomplete', () => ({
+  default: ({ value, onChange, onSelect, isInvalid, feedback }: {
+    value: string; onChange: (v: string) => void; onSelect: (a: typeof picked.address) => void; isInvalid?: boolean; feedback?: React.ReactNode;
+  }) => (
+    <>
+      <input className={`form-control${isInvalid ? ' is-invalid' : ''}`} value={value} onChange={e => onChange(e.target.value)} />
+      {feedback}
+      <button type="button" onClick={() => onSelect(picked.address)}>pick-suggestion</button>
+    </>
+  ),
+}));
+
 const { getProfile, updateProfile, changePassword, addAddress, updateAddress, deleteAddress, downloadMyDataExport, requestAccountDeletion, updateNewsletterSubscription, updateEmail, resendEmailConfirmation } = vi.hoisted(() => ({
   updateNewsletterSubscription: vi.fn(),
   updateEmail: vi.fn(),
@@ -157,6 +171,23 @@ describe('AccountPage', () => {
     fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'account.save' }));
 
     await waitFor(() => expect(updateAddress).toHaveBeenCalledWith(1, expect.objectContaining({ alias: 'Casa' })));
+  });
+
+  // A suggestion Google returns without a post code or province must not keep the old
+  // address's: Barcelona with Madrid's 28001 would be a mixed address on the label.
+  it('picking a suggestion replaces post code, city and province, even with blanks', async () => {
+    renderAccount();
+    await screen.findByDisplayValue('Jane');
+    fireEvent.click(document.querySelectorAll('.border.rounded button')[0]);
+    const dialog = screen.getByRole('dialog');
+    expect(within(dialog).getByDisplayValue('28001')).toBeInTheDocument();
+
+    fireEvent.click(within(dialog).getByRole('button', { name: 'pick-suggestion' }));
+
+    expect(within(dialog).getByDisplayValue('Carrer Gran, 5')).toBeInTheDocument();
+    expect(within(dialog).getByDisplayValue('Barcelona')).toBeInTheDocument();
+    expect(within(dialog).queryByDisplayValue('28001')).not.toBeInTheDocument();
+    expect(within(dialog).queryByDisplayValue('Madrid')).not.toBeInTheDocument();
   });
 
   it('shows a generic error in the modal when saving an address fails without axios details', async () => {

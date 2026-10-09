@@ -232,6 +232,38 @@ describe('PageCatalogPage cargar más (phone)', () => {
     }
   });
 
+  // The catalog shifted mid-session: page 2 repeats a product already listed, so the count
+  // never reaches totalItems. Past the last page there's nothing more to ask for.
+  it('stops auto-loading after the last page even when the count never catches up', async () => {
+    let fire: (() => void) | undefined;
+    const original = window.IntersectionObserver;
+    window.IntersectionObserver = class {
+      constructor(cb: (e: { isIntersecting: boolean }[]) => void) { fire = () => cb([{ isIntersecting: true }]); }
+      observe() {}
+      disconnect() {}
+    } as unknown as typeof IntersectionObserver;
+    try {
+      const shifted = (page: number) => pageDetail({
+        type: 'Category', allProductsCount: 4, totalItems: 4, totalPages: 2, currentPage: page,
+        items: (page === 1 ? [card(1), card(2)] : page === 2 ? [card(2), card(3)] : []) as never[],
+      });
+      getPageBySlug.mockReset().mockImplementation((_s: string, page: number) => Promise.resolve(shifted(page)));
+      renderAll();
+      await screen.findByTestId('variant-card-2');
+
+      fire!();
+      expect(await screen.findByTestId('variant-card-3')).toBeInTheDocument();
+      await new Promise(r => setTimeout(r, 0));
+      fire!();
+      await new Promise(r => setTimeout(r, 0));
+
+      expect(getPageBySlug).toHaveBeenCalledTimes(2);
+      expect(screen.queryByRole('button', { name: /catalog\.loadMore/ })).not.toBeInTheDocument();
+    } finally {
+      window.IntersectionObserver = original;
+    }
+  });
+
   it('keeps what is listed and says so when loading more fails', async () => {
     getPageBySlug.mockReset().mockImplementation((_s: string, page: number) =>
       page === 1 ? Promise.resolve(pageOf(1)) : Promise.reject(new Error('network')));
