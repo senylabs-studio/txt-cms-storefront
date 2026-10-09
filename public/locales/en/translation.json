@@ -229,7 +229,8 @@
     "confirmWithGiftCard": "Place order",
     "coveredByGiftCard": "Your gift card covers the whole order: there's nothing more to pay.",
     "confirmFree": "Confirm order",
-    "nothingToPay": "There is nothing to pay: the order is placed when you press the button."
+    "nothingToPay": "There is nothing to pay: the order is placed when you press the button.",
+    "vatExempt": "No VAT (shipped outside the EU VAT area: export)"
   },
   "checkoutSuccess": {
     "title": "Order received!",

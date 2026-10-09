@@ -229,7 +229,8 @@
     "confirmWithGiftCard": "Confirmar pedido",
     "coveredByGiftCard": "Tu tarjeta regalo cubre todo el pedido: no tienes que pagar nada más.",
     "confirmFree": "Confirmar pedido",
-    "nothingToPay": "No tienes que pagar nada: el pedido se confirma al pulsar el botón."
+    "nothingToPay": "No tienes que pagar nada: el pedido se confirma al pulsar el botón.",
+    "vatExempt": "IVA no aplicable (envío fuera del territorio IVA: exportación)"
   },
   "checkoutSuccess": {
     "title": "¡Pedido recibido!",

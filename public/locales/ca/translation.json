@@ -229,7 +229,8 @@
     "confirmWithGiftCard": "Confirmar la comanda",
     "coveredByGiftCard": "La teva targeta regal cobreix tota la comanda: no has de pagar res més.",
     "confirmFree": "Confirmar la comanda",
-    "nothingToPay": "No has de pagar res: la comanda es confirma en prémer el botó."
+    "nothingToPay": "No has de pagar res: la comanda es confirma en prémer el botó.",
+    "vatExempt": "IVA no aplicable (enviament fora del territori IVA: exportació)"
   },
   "checkoutSuccess": {
     "title": "Comanda rebuda!",

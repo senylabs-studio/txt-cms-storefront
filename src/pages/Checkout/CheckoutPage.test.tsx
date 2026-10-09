@@ -129,6 +129,22 @@ describe('CheckoutPage', () => {
     await waitFor(() => expect(screen.getAllByText('20,00 €').length).toBeGreaterThan(0));
   });
 
+  // Canarias, Ceuta, Melilla, non-EU: the server charges each amount without VAT (20 → 16,53,
+  // shipping 5 → 4,13) — the summary must show that total, not the VAT-inclusive 25 €.
+  it('takes the VAT off the total when the address is outside the VAT area', async () => {
+    mockCart.cart = cartWithItems();
+    const p = profile();
+    p.addresses[0] = { ...p.addresses[0], city: 'Las Palmas', postalCode: '35001' };
+    getProfile.mockResolvedValue(p);
+    getApplicableShippingRate.mockResolvedValue({ ...validShippingRate, vatExempt: true, vatPercent: 21 });
+    render(<CheckoutPage />);
+
+    expect(await screen.findByText('checkout.vatExempt')).toBeInTheDocument();
+    await waitFor(() => expect(getApplicableShippingRate).toHaveBeenCalledWith('ES', 20, '35001'));
+    expect(screen.getByText('−4,34 €')).toBeInTheDocument();
+    expect(screen.getByText('20,66 €')).toBeInTheDocument();
+  });
+
   it('submits the Redsys form automatically once checkout() succeeds', async () => {
     mockCart.cart = cartWithItems();
     checkout.mockResolvedValue(checkoutResponse);

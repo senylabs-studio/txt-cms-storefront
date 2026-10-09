@@ -64,7 +64,7 @@ const CheckoutPage: React.FC = () => {
     let cancelled = false;
     const cartSubtotal = cart.items.reduce((sum, i) => sum + i.subtotal, 0);
     setShippingLoading(true);
-    getApplicableShippingRate(addr.country, cartSubtotal)
+    getApplicableShippingRate(addr.country, cartSubtotal, addr.postalCode)
       .then(rate => { if (!cancelled) setShippingRate(rate); })
       .finally(() => { if (!cancelled) setShippingLoading(false); });
     // Switching the shipping address twice in quick succession (before the first lookup
@@ -113,7 +113,18 @@ const CheckoutPage: React.FC = () => {
   // what's shown here before redirecting to Redsys.
   const recargoRatio = netAfterDiscount > 0 ? (cart?.recargoEquivalenciaAmount ?? 0) / netAfterDiscount : 0;
   const estimatedRecargo = Math.round((netAfterDiscount + estimatedShipping) * recargoRatio * 100) / 100;
-  const estimatedTotal = netAfterDiscount + estimatedShipping + estimatedRecargo;
+  const grossTotal = netAfterDiscount + estimatedShipping + estimatedRecargo;
+  // Shipped outside the VAT area (Canarias, Ceuta, Melilla, non-EU): charged without VAT and
+  // without recargo. Same per-amount rounding as CheckoutService (VatTerritory.WithoutVat): each
+  // line, the coupon and shipping, so this total is the amount charged.
+  const vatExempt = !!shippingRate?.vatExempt; // no rate (so never exempt) for a gift card purchase
+  const withoutVat = (amount: number) => Math.round(amount / (1 + (shippingRate?.vatPercent ?? 21) / 100) * 100) / 100;
+  const exemptTotal = vatExempt
+    ? Math.round((Math.max(0, (cart?.items ?? []).reduce((sum, i) => sum + withoutVat(i.subtotal), 0) - withoutVat(couponDiscount))
+        + withoutVat(estimatedShipping)) * 100) / 100
+    : 0;
+  const estimatedTotal = vatExempt ? exemptTotal : grossTotal;
+  const vatDeducted = vatExempt ? Math.round((netAfterDiscount + estimatedShipping - exemptTotal) * 100) / 100 : 0;
   // The gift card can also cover the shipping that's only known here: what it covers is the
   // smaller of its free balance and the whole estimate (the server recomputes it exactly).
   const giftCardCovers = cart?.giftCardCode ? Math.min(cart.giftCardAvailable, estimatedTotal) : 0;
@@ -317,7 +328,14 @@ const CheckoutPage: React.FC = () => {
                   </Alert>
                 )}
 
-                {estimatedRecargo > 0 && (
+                {vatExempt && (
+                  <div className="d-flex justify-content-between small text-success mb-2">
+                    <span>{t('checkout.vatExempt')}</span>
+                    <span>−{formatPrice(vatDeducted)}</span>
+                  </div>
+                )}
+
+                {estimatedRecargo > 0 && !vatExempt && (
                   <div className="d-flex justify-content-between small text-muted mb-2">
                     <span>{t('cart.recargoEquivalencia', { percent: cart?.recargoEquivalenciaPercent ?? 0 })}</span>
                     <span>{formatPrice(estimatedRecargo)}</span>

@@ -8,15 +8,19 @@ export interface ApplicableShippingRate {
   isFree: boolean;
   estimatedDaysMin?: number;
   estimatedDaysMax?: number;
+  /** Canarias, Ceuta, Melilla or outside the EU: the order is charged without VAT (export). */
+  vatExempt?: boolean;
+  vatPercent?: number;
 }
 
 export const getApplicableShippingRate = async (
   country: string,
-  cartTotal: number
+  cartTotal: number,
+  postalCode?: string,
 ): Promise<ApplicableShippingRate | null> => {
   try {
     const res = await apiClient.get('/storefront/shipping/applicable', {
-      params: { country, cartTotal },
+      params: { country, cartTotal, postalCode },
     });
     return res.data;
   } catch {
