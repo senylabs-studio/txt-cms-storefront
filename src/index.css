@@ -21,39 +21,41 @@
    others). */
 .sf-price { color: var(--brand-text-color); font-weight: 700; }
 
-/* Bootstrap primary overrides */
+/* Bootstrap primary overrides. Buttons use the darkened brand colour: white text on the brand
+   colour itself (#06b773) is ~2.6:1, unreadable for low-vision users on the shop's main actions
+   (audit 2026-10-09); the darkened one is ~5:1 (WCAG AA), like prices and the emails' buttons. */
 .btn-primary {
-  background-color: var(--brand-color);
-  border-color: var(--brand-color);
+  background-color: var(--brand-text-color);
+  border-color: var(--brand-text-color);
   color: #fff;
 }
 .btn-primary:hover,
 .btn-primary:active,
 .btn-primary:first-child:active,
 :not(.btn-check) + .btn-primary:active {
-  background-color: color-mix(in srgb, var(--brand-color) 85%, black);
-  border-color: color-mix(in srgb, var(--brand-color) 80%, black);
+  background-color: color-mix(in srgb, var(--brand-text-color) 85%, black);
+  border-color: color-mix(in srgb, var(--brand-text-color) 80%, black);
   color: #fff;
 }
 .btn-primary:focus-visible {
-  background-color: color-mix(in srgb, var(--brand-color) 85%, black);
-  border-color: color-mix(in srgb, var(--brand-color) 80%, black);
+  background-color: color-mix(in srgb, var(--brand-text-color) 85%, black);
+  border-color: color-mix(in srgb, var(--brand-text-color) 80%, black);
   box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--brand-color) 35%, transparent);
 }
 .btn-primary:disabled,
 .btn-primary.disabled {
-  background-color: var(--brand-color);
-  border-color: var(--brand-color);
+  background-color: var(--brand-text-color);
+  border-color: var(--brand-text-color);
 }
 .btn-outline-primary {
-  color: var(--brand-color);
-  border-color: var(--brand-color);
+  color: var(--brand-text-color);
+  border-color: var(--brand-text-color);
 }
 .btn-outline-primary:hover,
 .btn-outline-primary:active,
 .btn-outline-primary:first-child:active {
-  background-color: var(--brand-color);
-  border-color: var(--brand-color);
+  background-color: var(--brand-text-color);
+  border-color: var(--brand-text-color);
   color: #fff;
 }
 .btn-outline-primary:focus-visible {

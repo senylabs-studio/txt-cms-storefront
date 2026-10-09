@@ -49,7 +49,8 @@ const BannerSlideContent: React.FC<{ slide: HomeBannerSlide }> = ({ slide }) => 
 
   return (
     <div className="home-banner-overlay banner-slide-content" style={overlayStyle}>
-      {slide.title && <h1 className="home-banner-title">{slide.title}</h1>}
+      {/* h2: every slide has a title, and a page has one h1 (the shop's name, below). */}
+      {slide.title && <h2 className="home-banner-title">{slide.title}</h2>}
       {slide.subtitle && <p className="home-banner-subtitle" style={subtitleMarginForAlign(slide.textAlign)}>{slide.subtitle}</p>}
       {/* Admin-authored URL (may be internal or external) — plain <a>, not <Link>, which
           resolves any absolute URL as an app-relative pathname and silently breaks it. Matches
@@ -119,13 +120,13 @@ const ImageGridBlock: React.FC<{ config: HomeImageGridBlockConfig }> = ({ config
               // PageBlockRenderer's Gallery/Image blocks (the equivalent Page-block field).
               <a {...blockLinkProps(img.linkUrl)} className="d-block">
                 <div className="home-image-grid-item">
-                  <img src={img.imageUrl} alt={img.caption ?? ''} className="w-100 h-100 object-fit-cover" />
+                  <img src={img.imageUrl} alt={img.caption ?? ''} className="w-100 h-100 object-fit-cover" loading="lazy" decoding="async" />
                   {img.caption && <div className="home-image-grid-caption">{img.caption}</div>}
                 </div>
               </a>
             ) : (
               <div className="home-image-grid-item">
-                <img src={img.imageUrl} alt={img.caption ?? ''} className="w-100 h-100 object-fit-cover" />
+                <img src={img.imageUrl} alt={img.caption ?? ''} className="w-100 h-100 object-fit-cover" loading="lazy" decoding="async" />
                 {img.caption && <div className="home-image-grid-caption">{img.caption}</div>}
               </div>
             )}
@@ -186,7 +187,7 @@ const ImageTextBlock: React.FC<{ config: HomeImageTextBlockConfig }> = ({ config
       <div className={cardClass} style={cardStyle}>
         {hasImage && (
           <div className="home-imagetext-media">
-            <img src={config.imageUrl} alt="" />
+            <img src={config.imageUrl} alt="" loading="lazy" decoding="async" />
           </div>
         )}
         <div className={`home-imagetext-body align-${align}`} style={textStyle}>
@@ -369,6 +370,7 @@ const LandingPage: React.FC = () => {
 
   return (
     <MainLayout>
+      <h1 className="visually-hidden">{siteName}</h1>
       {blocks.map(block => <BlockRenderer key={block.id} block={block} />)}
     </MainLayout>
   );

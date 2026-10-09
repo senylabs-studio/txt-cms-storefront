@@ -2,13 +2,15 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Container, Row, Col, Form, Button, Card, Alert, Spinner, Badge } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FaTruck, FaGift } from 'react-icons/fa';
+import { useDocumentMeta } from '../../hooks/useDocumentMeta';
+import { useSiteSettings } from '../../contexts/SiteSettingsContext';
+import { FaTruck, FaGift, FaStore } from 'react-icons/fa';
 import MainLayout from '../../components/Layout/MainLayout';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { checkout } from '../../services/cartService';
 import { getProfile } from '../../services/profileService';
-import { getApplicableShippingRate, type ApplicableShippingRate } from '../../services/shippingService';
+import { getShippingOptions, type ApplicableShippingRate } from '../../services/shippingService';
 import { getApiErrorMessage } from '../../utils/apiError';
 import type { CustomerAddress, CheckoutResponse, CheckoutRequest } from '../../types';
 import PayPalCheckoutButton from './PayPalCheckoutButton';
@@ -17,6 +19,9 @@ import { cartItemName } from '../../utils/giftCard';
 
 const CheckoutPage: React.FC = () => {
   const { t } = useTranslation();
+  const { siteName, companyAddress, companyPostalCode, companyCity } = useSiteSettings();
+  // The tab title: this screen's, not the previous page's.
+  useDocumentMeta(`${t('checkout.title')} — ${siteName}`);
   const { cart, fetchCart } = useCart();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -29,7 +34,9 @@ const CheckoutPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [paypalBusy, setPaypalBusy] = useState(false);
   const [error, setError] = useState('');
-  const [shippingRate, setShippingRate] = useState<ApplicableShippingRate | null | undefined>(undefined);
+  // Options for the chosen address (null = none covers it, undefined = not looked up yet).
+  const [shippingOptions, setShippingOptions] = useState<ApplicableShippingRate[] | null | undefined>(undefined);
+  const [chosenRateId, setChosenRateId] = useState<number | undefined>();
   const [shippingLoading, setShippingLoading] = useState(false);
 
   // Redsys redirect state
@@ -47,26 +54,33 @@ const CheckoutPage: React.FC = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps -- one-off checkout bootstrap per auth state; fetchCart/navigate/t don't change what's loaded
   }, [isAuthenticated]);
 
-  // Fetch shipping rate whenever shipping address or cart changes
+  // Fetch the shipping options whenever the shipping address or the cart changes (the price
+  // depends on the cart's weight and total, worked out server-side).
   useEffect(() => {
     if (!shippingId || !cart?.items?.length || cart.isGiftCardPurchase) {
-      setShippingRate(undefined);
+      setShippingOptions(undefined);
       return;
     }
-    const addr = addresses.find(a => a.id === shippingId);
-    if (!addr?.country) { setShippingRate(undefined); return; }
-
     let cancelled = false;
-    const cartSubtotal = cart.items.reduce((sum, i) => sum + i.subtotal, 0);
     setShippingLoading(true);
-    getApplicableShippingRate(addr.country, cartSubtotal)
-      .then(rate => { if (!cancelled) setShippingRate(rate); })
+    getShippingOptions(shippingId)
+      .then(options => {
+        if (cancelled) return;
+        setShippingOptions(options.length ? options : null);
+        // Keep the customer's choice while it's still offered; else the default delivery.
+        setChosenRateId(prev => options.some(o => o.id === prev) ? prev : (options.find(o => !o.isPickup) ?? options[0])?.id);
+      })
       .finally(() => { if (!cancelled) setShippingLoading(false); });
     // Switching the shipping address twice in quick succession (before the first lookup
-    // resolves) must not let the slower, now-stale response overwrite the rate for the address
-    // actually selected now — same class of stale-response bug this codebase has hit before.
+    // resolves) must not let the slower, now-stale response overwrite the options for the
+    // address actually selected now — same class of stale-response bug this codebase has hit before.
     return () => { cancelled = true; };
-  }, [shippingId, addresses, cart]);
+  }, [shippingId, cart]);
+
+  // The option in use: null when the address has none (or only pickup and nothing chosen).
+  const shippingRate: ApplicableShippingRate | null | undefined = shippingOptions === undefined
+    ? undefined
+    : shippingOptions?.find(o => o.id === chosenRateId) ?? null;
 
   // Auto-submit the Redsys form once we have the data
   useEffect(() => {
@@ -108,19 +122,34 @@ const CheckoutPage: React.FC = () => {
   // what's shown here before redirecting to Redsys.
   const recargoRatio = netAfterDiscount > 0 ? (cart?.recargoEquivalenciaAmount ?? 0) / netAfterDiscount : 0;
   const estimatedRecargo = Math.round((netAfterDiscount + estimatedShipping) * recargoRatio * 100) / 100;
-  const estimatedTotal = netAfterDiscount + estimatedShipping + estimatedRecargo;
+  const grossTotal = netAfterDiscount + estimatedShipping + estimatedRecargo;
+  // Shipped outside the VAT area (Canarias, Ceuta, Melilla, non-EU): charged without VAT and
+  // without recargo. Same per-amount rounding as CheckoutService (VatTerritory.WithoutVat): each
+  // line, the coupon and shipping, so this total is the amount charged.
+  const vatExempt = !!shippingRate?.vatExempt; // no rate (so never exempt) for a gift card purchase
+  const withoutVat = (amount: number) => Math.round(amount / (1 + (shippingRate?.vatPercent ?? 21) / 100) * 100) / 100;
+  const exemptTotal = vatExempt
+    ? Math.round((Math.max(0, (cart?.items ?? []).reduce((sum, i) => sum + withoutVat(i.subtotal), 0) - withoutVat(couponDiscount))
+        + withoutVat(estimatedShipping)) * 100) / 100
+    : 0;
+  const estimatedTotal = vatExempt ? exemptTotal : grossTotal;
+  const vatDeducted = vatExempt ? Math.round((netAfterDiscount + estimatedShipping - exemptTotal) * 100) / 100 : 0;
   // The gift card can also cover the shipping that's only known here: what it covers is the
   // smaller of its free balance and the whole estimate (the server recomputes it exactly).
   const giftCardCovers = cart?.giftCardCode ? Math.min(cart.giftCardAvailable, estimatedTotal) : 0;
   const amountDue = Math.round((estimatedTotal - giftCardCovers) * 100) / 100;
   const isGiftCardPurchase = cart?.isGiftCardPurchase ?? false;
-  const coveredByGiftCard = !!cart?.giftCardCode && amountDue <= 0;
+  // Nothing to pay: the gift card covers it all, or a coupon brought the order to 0 €. The order is
+  // placed by the button below; PayPal can't take a 0 € payment.
+  const nothingToPay = amountDue <= 0;
+  const coveredByGiftCard = !!cart?.giftCardCode && nothingToPay;
   // Gift cards are emailed: no address (and no shipping rate) needed to buy them.
   const addressReady = isGiftCardPurchase || (!!shippingId && !shippingLoading && shippingRate !== null);
 
   // Same request for both payment routes (Redsys page / PayPal button).
   const buildCheckoutRequest = (): CheckoutRequest => ({
     shippingAddressId: cart?.isGiftCardPurchase ? undefined : shippingId,
+    shippingRateId: cart?.isGiftCardPurchase ? undefined : shippingRate?.id,
     billingAddressId: billingId,
     notes: notes || undefined,
     browserAcceptHeader: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -205,6 +234,32 @@ const CheckoutPage: React.FC = () => {
                       </Form.Select>
                     </Form.Group>
 
+                    {shippingOptions && shippingOptions.length > 1 && (
+                      <Form.Group className="mb-3" role="radiogroup" aria-label={t('checkout.shippingMethod')}>
+                        <Form.Label className="fw-semibold d-block">{t('checkout.shippingMethod')}</Form.Label>
+                        {shippingOptions.map(o => (
+                          <Form.Check
+                            key={o.id}
+                            type="radio"
+                            id={`shipping-option-${o.id}`}
+                            name="shipping-option"
+                            checked={o.id === chosenRateId}
+                            onChange={() => setChosenRateId(o.id)}
+                            label={<>
+                              {o.isPickup ? <FaStore className="me-1" aria-hidden /> : <FaTruck className="me-1" aria-hidden />}
+                              {o.name} — {o.isFree || o.shippingCost === 0 ? t('checkout.free') : formatPrice(o.shippingCost)}
+                            </>}
+                          />
+                        ))}
+                      </Form.Group>
+                    )}
+                    {shippingRate?.isPickup && (
+                      <Alert variant="info" className="py-2 small">
+                        <FaStore className="me-1" aria-hidden />
+                        {t('checkout.pickupAt', { address: [companyAddress, [companyPostalCode, companyCity].filter(Boolean).join(' ')].filter(Boolean).join(', ') || siteName })}
+                      </Alert>
+                    )}
+
                     <Form.Group className="mb-3">
                       <Form.Label className="fw-semibold">{t('checkout.billingAddress')}</Form.Label>
                       <Form.Select value={billingId ?? ''} onChange={e => setBillingId(Number(e.target.value))}>
@@ -239,11 +294,12 @@ const CheckoutPage: React.FC = () => {
                 >
                   {loading
                     ? <><Spinner size="sm" animation="border" className="me-2" />{t('checkout.processing')}</>
-                    : coveredByGiftCard ? t('checkout.confirmWithGiftCard') : t('checkout.proceed')}
+                    : coveredByGiftCard ? t('checkout.confirmWithGiftCard') : nothingToPay ? t('checkout.confirmFree') : t('checkout.proceed')}
                 </Button>
                 {coveredByGiftCard && <div className="small text-success mt-2">{t('checkout.coveredByGiftCard')}</div>}
+                {nothingToPay && !coveredByGiftCard && <div className="small text-success mt-2">{t('checkout.nothingToPay')}</div>}
 
-                {!coveredByGiftCard && (
+                {!nothingToPay && (
                   <PayPalCheckoutButton
                     buildRequest={buildCheckoutRequest}
                     disabled={loading || !addressReady}
@@ -308,7 +364,14 @@ const CheckoutPage: React.FC = () => {
                   </Alert>
                 )}
 
-                {estimatedRecargo > 0 && (
+                {vatExempt && (
+                  <div className="d-flex justify-content-between small text-success mb-2">
+                    <span>{t('checkout.vatExempt')}</span>
+                    <span>−{formatPrice(vatDeducted)}</span>
+                  </div>
+                )}
+
+                {estimatedRecargo > 0 && !vatExempt && (
                   <div className="d-flex justify-content-between small text-muted mb-2">
                     <span>{t('cart.recargoEquivalencia', { percent: cart?.recargoEquivalenciaPercent ?? 0 })}</span>
                     <span>{formatPrice(estimatedRecargo)}</span>

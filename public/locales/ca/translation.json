@@ -45,6 +45,10 @@
     "loginRequired": "Inicia sessió per veure la teva cistella",
     "updateError": "Error en actualitzar la quantitat",
     "removeError": "Error en eliminar el producte",
+    "lessQuantity": "Menys quantitat",
+    "moreQuantity": "Més quantitat",
+    "removeItem": "Treure del carretó",
+    "quantityMetres": "Quantitat (metres)",
     "couponPlaceholder": "Codi de descompte",
     "applyCoupon": "Aplicar",
     "removeCoupon": "Treure",
@@ -223,7 +227,12 @@
     "paypalError": "No s'ha pogut completar el pagament amb PayPal. No s'ha fet cap càrrec.",
     "giftCardDelivery": "Les targetes regal s'envien per correu en confirmar el pagament: no cal adreça d'enviament.",
     "confirmWithGiftCard": "Confirmar la comanda",
-    "coveredByGiftCard": "La teva targeta regal cobreix tota la comanda: no has de pagar res més."
+    "coveredByGiftCard": "La teva targeta regal cobreix tota la comanda: no has de pagar res més.",
+    "confirmFree": "Confirmar la comanda",
+    "nothingToPay": "No has de pagar res: la comanda es confirma en prémer el botó.",
+    "vatExempt": "IVA no aplicable (enviament fora del territori IVA: exportació)",
+    "shippingMethod": "Forma d'enviament",
+    "pickupAt": "Recolliràs la comanda a la botiga: {{address}}. T'avisarem quan estigui a punt."
   },
   "checkoutSuccess": {
     "title": "Comanda rebuda!",
@@ -277,6 +286,7 @@
     "street": "Carrer",
     "streetSearchPlaceholder": "Comença a escriure el carrer i el número",
     "streetSuggestionsError": "No s'han pogut carregar suggeriments; escriu l'adreça a mà.",
+    "streetNoSuggestions": "No hi ha suggeriments per a aquesta adreça; pots escriure-la a mà.",
     "postalCode": "CP",
     "city": "Ciutat",
     "province": "Província",
@@ -387,6 +397,9 @@
     "cancelSuccess": "Comanda cancel·lada correctament.",
     "returnSuccess": "Sol·licitud de devolució enviada.",
     "giftCardPaid": "Pagat amb la targeta regal {{code}}",
+    "coupon": "Cupó {{code}}",
+    "recargo": "Recàrrec d'equivalència",
+    "refunded": "Reemborsat",
     "amountPaid": "Pagat amb el teu mètode de pagament",
     "giftCardsBought": "Targetes regal",
     "downloadLetter": "Descarregar la carta",
@@ -584,6 +597,7 @@
     "savePreferences": "Desar configuració"
   },
   "common": {
+    "selectOption": "Selecciona una opció",
     "fieldRequired": "Aquest camp és obligatori.",
     "unexpectedError": "S'ha produït un error inesperat. Torna-ho a provar.",
     "networkError": "No s'ha pogut connectar. Comprova la connexió i torna-ho a provar.",

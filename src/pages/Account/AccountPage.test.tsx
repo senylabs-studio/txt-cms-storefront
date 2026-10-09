@@ -7,6 +7,7 @@ import { ToastProvider } from '../../contexts/ToastContext';
 import GlobalToast from '../../components/common/GlobalToast/GlobalToast';
 import type { StorefrontProfile } from '../../types';
 
+vi.mock('../../contexts/SiteSettingsContext', () => ({ useSiteSettings: () => ({ siteName: 'Shop' }) }));
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'es' } }),
 }));
@@ -16,6 +17,20 @@ vi.mock('../../contexts/AuthContext', () => ({ useAuth: () => mockAuth }));
 
 vi.mock('../../components/Layout/MainLayout', () => ({
   default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}));
+
+// The street field as a plain input plus a button that "picks" a Google suggestion.
+const picked = vi.hoisted(() => ({ address: { street: 'Carrer Gran, 5', postalCode: '', city: 'Barcelona', province: '', country: 'ES' } }));
+vi.mock('../../components/common/AddressAutocomplete/AddressAutocomplete', () => ({
+  default: ({ value, onChange, onSelect, isInvalid, feedback }: {
+    value: string; onChange: (v: string) => void; onSelect: (a: typeof picked.address) => void; isInvalid?: boolean; feedback?: React.ReactNode;
+  }) => (
+    <>
+      <input className={`form-control${isInvalid ? ' is-invalid' : ''}`} value={value} onChange={e => onChange(e.target.value)} />
+      {feedback}
+      <button type="button" onClick={() => onSelect(picked.address)}>pick-suggestion</button>
+    </>
+  ),
 }));
 
 const { getProfile, updateProfile, changePassword, addAddress, updateAddress, deleteAddress, downloadMyDataExport, requestAccountDeletion, updateNewsletterSubscription, updateEmail, resendEmailConfirmation } = vi.hoisted(() => ({
@@ -127,6 +142,24 @@ describe('AccountPage', () => {
     expect(screen.queryByText('account.newAddress')).not.toBeInTheDocument();
   });
 
+  it('clears a field\'s "required" message as soon as it is filled in', async () => {
+    getProfile.mockResolvedValue(profile());
+    renderAccount();
+    await screen.findByDisplayValue('Jane');
+
+    fireEvent.click(screen.getByText('account.add'));
+    const dialog = screen.getByRole('dialog');
+    fireEvent.click(within(dialog).getByRole('button', { name: 'account.save' }));
+    expect(within(dialog).getAllByText('common.fieldRequired')).toHaveLength(5);
+
+    const [alias, , street] = within(dialog).getAllByRole('textbox');
+    fireEvent.change(alias, { target: { value: 'Casa' } });
+    fireEvent.change(street, { target: { value: 'Calle Mayor, 10' } });
+    expect(within(dialog).getAllByText('common.fieldRequired')).toHaveLength(3);
+    expect(alias).not.toHaveClass('is-invalid');
+    expect(addAddress).not.toHaveBeenCalled();
+  });
+
   it('opens the edit modal prefilled and updates the address', async () => {
     updateAddress.mockResolvedValue(undefined);
     renderAccount();
@@ -139,6 +172,23 @@ describe('AccountPage', () => {
     fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'account.save' }));
 
     await waitFor(() => expect(updateAddress).toHaveBeenCalledWith(1, expect.objectContaining({ alias: 'Casa' })));
+  });
+
+  // A suggestion Google returns without a post code or province must not keep the old
+  // address's: Barcelona with Madrid's 28001 would be a mixed address on the label.
+  it('picking a suggestion replaces post code, city and province, even with blanks', async () => {
+    renderAccount();
+    await screen.findByDisplayValue('Jane');
+    fireEvent.click(document.querySelectorAll('.border.rounded button')[0]);
+    const dialog = screen.getByRole('dialog');
+    expect(within(dialog).getByDisplayValue('28001')).toBeInTheDocument();
+
+    fireEvent.click(within(dialog).getByRole('button', { name: 'pick-suggestion' }));
+
+    expect(within(dialog).getByDisplayValue('Carrer Gran, 5')).toBeInTheDocument();
+    expect(within(dialog).getByDisplayValue('Barcelona')).toBeInTheDocument();
+    expect(within(dialog).queryByDisplayValue('28001')).not.toBeInTheDocument();
+    expect(within(dialog).queryByDisplayValue('Madrid')).not.toBeInTheDocument();
   });
 
   it('shows a generic error in the modal when saving an address fails without axios details', async () => {

@@ -3,6 +3,9 @@ import { Container, Row, Col, Button, Card, Alert, Form } from 'react-bootstrap'
 import { FaTrash, FaArrowRight, FaTag, FaGift } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useDocumentMeta } from '../../hooks/useDocumentMeta';
+import { useSiteSettings } from '../../contexts/SiteSettingsContext';
+import IconTooltip from '../../components/common/IconTooltip/IconTooltip';
 import MainLayout from '../../components/Layout/MainLayout';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -15,6 +18,9 @@ import type { CartItem } from '../../types';
 
 const CartPage: React.FC = () => {
   const { t } = useTranslation();
+  const { siteName } = useSiteSettings();
+  // The tab title: this screen's, not the previous page's.
+  useDocumentMeta(`${t('cart.title')} — ${siteName}`);
   const { cart, loading, fetchCart, updateItem, removeItem, applyCoupon, removeCoupon, applyGiftCard, removeGiftCard } = useCart();
   const { isAuthenticated } = useAuth();
   const { showToast } = useToast();
@@ -191,9 +197,11 @@ const CartPage: React.FC = () => {
                       )}
                       <Col sm={2} className="text-end mt-2 mt-sm-0">
                         <div className="fw-bold">{formatPrice(item.subtotal)}</div>
-                        <Button size="sm" variant="link" className="text-danger p-0" onClick={() => handleRemove(item.id)} disabled={loading}>
-                          <FaTrash size={12} />
-                        </Button>
+                        <IconTooltip label={t('cart.removeItem')}>
+                          <Button size="sm" variant="link" className="text-danger p-0" aria-label={t('cart.removeItem')} onClick={() => handleRemove(item.id)} disabled={loading}>
+                            <FaTrash size={12} />
+                          </Button>
+                        </IconTooltip>
                       </Col>
                     </Row>
                   </Card.Body>

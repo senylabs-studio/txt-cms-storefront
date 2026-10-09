@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildMeta, injectMeta, cleanText } from './meta.mjs';
+import { buildMeta, injectMeta, cleanText, NOT_FOUND } from './meta.mjs';
 
 const site = { siteName: 'Tejidos Pulido', siteDescription: 'Tu tienda de tejidos de confianza.', logoUrl: 'https://cdn/logo.png' };
 const api = (routes) => async (path) => (path === '/storefront/site-settings' ? site : routes[path] ?? null);
@@ -53,5 +53,33 @@ describe('share preview meta', () => {
   it('does not throw on a malformed percent-escape in the path', async () => {
     const meta = await buildMeta('/guia-de-tejidos%E0', api({}));
     expect(meta.title).toBe('Tejidos Pulido');
+  });
+
+  // Pages that don't exist must answer 404 with noindex, not the home page with 200 (a soft 404
+  // search engines index as a duplicate). "The API didn't answer" (null) is not "doesn't exist".
+  it('marks unknown routes and items the API says don\'t exist as not found', async () => {
+    const missing = api({
+      '/storefront/products/variants/999': NOT_FOUND,
+      '/storefront/pages/no-existe?pageSize=1': NOT_FOUND,
+      '/storefront/products/borrado': NOT_FOUND,
+    });
+    expect((await buildMeta('/variant/999', missing)).notFound).toBe(true);
+    expect((await buildMeta('/no-existe', missing)).notFound).toBe(true);
+    expect((await buildMeta('/product/borrado', missing)).notFound).toBe(true);
+    expect((await buildMeta('/una/ruta/inventada', missing)).notFound).toBe(true);
+    expect((await buildMeta('/variant/abc', missing)).notFound).toBe(true);
+    // Real routes and an API that didn't answer are not 404s.
+    for (const path of ['/', '/cart', '/account/orders/5', '/checkout/success', '/email/confirmar', '/variant/42'])
+      expect((await buildMeta(path, missing)).notFound).toBeFalsy();
+  });
+
+  it('adds the canonical URL, or noindex for a page that doesn\'t exist', () => {
+    const html = '<head><title>x</title>\n<meta name="description" content="x" /></head>';
+    const ok = injectMeta(html, { siteName: 'S', title: 'T', description: 'D', type: 'website' }, 'https://www.tejidospulido.com/patchwork');
+    expect(ok).toContain('<link rel="canonical" href="https://www.tejidospulido.com/patchwork" />');
+    expect(ok).not.toContain('noindex');
+    const missing = injectMeta(html, { siteName: 'S', title: 'T', description: 'D', type: 'website', notFound: true }, 'https://www.tejidospulido.com/x');
+    expect(missing).toContain('<meta name="robots" content="noindex" />');
+    expect(missing).not.toContain('rel="canonical"');
   });
 });

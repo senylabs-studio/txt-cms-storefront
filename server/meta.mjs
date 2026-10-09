@@ -5,6 +5,18 @@
 
 const MAX_DESCRIPTION = 200;
 
+/** What getJson returns when the API answered 404 (as opposed to null: it didn't answer). */
+export const NOT_FOUND = Symbol.for('storefront.notFound');
+
+// The storefront's routes (App.tsx) beyond "/<page-slug>": anything else is a real 404, not the
+// home page with status 200 (a "soft 404" search engines index as a duplicate).
+const KNOWN_TWO = new Set(['account/orders', 'checkout/error', 'checkout/success', 'email/cambio', 'email/confirmar',
+  'guest-access/verify', 'newsletter/confirmar']);
+const isKnownShape = (segments) =>
+  segments.length <= 1
+  || (segments.length === 2 && (['pages', 'product', 'variant'].includes(segments[0]) || KNOWN_TWO.has(segments.join('/'))))
+  || (segments.length === 3 && segments[0] === 'account' && segments[1] === 'orders');
+
 export const escapeHtml = (s) =>
   String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
@@ -43,9 +55,13 @@ export async function buildMeta(pathname, getJson) {
   // A malformed %-escape (hand-typed or mangled link) must not throw: keep that segment raw.
   const segments = pathname.split('/').filter(Boolean).map(safeDecode);
 
+  if (!isKnownShape(segments) || (segments[0] === 'variant' && !/^\d+$/.test(segments[1] ?? '')))
+    return { ...base, notFound: true };
+
   try {
     if (segments[0] === 'variant' && /^\d+$/.test(segments[1] ?? '')) {
       const v = await getJson(`/storefront/products/variants/${segments[1]}`);
+      if (v === NOT_FOUND) return { ...base, notFound: true };
       if (v) return {
         ...base, type: 'product', title: titled(v.name),
         description: cleanText(v.description) || base.description,
@@ -53,6 +69,7 @@ export async function buildMeta(pathname, getJson) {
       };
     } else if (segments[0] === 'product' && segments[1]) {
       const p = await getJson(`/storefront/products/${encodeURIComponent(segments[1])}`);
+      if (p === NOT_FOUND) return { ...base, notFound: true };
       if (p) return {
         ...base, type: 'product', title: titled(p.name),
         description: cleanText(p.description) || base.description,
@@ -61,6 +78,7 @@ export async function buildMeta(pathname, getJson) {
     } else if (segments.length === 1 && !APP_PATHS.has(segments[0]) || (segments[0] === 'pages' && segments[1])) {
       const slug = segments[0] === 'pages' ? segments[1] : segments[0];
       const page = await getJson(`/storefront/pages/${encodeURIComponent(slug)}?pageSize=1`);
+      if (page === NOT_FOUND) return { ...base, notFound: true };
       if (page) return {
         ...base, title: titled(page.name),
         description: cleanText(page.description) || base.description,
@@ -78,9 +96,12 @@ export function safeDecode(segment) {
   try { return decodeURIComponent(segment); } catch { return segment; }
 }
 
-/** Writes the preview into index.html: replaces <title> and the description, adds og:/twitter: tags. */
+/** Writes the preview into index.html: replaces <title> and the description, adds og:/twitter: tags,
+ * the canonical URL, and noindex on a page that doesn't exist. */
 export function injectMeta(html, meta, url) {
   const tags = [
+    meta.notFound ? '<meta name="robots" content="noindex" />' : '',
+    url && !meta.notFound ? `<link rel="canonical" href="${escapeHtml(url)}" />` : '',
     `<meta name="description" content="${escapeHtml(meta.description)}" />`,
     `<meta property="og:site_name" content="${escapeHtml(meta.siteName)}" />`,
     `<meta property="og:type" content="${escapeHtml(meta.type)}" />`,

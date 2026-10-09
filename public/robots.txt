@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://txt-cms-backend-fvaffbc6hdgsb5hs.spaincentral-01.azurewebsites.net/sitemap.xml

@@ -80,6 +80,8 @@ const Header: React.FC = () => {
     <Form className={`header-search ${condensed ? 'header-search--condensed' : ''}`} onSubmit={handleSearch} autoComplete="off">
       <InputGroup>
         <Form.Control
+          type="search"
+          aria-label={t('header.search')}
           placeholder={condensed ? t('header.searchShort') : t('header.search')}
           value={search}
           onChange={e => setSearch(e.target.value)}
@@ -157,7 +159,7 @@ const Header: React.FC = () => {
     <Link to="/" className="brand text-decoration-none">
       {logoUrl
         ? <img src={logoUrl} alt={siteName} className="brand-logo" />
-        : <><span className="brand-txt">TXT</span><span className="brand-cms"> Shop</span></>
+        : <span className="brand-txt">{siteName}</span>
       }
     </Link>
   );

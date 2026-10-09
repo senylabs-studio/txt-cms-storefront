@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { formatPrice } from '../../../utils/pricing';
 import { FaTimes } from 'react-icons/fa';
 import type { PageFilters } from '../../../services/pageService';
 import './ActiveFilters.css';
@@ -27,8 +28,8 @@ const ActiveFilters: React.FC<Props> = ({ filters, onChange }) => {
   const chips: { key: string; label: string; remove: () => void }[] = [];
   const { minPrice, maxPrice } = filters;
   if (minPrice !== undefined || maxPrice !== undefined) {
-    const range = minPrice !== undefined && maxPrice !== undefined ? `${minPrice} € – ${maxPrice} €`
-      : minPrice !== undefined ? t('filters.from', { value: `${minPrice} €` }) : t('filters.upTo', { value: `${maxPrice} €` });
+    const range = minPrice !== undefined && maxPrice !== undefined ? `${formatPrice(minPrice)} – ${formatPrice(maxPrice)}`
+      : minPrice !== undefined ? t('filters.from', { value: formatPrice(minPrice) }) : t('filters.upTo', { value: formatPrice(maxPrice!) });
     chips.push({ key: 'price', label: `${t('filters.price')}: ${range}`, remove: () => without('minPrice', 'maxPrice') });
   }
   if (filters.pattern) chips.push({ key: 'pattern', label: `${t('filters.pattern')}: ${t(`fabricPatterns.${filters.pattern}`)}`, remove: () => without('pattern') });

@@ -3,6 +3,8 @@ import { Container, Row, Col, Card, Form, Button, Alert, Spinner, Badge, Modal }
 import { FaPlus, FaEdit, FaTrash, FaMapMarkerAlt, FaUser, FaLock, FaShieldAlt, FaEnvelope } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useDocumentMeta } from '../../hooks/useDocumentMeta';
+import { useSiteSettings } from '../../contexts/SiteSettingsContext';
 import MainLayout from '../../components/Layout/MainLayout';
 import {
   getProfile, updateProfile, changePassword, updateEmail, resendEmailConfirmation, addAddress, updateAddress, deleteAddress, updateNewsletterSubscription,
@@ -25,6 +27,9 @@ const emptyAddress: Partial<CustomerAddress> = {
 
 const AccountPage: React.FC = () => {
   const { t } = useTranslation();
+  const { siteName } = useSiteSettings();
+  // The tab title: this screen's, not the previous page's.
+  useDocumentMeta(`${t('account.title')} — ${siteName}`);
   const { login, updateUser } = useAuth();
   const { showToast } = useToast();
   const [profile, setProfile] = useState<StorefrontProfile | null>(null);
@@ -193,6 +198,18 @@ const AccountPage: React.FC = () => {
     } finally {
       setPwdSaving(false);
     }
+  };
+
+  // Typing into a field that was flagged by the last save clears that field's message.
+  const updateAddr = (patch: Partial<CustomerAddress>) => {
+    setAddrForm(f => ({ ...f, ...patch }));
+    setAddrFieldErrors(errs => {
+      const fixed = Object.keys(patch).filter(k => errs[k] && String(patch[k as keyof CustomerAddress] ?? '').trim());
+      if (fixed.length === 0) return errs;
+      const rest = { ...errs };
+      fixed.forEach(k => delete rest[k]);
+      return rest;
+    });
   };
 
   const openAddAddr = () => { setAddrForm(emptyAddress); setEditAddrId(null); setAddrError(''); setAddrFieldErrors({}); setShowAddr(true); };
@@ -518,7 +535,7 @@ const AccountPage: React.FC = () => {
                 <Form.Label>{t('account.alias')}</Form.Label>
                 <Form.Control
                   value={addrForm.alias ?? ''}
-                  onChange={e => setAddrForm(f => ({ ...f, alias: e.target.value }))}
+                  onChange={e => updateAddr({ alias: e.target.value })}
                   placeholder={t('account.aliasPlaceholder')}
                   isInvalid={!!addrFieldErrors.alias}
                 />
@@ -530,7 +547,7 @@ const AccountPage: React.FC = () => {
                 <Form.Label>{t('account.recipient')}</Form.Label>
                 <Form.Control
                   value={addrForm.recipientName ?? ''}
-                  onChange={e => setAddrForm(f => ({ ...f, recipientName: e.target.value }))}
+                  onChange={e => updateAddr({ recipientName: e.target.value })}
                   isInvalid={!!addrFieldErrors.recipientName}
                 />
                 <Form.Control.Feedback type="invalid">{addrFieldErrors.recipientName}</Form.Control.Feedback>
@@ -544,7 +561,7 @@ const AccountPage: React.FC = () => {
                 <Form.Label>{t('account.country')}</Form.Label>
                 <Form.Select
                   value={addrForm.country ?? 'ES'}
-                  onChange={e => setAddrForm(f => ({ ...f, country: e.target.value }))}
+                  onChange={e => updateAddr({ country: e.target.value })}
                   isInvalid={!!addrFieldErrors.country}
                 >
                   <option value="">{t('account.selectCountry')}</option>
@@ -560,16 +577,17 @@ const AccountPage: React.FC = () => {
             <Form.Label>{t('account.street')}</Form.Label>
             <AddressAutocomplete
               value={addrForm.street ?? ''}
-              onChange={street => setAddrForm(f => ({ ...f, street }))}
-              onSelect={a => setAddrForm(f => ({
-                ...f,
+              onChange={street => updateAddr({ street })}
+              // The picked address replaces the old one's parts: a part Google doesn't know stays
+              // empty (and is asked for on save) rather than keeping the previous address's.
+              onSelect={a => updateAddr({
                 street: a.street,
-                postalCode: a.postalCode || f.postalCode,
-                city: a.city || f.city,
-                province: a.province || f.province,
+                postalCode: a.postalCode,
+                city: a.city,
+                province: a.province,
                 // Only a country the shop ships to; otherwise keep the one already chosen.
-                country: countries.some(c => c.isoCode === a.country) ? a.country : f.country,
-              }))}
+                country: countries.some(c => c.isoCode === a.country) ? a.country : addrForm.country,
+              })}
               regionCodes={addrForm.country ? [addrForm.country] : []}
               isInvalid={!!addrFieldErrors.street}
               feedback={<Form.Control.Feedback type="invalid">{addrFieldErrors.street}</Form.Control.Feedback>}
@@ -581,7 +599,7 @@ const AccountPage: React.FC = () => {
                 <Form.Label>{t('account.postalCode')}</Form.Label>
                 <Form.Control
                   value={addrForm.postalCode ?? ''}
-                  onChange={e => setAddrForm(f => ({ ...f, postalCode: e.target.value }))}
+                  onChange={e => updateAddr({ postalCode: e.target.value })}
                   isInvalid={!!addrFieldErrors.postalCode}
                 />
                 <Form.Control.Feedback type="invalid">{addrFieldErrors.postalCode}</Form.Control.Feedback>
@@ -592,7 +610,7 @@ const AccountPage: React.FC = () => {
                 <Form.Label>{t('account.city')}</Form.Label>
                 <Form.Control
                   value={addrForm.city ?? ''}
-                  onChange={e => setAddrForm(f => ({ ...f, city: e.target.value }))}
+                  onChange={e => updateAddr({ city: e.target.value })}
                   isInvalid={!!addrFieldErrors.city}
                 />
                 <Form.Control.Feedback type="invalid">{addrFieldErrors.city}</Form.Control.Feedback>
@@ -603,13 +621,13 @@ const AccountPage: React.FC = () => {
             <Col sm={6}>
               <Form.Group className="mb-2">
                 <Form.Label>{t('account.province')}</Form.Label>
-                <Form.Control value={addrForm.province ?? ''} onChange={e => setAddrForm(f => ({ ...f, province: e.target.value }))} />
+                <Form.Control value={addrForm.province ?? ''} onChange={e => updateAddr({ province: e.target.value })} />
               </Form.Group>
             </Col>
             <Col sm={6}>
               <Form.Group className="mb-2">
                 <Form.Label>{t('account.phone')}</Form.Label>
-                <Form.Control value={addrForm.phone ?? ''} onChange={e => setAddrForm(f => ({ ...f, phone: e.target.value }))} />
+                <Form.Control value={addrForm.phone ?? ''} onChange={e => updateAddr({ phone: e.target.value })} />
               </Form.Group>
             </Col>
           </Row>
@@ -617,7 +635,7 @@ const AccountPage: React.FC = () => {
             type="checkbox"
             label={t('account.defaultAddress')}
             checked={addrForm.isDefault ?? false}
-            onChange={e => setAddrForm(f => ({ ...f, isDefault: e.target.checked }))}
+            onChange={e => updateAddr({ isDefault: e.target.checked })}
             className="mt-2"
           />
         </Modal.Body>

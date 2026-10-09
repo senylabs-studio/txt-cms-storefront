@@ -80,7 +80,8 @@ describe('CartDrawer', () => {
     mockCart.cart = cartWithItems();
     renderDrawer();
 
-    const [minusBtn, plusBtn] = screen.getAllByRole('button', { name: '' }).slice(0, 2);
+    const minusBtn = screen.getByRole('button', { name: 'cart.lessQuantity' });
+    const plusBtn = screen.getByRole('button', { name: 'cart.moreQuantity' });
     fireEvent.click(plusBtn);
     expect(mockCart.updateItem).toHaveBeenCalledWith(1, 2.05);
 
@@ -92,7 +93,8 @@ describe('CartDrawer', () => {
     mockCart.cart = cartWithItems({ items: [{ id: 1, productName: 'Tela azul', productCode: 'TA1', originalUnitPrice: 10, unitPrice: 10, quantity: 4, subtotal: 40, availableStock: 20, minQuantity: 2, quantityStep: 2 }] });
     renderDrawer();
 
-    const [minusBtn, plusBtn] = screen.getAllByRole('button', { name: '' }).slice(0, 2);
+    const minusBtn = screen.getByRole('button', { name: 'cart.lessQuantity' });
+    const plusBtn = screen.getByRole('button', { name: 'cart.moreQuantity' });
     fireEvent.click(plusBtn);
     expect(mockCart.updateItem).toHaveBeenCalledWith(1, 6);
 
@@ -104,7 +106,7 @@ describe('CartDrawer', () => {
     mockCart.cart = cartWithItems({ items: [{ id: 1, productName: 'Tela azul', productCode: 'TA1', originalUnitPrice: 10, unitPrice: 10, quantity: 2, subtotal: 20, availableStock: 20, minQuantity: 2, quantityStep: 2 }] });
     renderDrawer();
 
-    const [minusBtn] = screen.getAllByRole('button', { name: '' });
+    const minusBtn = screen.getByRole('button', { name: 'cart.lessQuantity' });
     expect(minusBtn).toBeDisabled();
   });
 
@@ -112,8 +114,7 @@ describe('CartDrawer', () => {
     mockCart.cart = cartWithItems({ items: [{ id: 1, productName: 'Tela azul', productCode: 'TA1', originalUnitPrice: 10, unitPrice: 10, quantity: 5, subtotal: 50, availableStock: 5, minQuantity: 0.3, quantityStep: 0.05 }] });
     renderDrawer();
 
-    const buttons = screen.getAllByRole('button', { name: '' });
-    const plusBtn = buttons[1];
+    const plusBtn = screen.getByRole('button', { name: 'cart.moreQuantity' });
     expect(plusBtn).toBeDisabled();
   });
 
@@ -122,7 +123,7 @@ describe('CartDrawer', () => {
     mockCart.updateItem.mockRejectedValue({ isAxiosError: true, response: { data: { message: 'Stock insuficiente' } } });
     renderDrawer();
 
-    const [, plusBtn] = screen.getAllByRole('button', { name: '' });
+    const plusBtn = screen.getByRole('button', { name: 'cart.moreQuantity' });
     fireEvent.click(plusBtn);
 
     expect(await screen.findByText('Stock insuficiente')).toBeInTheDocument();
@@ -133,8 +134,7 @@ describe('CartDrawer', () => {
     mockCart.removeItem.mockRejectedValue(new Error('boom'));
     renderDrawer();
 
-    const buttons = screen.getAllByRole('button', { name: '' });
-    const removeBtn = buttons[buttons.length - 1];
+    const removeBtn = screen.getByRole('button', { name: 'cart.removeItem' });
     fireEvent.click(removeBtn);
 
     expect(await screen.findByText('cart.removeError')).toBeInTheDocument();
@@ -145,8 +145,7 @@ describe('CartDrawer', () => {
     mockCart.removeItem.mockRejectedValue(new Error('boom'));
     const { rerender } = renderDrawer();
 
-    const buttons = screen.getAllByRole('button', { name: '' });
-    fireEvent.click(buttons[buttons.length - 1]);
+    fireEvent.click(screen.getByRole('button', { name: 'cart.removeItem' }));
     expect(await screen.findByText('cart.removeError')).toBeInTheDocument();
 
     mockCart.drawerOpen = false;

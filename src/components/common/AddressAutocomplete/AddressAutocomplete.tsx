@@ -31,6 +31,8 @@ const AddressAutocomplete: React.FC<Props> = ({ id, value, onChange, onSelect, r
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
   const [error, setError] = useState(false);
+  // Google answered but found nothing for what was typed.
+  const [noResults, setNoResults] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const sessionRef = useRef<google.maps.places.AutocompleteSessionToken | null>(null);
   const seqRef = useRef(0);
@@ -41,6 +43,7 @@ const AddressAutocomplete: React.FC<Props> = ({ id, value, onChange, onSelect, r
   useEffect(() => {
     if (!enabled || query === null) return;
     const seq = ++seqRef.current;
+    setNoResults(false);
     if (query.trim().length < MIN_CHARS) {
       setSuggestions([]);
       return;
@@ -57,7 +60,9 @@ const AddressAutocomplete: React.FC<Props> = ({ id, value, onChange, onSelect, r
           ...(regionsKey ? { includedRegionCodes: regionsKey.split(',').map(c => c.toLowerCase()) } : {}),
         });
         if (seq !== seqRef.current) return;
-        setSuggestions(result.map(s => s.placePrediction).filter((p): p is google.maps.places.PlacePrediction => !!p));
+        const predictions = result.map(s => s.placePrediction).filter((p): p is google.maps.places.PlacePrediction => !!p);
+        setSuggestions(predictions);
+        setNoResults(predictions.length === 0);
         setActive(-1);
         setOpen(true);
         setError(false);
@@ -74,6 +79,7 @@ const AddressAutocomplete: React.FC<Props> = ({ id, value, onChange, onSelect, r
     ++seqRef.current;
     setOpen(false);
     setSuggestions([]);
+    setNoResults(false);
     setQuery(null);
     try {
       const place = prediction.toPlace();
@@ -150,6 +156,7 @@ const AddressAutocomplete: React.FC<Props> = ({ id, value, onChange, onSelect, r
         </div>
       )}
       {error && <Form.Text className="text-muted">{t('account.streetSuggestionsError')}</Form.Text>}
+      {!error && noResults && <Form.Text className="text-muted">{t('account.streetNoSuggestions')}</Form.Text>}
     </div>
   );
 };

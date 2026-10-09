@@ -181,6 +181,8 @@ export interface AddGiftCardRequest {
 
 export interface CheckoutRequest {
   shippingAddressId?: number;
+  /** Shipping option chosen at checkout; empty = the default delivery. */
+  shippingRateId?: number;
   billingAddressId?: number;
   notes?: string;
   browserAcceptHeader?: string;
@@ -267,6 +269,11 @@ export interface StorefrontOrderDetail {
   /** Part of the total paid with a gift card. */
   giftCardAmount?: number;
   giftCardCode?: string;
+  couponCode?: string | null;
+  couponDiscountAmount?: number;
+  recargoEquivalenciaAmount?: number | null;
+  refundedAmount?: number;
+  hasInvoice?: boolean;
   /** The order bought gift cards: no invoice, nothing shipped. */
   isGiftCardPurchase?: boolean;
   shippingAddress?: AddressSummary;

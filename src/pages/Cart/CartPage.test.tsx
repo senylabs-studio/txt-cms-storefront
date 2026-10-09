@@ -7,6 +7,7 @@ import type { Cart } from '../../types';
 
 const renderCartPage = () => render(<ToastProvider><CartPage /></ToastProvider>);
 
+vi.mock('../../contexts/SiteSettingsContext', () => ({ useSiteSettings: () => ({ siteName: 'Shop' }) }));
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }));
@@ -144,7 +145,7 @@ describe('CartPage', () => {
     mockCart.removeItem.mockRejectedValue({ isAxiosError: true, response: { data: { message: 'No se pudo eliminar' } } });
     renderCartPage();
 
-    fireEvent.click(screen.getByRole('button', { name: '' }));
+    fireEvent.click(screen.getByRole('button', { name: 'cart.removeItem' }));
 
     const alert = await screen.findByText('No se pudo eliminar');
     expect(alert).toBeInTheDocument();

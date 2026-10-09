@@ -45,6 +45,10 @@
     "loginRequired": "Log in to view your cart",
     "updateError": "Error updating quantity",
     "removeError": "Error removing item",
+    "lessQuantity": "Less",
+    "moreQuantity": "More",
+    "removeItem": "Remove from cart",
+    "quantityMetres": "Quantity (metres)",
     "couponPlaceholder": "Discount code",
     "applyCoupon": "Apply",
     "removeCoupon": "Remove",
@@ -223,7 +227,12 @@
     "paypalError": "The PayPal payment could not be completed. You have not been charged.",
     "giftCardDelivery": "Gift cards are emailed once payment is confirmed: no shipping address needed.",
     "confirmWithGiftCard": "Place order",
-    "coveredByGiftCard": "Your gift card covers the whole order: there's nothing more to pay."
+    "coveredByGiftCard": "Your gift card covers the whole order: there's nothing more to pay.",
+    "confirmFree": "Confirm order",
+    "nothingToPay": "There is nothing to pay: the order is placed when you press the button.",
+    "vatExempt": "No VAT (shipped outside the EU VAT area: export)",
+    "shippingMethod": "Shipping method",
+    "pickupAt": "You'll collect your order at the shop: {{address}}. We'll let you know when it's ready."
   },
   "checkoutSuccess": {
     "title": "Order received!",
@@ -277,6 +286,7 @@
     "street": "Street",
     "streetSearchPlaceholder": "Start typing your street and number",
     "streetSuggestionsError": "Suggestions could not be loaded; type the address by hand.",
+    "streetNoSuggestions": "No suggestions for this address; you can type it by hand.",
     "postalCode": "Post code",
     "city": "City",
     "province": "Province",
@@ -387,6 +397,9 @@
     "cancelSuccess": "Order cancelled successfully.",
     "returnSuccess": "Return request sent.",
     "giftCardPaid": "Paid with gift card {{code}}",
+    "coupon": "Coupon {{code}}",
+    "recargo": "Equivalence surcharge",
+    "refunded": "Refunded",
     "amountPaid": "Paid with your payment method",
     "giftCardsBought": "Gift cards",
     "downloadLetter": "Download letter",
@@ -584,6 +597,7 @@
     "savePreferences": "Save preferences"
   },
   "common": {
+    "selectOption": "Select an option",
     "fieldRequired": "This field is required.",
     "unexpectedError": "An unexpected error occurred. Please try again.",
     "networkError": "Could not connect. Check your connection and try again.",

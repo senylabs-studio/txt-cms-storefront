@@ -60,7 +60,9 @@ const OrderDetailPage: React.FC = () => {
   if (!order) return null;
 
   // Gift card purchases carry no invoice (the order where the balance is spent is invoiced).
-  const canDownloadInvoice = order.status !== 'PendingPayment' && order.status !== 'Cancelled' && !order.isGiftCardPurchase;
+  // A cancelled order keeps the invoice issued before it was cancelled (with its rectificativa).
+  const canDownloadInvoice = order.status !== 'PendingPayment' && !order.isGiftCardPurchase
+    && (order.status !== 'Cancelled' || !!order.hasInvoice);
   const canCancelOrder = order.status === 'PendingPayment' || order.status === 'Paid';
   const canRequestReturn = order.status === 'Delivered' && !order.returnRequestedAt;
   const canReview = order.status === 'Delivered';
@@ -258,12 +260,24 @@ const OrderDetailPage: React.FC = () => {
                 ))}
               </tbody>
               <tfoot>
+                {(order.couponDiscountAmount ?? 0) > 0 && (
+                  <tr>
+                    <td colSpan={5} className="text-end text-muted">{t('orderDetail.coupon', { code: order.couponCode ?? '' })}</td>
+                    <td className="text-end text-success">−{formatPrice(order.couponDiscountAmount ?? 0)}</td>
+                  </tr>
+                )}
                 {!order.isGiftCardPurchase && (
                   <tr>
                     <td colSpan={5} className="text-end text-muted">{t('orderDetail.shippingCost')}</td>
                     <td className="text-end">
                       {order.shippingCost > 0 ? formatPrice(order.shippingCost) : t('orderDetail.free')}
                     </td>
+                  </tr>
+                )}
+                {(order.recargoEquivalenciaAmount ?? 0) > 0 && (
+                  <tr>
+                    <td colSpan={5} className="text-end text-muted">{t('orderDetail.recargo')}</td>
+                    <td className="text-end">{formatPrice(order.recargoEquivalenciaAmount ?? 0)}</td>
                   </tr>
                 )}
                 <tr>
@@ -281,6 +295,12 @@ const OrderDetailPage: React.FC = () => {
                       <td className="text-end small">{formatPrice(order.total - (order.giftCardAmount ?? 0))}</td>
                     </tr>
                   </>
+                )}
+                {(order.refundedAmount ?? 0) > 0 && (
+                  <tr>
+                    <td colSpan={5} className="text-end text-muted small">{t('orderDetail.refunded')}</td>
+                    <td className="text-end small">{formatPrice(order.refundedAmount ?? 0)}</td>
+                  </tr>
                 )}
               </tfoot>
             </Table>
