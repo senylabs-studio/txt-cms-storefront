@@ -19,7 +19,8 @@
   },
   "nav": {
     "viewAll": "Veure-ho tot →",
-    "discoverMore": "Descobreix més →"
+    "discoverMore": "Descobreix més →",
+    "openSubmenu": "Obrir el submenú de {{name}}"
   },
   "footer": {
     "copyright": "© {{year}} {{siteName}}. Tots els drets reservats.",

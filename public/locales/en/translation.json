@@ -19,7 +19,8 @@
   },
   "nav": {
     "viewAll": "View all →",
-    "discoverMore": "Discover more →"
+    "discoverMore": "Discover more →",
+    "openSubmenu": "Open the {{name}} submenu"
   },
   "footer": {
     "copyright": "© {{year}} {{siteName}}. All rights reserved.",
