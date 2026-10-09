@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Form, Button } from 'react-bootstrap';
 import { FaTimes } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
+import { formatPrice } from '../../utils/pricing';
 import type { PageFilterFacets } from '../../types';
 import type { PageFilters } from '../../services/pageService';
 import { parseFabricPattern } from '../../utils/fabricPatterns';
@@ -188,7 +189,7 @@ const ProductFilters: React.FC<Props> = ({ facets, filters, onChange, onClose })
           <div style={{ ...labelStyle, display: 'flex', justifyContent: 'space-between' }}>
             <span>{t('filters.price')}</span>
             <span style={{ color: 'var(--brand-text-color)', fontWeight: 700, textTransform: 'none', letterSpacing: 0 }}>
-              {localMin} € – {localMax} €
+              {formatPrice(localMin)} – {formatPrice(localMax)}
             </span>
           </div>
           <PriceRangeSlider
@@ -197,8 +198,8 @@ const ProductFilters: React.FC<Props> = ({ facets, filters, onChange, onClose })
             onChange={handleSlider}
           />
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: '#adb5bd', marginTop: 2 }}>
-            <span>{absMin} €</span>
-            <span>{absMax} €</span>
+            <span>{formatPrice(absMin)}</span>
+            <span>{formatPrice(absMax)}</span>
           </div>
         </div>
       </>}

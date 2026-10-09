@@ -402,6 +402,7 @@ const GalleryBlock: React.FC<{ config: GalleryBlockConfig }> = ({ config }) => {
 };
 
 const FormFieldBlock: React.FC<{ config: FormFieldBlockConfig }> = ({ config }) => {
+  const { t } = useTranslation();
   // Unique per field: ids built from the label collided whenever two checkboxes had an empty
   // label, so clicking the second one's text ticked the first.
   const id = React.useId();
@@ -424,7 +425,7 @@ const FormFieldBlock: React.FC<{ config: FormFieldBlockConfig }> = ({ config }) 
         />
       ) : config.fieldType === 'select' ? (
         <select className="form-select" required={config.required}>
-          <option value="">{config.placeholder || 'Selecciona una opción'}</option>
+          <option value="">{config.placeholder || t('common.selectOption')}</option>
           {(config.options ?? '').split('\n').filter(Boolean).map((opt: string, i: number) => (
             <option key={i} value={opt.trim()}>{opt.trim()}</option>
           ))}

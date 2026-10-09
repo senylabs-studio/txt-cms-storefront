@@ -104,6 +104,13 @@
   background: rgba(255, 255, 255, 0.5);
   cursor: pointer;
   transition: width 0.25s ease, background 0.25s ease;
+  /* A 24×24 px tap area around the small dot (WCAG 2.2 target size) without changing its look. */
+  position: relative;
+}
+.vdp-dot::before {
+  content: '';
+  position: absolute;
+  inset: -9px -8px;
 }
 
 .vdp-dot--active {

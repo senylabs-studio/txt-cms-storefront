@@ -1,5 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { formatPrice } from '../../../utils/pricing';
+
+// The DOM text is matched with whitespace normalised (the non-breaking space before € becomes a space).
+const price = (v: number) => formatPrice(v).replace(/\u00a0/g, ' ');
 import ActiveFilters from './ActiveFilters';
 
 vi.mock('react-i18next', () => ({
@@ -18,13 +22,13 @@ describe('ActiveFilters', () => {
 
     expect(screen.getByText('filters.pattern: fabricPatterns.Stripes')).toBeInTheDocument();
     expect(screen.getByText('filters.width: 140 cm')).toBeInTheDocument();
-    expect(screen.getByText('filters.price: 5 € – 20 €')).toBeInTheDocument();
+    expect(screen.getByText(`filters.price: ${price(5)} – ${price(20)}`)).toBeInTheDocument();
     expect(screen.getByText('filters.onlyOffers')).toBeInTheDocument();
 
     fireEvent.click(screen.getByText('filters.width: 140 cm'));
     expect(onChange).toHaveBeenLastCalledWith({ pattern: 'Stripes', onlyOffers: true, minPrice: 5, maxPrice: 20 });
 
-    fireEvent.click(screen.getByText('filters.price: 5 € – 20 €'));
+    fireEvent.click(screen.getByText(`filters.price: ${price(5)} – ${price(20)}`));
     expect(onChange).toHaveBeenLastCalledWith({ pattern: 'Stripes', width: 140, onlyOffers: true });
   });
 
@@ -40,7 +44,7 @@ describe('ActiveFilters', () => {
 
   it('shows an open price range as "from" / "up to"', () => {
     render(<ActiveFilters filters={{ minPrice: 8 }} onChange={vi.fn()} />);
-    expect(screen.getByText('filters.price: filters.from(8 €)')).toBeInTheDocument();
+    expect(screen.getByText(`filters.price: filters.from(${price(8)})`)).toBeInTheDocument();
   });
 
   it('shows a chip per colour and removes just that colour', () => {
