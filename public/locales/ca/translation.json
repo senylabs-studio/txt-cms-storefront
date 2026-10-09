@@ -19,7 +19,8 @@
   },
   "nav": {
     "viewAll": "Veure-ho tot →",
-    "discoverMore": "Descobreix més →"
+    "discoverMore": "Descobreix més →",
+    "openSubmenu": "Obrir el submenú de {{name}}"
   },
   "footer": {
     "copyright": "© {{year}} {{siteName}}. Tots els drets reservats.",
@@ -522,7 +523,9 @@
     "from": "des de {{value}}",
     "upTo": "fins a {{value}}",
     "color": "Color",
-    "colors": "Colors"
+    "colors": "Colors",
+    "priceMin": "Preu mínim",
+    "priceMax": "Preu màxim"
   },
   "careLabels": {
     "wash30": "Rentar a màquina màx. 30°C",

@@ -54,3 +54,15 @@ describe('ProductFilters — Diseño and offers', () => {
     expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ colors: ['Blue', 'Red'] }));
   });
 });
+
+// Audit 2026-10-09: sort, width and composition selects and the price sliders had no accessible name.
+describe('ProductFilters — accessible names', () => {
+  it('names every select and both price sliders', () => {
+    render(<ProductFilters facets={{ ...facets(['Plain']), widths: [140, 150], materials: ['Algodón'], minPrice: 1, maxPrice: 50 }} filters={{}} onChange={vi.fn()} />);
+
+    for (const name of ['filters.sortBy', 'filters.pattern', 'filters.width', 'filters.composition'])
+      expect(screen.getByRole('combobox', { name })).toBeInTheDocument();
+    expect(screen.getByRole('slider', { name: 'filters.priceMin' })).toBeInTheDocument();
+    expect(screen.getByRole('slider', { name: 'filters.priceMax' })).toBeInTheDocument();
+  });
+});

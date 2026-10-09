@@ -300,6 +300,16 @@
   opacity: 1;
 }
 
+/* Keyboard-only toggle next to a section with subcategories (visually-hidden-focusable) */
+.nav-menu-toggle {
+  background: none;
+  border: 0;
+  padding: 0 6px;
+  color: inherit;
+  align-self: center;
+}
+.nav-menu-toggle:focus-visible { outline: 2px solid var(--brand-color); outline-offset: 2px; }
+
 /* Mega panel */
 .mega-panel {
   position: absolute;

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildMeta, injectMeta, cleanText, NOT_FOUND } from './meta.mjs';
+import { buildMeta, injectMeta, cleanText, createJsonCache, NOT_FOUND } from './meta.mjs';
 
 const site = { siteName: 'Tejidos Pulido', siteDescription: 'Tu tienda de tejidos de confianza.', logoUrl: 'https://cdn/logo.png' };
 const api = (routes) => async (path) => (path === '/storefront/site-settings' ? site : routes[path] ?? null);
@@ -81,5 +81,57 @@ describe('share preview meta', () => {
     const missing = injectMeta(html, { siteName: 'S', title: 'T', description: 'D', type: 'website', notFound: true }, 'https://www.tejidospulido.com/x');
     expect(missing).toContain('<meta name="robots" content="noindex" />');
     expect(missing).not.toContain('rel="canonical"');
+  });
+
+  // Audit 2026-10-09: no structured data for search engines.
+  it('adds schema.org Product data with price and availability on a variant page', async () => {
+    const meta = await buildMeta('/variant/42', api({
+      '/storefront/products/variants/42': { name: 'Cretona </script> lisa', code: '1019-01', description: 'Algodón', price: 11.5, availableStock: 0, images: [{ url: 'https://cdn/v.jpg' }] },
+    }));
+    const html = injectMeta('<head><title>x</title>\n<meta name="description" content="x" /></head>', meta, 'https://shop/variant/42');
+    const json = html.match(/<script type="application\/ld\+json">(.*?)<\/script>/)[1];
+    expect(json).not.toContain('</script');
+    const ld = JSON.parse(json);
+    expect(ld).toMatchObject({ '@type': 'Product', name: 'Cretona </script> lisa', sku: '1019-01', url: 'https://shop/variant/42',
+      offers: { '@type': 'Offer', price: '11.50', priceCurrency: 'EUR', availability: 'https://schema.org/OutOfStock', url: 'https://shop/variant/42' } });
+  });
+
+  it('uses a price range for a product with variants, and the shop (Store) on the home page', async () => {
+    const product = await buildMeta('/product/stof', api({
+      '/storefront/products/stof': { name: 'Stof', code: '1272', price: 9, variants: [{ price: 9, availableStock: 0 }, { price: 12.5, availableStock: 2 }] },
+    }));
+    expect(product.jsonLd.offers).toMatchObject({ '@type': 'AggregateOffer', lowPrice: '9.00', highPrice: '12.50', availability: 'https://schema.org/InStock' });
+
+    const home = await buildMeta('/', async (path) => (path === '/storefront/site-settings'
+      ? { ...site, companyAddress: 'Calle Montserrat 27', companyCity: 'Mataró', companyPostalCode: '08302', companyPhone: '937906859', instagramUrl: 'https://instagram.com/x' }
+      : null));
+    expect(home.jsonLd).toMatchObject({ '@type': 'Store', name: 'Tejidos Pulido', telephone: '937906859',
+      address: { streetAddress: 'Calle Montserrat 27', postalCode: '08302', addressCountry: 'ES' }, sameAs: ['https://instagram.com/x'] });
+    expect((await buildMeta('/cart', api({}))).jsonLd).toBeUndefined();
+  });
+});
+
+describe('API cache for previews', () => {
+  it('serves the last good answer while the API is down, and retries later', async () => {
+    let t = 0;
+    let answer = { siteName: 'Tejidos Pulido' };
+    let calls = 0;
+    const get = createJsonCache(async () => { calls++; if (answer instanceof Error) throw answer; return answer; }, { now: () => t });
+
+    expect(await get('/s')).toEqual({ siteName: 'Tejidos Pulido' });
+    t += 10 * 60 * 1000;                     // stale
+    answer = new Error('timeout');           // API waking up
+    expect(await get('/s')).toEqual({ siteName: 'Tejidos Pulido' });
+    expect(await get('/s')).toEqual({ siteName: 'Tejidos Pulido' }); // within the retry window: no new call
+    expect(calls).toBe(2);
+    t += 31 * 1000;
+    answer = { siteName: 'Nuevo' };
+    expect(await get('/s')).toEqual({ siteName: 'Nuevo' });
+  });
+
+  it('remembers a 404 and a first failure only as such', async () => {
+    const get = createJsonCache(async (p) => (p === '/gone' ? NOT_FOUND : null));
+    expect(await get('/gone')).toBe(NOT_FOUND);
+    expect(await get('/down')).toBeNull();
   });
 });

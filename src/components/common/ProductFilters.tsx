@@ -49,6 +49,7 @@ interface SliderProps {
 }
 
 const PriceRangeSlider: React.FC<SliderProps> = ({ min, max, valueMin, valueMax, onChange }) => {
+  const { t } = useTranslation();
   const range = max - min || 1;
   const lPct = ((valueMin - min) / range) * 100;
   const rPct = ((max - valueMax) / range) * 100;
@@ -71,8 +72,10 @@ const PriceRangeSlider: React.FC<SliderProps> = ({ min, max, valueMin, valueMax,
         height: 4, background: 'var(--brand-color)', borderRadius: 4,
       }} />
       <input type="range" min={min} max={max} step={1} value={valueMin} onChange={onMin}
+        aria-label={t('filters.priceMin')} aria-valuetext={formatPrice(valueMin)}
         style={{ zIndex: valueMin > max - range * 0.1 ? 5 : 3 }} />
       <input type="range" min={min} max={max} step={1} value={valueMax} onChange={onMax}
+        aria-label={t('filters.priceMax')} aria-valuetext={formatPrice(valueMax)}
         style={{ zIndex: 4 }} />
     </div>
   );
@@ -148,7 +151,7 @@ const ProductFilters: React.FC<Props> = ({ facets, filters, onChange, onClose })
       {/* Sort */}
       <div>
         <div style={labelStyle}>{t('filters.sortBy')}</div>
-        <Form.Select size="sm" value={draft.orderBy ?? ''}
+        <Form.Select size="sm" aria-label={t('filters.sortBy')} value={draft.orderBy ?? ''}
           onChange={e => setDraft(d => ({ ...d, orderBy: e.target.value || undefined }))}>
           <option value="">{t('filters.default')}</option>
           <option value="price_asc">{t('filters.priceAsc')}</option>
@@ -246,7 +249,7 @@ const ProductFilters: React.FC<Props> = ({ facets, filters, onChange, onClose })
         {sep}
         <div>
           <div style={labelStyle}>{t('filters.width')}</div>
-          <Form.Select size="sm" value={draft.width?.toString() ?? ''}
+          <Form.Select size="sm" aria-label={t('filters.width')} value={draft.width?.toString() ?? ''}
             onChange={e => setDraft(d => ({ ...d, width: e.target.value ? parseFloat(e.target.value) : undefined }))}>
             <option value="">{t('filters.all')}</option>
             {facets.widths.map(w => <option key={w} value={w}>{w} cm</option>)}
@@ -259,7 +262,7 @@ const ProductFilters: React.FC<Props> = ({ facets, filters, onChange, onClose })
         {sep}
         <div>
           <div style={labelStyle}>{t('filters.composition')}</div>
-          <Form.Select size="sm" value={draft.material ?? ''}
+          <Form.Select size="sm" aria-label={t('filters.composition')} value={draft.material ?? ''}
             onChange={e => setDraft(d => ({ ...d, material: e.target.value || undefined }))}>
             <option value="">{t('filters.all')}</option>
             {facets.materials.map(m => <option key={m} value={m}>{m}</option>)}

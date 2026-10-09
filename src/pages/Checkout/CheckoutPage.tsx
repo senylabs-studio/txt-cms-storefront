@@ -224,7 +224,7 @@ const CheckoutPage: React.FC = () => {
                   </Alert>
                 ) : (
                   <>
-                    <Form.Group className="mb-3">
+                    <Form.Group className="mb-3" controlId="checkout-shipping-address">
                       <Form.Label className="fw-semibold">{t('checkout.shippingAddress')}</Form.Label>
                       <Form.Select value={shippingId ?? ''} onChange={e => setShippingId(Number(e.target.value))}>
                         <option value="">{t('checkout.selectAddress')}</option>
@@ -260,7 +260,7 @@ const CheckoutPage: React.FC = () => {
                       </Alert>
                     )}
 
-                    <Form.Group className="mb-3">
+                    <Form.Group className="mb-3" controlId="checkout-billing-address">
                       <Form.Label className="fw-semibold">{t('checkout.billingAddress')}</Form.Label>
                       <Form.Select value={billingId ?? ''} onChange={e => setBillingId(Number(e.target.value))}>
                         <option value="">{t('checkout.sameBilling')}</option>
@@ -272,7 +272,7 @@ const CheckoutPage: React.FC = () => {
                   </>
                 )}
 
-                <Form.Group className="mb-3">
+                <Form.Group className="mb-3" controlId="checkout-notes">
                   <Form.Label className="fw-semibold">{t('checkout.orderNotes')}</Form.Label>
                   <Form.Control
                     as="textarea"

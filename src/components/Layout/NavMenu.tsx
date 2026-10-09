@@ -125,10 +125,20 @@ interface NavMenuProps {
 }
 
 const NavMenu: React.FC<NavMenuProps> = ({ leading, trailing }) => {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [items, setItems] = useState<StorefrontMenuItem[]>([]);
   const [activeId, setActiveId] = useState<number | null>(null);
   const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Keyboard: the panel was opened with its toggle button, so focus moves into it.
+  const focusPanel = useRef(false);
+  const toggleRefs = useRef<Record<number, HTMLButtonElement | null>>({});
+  const panelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!focusPanel.current || activeId == null) return;
+    focusPanel.current = false;
+    panelRef.current?.querySelector<HTMLElement>('a')?.focus();
+  }, [activeId]);
 
   useEffect(() => {
     getMenu().then(setItems).catch(() => {});
@@ -148,6 +158,24 @@ const NavMenu: React.FC<NavMenuProps> = ({ leading, trailing }) => {
     setActiveId(null);
   };
 
+  const toggleFromKeyboard = (id: number) => {
+    if (activeId === id) { handleClose(); return; }
+    focusPanel.current = true;
+    handleEnter(id);
+  };
+
+  // Escape closes the open panel and puts focus back on its toggle; tabbing out of the menu
+  // closes it too (the panel is mouse-hover only otherwise).
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key !== 'Escape' || activeId == null) return;
+    const id = activeId;
+    handleClose();
+    toggleRefs.current[id]?.focus();
+  };
+  const handleBlur = (e: React.FocusEvent<HTMLElement>) => {
+    if (activeId != null && !e.currentTarget.contains(e.relatedTarget as Node | null)) handleClose();
+  };
+
   // Still render when there are no CMS-configured menu items, as long as the
   // header wants the collapsed-state logo/search/icons slot rendered here.
   if (items.length === 0 && !leading && !trailing) return null;
@@ -158,6 +186,8 @@ const NavMenu: React.FC<NavMenuProps> = ({ leading, trailing }) => {
     <nav
       className={`nav-menu-bar${leading || trailing ? ' nav-menu-bar--condensed' : ''}`}
       onMouseLeave={handleLeave}
+      onKeyDown={handleKeyDown}
+      onBlur={handleBlur}
     >
       {/* Top strip — the actual nav items */}
       <Container>
@@ -186,6 +216,20 @@ const NavMenu: React.FC<NavMenuProps> = ({ leading, trailing }) => {
                   </Link>
                 )}
                 {hasChildren && <span className="nav-menu-indicator" />}
+                {hasChildren && (
+                  // Only visible when it gets keyboard focus: the mouse opens the panel on hover.
+                  <button
+                    type="button"
+                    ref={el => { toggleRefs.current[item.id] = el; }}
+                    className="nav-menu-toggle visually-hidden-focusable"
+                    aria-expanded={isActive}
+                    aria-controls={`mega-panel-${item.id}`}
+                    aria-label={t('nav.openSubmenu', { name: item.name })}
+                    onClick={() => toggleFromKeyboard(item.id)}
+                  >
+                    <span aria-hidden="true">▾</span>
+                  </button>
+                )}
               </li>
             );
           })}
@@ -196,7 +240,7 @@ const NavMenu: React.FC<NavMenuProps> = ({ leading, trailing }) => {
 
       {/* Mega panel */}
       {activeItem && activeItem.children.length > 0 && (
-        <div onMouseEnter={() => handleEnter(activeItem.id)}>
+        <div id={`mega-panel-${activeItem.id}`} ref={panelRef} onMouseEnter={() => handleEnter(activeItem.id)}>
           <MegaPanel key={activeItem.id} item={activeItem} onClose={handleClose} />
         </div>
       )}

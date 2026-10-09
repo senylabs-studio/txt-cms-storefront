@@ -141,3 +141,38 @@ describe('NavMenu special entries', () => {
     expect(screen.getByText('Hogar').querySelector('svg')).toBeNull();
   });
 });
+
+// Audit 2026-10-09: the mega menu opened on mouse hover only.
+describe('NavMenu keyboard', () => {
+  it('opens the panel from its toggle, focuses the first link, and Escape closes it back on the toggle', async () => {
+    getMenu.mockResolvedValue(menu);
+    render(<MemoryRouter><NavMenu /></MemoryRouter>);
+
+    const toggles = await screen.findAllByRole('button', { name: 'nav.openSubmenu' });
+    expect(toggles).toHaveLength(2);
+    const toggle = toggles[0];
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+
+    fireEvent.click(toggle);
+
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(document.getElementById('mega-panel-1')).toBeInTheDocument();
+    await vi.waitFor(() => expect(document.activeElement?.textContent).toContain('nav.viewAll'));
+
+    fireEvent.keyDown(document.activeElement!, { key: 'Escape' });
+
+    expect(document.getElementById('mega-panel-1')).not.toBeInTheDocument();
+    expect(document.activeElement).toBe(toggle);
+  });
+
+  it('closes when focus leaves the menu', async () => {
+    getMenu.mockResolvedValue(menu);
+    render(<MemoryRouter><NavMenu /><button>fuera</button></MemoryRouter>);
+
+    fireEvent.click((await screen.findAllByRole('button', { name: 'nav.openSubmenu' }))[0]);
+    const link = await screen.findByText('Lino');
+    fireEvent.blur(link, { relatedTarget: screen.getByText('fuera') });
+
+    expect(document.getElementById('mega-panel-1')).not.toBeInTheDocument();
+  });
+});
