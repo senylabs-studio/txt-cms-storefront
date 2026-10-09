@@ -557,7 +557,7 @@ const AccountPage: React.FC = () => {
           {/* Country first: the street suggestions search in the chosen country. */}
           <Row>
             <Col sm={6}>
-              <Form.Group className="mb-2">
+              <Form.Group className="mb-2" controlId="address-country">
                 <Form.Label>{t('account.country')}</Form.Label>
                 <Form.Select
                   value={addrForm.country ?? 'ES'}

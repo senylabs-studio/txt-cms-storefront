@@ -523,7 +523,9 @@
     "from": "des de {{value}}",
     "upTo": "fins a {{value}}",
     "color": "Color",
-    "colors": "Colors"
+    "colors": "Colors",
+    "priceMin": "Preu mínim",
+    "priceMax": "Preu màxim"
   },
   "careLabels": {
     "wash30": "Rentar a màquina màx. 30°C",
