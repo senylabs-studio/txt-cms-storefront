@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildMeta, injectMeta, cleanText, NOT_FOUND } from './meta.mjs';
+import { buildMeta, injectMeta, cleanText, createJsonCache, NOT_FOUND } from './meta.mjs';
 
 const site = { siteName: 'Tejidos Pulido', siteDescription: 'Tu tienda de tejidos de confianza.', logoUrl: 'https://cdn/logo.png' };
 const api = (routes) => async (path) => (path === '/storefront/site-settings' ? site : routes[path] ?? null);
@@ -108,5 +108,30 @@ describe('share preview meta', () => {
     expect(home.jsonLd).toMatchObject({ '@type': 'Store', name: 'Tejidos Pulido', telephone: '937906859',
       address: { streetAddress: 'Calle Montserrat 27', postalCode: '08302', addressCountry: 'ES' }, sameAs: ['https://instagram.com/x'] });
     expect((await buildMeta('/cart', api({}))).jsonLd).toBeUndefined();
+  });
+});
+
+describe('API cache for previews', () => {
+  it('serves the last good answer while the API is down, and retries later', async () => {
+    let t = 0;
+    let answer = { siteName: 'Tejidos Pulido' };
+    let calls = 0;
+    const get = createJsonCache(async () => { calls++; if (answer instanceof Error) throw answer; return answer; }, { now: () => t });
+
+    expect(await get('/s')).toEqual({ siteName: 'Tejidos Pulido' });
+    t += 10 * 60 * 1000;                     // stale
+    answer = new Error('timeout');           // API waking up
+    expect(await get('/s')).toEqual({ siteName: 'Tejidos Pulido' });
+    expect(await get('/s')).toEqual({ siteName: 'Tejidos Pulido' }); // within the retry window: no new call
+    expect(calls).toBe(2);
+    t += 31 * 1000;
+    answer = { siteName: 'Nuevo' };
+    expect(await get('/s')).toEqual({ siteName: 'Nuevo' });
+  });
+
+  it('remembers a 404 and a first failure only as such', async () => {
+    const get = createJsonCache(async (p) => (p === '/gone' ? NOT_FOUND : null));
+    expect(await get('/gone')).toBe(NOT_FOUND);
+    expect(await get('/down')).toBeNull();
   });
 });

@@ -139,6 +139,29 @@ const ldScript = (data, url) => data
   ? `<script type="application/ld+json">${JSON.stringify(url ? { ...data, url, ...(data.offers ? { offers: { ...data.offers, url } } : {}) } : data).replace(/</g, '\\u003c')}</script>`
   : '';
 
+/**
+ * Cached API reads for the previews. `load(path)` returns the parsed body, NOT_FOUND, or null
+ * (it failed / timed out). Good answers are kept 5 minutes; when the API fails (e.g. waking up
+ * from idle) the last good copy is served instead of nothing — the preview used to fall back to a
+ * generic "Tienda" (audit 2026-10-09). `{ refresh: true }` ignores the cache's freshness.
+ */
+export function createJsonCache(load, { ttlMs = 5 * 60 * 1000, retryMs = 30 * 1000, max = 2000, now = Date.now } = {}) {
+  const cache = new Map();
+  return async (path, { refresh = false } = {}) => {
+    const hit = cache.get(path);
+    if (!refresh && hit && hit.until > now()) return hit.value;
+    let value = null;
+    try { value = await load(path); } catch { value = null; }
+    if (value === null && hit?.value) {
+      cache.set(path, { value: hit.value, until: now() + retryMs });
+      return hit.value;
+    }
+    cache.set(path, { value, until: now() + (value ? ttlMs : retryMs) });
+    if (cache.size > max) cache.delete(cache.keys().next().value);
+    return value;
+  };
+}
+
 /** decodeURIComponent that leaves a malformed segment as it is instead of throwing. */
 export function safeDecode(segment) {
   try { return decodeURIComponent(segment); } catch { return segment; }

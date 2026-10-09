@@ -8,7 +8,7 @@ import { existsSync } from 'node:fs';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildMeta, injectMeta, safeDecode, NOT_FOUND } from './meta.mjs';
+import { buildMeta, injectMeta, safeDecode, createJsonCache, NOT_FOUND } from './meta.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 // Deployed next to dist/ (Azure package root); in the repo it lives in server/, beside ../dist.
@@ -32,25 +32,17 @@ const TYPES = {
 };
 
 // API answers cached a few minutes: a shared link is often opened by many crawlers/people at once.
-const cache = new Map();
-const CACHE_MS = 5 * 60 * 1000;
-async function getJson(path) {
+const getJson = createJsonCache(async (path) => {
   if (!API_URL) return null;
-  const hit = cache.get(path);
-  if (hit && hit.until > Date.now()) return hit.value;
-  let value = null;
-  try {
-    const res = await fetch(API_URL + path, { signal: AbortSignal.timeout(5000), headers: { Accept: 'application/json' } });
-    if (res.ok) value = await res.json();
-    else if (res.status === 404) value = NOT_FOUND;
-  } catch {
-    value = null;
-  }
-  // A failure (e.g. the API waking up) is only remembered briefly, so the next request retries.
-  cache.set(path, { value, until: Date.now() + (value ? CACHE_MS : 30 * 1000) });
-  if (cache.size > 2000) cache.delete(cache.keys().next().value);
-  return value;
-}
+  const res = await fetch(API_URL + path, { signal: AbortSignal.timeout(5000), headers: { Accept: 'application/json' } });
+  if (res.ok) return res.json();
+  return res.status === 404 ? NOT_FOUND : null;
+});
+// The shop's name and logo are in every preview: fetched at start and kept fresh, so a preview
+// asked while the API is waking up still has them.
+const refreshSite = () => getJson('/storefront/site-settings', { refresh: true }).catch(() => {});
+refreshSite();
+setInterval(refreshSite, 4 * 60 * 1000).unref();
 
 async function sendFile(res, file) {
   const body = await readFile(file);
