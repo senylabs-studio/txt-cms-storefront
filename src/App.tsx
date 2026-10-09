@@ -14,31 +14,34 @@ import GlobalToast from './components/common/GlobalToast/GlobalToast';
 import UnhandledApiErrorToaster from './components/common/UnhandledApiErrorToaster';
 import ScrollToTop from './components/common/ScrollToTop';
 import { useSyncDocumentLang } from './hooks/useSyncDocumentLang';
+import { Suspense } from 'react';
+import { lazyPage } from './utils/lazyPage';
+import PageFallback from './components/common/PageFallback';
 
 import LandingPage from './pages/Home/LandingPage';
-import HomePage from './pages/Catalog/HomePage';
+const HomePage = lazyPage(() => import('./pages/Catalog/HomePage'));
 import ProductDetailPage from './pages/Catalog/ProductDetailPage';
 import VariantDetailPage from './pages/Catalog/VariantDetailPage/VariantDetailPage';
 import PageCatalogPage from './pages/Catalog/PageCatalogPage/PageCatalogPage';
-import CartPage from './pages/Cart/CartPage';
-import GiftCardPage from './pages/GiftCard/GiftCardPage';
-import CheckoutPage from './pages/Checkout/CheckoutPage';
-import CheckoutSuccessPage from './pages/Checkout/CheckoutSuccessPage';
-import CheckoutErrorPage from './pages/Checkout/CheckoutErrorPage';
-import LoginPage from './pages/Auth/LoginPage';
-import RegisterPage from './pages/Auth/RegisterPage';
-import ForgotPasswordPage from './pages/Auth/ForgotPasswordPage';
-import ResetPasswordPage from './pages/Auth/ResetPasswordPage';
-import GuestAccessRequestPage from './pages/Auth/GuestAccessRequestPage';
-import GuestAccessVerifyPage from './pages/Auth/GuestAccessVerifyPage';
-import UnsubscribePage from './pages/Auth/UnsubscribePage';
-import NewsletterConfirmPage from './pages/Auth/NewsletterConfirmPage';
-import ConfirmEmailPage from './pages/Auth/ConfirmEmailPage';
-import AccountPage from './pages/Account/AccountPage';
-import OrdersPage from './pages/Account/OrdersPage';
-import OrderDetailPage from './pages/Account/OrderDetailPage';
-import FavoritesPage from './pages/Favorites/FavoritesPage';
-import BoardPage from './pages/Board/BoardPage';
+const CartPage = lazyPage(() => import('./pages/Cart/CartPage'));
+const GiftCardPage = lazyPage(() => import('./pages/GiftCard/GiftCardPage'));
+const CheckoutPage = lazyPage(() => import('./pages/Checkout/CheckoutPage'));
+const CheckoutSuccessPage = lazyPage(() => import('./pages/Checkout/CheckoutSuccessPage'));
+const CheckoutErrorPage = lazyPage(() => import('./pages/Checkout/CheckoutErrorPage'));
+const LoginPage = lazyPage(() => import('./pages/Auth/LoginPage'));
+const RegisterPage = lazyPage(() => import('./pages/Auth/RegisterPage'));
+const ForgotPasswordPage = lazyPage(() => import('./pages/Auth/ForgotPasswordPage'));
+const ResetPasswordPage = lazyPage(() => import('./pages/Auth/ResetPasswordPage'));
+const GuestAccessRequestPage = lazyPage(() => import('./pages/Auth/GuestAccessRequestPage'));
+const GuestAccessVerifyPage = lazyPage(() => import('./pages/Auth/GuestAccessVerifyPage'));
+const UnsubscribePage = lazyPage(() => import('./pages/Auth/UnsubscribePage'));
+const NewsletterConfirmPage = lazyPage(() => import('./pages/Auth/NewsletterConfirmPage'));
+const ConfirmEmailPage = lazyPage(() => import('./pages/Auth/ConfirmEmailPage'));
+const AccountPage = lazyPage(() => import('./pages/Account/AccountPage'));
+const OrdersPage = lazyPage(() => import('./pages/Account/OrdersPage'));
+const OrderDetailPage = lazyPage(() => import('./pages/Account/OrderDetailPage'));
+const FavoritesPage = lazyPage(() => import('./pages/Favorites/FavoritesPage'));
+const BoardPage = lazyPage(() => import('./pages/Board/BoardPage'));
 
 function App() {
   useSyncDocumentLang();
@@ -55,6 +58,9 @@ function App() {
         <CartProvider>
           <FavoritesProvider>
           <StockNotificationProvider>
+            {/* The landing, category and product pages are in the main bundle (what most visits
+                open); the rest load on demand. */}
+            <Suspense fallback={<PageFallback />}>
             <Routes>
               {/* Public */}
               <Route path="/" element={<LandingPage />} />
@@ -91,6 +97,7 @@ function App() {
               {/* Fallback */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
+            </Suspense>
             <ChatWidget />
             <GlobalToast />
             <UnhandledApiErrorToaster />
