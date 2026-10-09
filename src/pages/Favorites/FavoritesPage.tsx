@@ -3,6 +3,8 @@ import { Container, Row, Col, Button, Badge } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaHeart, FaShoppingCart, FaTrash } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
+import { useDocumentMeta } from '../../hooks/useDocumentMeta';
+import { useSiteSettings } from '../../contexts/SiteSettingsContext';
 import MainLayout from '../../components/Layout/MainLayout';
 import { getFavorites, type FavoriteItem } from '../../services/favoriteService';
 import { useFavorites } from '../../contexts/FavoritesContext';
@@ -17,6 +19,9 @@ import { formatPrice } from '../../utils/pricing';
 
 const FavoritesPage: React.FC = () => {
   const { t, i18n } = useTranslation();
+  const { siteName } = useSiteSettings();
+  // The tab title: this screen's, not the previous page's.
+  useDocumentMeta(`${t('favorites.title')} — ${siteName}`);
   const [items, setItems] = useState<FavoriteItem[]>([]);
   const [loading, setLoading] = useState(true);
   const { toggle } = useFavorites();

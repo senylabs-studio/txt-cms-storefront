@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Container, Card, Form, Button, Alert, Spinner } from 'react-bootstrap';
 import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useDocumentMeta } from '../../hooks/useDocumentMeta';
+import { useSiteSettings } from '../../contexts/SiteSettingsContext';
 import MainLayout from '../../components/Layout/MainLayout';
 import { login as loginService } from '../../services/authService';
 import { useAuth } from '../../contexts/AuthContext';
@@ -9,6 +11,9 @@ import { getApiErrorMessage } from '../../utils/apiError';
 
 const LoginPage: React.FC = () => {
   const { t } = useTranslation();
+  const { siteName } = useSiteSettings();
+  // The tab title: this screen's, not the previous page's.
+  useDocumentMeta(`${t('auth.login.title')} — ${siteName}`);
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();

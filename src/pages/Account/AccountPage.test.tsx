@@ -7,6 +7,7 @@ import { ToastProvider } from '../../contexts/ToastContext';
 import GlobalToast from '../../components/common/GlobalToast/GlobalToast';
 import type { StorefrontProfile } from '../../types';
 
+vi.mock('../../contexts/SiteSettingsContext', () => ({ useSiteSettings: () => ({ siteName: 'Shop' }) }));
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'es' } }),
 }));

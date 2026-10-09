@@ -5,6 +5,7 @@ import CheckoutPage from './CheckoutPage';
 import type { Cart, CheckoutResponse, StorefrontProfile } from '../../types';
 import type { ApplicableShippingRate } from '../../services/shippingService';
 
+vi.mock('../../contexts/SiteSettingsContext', () => ({ useSiteSettings: () => ({ siteName: 'Shop' }) }));
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }));

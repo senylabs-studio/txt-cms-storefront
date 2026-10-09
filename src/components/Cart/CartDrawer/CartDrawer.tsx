@@ -3,6 +3,7 @@ import { Offcanvas, Button, Alert } from 'react-bootstrap';
 import { FaTrash, FaMinus, FaPlus, FaShoppingBag, FaGift } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import IconTooltip from '../../common/IconTooltip/IconTooltip';
 import { useCart } from '../../../contexts/CartContext';
 import { getApiErrorMessage } from '../../../utils/apiError';
 import './CartDrawer.css';
@@ -107,20 +108,22 @@ const CartDrawer: React.FC = () => {
                       </span>
                     </div>
                     {!item.giftCard && <div className="cart-item-qty">
-                      <button className="qty-btn" disabled={loading || item.quantity <= item.minQuantity} onClick={() => handleUpdate(item.id, roundToStep(item.quantity - item.quantityStep))}>
+                      <button className="qty-btn" aria-label={t('cart.lessQuantity')} disabled={loading || item.quantity <= item.minQuantity} onClick={() => handleUpdate(item.id, roundToStep(item.quantity - item.quantityStep))}>
                         <FaMinus size={10} />
                       </button>
                       <span className="qty-value">{item.quantity}</span>
-                      <button className="qty-btn" disabled={loading || item.quantity + item.quantityStep > item.availableStock} onClick={() => handleUpdate(item.id, roundToStep(item.quantity + item.quantityStep))}>
+                      <button className="qty-btn" aria-label={t('cart.moreQuantity')} disabled={loading || item.quantity + item.quantityStep > item.availableStock} onClick={() => handleUpdate(item.id, roundToStep(item.quantity + item.quantityStep))}>
                         <FaPlus size={10} />
                       </button>
                     </div>}
                   </div>
                   <div className="cart-item-subtotal">
                     <div className="fw-semibold">{formatPrice(item.subtotal)}</div>
-                    <button className="remove-btn" onClick={() => handleRemove(item.id)} disabled={loading}>
-                      <FaTrash size={12} />
-                    </button>
+                    <IconTooltip label={t('cart.removeItem')}>
+                      <button className="remove-btn" aria-label={t('cart.removeItem')} onClick={() => handleRemove(item.id)} disabled={loading}>
+                        <FaTrash size={12} />
+                      </button>
+                    </IconTooltip>
                   </div>
                 </div>
               ))}

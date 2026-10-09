@@ -466,15 +466,16 @@ const VariantDetailPage: React.FC = () => {
             {/* Quantity stepper + add to cart */}
             <div className="vdp-actions">
               <div className="vdp-stepper">
-                <button className="vdp-stepper-btn" disabled={outOfStock || quantity <= minQty}
+                <button className="vdp-stepper-btn" aria-label={t('cart.lessQuantity')} disabled={outOfStock || quantity <= minQty}
                   onClick={() => adj(-stepQty)}>−</button>
                 <input
                   className="vdp-stepper-input"
+                  aria-label={t('cart.quantityMetres')}
                   type="number" value={quantity} min={minQty} step={stepQty}
                   disabled={outOfStock}
                   onChange={e => { const v = parseFloat(e.target.value); if (!isNaN(v) && v >= minQty) setQuantity(Math.round(v * 100) / 100); }}
                 />
-                <button className="vdp-stepper-btn" disabled={outOfStock} onClick={() => adj(stepQty)}>+</button>
+                <button className="vdp-stepper-btn" aria-label={t('cart.moreQuantity')} disabled={outOfStock} onClick={() => adj(stepQty)}>+</button>
               </div>
               <Button
                 variant="dark" size="lg" className="flex-grow-1 fw-semibold vdp-add-btn"

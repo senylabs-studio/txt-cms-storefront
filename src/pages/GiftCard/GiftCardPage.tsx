@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert, InputGroup, Spinner } from 'react-bootstrap';
 import { FaGift, FaMinus, FaPlus } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
+import { useDocumentMeta } from '../../hooks/useDocumentMeta';
 import MainLayout from '../../components/Layout/MainLayout';
 import { useCart } from '../../contexts/CartContext';
 import { useAuthGate } from '../../contexts/AuthGateContext';
@@ -20,6 +21,8 @@ const MESSAGE_MAX = 500;
 const GiftCardPage: React.FC = () => {
   const { t } = useTranslation();
   const settings = useSiteSettings();
+  // The tab title: this screen's, not the previous page's.
+  useDocumentMeta(`${t('giftCard.title')} — ${settings.siteName}`);
   const { addGiftCard, loading } = useCart();
   const { requireAuth } = useAuthGate();
   const { showToast } = useToast();

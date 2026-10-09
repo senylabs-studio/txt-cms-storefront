@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Container, Row, Col, Form, Button, Card, Alert, Spinner, Badge } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useDocumentMeta } from '../../hooks/useDocumentMeta';
+import { useSiteSettings } from '../../contexts/SiteSettingsContext';
 import { FaTruck, FaGift } from 'react-icons/fa';
 import MainLayout from '../../components/Layout/MainLayout';
 import { useCart } from '../../contexts/CartContext';
@@ -17,6 +19,9 @@ import { cartItemName } from '../../utils/giftCard';
 
 const CheckoutPage: React.FC = () => {
   const { t } = useTranslation();
+  const { siteName } = useSiteSettings();
+  // The tab title: this screen's, not the previous page's.
+  useDocumentMeta(`${t('checkout.title')} — ${siteName}`);
   const { cart, fetchCart } = useCart();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();

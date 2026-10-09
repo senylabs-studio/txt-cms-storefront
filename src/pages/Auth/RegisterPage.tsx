@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Container, Card, Form, Button, Alert, Spinner } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useDocumentMeta } from '../../hooks/useDocumentMeta';
+import { useSiteSettings } from '../../contexts/SiteSettingsContext';
 import MainLayout from '../../components/Layout/MainLayout';
 import { register as registerService } from '../../services/authService';
 import { useAuth } from '../../contexts/AuthContext';
@@ -11,6 +13,9 @@ import { meetsPasswordRules } from '../../utils/password';
 
 const RegisterPage: React.FC = () => {
   const { t } = useTranslation();
+  const { siteName } = useSiteSettings();
+  // The tab title: this screen's, not the previous page's.
+  useDocumentMeta(`${t('auth.register.title')} — ${siteName}`);
   const { login } = useAuth();
   const navigate = useNavigate();
   const { showToast } = useToast();

@@ -3,6 +3,8 @@ import { Container, Row, Col, Card, Form, Button, Alert, Spinner, Badge, Modal }
 import { FaPlus, FaEdit, FaTrash, FaMapMarkerAlt, FaUser, FaLock, FaShieldAlt, FaEnvelope } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useDocumentMeta } from '../../hooks/useDocumentMeta';
+import { useSiteSettings } from '../../contexts/SiteSettingsContext';
 import MainLayout from '../../components/Layout/MainLayout';
 import {
   getProfile, updateProfile, changePassword, updateEmail, resendEmailConfirmation, addAddress, updateAddress, deleteAddress, updateNewsletterSubscription,
@@ -25,6 +27,9 @@ const emptyAddress: Partial<CustomerAddress> = {
 
 const AccountPage: React.FC = () => {
   const { t } = useTranslation();
+  const { siteName } = useSiteSettings();
+  // The tab title: this screen's, not the previous page's.
+  useDocumentMeta(`${t('account.title')} — ${siteName}`);
   const { login, updateUser } = useAuth();
   const { showToast } = useToast();
   const [profile, setProfile] = useState<StorefrontProfile | null>(null);

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FaChevronRight } from 'react-icons/fa';
@@ -26,13 +26,15 @@ const MobileMenuSheet: React.FC<MobileMenuSheetProps> = ({ open, onClose }) => {
   const [items, setItems] = useState<StorefrontMenuItem[]>([]);
   const [languages, setLanguages] = useState<StorefrontLanguage[]>([]);
 
+  // Loaded when the sheet is first opened (per language), not on every page: the header's own menu
+  // already fetches them, and on desktop this sheet is never opened at all.
+  const loadedFor = useRef<string | null>(null);
   useEffect(() => {
+    if (!open || loadedFor.current === i18n.language) return;
+    loadedFor.current = i18n.language;
     getMenu().then(setItems).catch(() => {});
-  }, [i18n.language]);
-
-  useEffect(() => {
-    getLanguages().then(setLanguages).catch(() => {});
-  }, []);
+    if (languages.length === 0) getLanguages().then(setLanguages).catch(() => {});
+  }, [open, i18n.language, languages.length]);
 
   // The sheet renders inside the sticky header (its own stacking context, z-index 1000), so the
   // floating chat button (1050) would sit on top of the open menu and cover its items.
