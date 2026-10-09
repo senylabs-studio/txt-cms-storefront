@@ -82,4 +82,31 @@ describe('share preview meta', () => {
     expect(missing).toContain('<meta name="robots" content="noindex" />');
     expect(missing).not.toContain('rel="canonical"');
   });
+
+  // Audit 2026-10-09: no structured data for search engines.
+  it('adds schema.org Product data with price and availability on a variant page', async () => {
+    const meta = await buildMeta('/variant/42', api({
+      '/storefront/products/variants/42': { name: 'Cretona </script> lisa', code: '1019-01', description: 'Algodón', price: 11.5, availableStock: 0, images: [{ url: 'https://cdn/v.jpg' }] },
+    }));
+    const html = injectMeta('<head><title>x</title>\n<meta name="description" content="x" /></head>', meta, 'https://shop/variant/42');
+    const json = html.match(/<script type="application\/ld\+json">(.*?)<\/script>/)[1];
+    expect(json).not.toContain('</script');
+    const ld = JSON.parse(json);
+    expect(ld).toMatchObject({ '@type': 'Product', name: 'Cretona </script> lisa', sku: '1019-01', url: 'https://shop/variant/42',
+      offers: { '@type': 'Offer', price: '11.50', priceCurrency: 'EUR', availability: 'https://schema.org/OutOfStock', url: 'https://shop/variant/42' } });
+  });
+
+  it('uses a price range for a product with variants, and the shop (Store) on the home page', async () => {
+    const product = await buildMeta('/product/stof', api({
+      '/storefront/products/stof': { name: 'Stof', code: '1272', price: 9, variants: [{ price: 9, availableStock: 0 }, { price: 12.5, availableStock: 2 }] },
+    }));
+    expect(product.jsonLd.offers).toMatchObject({ '@type': 'AggregateOffer', lowPrice: '9.00', highPrice: '12.50', availability: 'https://schema.org/InStock' });
+
+    const home = await buildMeta('/', async (path) => (path === '/storefront/site-settings'
+      ? { ...site, companyAddress: 'Calle Montserrat 27', companyCity: 'Mataró', companyPostalCode: '08302', companyPhone: '937906859', instagramUrl: 'https://instagram.com/x' }
+      : null));
+    expect(home.jsonLd).toMatchObject({ '@type': 'Store', name: 'Tejidos Pulido', telephone: '937906859',
+      address: { streetAddress: 'Calle Montserrat 27', postalCode: '08302', addressCountry: 'ES' }, sameAs: ['https://instagram.com/x'] });
+    expect((await buildMeta('/cart', api({}))).jsonLd).toBeUndefined();
+  });
 });
