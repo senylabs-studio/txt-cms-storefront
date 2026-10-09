@@ -114,7 +114,10 @@ const CheckoutPage: React.FC = () => {
   const giftCardCovers = cart?.giftCardCode ? Math.min(cart.giftCardAvailable, estimatedTotal) : 0;
   const amountDue = Math.round((estimatedTotal - giftCardCovers) * 100) / 100;
   const isGiftCardPurchase = cart?.isGiftCardPurchase ?? false;
-  const coveredByGiftCard = !!cart?.giftCardCode && amountDue <= 0;
+  // Nothing to pay: the gift card covers it all, or a coupon brought the order to 0 €. The order is
+  // placed by the button below; PayPal can't take a 0 € payment.
+  const nothingToPay = amountDue <= 0;
+  const coveredByGiftCard = !!cart?.giftCardCode && nothingToPay;
   // Gift cards are emailed: no address (and no shipping rate) needed to buy them.
   const addressReady = isGiftCardPurchase || (!!shippingId && !shippingLoading && shippingRate !== null);
 
@@ -239,11 +242,12 @@ const CheckoutPage: React.FC = () => {
                 >
                   {loading
                     ? <><Spinner size="sm" animation="border" className="me-2" />{t('checkout.processing')}</>
-                    : coveredByGiftCard ? t('checkout.confirmWithGiftCard') : t('checkout.proceed')}
+                    : coveredByGiftCard ? t('checkout.confirmWithGiftCard') : nothingToPay ? t('checkout.confirmFree') : t('checkout.proceed')}
                 </Button>
                 {coveredByGiftCard && <div className="small text-success mt-2">{t('checkout.coveredByGiftCard')}</div>}
+                {nothingToPay && !coveredByGiftCard && <div className="small text-success mt-2">{t('checkout.nothingToPay')}</div>}
 
-                {!coveredByGiftCard && (
+                {!nothingToPay && (
                   <PayPalCheckoutButton
                     buildRequest={buildCheckoutRequest}
                     disabled={loading || !addressReady}

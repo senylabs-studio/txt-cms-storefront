@@ -223,7 +223,9 @@
     "paypalError": "No s'ha pogut completar el pagament amb PayPal. No s'ha fet cap càrrec.",
     "giftCardDelivery": "Les targetes regal s'envien per correu en confirmar el pagament: no cal adreça d'enviament.",
     "confirmWithGiftCard": "Confirmar la comanda",
-    "coveredByGiftCard": "La teva targeta regal cobreix tota la comanda: no has de pagar res més."
+    "coveredByGiftCard": "La teva targeta regal cobreix tota la comanda: no has de pagar res més.",
+    "confirmFree": "Confirmar la comanda",
+    "nothingToPay": "No has de pagar res: la comanda es confirma en prémer el botó."
   },
   "checkoutSuccess": {
     "title": "Comanda rebuda!",

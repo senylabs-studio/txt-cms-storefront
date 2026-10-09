@@ -223,7 +223,9 @@
     "paypalError": "The PayPal payment could not be completed. You have not been charged.",
     "giftCardDelivery": "Gift cards are emailed once payment is confirmed: no shipping address needed.",
     "confirmWithGiftCard": "Place order",
-    "coveredByGiftCard": "Your gift card covers the whole order: there's nothing more to pay."
+    "coveredByGiftCard": "Your gift card covers the whole order: there's nothing more to pay.",
+    "confirmFree": "Confirm order",
+    "nothingToPay": "There is nothing to pay: the order is placed when you press the button."
   },
   "checkoutSuccess": {
     "title": "Order received!",

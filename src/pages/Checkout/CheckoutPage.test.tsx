@@ -108,6 +108,18 @@ describe('CheckoutPage', () => {
     expect(navigate).toHaveBeenCalledWith('/catalog');
   });
 
+  // A coupon that brings the order to 0 € with free shipping, no gift card: nothing to pay —
+  // the order is confirmed by the button (PayPal can't take 0 €), not "paid with a gift card".
+  it('offers to confirm a 0 € order without a gift card', async () => {
+    mockCart.cart = { ...cartWithItems(), couponCode: 'GRATIS', couponDiscountAmount: 20, total: 0 };
+    getApplicableShippingRate.mockResolvedValue({ name: 'Gratis', price: 0, shippingCost: 0, isFree: true });
+    render(<CheckoutPage />);
+
+    expect(await screen.findByText('checkout.nothingToPay')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'checkout.confirmFree' })).toBeInTheDocument();
+    expect(screen.queryByText('checkout.coveredByGiftCard')).not.toBeInTheDocument();
+  });
+
   it('renders the order summary with the correct subtotal/total once addresses load', async () => {
     mockCart.cart = cartWithItems();
     render(<CheckoutPage />);
