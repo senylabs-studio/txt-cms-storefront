@@ -181,6 +181,8 @@ export interface AddGiftCardRequest {
 
 export interface CheckoutRequest {
   shippingAddressId?: number;
+  /** Shipping option chosen at checkout; empty = the default delivery. */
+  shippingRateId?: number;
   billingAddressId?: number;
   notes?: string;
   browserAcceptHeader?: string;

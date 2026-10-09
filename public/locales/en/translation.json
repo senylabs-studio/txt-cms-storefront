@@ -230,7 +230,9 @@
     "coveredByGiftCard": "Your gift card covers the whole order: there's nothing more to pay.",
     "confirmFree": "Confirm order",
     "nothingToPay": "There is nothing to pay: the order is placed when you press the button.",
-    "vatExempt": "No VAT (shipped outside the EU VAT area: export)"
+    "vatExempt": "No VAT (shipped outside the EU VAT area: export)",
+    "shippingMethod": "Shipping method",
+    "pickupAt": "You'll collect your order at the shop: {{address}}. We'll let you know when it's ready."
   },
   "checkoutSuccess": {
     "title": "Order received!",

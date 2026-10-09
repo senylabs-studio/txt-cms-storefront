@@ -230,7 +230,9 @@
     "coveredByGiftCard": "Tu tarjeta regalo cubre todo el pedido: no tienes que pagar nada más.",
     "confirmFree": "Confirmar pedido",
     "nothingToPay": "No tienes que pagar nada: el pedido se confirma al pulsar el botón.",
-    "vatExempt": "IVA no aplicable (envío fuera del territorio IVA: exportación)"
+    "vatExempt": "IVA no aplicable (envío fuera del territorio IVA: exportación)",
+    "shippingMethod": "Forma de envío",
+    "pickupAt": "Recogerás el pedido en la tienda: {{address}}. Te avisaremos cuando esté listo."
   },
   "checkoutSuccess": {
     "title": "¡Pedido recibido!",

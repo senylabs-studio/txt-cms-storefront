@@ -230,7 +230,9 @@
     "coveredByGiftCard": "La teva targeta regal cobreix tota la comanda: no has de pagar res més.",
     "confirmFree": "Confirmar la comanda",
     "nothingToPay": "No has de pagar res: la comanda es confirma en prémer el botó.",
-    "vatExempt": "IVA no aplicable (enviament fora del territori IVA: exportació)"
+    "vatExempt": "IVA no aplicable (enviament fora del territori IVA: exportació)",
+    "shippingMethod": "Forma d'enviament",
+    "pickupAt": "Recolliràs la comanda a la botiga: {{address}}. T'avisarem quan estigui a punt."
   },
   "checkoutSuccess": {
     "title": "Comanda rebuda!",

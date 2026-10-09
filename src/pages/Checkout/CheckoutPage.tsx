@@ -4,13 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useDocumentMeta } from '../../hooks/useDocumentMeta';
 import { useSiteSettings } from '../../contexts/SiteSettingsContext';
-import { FaTruck, FaGift } from 'react-icons/fa';
+import { FaTruck, FaGift, FaStore } from 'react-icons/fa';
 import MainLayout from '../../components/Layout/MainLayout';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { checkout } from '../../services/cartService';
 import { getProfile } from '../../services/profileService';
-import { getApplicableShippingRate, type ApplicableShippingRate } from '../../services/shippingService';
+import { getShippingOptions, type ApplicableShippingRate } from '../../services/shippingService';
 import { getApiErrorMessage } from '../../utils/apiError';
 import type { CustomerAddress, CheckoutResponse, CheckoutRequest } from '../../types';
 import PayPalCheckoutButton from './PayPalCheckoutButton';
@@ -19,7 +19,7 @@ import { cartItemName } from '../../utils/giftCard';
 
 const CheckoutPage: React.FC = () => {
   const { t } = useTranslation();
-  const { siteName } = useSiteSettings();
+  const { siteName, companyAddress, companyPostalCode, companyCity } = useSiteSettings();
   // The tab title: this screen's, not the previous page's.
   useDocumentMeta(`${t('checkout.title')} — ${siteName}`);
   const { cart, fetchCart } = useCart();
@@ -34,7 +34,9 @@ const CheckoutPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [paypalBusy, setPaypalBusy] = useState(false);
   const [error, setError] = useState('');
-  const [shippingRate, setShippingRate] = useState<ApplicableShippingRate | null | undefined>(undefined);
+  // Options for the chosen address (null = none covers it, undefined = not looked up yet).
+  const [shippingOptions, setShippingOptions] = useState<ApplicableShippingRate[] | null | undefined>(undefined);
+  const [chosenRateId, setChosenRateId] = useState<number | undefined>();
   const [shippingLoading, setShippingLoading] = useState(false);
 
   // Redsys redirect state
@@ -52,26 +54,33 @@ const CheckoutPage: React.FC = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps -- one-off checkout bootstrap per auth state; fetchCart/navigate/t don't change what's loaded
   }, [isAuthenticated]);
 
-  // Fetch shipping rate whenever shipping address or cart changes
+  // Fetch the shipping options whenever the shipping address or the cart changes (the price
+  // depends on the cart's weight and total, worked out server-side).
   useEffect(() => {
     if (!shippingId || !cart?.items?.length || cart.isGiftCardPurchase) {
-      setShippingRate(undefined);
+      setShippingOptions(undefined);
       return;
     }
-    const addr = addresses.find(a => a.id === shippingId);
-    if (!addr?.country) { setShippingRate(undefined); return; }
-
     let cancelled = false;
-    const cartSubtotal = cart.items.reduce((sum, i) => sum + i.subtotal, 0);
     setShippingLoading(true);
-    getApplicableShippingRate(addr.country, cartSubtotal, addr.postalCode)
-      .then(rate => { if (!cancelled) setShippingRate(rate); })
+    getShippingOptions(shippingId)
+      .then(options => {
+        if (cancelled) return;
+        setShippingOptions(options.length ? options : null);
+        // Keep the customer's choice while it's still offered; else the default delivery.
+        setChosenRateId(prev => options.some(o => o.id === prev) ? prev : (options.find(o => !o.isPickup) ?? options[0])?.id);
+      })
       .finally(() => { if (!cancelled) setShippingLoading(false); });
     // Switching the shipping address twice in quick succession (before the first lookup
-    // resolves) must not let the slower, now-stale response overwrite the rate for the address
-    // actually selected now — same class of stale-response bug this codebase has hit before.
+    // resolves) must not let the slower, now-stale response overwrite the options for the
+    // address actually selected now — same class of stale-response bug this codebase has hit before.
     return () => { cancelled = true; };
-  }, [shippingId, addresses, cart]);
+  }, [shippingId, cart]);
+
+  // The option in use: null when the address has none (or only pickup and nothing chosen).
+  const shippingRate: ApplicableShippingRate | null | undefined = shippingOptions === undefined
+    ? undefined
+    : shippingOptions?.find(o => o.id === chosenRateId) ?? null;
 
   // Auto-submit the Redsys form once we have the data
   useEffect(() => {
@@ -140,6 +149,7 @@ const CheckoutPage: React.FC = () => {
   // Same request for both payment routes (Redsys page / PayPal button).
   const buildCheckoutRequest = (): CheckoutRequest => ({
     shippingAddressId: cart?.isGiftCardPurchase ? undefined : shippingId,
+    shippingRateId: cart?.isGiftCardPurchase ? undefined : shippingRate?.id,
     billingAddressId: billingId,
     notes: notes || undefined,
     browserAcceptHeader: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -223,6 +233,32 @@ const CheckoutPage: React.FC = () => {
                         ))}
                       </Form.Select>
                     </Form.Group>
+
+                    {shippingOptions && shippingOptions.length > 1 && (
+                      <Form.Group className="mb-3" role="radiogroup" aria-label={t('checkout.shippingMethod')}>
+                        <Form.Label className="fw-semibold d-block">{t('checkout.shippingMethod')}</Form.Label>
+                        {shippingOptions.map(o => (
+                          <Form.Check
+                            key={o.id}
+                            type="radio"
+                            id={`shipping-option-${o.id}`}
+                            name="shipping-option"
+                            checked={o.id === chosenRateId}
+                            onChange={() => setChosenRateId(o.id)}
+                            label={<>
+                              {o.isPickup ? <FaStore className="me-1" aria-hidden /> : <FaTruck className="me-1" aria-hidden />}
+                              {o.name} — {o.isFree || o.shippingCost === 0 ? t('checkout.free') : formatPrice(o.shippingCost)}
+                            </>}
+                          />
+                        ))}
+                      </Form.Group>
+                    )}
+                    {shippingRate?.isPickup && (
+                      <Alert variant="info" className="py-2 small">
+                        <FaStore className="me-1" aria-hidden />
+                        {t('checkout.pickupAt', { address: [companyAddress, [companyPostalCode, companyCity].filter(Boolean).join(' ')].filter(Boolean).join(', ') || siteName })}
+                      </Alert>
+                    )}
 
                     <Form.Group className="mb-3">
                       <Form.Label className="fw-semibold">{t('checkout.billingAddress')}</Form.Label>

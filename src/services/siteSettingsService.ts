@@ -48,6 +48,10 @@ export interface SiteSettings {
   brandColor?: string;
   siteDescription: string;
   copyright: string;
+  /** The shop's address: shown for "Recogida en tienda" at checkout. */
+  companyAddress?: string;
+  companyPostalCode?: string;
+  companyCity?: string;
   instagramUrl?: string;
   facebookUrl?: string;
   tikTokUrl?: string;

@@ -36,8 +36,8 @@ vi.mock('../../services/cartService', () => ({ checkout }));
 const { getProfile } = vi.hoisted(() => ({ getProfile: vi.fn() }));
 vi.mock('../../services/profileService', () => ({ getProfile }));
 
-const { getApplicableShippingRate } = vi.hoisted(() => ({ getApplicableShippingRate: vi.fn() }));
-vi.mock('../../services/shippingService', () => ({ getApplicableShippingRate }));
+const { getShippingOptions } = vi.hoisted(() => ({ getShippingOptions: vi.fn() }));
+vi.mock('../../services/shippingService', () => ({ getShippingOptions }));
 // PayPal has its own tests (PayPalCheckoutButton.test.tsx); here it just must not load the SDK.
 vi.mock('./PayPalCheckoutButton', () => ({ default: () => null }));
 
@@ -85,7 +85,7 @@ describe('CheckoutPage', () => {
     mockAuth.isAuthenticated = true;
     mockCart.cart = null;
     getProfile.mockResolvedValue(profile());
-    getApplicableShippingRate.mockResolvedValue(validShippingRate);
+    getShippingOptions.mockResolvedValue([validShippingRate]);
     HTMLFormElement.prototype.submit = vi.fn();
   });
 
@@ -113,7 +113,7 @@ describe('CheckoutPage', () => {
   // the order is confirmed by the button (PayPal can't take 0 €), not "paid with a gift card".
   it('offers to confirm a 0 € order without a gift card', async () => {
     mockCart.cart = { ...cartWithItems(), couponCode: 'GRATIS', couponDiscountAmount: 20, total: 0 };
-    getApplicableShippingRate.mockResolvedValue({ name: 'Gratis', price: 0, shippingCost: 0, isFree: true });
+    getShippingOptions.mockResolvedValue([{ name: 'Gratis', price: 0, shippingCost: 0, isFree: true }]);
     render(<CheckoutPage />);
 
     expect(await screen.findByText('checkout.nothingToPay')).toBeInTheDocument();
@@ -136,13 +136,32 @@ describe('CheckoutPage', () => {
     const p = profile();
     p.addresses[0] = { ...p.addresses[0], city: 'Las Palmas', postalCode: '35001' };
     getProfile.mockResolvedValue(p);
-    getApplicableShippingRate.mockResolvedValue({ ...validShippingRate, vatExempt: true, vatPercent: 21 });
+    getShippingOptions.mockResolvedValue([{ ...validShippingRate, vatExempt: true, vatPercent: 21 }]);
     render(<CheckoutPage />);
 
     expect(await screen.findByText('checkout.vatExempt')).toBeInTheDocument();
-    await waitFor(() => expect(getApplicableShippingRate).toHaveBeenCalledWith('ES', 20, '35001'));
+    await waitFor(() => expect(getShippingOptions).toHaveBeenCalledWith(1));
     expect(screen.getByText('−4,34 €')).toBeInTheDocument();
     expect(screen.getByText('20,66 €')).toBeInTheDocument();
+  });
+
+  it('lets the customer choose another shipping option, such as store pickup', async () => {
+    mockCart.cart = cartWithItems();
+    getShippingOptions.mockResolvedValue([
+      { id: 1, name: 'Península', price: 5.4, shippingCost: 5.4, isFree: false },
+      { id: 2, name: 'Urgente', price: 12, shippingCost: 12, isFree: false },
+      { id: 3, name: 'Recogida en tienda', price: 0, shippingCost: 0, isFree: false, isPickup: true },
+    ]);
+    checkout.mockResolvedValue(checkoutResponse);
+    render(<CheckoutPage />);
+
+    const pickup = await screen.findByRole('radio', { name: /Recogida en tienda/ });
+    expect(screen.getByRole('radio', { name: /Península/ })).toBeChecked();
+    fireEvent.click(pickup);
+
+    expect(await screen.findByText(/checkout.pickupAt/)).toBeInTheDocument();
+    fireEvent.click(screen.getByText('checkout.proceed'));
+    await waitFor(() => expect(checkout).toHaveBeenCalledWith(expect.objectContaining({ shippingAddressId: 1, shippingRateId: 3 })));
   });
 
   it('submits the Redsys form automatically once checkout() succeeds', async () => {
@@ -211,7 +230,7 @@ describe('CheckoutPage', () => {
     };
     render(<CheckoutPage />);
 
-    await waitFor(() => expect(getApplicableShippingRate).toHaveBeenCalled());
+    await waitFor(() => expect(getShippingOptions).toHaveBeenCalled());
 
     // subtotal 100, shipping 5 (validShippingRate), recargo ratio 10/100 = 0.1
     // -> estimatedRecargo = (100 + 5) * 0.1 = 10.50, estimatedTotal = 100 + 5 + 10.50 = 115.50
@@ -224,11 +243,11 @@ describe('CheckoutPage', () => {
   // address overwrite the rate already shown for the SECOND (currently selected) address.
   it('ignores a stale shipping-rate response from an address the customer already switched away from', async () => {
     mockCart.cart = cartWithItems();
-    let resolveFirst!: (rate: ApplicableShippingRate) => void;
-    let resolveSecond!: (rate: ApplicableShippingRate) => void;
-    const first = new Promise<ApplicableShippingRate>(res => { resolveFirst = res; });
-    const second = new Promise<ApplicableShippingRate>(res => { resolveSecond = res; });
-    getApplicableShippingRate.mockImplementationOnce(() => first).mockImplementationOnce(() => second);
+    let resolveFirst!: (rates: ApplicableShippingRate[]) => void;
+    let resolveSecond!: (rates: ApplicableShippingRate[]) => void;
+    const first = new Promise<ApplicableShippingRate[]>(res => { resolveFirst = res; });
+    const second = new Promise<ApplicableShippingRate[]>(res => { resolveSecond = res; });
+    getShippingOptions.mockImplementationOnce(() => first).mockImplementationOnce(() => second);
     const twoAddresses: StorefrontProfile = {
       ...profile(),
       addresses: [
@@ -239,17 +258,17 @@ describe('CheckoutPage', () => {
     getProfile.mockResolvedValue(twoAddresses);
     render(<CheckoutPage />);
 
-    await waitFor(() => expect(getApplicableShippingRate).toHaveBeenCalledTimes(1)); // default address (id 1)
+    await waitFor(() => expect(getShippingOptions).toHaveBeenCalledTimes(1)); // default address (id 1)
 
     const selects = screen.getAllByRole('combobox');
     fireEvent.change(selects[0], { target: { value: '2' } }); // switch to the second address
-    await waitFor(() => expect(getApplicableShippingRate).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(getShippingOptions).toHaveBeenCalledTimes(2));
 
-    resolveSecond({ name: 'RateB', price: 8, shippingCost: 8, isFree: false });
+    resolveSecond([{ name: 'RateB', price: 8, shippingCost: 8, isFree: false }]);
     await screen.findByText('RateB');
 
     // The first (now-stale) address's slower response arrives after the switch — must be ignored.
-    resolveFirst({ name: 'RateA', price: 3, shippingCost: 3, isFree: false });
+    resolveFirst([{ name: 'RateA', price: 3, shippingCost: 3, isFree: false }]);
     await new Promise(r => setTimeout(r, 0));
 
     expect(screen.getByText('RateB')).toBeInTheDocument();
@@ -260,10 +279,10 @@ describe('CheckoutPage', () => {
     // Regression test: the backend now blocks this case rather than silently shipping for
     // free, and the button must not let the customer click through the warning either.
     mockCart.cart = cartWithItems();
-    getApplicableShippingRate.mockResolvedValue(null);
+    getShippingOptions.mockResolvedValue([]);
     render(<CheckoutPage />);
 
-    await waitFor(() => expect(getApplicableShippingRate).toHaveBeenCalled());
+    await waitFor(() => expect(getShippingOptions).toHaveBeenCalled());
     const proceedBtn = await screen.findByRole('button', { name: 'checkout.proceed' });
     expect(proceedBtn).toBeDisabled();
     expect(screen.getByText('checkout.noShippingRate')).toBeInTheDocument();
@@ -285,7 +304,7 @@ describe('CheckoutPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'checkout.proceed' }));
 
     await waitFor(() => expect(checkout).toHaveBeenCalledWith(expect.objectContaining({ shippingAddressId: undefined })));
-    expect(getApplicableShippingRate).not.toHaveBeenCalled();
+    expect(getShippingOptions).not.toHaveBeenCalled();
   });
 
   it('a gift card covering everything places the order without going to Redsys', async () => {
