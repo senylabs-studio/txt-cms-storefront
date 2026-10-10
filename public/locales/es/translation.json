@@ -512,7 +512,9 @@
     "seeAllNew": "Ver todas las novedades",
     "fibreGuideLink": "Qué es {{material}}: ver en la guía de tejidos",
     "pattern": "Diseño",
-    "colors": "Colores"
+    "colors": "Colores",
+    "rating": "Valoración",
+    "ratingOf": "{{value}} de 5 estrellas"
   },
   "filters": {
     "close": "Cerrar filtros",

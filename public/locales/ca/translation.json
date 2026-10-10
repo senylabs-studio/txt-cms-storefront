@@ -512,7 +512,9 @@
     "seeAllNew": "Veure totes les novetats",
     "fibreGuideLink": "Què és {{material}}: veure-ho a la guia de teixits",
     "pattern": "Disseny",
-    "colors": "Colors"
+    "colors": "Colors",
+    "rating": "Valoració",
+    "ratingOf": "{{value}} de 5 estrelles"
   },
   "filters": {
     "close": "Tancar filtres",

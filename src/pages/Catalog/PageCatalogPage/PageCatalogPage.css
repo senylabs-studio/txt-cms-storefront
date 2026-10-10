@@ -28,11 +28,15 @@
   display: flex;
   flex-direction: column;
   transform: translateX(-100%);
-  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Hidden once it has slid out: off-screen alone, its ~20 controls stayed in the tab order. */
+  visibility: hidden;
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s linear 0.28s;
 }
 
 .filter-panel.is-open {
   transform: translateX(0);
+  visibility: visible;
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s;
 }
 
 /* ── Panel header ─────────────────────────────────────────────────────────────── */

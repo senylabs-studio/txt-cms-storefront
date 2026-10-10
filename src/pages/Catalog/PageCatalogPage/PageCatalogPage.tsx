@@ -21,6 +21,7 @@ import PageItemsGrid from '../../../components/common/PageItemsGrid';
 import CatalogPagination from '../../../components/common/CatalogPagination/CatalogPagination';
 import ActiveFilters from '../../../components/common/ActiveFilters/ActiveFilters';
 import { FILTER_PARAMS, filtersFromParams, writeFilterParams } from '../../../utils/catalogParams';
+import { useFilterPanel } from '../../../hooks/useFilterPanel';
 
 // 24 fills whole rows at every products-block column count (2, 3, 4 or 6).
 const PAGE_SIZE = 24;
@@ -56,6 +57,7 @@ const PageCatalogPage: React.FC = () => {
   const [loadFailed, setLoadFailed] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const filterPanelRef = useFilterPanel(sidebarOpen, () => setSidebarOpen(false));
 
   // Phones get "Cargar más" instead of page numbers: each tap adds the next page's products
   // under the ones already shown, and ?pagina= counts the pages listed.
@@ -321,7 +323,7 @@ const PageCatalogPage: React.FC = () => {
       <>
         <div className={`filter-backdrop${sidebarOpen ? ' is-open' : ''}`} onClick={() => setSidebarOpen(false)} />
 
-        <div className={`filter-panel${sidebarOpen ? ' is-open' : ''}`}>
+        <div ref={filterPanelRef} role="dialog" aria-modal="true" aria-label={t('filters.title')} className={`filter-panel${sidebarOpen ? ' is-open' : ''}`}>
           <div className="filter-panel-header">
             <span className="filter-panel-title">{t('filters.title')}</span>
             <IconTooltip label={t('filters.close')}>

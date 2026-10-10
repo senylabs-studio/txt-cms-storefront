@@ -512,7 +512,9 @@
     "seeAllNew": "See all new arrivals",
     "fibreGuideLink": "What is {{material}}: see the fabric guide",
     "pattern": "Design",
-    "colors": "Colours"
+    "colors": "Colours",
+    "rating": "Rating",
+    "ratingOf": "{{value}} out of 5 stars"
   },
   "filters": {
     "close": "Close filters",

@@ -41,15 +41,33 @@ const SectionTitle: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 );
 
 // ── Star rating (display, or interactive when onChange is given) ──────────────
-const StarRating: React.FC<{ value: number; onChange?: (v: number) => void; size?: number }> = ({ value, onChange, size = 16 }) => (
-  <span className="text-warning" style={{ cursor: onChange ? 'pointer' : undefined }}>
-    {Array.from({ length: 5 }, (_, i) => {
-      const filled = i < Math.round(value);
-      const Icon = filled ? FaStar : FaRegStar;
-      return <Icon key={i} size={size} onClick={onChange ? () => onChange(i + 1) : undefined} />;
-    })}
-  </span>
-);
+// Interactive: a radio group of buttons (keyboard and screen readers can rate too — the stars
+// were click-only icons, so a review couldn't be written without a mouse).
+const StarRating: React.FC<{ value: number; onChange?: (v: number) => void; size?: number }> = ({ value, onChange, size = 16 }) => {
+  const { t } = useTranslation();
+  if (!onChange) return (
+    <span className="text-warning" role="img" aria-label={t('product.ratingOf', { value: Math.round(value) })}>
+      {Array.from({ length: 5 }, (_, i) => {
+        const Icon = i < Math.round(value) ? FaStar : FaRegStar;
+        return <Icon key={i} size={size} aria-hidden />;
+      })}
+    </span>
+  );
+  return (
+    <span className="text-warning" role="radiogroup" aria-label={t('product.rating')}>
+      {Array.from({ length: 5 }, (_, i) => {
+        const Icon = i < Math.round(value) ? FaStar : FaRegStar;
+        return (
+          <button key={i} type="button" role="radio" aria-checked={Math.round(value) === i + 1}
+            aria-label={t('product.ratingOf', { value: i + 1 })}
+            className="btn btn-link p-0 me-1 text-warning" onClick={() => onChange(i + 1)}>
+            <Icon size={size} aria-hidden />
+          </button>
+        );
+      })}
+    </span>
+  );
+};
 
 // ── Info row ──────────────────────────────────────────────────────────────────
 const InfoRow: React.FC<{ label: string; value: React.ReactNode }> = ({ label, value }) => (
@@ -415,13 +433,15 @@ const VariantDetailPage: React.FC = () => {
             {images.length > 1 && (
               <div className="vdp-thumb-strip">
                 {images.map((img, i) => (
-                  <div
+                  <button
+                    type="button"
                     key={i}
                     className={`vdp-thumb${i === selectedImage ? ' vdp-thumb--active' : ''}`}
+                    aria-pressed={i === selectedImage}
                     onClick={() => setSelectedImage(i)}
                   >
                     <img src={img.url} alt={img.altText || `${variant.name} ${i + 1}`} />
-                  </div>
+                  </button>
                 ))}
               </div>
             )}

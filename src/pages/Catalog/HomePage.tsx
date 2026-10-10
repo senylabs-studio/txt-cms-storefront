@@ -19,6 +19,7 @@ import IconTooltip from '../../components/common/IconTooltip/IconTooltip';
 import CatalogPagination from '../../components/common/CatalogPagination/CatalogPagination';
 import { NEW_ARRIVALS_PARAM, FILTER_PARAMS, filtersFromParams, writeFilterParams } from '../../utils/catalogParams';
 import ActiveFilters from '../../components/common/ActiveFilters/ActiveFilters';
+import { useFilterPanel } from '../../hooks/useFilterPanel';
 
 const EMPTY_FACETS: PageFilterFacets = { minPrice: 0, maxPrice: 0, widths: [], materials: [] };
 
@@ -34,6 +35,7 @@ const HomePage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const filterPanelRef = useFilterPanel(sidebarOpen, () => setSidebarOpen(false));
 
   const [search, setSearch] = useState(searchParams.get('search') ?? '');
 
@@ -111,7 +113,7 @@ const HomePage: React.FC = () => {
     <MainLayout>
       {/* ── Floating filter sidebar ── */}
       <div className={`filter-backdrop${sidebarOpen ? ' is-open' : ''}`} onClick={() => setSidebarOpen(false)} />
-      <div className={`filter-panel${sidebarOpen ? ' is-open' : ''}`}>
+      <div ref={filterPanelRef} role="dialog" aria-modal="true" aria-label={t('filters.title')} className={`filter-panel${sidebarOpen ? ' is-open' : ''}`}>
         <div className="filter-panel-header">
           <span className="filter-panel-title">{t('filters.title')}</span>
           <IconTooltip label={t('filters.close')}>
