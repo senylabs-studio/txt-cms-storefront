@@ -249,7 +249,10 @@
     "setPasswordTitle": "Save your account",
     "setPasswordSubtitle": "Create a password so you can log back in later and track this and future orders.",
     "setPasswordSubmit": "Save",
-    "setPasswordSuccess": "Password saved. You can now log in with your email whenever you like."
+    "setPasswordSuccess": "Password saved. You can now log in with your email whenever you like.",
+    "confirmingTitle": "Confirming your payment…",
+    "confirmingMessage": "We're waiting for the bank's confirmation. It only takes a few seconds; don't close this page or pay again.",
+    "stillConfirming": "The bank hasn't confirmed the payment yet. We'll email you as soon as it does; don't pay again. If you don't hear from us within a few hours, contact us."
   },
   "authGate": {
     "title": "Continue with your purchase",

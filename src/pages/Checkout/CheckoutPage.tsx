@@ -233,7 +233,9 @@ const CheckoutPage: React.FC = () => {
                 ) : addresses.length === 0 ? (
                   <Alert variant="info">
                     {t('checkout.noAddresses')}{' '}
-                    <Button variant="link" className="p-0" onClick={() => navigate('/account')}>{t('checkout.addAddress')}</Button>
+                    {/* Straight to the new-address form, and back here once it's saved (it used to leave the
+                        first-time buyer on Mi cuenta with no way back). */}
+                    <Button variant="link" className="p-0" onClick={() => navigate('/account?nuevaDireccion=1&volver=/checkout')}>{t('checkout.addAddress')}</Button>
                   </Alert>
                 ) : (
                   <>

@@ -249,7 +249,10 @@
     "setPasswordTitle": "Desa el teu compte",
     "setPasswordSubtitle": "Crea una contrasenya per poder iniciar sessió més endavant i seguir aquesta i futures comandes.",
     "setPasswordSubmit": "Desar",
-    "setPasswordSuccess": "Contrasenya desada. Ja pots iniciar sessió amb el teu correu quan vulguis."
+    "setPasswordSuccess": "Contrasenya desada. Ja pots iniciar sessió amb el teu correu quan vulguis.",
+    "confirmingTitle": "Confirmant el pagament…",
+    "confirmingMessage": "Esperem la confirmació del banc. Són només uns segons; no tanquis aquesta pàgina ni tornis a pagar.",
+    "stillConfirming": "El banc encara no ens ha confirmat el pagament. T'enviarem un correu tan bon punt arribi; no tornis a pagar. Si d'aquí a unes hores no el reps, contacta amb nosaltres."
   },
   "authGate": {
     "title": "Continuar amb la compra",

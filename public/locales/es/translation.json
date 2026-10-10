@@ -249,7 +249,10 @@
     "setPasswordTitle": "Guarda tu cuenta",
     "setPasswordSubtitle": "Crea una contraseña para poder iniciar sesión más adelante y seguir este y futuros pedidos.",
     "setPasswordSubmit": "Guardar",
-    "setPasswordSuccess": "Contraseña guardada. Ya puedes iniciar sesión con tu email cuando quieras."
+    "setPasswordSuccess": "Contraseña guardada. Ya puedes iniciar sesión con tu email cuando quieras.",
+    "confirmingTitle": "Confirmando tu pago…",
+    "confirmingMessage": "Esperamos la confirmación del banco. Son solo unos segundos; no cierres esta página ni vuelvas a pagar.",
+    "stillConfirming": "El banco aún no nos ha confirmado el pago. Te enviaremos un email en cuanto llegue; no vuelvas a pagar. Si en unas horas no lo recibes, contacta con nosotros."
   },
   "authGate": {
     "title": "Continuar con la compra",
