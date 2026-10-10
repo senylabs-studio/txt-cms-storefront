@@ -17,12 +17,9 @@ export interface ApplicableShippingRate {
 }
 
 /** The shipping options for the customer's cart sent to one of their addresses (weight-based
- * rates, urgent, store pickup…). The first delivery option is the default. Empty on error. */
+ * rates, urgent, store pickup…). The first delivery option is the default. Throws on error: a
+ * failed lookup (API waking up, timeout) is not "we don't ship there". */
 export const getShippingOptions = async (shippingAddressId: number): Promise<ApplicableShippingRate[]> => {
-  try {
-    const res = await apiClient.get('/storefront/checkout/shipping-options', { params: { shippingAddressId } });
-    return res.data ?? [];
-  } catch {
-    return [];
-  }
+  const res = await apiClient.get('/storefront/checkout/shipping-options', { params: { shippingAddressId } });
+  return res.data ?? [];
 };

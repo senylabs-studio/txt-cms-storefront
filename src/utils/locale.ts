@@ -18,3 +18,13 @@ export const countryName = (isoCode: string | null | undefined): string => {
     return isoCode;
   }
 };
+
+/** Metres as the UI language writes them: "1,5 m" (es/ca), "1.5 m" (en). */
+export const formatMeters = (value: number): string =>
+  `${new Intl.NumberFormat(uiLocale(), { maximumFractionDigits: 2 }).format(value)} m`;
+
+/** A quantity as typed: "1,5" or "1.5" → 1.5; anything else → NaN. */
+export const parseQuantity = (text: string): number => {
+  const trimmed = text.trim();
+  return /^\d+([.,]\d+)?$/.test(trimmed) ? Number(trimmed.replace(',', '.')) : NaN;
+};

@@ -65,7 +65,11 @@
     "giftCardApplySuccess": "Targeta regal aplicada.",
     "giftCardApplyError": "No s'ha pogut aplicar la targeta regal.",
     "giftCardAvailable": "Saldo disponible: {{amount}}",
-    "amountDue": "A pagar"
+    "amountDue": "A pagar",
+    "invalidQuantity": "Escriu una quantitat vàlida (mínim {{min}}).",
+    "unavailable": "Ja no disponible",
+    "removeUnavailable": "Treu els articles que ja no estan disponibles per continuar.",
+    "quantityLabel": "Metres"
   },
   "auth": {
     "login": {
@@ -233,7 +237,9 @@
     "nothingToPay": "No has de pagar res: la comanda es confirma en prémer el botó.",
     "vatExempt": "IVA no aplicable (enviament fora del territori IVA: exportació)",
     "shippingMethod": "Forma d'enviament",
-    "pickupAt": "Recolliràs la comanda a la botiga: {{address}}. T'avisarem quan estigui a punt."
+    "pickupAt": "Recolliràs la comanda a la botiga: {{address}}. T'avisarem quan estigui a punt.",
+    "shippingLoadError": "No s'han pogut carregar les formes d'enviament. Torna-ho a provar.",
+    "shippingRetry": "Torna-ho a provar"
   },
   "checkoutSuccess": {
     "title": "Comanda rebuda!",
@@ -243,7 +249,10 @@
     "setPasswordTitle": "Desa el teu compte",
     "setPasswordSubtitle": "Crea una contrasenya per poder iniciar sessió més endavant i seguir aquesta i futures comandes.",
     "setPasswordSubmit": "Desar",
-    "setPasswordSuccess": "Contrasenya desada. Ja pots iniciar sessió amb el teu correu quan vulguis."
+    "setPasswordSuccess": "Contrasenya desada. Ja pots iniciar sessió amb el teu correu quan vulguis.",
+    "confirmingTitle": "Confirmant el pagament…",
+    "confirmingMessage": "Esperem la confirmació del banc. Són només uns segons; no tanquis aquesta pàgina ni tornis a pagar.",
+    "stillConfirming": "El banc encara no ens ha confirmat el pagament. T'enviarem un correu tan bon punt arribi; no tornis a pagar. Si d'aquí a unes hores no el reps, contacta amb nosaltres."
   },
   "authGate": {
     "title": "Continuar amb la compra",
@@ -406,7 +415,8 @@
     "downloadLetter": "Descarregar la carta",
     "letterError": "No s'ha pogut descarregar la carta.",
     "cardBalance": "Saldo: {{amount}}",
-    "cardSentTo": "Enviada també a {{email}}"
+    "cardSentTo": "Enviada també a {{email}}",
+    "loadError": "No s'ha pogut obrir la comanda."
   },
   "favorites": {
     "title": "Els meus favorits",
@@ -415,7 +425,8 @@
     "remove": "Treure dels favorits",
     "add": "Afegir a favorits",
     "removeError": "No s'ha pogut eliminar de preferits.",
-    "toggleError": "No s'ha pogut actualitzar preferits."
+    "toggleError": "No s'ha pogut actualitzar preferits.",
+    "loadError": "No s'han pogut carregar els teus preferits."
   },
   "board": {
     "title": "El meu tauler",
@@ -426,7 +437,10 @@
     "added": "Afegit al tauler",
     "remove": "Treure del tauler",
     "viewProduct": "Veure producte",
-    "noLongerAvailable": "Ja no disponible"
+    "noLongerAvailable": "Ja no disponible",
+    "addError": "No s'ha pogut afegir al tauler.",
+    "saveError": "No s'ha pogut desar la posició.",
+    "removeError": "No s'ha pogut treure del tauler."
   },
   "stockNotifications": {
     "notifyMe": "Avisa'm quan estigui disponible",
@@ -455,6 +469,7 @@
     "recentlyViewed": "Vistos recentment",
     "goesWith": "Combina amb",
     "reviewCount": "({{count}} ressenyes)",
+    "reviewCount_one": "({{count}} ressenya)",
     "reviewsTitle": "Ressenyes de clients",
     "noReviews": "Aquesta tela encara no té ressenyes.",
     "writeReview": "Escriu una ressenya",
@@ -478,6 +493,7 @@
     "addError": "Error en afegir a la cistella",
     "productNotFound": "Producte no trobat.",
     "referencesCount": "{{count}} referències",
+    "referencesCount_one": "{{count}} referència",
     "inStockCount": "{{count}} en estoc",
     "openImage": "Veure la imatge ampliada",
     "closeImage": "Tanca",
@@ -496,7 +512,9 @@
     "seeAllNew": "Veure totes les novetats",
     "fibreGuideLink": "Què és {{material}}: veure-ho a la guia de teixits",
     "pattern": "Disseny",
-    "colors": "Colors"
+    "colors": "Colors",
+    "rating": "Valoració",
+    "ratingOf": "{{value}} de 5 estrelles"
   },
   "filters": {
     "close": "Tancar filtres",
@@ -554,6 +572,7 @@
     "home": {
       "title": "Els nostres productes",
       "itemsAvailable": "{{count}} referències disponibles",
+      "itemsAvailable_one": "{{count}} referència disponible",
       "searchPlaceholder": "Cerca productes...",
       "noResults": "No s'han trobat productes.",
       "noResultsFor": "No s'han trobat productes per a \"{{search}}\".",
@@ -604,7 +623,9 @@
     "fieldRequired": "Aquest camp és obligatori.",
     "unexpectedError": "S'ha produït un error inesperat. Torna-ho a provar.",
     "networkError": "No s'ha pogut connectar. Comprova la connexió i torna-ho a provar.",
-    "loading": "Carregant…"
+    "loading": "Carregant…",
+    "pageLoadError": "No s'ha pogut carregar aquesta pàgina. Comprova la connexió i torna-la a carregar.",
+    "reload": "Torna a carregar"
   },
   "openingHours": {
     "title": "Horari",
@@ -713,5 +734,13 @@
     "changeError": "No s'ha pogut canviar el correu. Potser l'enllaç ha caducat: torna a demanar el canvi des de El meu compte.",
     "goToAccount": "Anar a El meu compte",
     "backToHome": "Tornar a la botiga"
+  },
+  "cartReminders": {
+    "unsubscribe": {
+      "title": "Avisos de cistella",
+      "instructions": "Vols deixar de rebre correus quan deixes productes a la cistella?",
+      "confirm": "Donar-me de baixa",
+      "success": "Fet: no t'enviarem més avisos de cistella."
+    }
   }
 }

@@ -16,3 +16,9 @@ export const confirmNewsletter = async (token: string): Promise<{ message: strin
   const res = await apiClient.post('/storefront/newsletter/confirm', { token });
   return res.data;
 };
+
+/** The opt-out link of an abandoned-cart reminder email. */
+export const optOutOfCartReminders = async (token: string): Promise<{ message: string }> => {
+  const res = await apiClient.post('/storefront/newsletter/cart-reminders/opt-out', { token });
+  return res.data;
+};

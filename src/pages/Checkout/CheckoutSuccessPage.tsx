@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Button, Card, Form, Alert } from 'react-bootstrap';
+import { Container, Button, Card, Form, Alert, Spinner } from 'react-bootstrap';
 import { FaCheckCircle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { useCart } from '../../contexts/CartContext';
+import { getCart } from '../../services/cartService';
 import { useAuth } from '../../contexts/AuthContext';
 import { convertGuestAccount } from '../../services/authService';
 import { getApiErrorMessage } from '../../utils/apiError';
@@ -20,10 +21,28 @@ const CheckoutSuccessPage: React.FC = () => {
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
 
+  // The order is created when the bank's confirmation reaches the shop, which can come a little
+  // after the shopper lands here: until the cart is checked out, say it's being confirmed (it
+  // read like a failed payment — items still in the cart, no order — and invited paying twice).
+  const [confirmed, setConfirmed] = useState<boolean | null>(null);
   useEffect(() => {
-    // Refresh cart so it clears the checked-out cart
-    fetchCart();
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- refresh the cart once after checkout; fetchCart is redefined by the provider
+    let cancelled = false;
+    let attempt = 0;
+    const check = async () => {
+      attempt++;
+      let done = false;
+      try { done = (await getCart()).items.length === 0; } catch { /* checked again */ }
+      if (cancelled) return;
+      if (done || attempt >= 10) {
+        setConfirmed(done);
+        fetchCart();
+      } else {
+        setTimeout(check, 3000);
+      }
+    };
+    check();
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- once after checkout; fetchCart is redefined by the provider
   }, []);
 
   const handleSetPassword = async (e: React.FormEvent) => {
@@ -48,9 +67,20 @@ const CheckoutSuccessPage: React.FC = () => {
   return (
     <MainLayout>
       <Container className="py-5 text-center" style={{ maxWidth: 520 }}>
-        <FaCheckCircle size={64} className="text-success mb-3" />
-        <h2 className="fw-bold mb-2">{t('checkoutSuccess.title')}</h2>
-        <p className="text-muted mb-4">{t('checkoutSuccess.message')}</p>
+        {confirmed === null ? (
+          <>
+            <Spinner animation="border" className="mb-3" />
+            <h2 className="fw-bold mb-2">{t('checkoutSuccess.confirmingTitle')}</h2>
+            <p className="text-muted mb-4">{t('checkoutSuccess.confirmingMessage')}</p>
+          </>
+        ) : (
+          <>
+            <FaCheckCircle size={64} className="text-success mb-3" />
+            <h2 className="fw-bold mb-2">{t('checkoutSuccess.title')}</h2>
+            <p className="text-muted mb-4">{t('checkoutSuccess.message')}</p>
+            {!confirmed && <Alert variant="info" className="text-start">{t('checkoutSuccess.stillConfirming')}</Alert>}
+          </>
+        )}
         <div className="d-flex gap-2 justify-content-center">
           <Button variant="primary" onClick={() => navigate('/account/orders')}>{t('checkoutSuccess.viewOrders')}</Button>
           <Button variant="outline-secondary" onClick={() => navigate('/catalog')}>{t('checkoutSuccess.continueShopping')}</Button>

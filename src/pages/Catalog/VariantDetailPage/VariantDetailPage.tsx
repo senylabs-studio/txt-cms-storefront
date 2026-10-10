@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { Container, Row, Col, Button, Badge, Alert, Form } from 'react-bootstrap';
 import { FaShoppingCart, FaArrowLeft, FaChevronLeft, FaChevronRight, FaStar, FaRegStar, FaRulerHorizontal, FaExpand } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
@@ -30,6 +30,7 @@ import PageLoader from '../../../components/common/ScissorsLoader/PageLoader';
 import { formatPrice } from '../../../utils/pricing';
 import { parseFabricColors } from '../../../utils/fabricColors';
 import { formatDate } from '../../../utils/locale';
+import MetresInput from '../../../components/common/MetresInput/MetresInput';
 
 const DEFAULT_MIN_QTY = 0.3;
 const DESC_THRESHOLD = 300;
@@ -40,15 +41,33 @@ const SectionTitle: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 );
 
 // ── Star rating (display, or interactive when onChange is given) ──────────────
-const StarRating: React.FC<{ value: number; onChange?: (v: number) => void; size?: number }> = ({ value, onChange, size = 16 }) => (
-  <span className="text-warning" style={{ cursor: onChange ? 'pointer' : undefined }}>
-    {Array.from({ length: 5 }, (_, i) => {
-      const filled = i < Math.round(value);
-      const Icon = filled ? FaStar : FaRegStar;
-      return <Icon key={i} size={size} onClick={onChange ? () => onChange(i + 1) : undefined} />;
-    })}
-  </span>
-);
+// Interactive: a radio group of buttons (keyboard and screen readers can rate too — the stars
+// were click-only icons, so a review couldn't be written without a mouse).
+const StarRating: React.FC<{ value: number; onChange?: (v: number) => void; size?: number }> = ({ value, onChange, size = 16 }) => {
+  const { t } = useTranslation();
+  if (!onChange) return (
+    <span className="text-warning" role="img" aria-label={t('product.ratingOf', { value: Math.round(value) })}>
+      {Array.from({ length: 5 }, (_, i) => {
+        const Icon = i < Math.round(value) ? FaStar : FaRegStar;
+        return <Icon key={i} size={size} aria-hidden />;
+      })}
+    </span>
+  );
+  return (
+    <span className="text-warning" role="radiogroup" aria-label={t('product.rating')}>
+      {Array.from({ length: 5 }, (_, i) => {
+        const Icon = i < Math.round(value) ? FaStar : FaRegStar;
+        return (
+          <button key={i} type="button" role="radio" aria-checked={Math.round(value) === i + 1}
+            aria-label={t('product.ratingOf', { value: i + 1 })}
+            className="btn btn-link p-0 me-1 text-warning" onClick={() => onChange(i + 1)}>
+            <Icon size={size} aria-hidden />
+          </button>
+        );
+      })}
+    </span>
+  );
+};
 
 // ── Info row ──────────────────────────────────────────────────────────────────
 const InfoRow: React.FC<{ label: string; value: React.ReactNode }> = ({ label, value }) => (
@@ -82,6 +101,19 @@ const VariantDetailPage: React.FC = () => {
   );
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  // A failed load that isn't a 404 (server error, timeout): said so with a retry, instead of
+  // silently sending the shopper to the catalog.
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
+  // The quantity resets for a new fabric, not when the same one is reloaded in another language.
+  const quantityForId = useRef<string | undefined>(undefined);
+  // «Dejar una reseña» links here with #reviews: the section renders after the variant loads,
+  // so the browser's own jump to it never happened — scroll once it's there.
+  const { hash } = useLocation();
+  useEffect(() => {
+    if (hash !== '#reviews' || loading || !variant) return;
+    document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [hash, loading, variant]);
   // Each fibre in the composition links to its section of the fabric guide (when the shop has one).
   const fibreCodes = useMaterialAbbreviations();
   const hasFabricGuide = useFabricGuide();
@@ -135,12 +167,22 @@ const VariantDetailPage: React.FC = () => {
     if (!id) return;
     let cancelled = false;
     setLoading(true);
-    setSelectedImage(0);
-    setRulerActive(false);
-    setDescExpanded(false);
+    setNotFound(false);
+    setLoadFailed(false);
+    const sameFabric = quantityForId.current === id;
+    if (!sameFabric) {
+      setSelectedImage(0);
+      setRulerActive(false);
+      setDescExpanded(false);
+    }
     getVariantById(Number(id))
-      .then(v => { if (!cancelled) { setVariant(v); setQuantity(v.minQuantity); } })
-      .catch((e) => { if (!cancelled) { if (e?.response?.status === 404) setNotFound(true); else navigate('/catalog'); } })
+      .then(v => {
+        if (cancelled) return;
+        setVariant(v);
+        if (!sameFabric) setQuantity(v.minQuantity);
+        quantityForId.current = id;
+      })
+      .catch((e) => { if (!cancelled) { if (e?.response?.status === 404) setNotFound(true); else setLoadFailed(true); } })
       .finally(() => { if (!cancelled) setLoading(false); });
     // In-page "siblings"/"also bought"/"recently viewed" links navigate to another
     // /variant/:id without unmounting this component, and the browser Back/Forward buttons can
@@ -148,8 +190,7 @@ const VariantDetailPage: React.FC = () => {
     // newer id's and silently overwrite the page with the wrong variant's data while the URL
     // still shows the new id.
     return () => { cancelled = true; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- navigate is only the error fallback; refetch only on id/language change
-  }, [id, i18n.language]);
+  }, [id, i18n.language, reloadKey]);
 
   useEffect(() => {
     if (!variant?.id) return;
@@ -233,6 +274,14 @@ const VariantDetailPage: React.FC = () => {
 
   if (loading) return <MainLayout><PageLoader /></MainLayout>;
   if (notFound) return <MainLayout><Container className="py-5"><Alert variant="warning">{t('product.notFound')}</Alert></Container></MainLayout>;
+  if (loadFailed) return (
+    <MainLayout><Container className="py-5">
+      <Alert variant="danger" className="d-flex align-items-center justify-content-between gap-2">
+        <span>{t('common.pageLoadError')}</span>
+        <Button size="sm" variant="outline-danger" onClick={() => setReloadKey(k => k + 1)}>{t('checkout.shippingRetry')}</Button>
+      </Alert>
+    </Container></MainLayout>
+  );
   if (!variant) return null;
 
   const images = variant.images.length
@@ -384,13 +433,15 @@ const VariantDetailPage: React.FC = () => {
             {images.length > 1 && (
               <div className="vdp-thumb-strip">
                 {images.map((img, i) => (
-                  <div
+                  <button
+                    type="button"
                     key={i}
                     className={`vdp-thumb${i === selectedImage ? ' vdp-thumb--active' : ''}`}
+                    aria-pressed={i === selectedImage}
                     onClick={() => setSelectedImage(i)}
                   >
                     <img src={img.url} alt={img.altText || `${variant.name} ${i + 1}`} />
-                  </div>
+                  </button>
                 ))}
               </div>
             )}
@@ -468,12 +519,12 @@ const VariantDetailPage: React.FC = () => {
               <div className="vdp-stepper">
                 <button className="vdp-stepper-btn" aria-label={t('cart.lessQuantity')} disabled={outOfStock || quantity <= minQty}
                   onClick={() => adj(-stepQty)}>−</button>
-                <input
+                <MetresInput
                   className="vdp-stepper-input"
                   aria-label={t('cart.quantityMetres')}
-                  type="number" value={quantity} min={minQty} step={stepQty}
+                  value={quantity} min={minQty}
                   disabled={outOfStock}
-                  onChange={e => { const v = parseFloat(e.target.value); if (!isNaN(v) && v >= minQty) setQuantity(Math.round(v * 100) / 100); }}
+                  onValue={setQuantity}
                 />
                 <button className="vdp-stepper-btn" aria-label={t('cart.moreQuantity')} disabled={outOfStock} onClick={() => adj(stepQty)}>+</button>
               </div>

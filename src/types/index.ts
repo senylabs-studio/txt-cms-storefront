@@ -121,6 +121,8 @@ export interface CartItem {
   availableStock: number;
   minQuantity: number;
   quantityStep: number;
+  /** False when the fabric was hidden or withdrawn after being added: checkout refuses it. */
+  isAvailable?: boolean;
   /** Set when the line is a gift card being bought (no product, quantity 1). */
   giftCard?: CartGiftCard;
 }

@@ -16,6 +16,7 @@ import ScrollToTop from './components/common/ScrollToTop';
 import { useSyncDocumentLang } from './hooks/useSyncDocumentLang';
 import { Suspense } from 'react';
 import { lazyPage } from './utils/lazyPage';
+import PageErrorBoundary from './components/common/PageErrorBoundary';
 import PageFallback from './components/common/PageFallback';
 
 import LandingPage from './pages/Home/LandingPage';
@@ -60,6 +61,7 @@ function App() {
           <StockNotificationProvider>
             {/* The landing, category and product pages are in the main bundle (what most visits
                 open); the rest load on demand. */}
+            <PageErrorBoundary>
             <Suspense fallback={<PageFallback />}>
             <Routes>
               {/* Public */}
@@ -98,6 +100,7 @@ function App() {
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
             </Suspense>
+            </PageErrorBoundary>
             <ChatWidget />
             <GlobalToast />
             <UnhandledApiErrorToaster />

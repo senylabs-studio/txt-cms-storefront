@@ -8,6 +8,7 @@ import { getLanguages, type StorefrontLanguage } from '../../../services/languag
 import type { StorefrontMenuItem } from '../../../types';
 import { pageUrl, menuItemClass } from '../../../utils/pageUrl';
 import MenuItemLabel from '../MenuItemLabel';
+import { loginUrl } from '../../../utils/session';
 
 function resolveHref(item: StorefrontMenuItem): string {
   if (item.externalUrl) return item.externalUrl;
@@ -31,8 +32,11 @@ const MobileMenuSheet: React.FC<MobileMenuSheetProps> = ({ open, onClose }) => {
   const loadedFor = useRef<string | null>(null);
   useEffect(() => {
     if (!open || loadedFor.current === i18n.language) return;
-    loadedFor.current = i18n.language;
-    getMenu().then(setItems).catch(() => {});
+    const language = i18n.language;
+    loadedFor.current = language;
+    // A failed load is forgotten, so opening the sheet again retries (it stayed empty until a
+    // full page reload).
+    getMenu().then(setItems).catch(() => { if (loadedFor.current === language) loadedFor.current = null; });
     if (languages.length === 0) getLanguages().then(setLanguages).catch(() => {});
   }, [open, i18n.language, languages.length]);
 
@@ -89,7 +93,7 @@ const MobileMenuSheet: React.FC<MobileMenuSheetProps> = ({ open, onClose }) => {
               </button>
             ) : (
               <>
-                <button className="mobile-menu-account" onClick={() => { navigate('/login'); onClose(); }}>
+                <button className="mobile-menu-account" onClick={() => { navigate(loginUrl()); onClose(); }}>
                   {t('header.login')}
                 </button>
                 <span className="mobile-menu-lang-sep">·</span>

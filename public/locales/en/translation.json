@@ -65,7 +65,11 @@
     "giftCardApplySuccess": "Gift card applied.",
     "giftCardApplyError": "The gift card couldn't be applied.",
     "giftCardAvailable": "Available balance: {{amount}}",
-    "amountDue": "To pay"
+    "amountDue": "To pay",
+    "invalidQuantity": "Enter a valid quantity (minimum {{min}}).",
+    "unavailable": "No longer available",
+    "removeUnavailable": "Remove the items that are no longer available to continue.",
+    "quantityLabel": "Metres"
   },
   "auth": {
     "login": {
@@ -233,7 +237,9 @@
     "nothingToPay": "There is nothing to pay: the order is placed when you press the button.",
     "vatExempt": "No VAT (shipped outside the EU VAT area: export)",
     "shippingMethod": "Shipping method",
-    "pickupAt": "You'll collect your order at the shop: {{address}}. We'll let you know when it's ready."
+    "pickupAt": "You'll collect your order at the shop: {{address}}. We'll let you know when it's ready.",
+    "shippingLoadError": "The shipping options couldn't be loaded. Please try again.",
+    "shippingRetry": "Try again"
   },
   "checkoutSuccess": {
     "title": "Order received!",
@@ -243,7 +249,10 @@
     "setPasswordTitle": "Save your account",
     "setPasswordSubtitle": "Create a password so you can log back in later and track this and future orders.",
     "setPasswordSubmit": "Save",
-    "setPasswordSuccess": "Password saved. You can now log in with your email whenever you like."
+    "setPasswordSuccess": "Password saved. You can now log in with your email whenever you like.",
+    "confirmingTitle": "Confirming your payment…",
+    "confirmingMessage": "We're waiting for the bank's confirmation. It only takes a few seconds; don't close this page or pay again.",
+    "stillConfirming": "The bank hasn't confirmed the payment yet. We'll email you as soon as it does; don't pay again. If you don't hear from us within a few hours, contact us."
   },
   "authGate": {
     "title": "Continue with your purchase",
@@ -406,7 +415,8 @@
     "downloadLetter": "Download letter",
     "letterError": "The letter couldn't be downloaded.",
     "cardBalance": "Balance: {{amount}}",
-    "cardSentTo": "Also sent to {{email}}"
+    "cardSentTo": "Also sent to {{email}}",
+    "loadError": "The order couldn't be opened."
   },
   "favorites": {
     "title": "My favourites",
@@ -415,7 +425,8 @@
     "remove": "Remove from favourites",
     "add": "Add to favourites",
     "removeError": "Failed to remove from favorites.",
-    "toggleError": "Failed to update favorites."
+    "toggleError": "Failed to update favorites.",
+    "loadError": "Your favourites couldn't be loaded."
   },
   "board": {
     "title": "My board",
@@ -426,7 +437,10 @@
     "added": "Added to board",
     "remove": "Remove from board",
     "viewProduct": "View product",
-    "noLongerAvailable": "No longer available"
+    "noLongerAvailable": "No longer available",
+    "addError": "Couldn't add it to the board.",
+    "saveError": "Couldn't save the position.",
+    "removeError": "Couldn't remove it from the board."
   },
   "stockNotifications": {
     "notifyMe": "Notify me when back in stock",
@@ -455,6 +469,7 @@
     "recentlyViewed": "Recently viewed",
     "goesWith": "Goes well with",
     "reviewCount": "({{count}} reviews)",
+    "reviewCount_one": "({{count}} review)",
     "reviewsTitle": "Customer reviews",
     "noReviews": "This fabric has no reviews yet.",
     "writeReview": "Write a review",
@@ -478,6 +493,7 @@
     "addError": "Error adding to cart",
     "productNotFound": "Product not found.",
     "referencesCount": "{{count}} references",
+    "referencesCount_one": "{{count}} reference",
     "inStockCount": "{{count}} in stock",
     "openImage": "View larger image",
     "closeImage": "Close",
@@ -496,7 +512,9 @@
     "seeAllNew": "See all new arrivals",
     "fibreGuideLink": "What is {{material}}: see the fabric guide",
     "pattern": "Design",
-    "colors": "Colours"
+    "colors": "Colours",
+    "rating": "Rating",
+    "ratingOf": "{{value}} out of 5 stars"
   },
   "filters": {
     "close": "Close filters",
@@ -554,6 +572,7 @@
     "home": {
       "title": "Our products",
       "itemsAvailable": "{{count}} items available",
+      "itemsAvailable_one": "{{count}} item available",
       "searchPlaceholder": "Search products...",
       "noResults": "No products found.",
       "noResultsFor": "No products found for \"{{search}}\".",
@@ -604,7 +623,9 @@
     "fieldRequired": "This field is required.",
     "unexpectedError": "An unexpected error occurred. Please try again.",
     "networkError": "Could not connect. Check your connection and try again.",
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "pageLoadError": "This page couldn't be loaded. Check your connection and reload it.",
+    "reload": "Reload"
   },
   "openingHours": {
     "title": "Opening hours",
@@ -713,5 +734,13 @@
     "changeError": "Your email couldn't be changed. The link may have expired: request the change again from My account.",
     "goToAccount": "Go to My account",
     "backToHome": "Back to the shop"
+  },
+  "cartReminders": {
+    "unsubscribe": {
+      "title": "Cart reminders",
+      "instructions": "Stop getting emails when you leave items in your cart?",
+      "confirm": "Unsubscribe",
+      "success": "Done: we won't send you more cart reminders."
+    }
   }
 }

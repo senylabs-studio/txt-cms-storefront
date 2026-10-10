@@ -8,7 +8,7 @@ import { existsSync } from 'node:fs';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildMeta, injectMeta, safeDecode, createJsonCache, NOT_FOUND } from './meta.mjs';
+import { buildMeta, injectMeta, safeDecode, createJsonCache, NOT_FOUND, isLocalPath, requestHost } from './meta.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 // Deployed next to dist/ (Azure package root); in the repo it lives in server/, beside ../dist.
@@ -67,10 +67,14 @@ const SECURITY_HEADERS = {
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
 };
 
-const redirect = (res, location) => {
-  res.writeHead(301, { ...SECURITY_HEADERS, Location: location, 'Cache-Control': 'public, max-age=3600' });
+// 301 (cached an hour) only for a known answer; a temporary one (302, not cached) when the API
+// couldn't be asked — browsers and search engines would otherwise keep "moved to the home page".
+const redirect = (res, location, permanent = true) => {
+  res.writeHead(permanent ? 301 : 302, { ...SECURITY_HEADERS, Location: location, 'Cache-Control': permanent ? 'public, max-age=3600' : 'no-store' });
   res.end();
 };
+
+
 
 // robots.txt: the sitemap on this host (below), and the private screens kept out of the index.
 const robotsTxt = (origin) => [
@@ -96,13 +100,14 @@ async function sitemapXml() {
 createServer(async (req, res) => {
   try {
     const url = new URL(req.url, 'http://localhost');
-    const host = String(req.headers['x-forwarded-host'] || req.headers.host || '').split(',')[0].trim().toLowerCase();
+    const host = requestHost(req.headers);
     if (CANONICAL_HOST && host && host !== CANONICAL_HOST)
       return redirect(res, `https://${CANONICAL_HOST}${url.pathname}${url.search}`);
     const origin = `https://${CANONICAL_HOST || host}`;
 
     if (url.pathname === '/robots.txt') {
-      res.writeHead(200, { ...SECURITY_HEADERS, 'Content-Type': TYPES['.txt'], 'Cache-Control': 'public, max-age=3600' });
+      // Cached only when the host is the configured one, not whatever the request said.
+      res.writeHead(200, { ...SECURITY_HEADERS, 'Content-Type': TYPES['.txt'], 'Cache-Control': CANONICAL_HOST ? 'public, max-age=3600' : 'no-cache' });
       return res.end(robotsTxt(origin));
     }
     // Served from the shop's own host: a sitemap on the API's host only counts if both hosts
@@ -116,8 +121,9 @@ createServer(async (req, res) => {
     // Old shop (ePages) links: /epages/<shop>.sf/<lang>/?ObjectPath=/Shops/<id>/… → where it lives now.
     if (url.pathname.startsWith('/epages/')) {
       const objectPath = url.searchParams.get('ObjectPath') || url.searchParams.get('ViewObjectPath') || '';
-      const target = objectPath ? await getJson(`/storefront/legacy-redirect?objectPath=${encodeURIComponent(objectPath)}`) : null;
-      return redirect(res, target && target !== NOT_FOUND && typeof target.path === 'string' && target.path.startsWith('/') ? target.path : '/');
+      const target = objectPath ? await getJson(`/storefront/legacy-redirect?objectPath=${encodeURIComponent(objectPath)}`) : NOT_FOUND;
+      if (target === null) return redirect(res, '/', false); // API asleep or failing: try again later
+      return redirect(res, target !== NOT_FOUND && isLocalPath(target.path) ? target.path : '/');
     }
 
     const filePath = normalize(join(DIST, safeDecode(url.pathname)));

@@ -14,7 +14,14 @@ export function lazyPage<T extends ComponentType<object>>(load: () => Promise<{ 
       return await load();
     } catch (err) {
       let last = 0;
-      try { last = Number(sessionStorage.getItem(RELOAD_KEY) ?? 0); } catch { /* storage blocked */ }
+      try {
+        last = Number(sessionStorage.getItem(RELOAD_KEY) ?? 0);
+      } catch {
+        // Storage blocked: no record of an earlier reload, so the 30 s guard can't work and a chunk
+        // that keeps failing would reload forever. A page that is itself a reload doesn't retry.
+        const nav = performance.getEntriesByType?.('navigation')[0] as PerformanceNavigationTiming | undefined;
+        if (nav?.type === 'reload') throw err;
+      }
       if (Date.now() - last > 30_000) {
         try { sessionStorage.setItem(RELOAD_KEY, String(Date.now())); } catch { /* storage blocked */ }
         window.location.reload();

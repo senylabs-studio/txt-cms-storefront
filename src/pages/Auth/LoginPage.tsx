@@ -8,6 +8,7 @@ import MainLayout from '../../components/Layout/MainLayout';
 import { login as loginService } from '../../services/authService';
 import { useAuth } from '../../contexts/AuthContext';
 import { getApiErrorMessage } from '../../utils/apiError';
+import { safeReturnPath } from '../../utils/session';
 
 const LoginPage: React.FC = () => {
   const { t } = useTranslation();
@@ -17,8 +18,12 @@ const LoginPage: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? '/catalog';
   const [searchParams] = useSearchParams();
+  // Back where they were — query string included (a filtered page, ?todos=1) — whether they came
+  // from a protected page (router state) or an expired session (?from=).
+  const stateFrom = (location.state as { from?: { pathname?: string; search?: string } } | null)?.from;
+  const from = safeReturnPath(stateFrom?.pathname ? stateFrom.pathname + (stateFrom.search ?? '') : null)
+    ?? safeReturnPath(searchParams.get('from')) ?? '/catalog';
   const sessionExpired = searchParams.get('expired') === '1';
 
   const [email, setEmail] = useState('');

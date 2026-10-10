@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useStockNotifications } from '../../../contexts/StockNotificationContext';
 import { useAuth } from '../../../contexts/AuthContext';
+import { loginUrl } from '../../../utils/session';
 
 interface Props {
   productId?: number;
@@ -23,7 +24,7 @@ const NotifyMeButton: React.FC<Props> = ({ productId, variantId, size, className
   const handleClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!isAuthenticated) { navigate('/login'); return; }
+    if (!isAuthenticated) { navigate(loginUrl()); return; }
     await toggle(productId, variantId);
   };
 

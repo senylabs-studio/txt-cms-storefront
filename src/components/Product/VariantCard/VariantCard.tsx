@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Badge, Button, Form, InputGroup } from 'react-bootstrap';
+import { Card, Badge, Button, InputGroup } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { FaShoppingCart, FaCheck, FaTimes } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +16,7 @@ import '../ProductCard/ProductCard.css';
 import IconTooltip from '../../common/IconTooltip/IconTooltip';
 import NewBadge from '../../common/NewBadge/NewBadge';
 import { variantCardTitle } from '../../../utils/variantTitle';
+import MetresInput from '../../common/MetresInput/MetresInput';
 
 interface Props { variant: StorefrontVariant; }
 
@@ -117,16 +118,12 @@ const VariantCard: React.FC<Props> = ({ variant }) => {
             <div className="variant-qty-form mt-2">
               <InputGroup size="sm" className="mb-1">
                 <Button variant="outline-secondary" onClick={() => adjust(-stepQty)} disabled={quantity <= minQty}>−</Button>
-                <Form.Control
-                  type="number"
-                  min={minQty}
-                  step={stepQty}
+                <MetresInput
                   value={quantity}
-                  onChange={e => {
-                    const v = parseFloat(e.target.value);
-                    if (!isNaN(v) && v >= minQty) setQuantity(Math.round(v * 100) / 100);
-                  }}
-                  className="text-center variant-qty-input"
+                  min={minQty}
+                  onValue={setQuantity}
+                  aria-label={t('cart.quantityMetres')}
+                  className="form-control text-center variant-qty-input"
                 />
                 <Button variant="outline-secondary" onClick={() => adjust(stepQty)}>+</Button>
               </InputGroup>

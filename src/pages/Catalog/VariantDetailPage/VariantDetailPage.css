@@ -132,6 +132,9 @@
 }
 
 .vdp-thumb {
+  /* A button now (keyboard): no default button look. */
+  padding: 0;
+  background: none;
   width: 72px;
   aspect-ratio: 3 / 2; /* same shape as the main image */
   border-radius: 6px;

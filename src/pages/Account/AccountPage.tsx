@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert, Spinner, Badge, Modal } from 'react-bootstrap';
 import { FaPlus, FaEdit, FaTrash, FaMapMarkerAlt, FaUser, FaLock, FaShieldAlt, FaEnvelope } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { safeReturnPath } from '../../utils/session';
 import { useTranslation } from 'react-i18next';
 import { useDocumentMeta } from '../../hooks/useDocumentMeta';
 import { useSiteSettings } from '../../contexts/SiteSettingsContext';
@@ -213,6 +214,15 @@ const AccountPage: React.FC = () => {
   };
 
   const openAddAddr = () => { setAddrForm(emptyAddress); setEditAddrId(null); setAddrError(''); setAddrFieldErrors({}); setShowAddr(true); };
+
+  // From checkout with no address yet: the form opens straight away, and saving goes back there.
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const returnTo = safeReturnPath(searchParams.get('volver'));
+  useEffect(() => {
+    if (searchParams.get('nuevaDireccion') === '1') openAddAddr();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, on arriving from checkout
+  }, []);
   const openEditAddr = (a: CustomerAddress) => { setAddrForm({ ...a }); setEditAddrId(a.id); setAddrError(''); setAddrFieldErrors({}); setShowAddr(true); };
 
   const handleSaveAddr = async () => {
@@ -240,6 +250,7 @@ const AccountPage: React.FC = () => {
       setProfile(p);
       setShowAddr(false);
       showToast('success', t('account.addrSaveSuccess'));
+      if (!editAddrId && returnTo) navigate(returnTo);
     } catch (e) {
       const fe = parseFieldErrors(e);
       if (fe) setAddrFieldErrors(fe);

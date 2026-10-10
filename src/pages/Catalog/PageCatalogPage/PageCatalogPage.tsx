@@ -19,9 +19,9 @@ import PageLoader from '../../../components/common/ScissorsLoader/PageLoader';
 import IconTooltip from '../../../components/common/IconTooltip/IconTooltip';
 import PageItemsGrid from '../../../components/common/PageItemsGrid';
 import CatalogPagination from '../../../components/common/CatalogPagination/CatalogPagination';
-import { parseFabricPattern } from '../../../utils/fabricPatterns';
 import ActiveFilters from '../../../components/common/ActiveFilters/ActiveFilters';
-import { parseFabricColors } from '../../../utils/fabricColors';
+import { FILTER_PARAMS, filtersFromParams, writeFilterParams } from '../../../utils/catalogParams';
+import { useFilterPanel } from '../../../hooks/useFilterPanel';
 
 // 24 fills whole rows at every products-block column count (2, 3, 4 or 6).
 const PAGE_SIZE = 24;
@@ -30,47 +30,6 @@ const EMPTY_FACETS = { minPrice: 0, maxPrice: 0, widths: [], materials: [] };
 const MAX_RESTORED_PAGES = 20;
 
 // The filters' URL params (same names as the API's).
-const FILTER_PARAMS = ['minPrice', 'maxPrice', 'width', 'material', 'pattern', 'colors', 'orderBy', 'onlyNew', 'onlyOffers'] as const;
-
-const numberParam = (params: URLSearchParams, name: string): number | undefined => {
-  const raw = params.get(name);
-  if (raw === null || raw === '') return undefined;
-  const value = Number(raw);
-  return Number.isFinite(value) ? value : undefined;
-};
-
-const filtersFromParams = (params: URLSearchParams): PageFilters => {
-  const filters: PageFilters = {};
-  const minPrice = numberParam(params, 'minPrice');
-  const maxPrice = numberParam(params, 'maxPrice');
-  const width = numberParam(params, 'width');
-  if (minPrice !== undefined) filters.minPrice = minPrice;
-  if (maxPrice !== undefined) filters.maxPrice = maxPrice;
-  if (width !== undefined) filters.width = width;
-  if (params.get('material')) filters.material = params.get('material')!;
-  const pattern = parseFabricPattern(params.get('pattern'));
-  if (pattern) filters.pattern = pattern;
-  const colors = parseFabricColors(params.get('colors'));
-  if (colors.length) filters.colors = colors;
-  if (params.get('orderBy')) filters.orderBy = params.get('orderBy')!;
-  if (params.get('onlyNew') === '1') filters.onlyNew = true;
-  if (params.get('onlyOffers') === '1') filters.onlyOffers = true;
-  return filters;
-};
-
-const writeFilterParams = (params: URLSearchParams, f: PageFilters) => {
-  for (const name of FILTER_PARAMS) params.delete(name);
-  if (f.minPrice !== undefined) params.set('minPrice', String(f.minPrice));
-  if (f.maxPrice !== undefined) params.set('maxPrice', String(f.maxPrice));
-  if (f.width !== undefined) params.set('width', String(f.width));
-  if (f.material) params.set('material', f.material);
-  if (f.pattern) params.set('pattern', f.pattern);
-  if (f.colors?.length) params.set('colors', f.colors.join(','));
-  if (f.orderBy) params.set('orderBy', f.orderBy);
-  if (f.onlyNew) params.set('onlyNew', '1');
-  if (f.onlyOffers) params.set('onlyOffers', '1');
-};
-
 const PageCatalogPage: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
@@ -93,7 +52,12 @@ const PageCatalogPage: React.FC = () => {
   const filters = useMemo(() => filtersFromParams(searchParams), [filtersKey]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  // A failed load that isn't a 404: a message with a retry — not a blank page, nor the previous
+  // category's products left under the new URL.
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const filterPanelRef = useFilterPanel(sidebarOpen, () => setSidebarOpen(false));
 
   // Phones get "Cargar más" instead of page numbers: each tap adds the next page's products
   // under the ones already shown, and ?pagina= counts the pages listed.
@@ -157,6 +121,7 @@ const PageCatalogPage: React.FC = () => {
     if (navigationType === 'PUSH') window.scrollTo(0, 0);
     setLoading(true);
     setNotFound(false);
+    setLoadFailed(false);
     setLoadingMore(false);
     setLoadMoreError(false);
     const request = isMobile
@@ -182,7 +147,7 @@ const PageCatalogPage: React.FC = () => {
         listedRef.current = isMobile ? { key: listKey, pages } : { key: '', pages: 0 };
         if (isMobile && pages !== currentPage) updateParams(p => p.set('pagina', String(pages)), true);
       })
-      .catch(e => { if (cancelled) return; if (e?.response?.status === 404) setNotFound(true); })
+      .catch(e => { if (cancelled) return; if (e?.response?.status === 404) setNotFound(true); else setLoadFailed(true); })
       .finally(() => { if (!cancelled) setLoading(false); });
     // Clicking a different category link (or rapidly toggling filters) before the previous
     // request resolves doesn't unmount this component — without this guard, an older slug's/
@@ -190,7 +155,7 @@ const PageCatalogPage: React.FC = () => {
     // page with the wrong category's products while the URL/filters still show the new state.
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- listKey covers slug, view, filters and language; navigationType is read, not a trigger
-  }, [listKey, currentPage, isMobile]);
+  }, [listKey, currentPage, isMobile, reloadKey]);
 
   // Back from a product: once the list is there again, return to where the visitor was. The
   // position is kept per history entry; the browser can't restore it itself because the list
@@ -305,7 +270,18 @@ const PageCatalogPage: React.FC = () => {
     </MainLayout>
   );
 
-  if (!pageDetail) return null;
+  if (loadFailed || !pageDetail) return (
+    <MainLayout>
+      <Container className="py-5">
+        {loadFailed && (
+          <Alert variant="danger" className="d-flex align-items-center justify-content-between gap-2">
+            <span>{t('common.pageLoadError')}</span>
+            <Button size="sm" variant="outline-danger" onClick={() => setReloadKey(k => k + 1)}>{t('checkout.shippingRetry')}</Button>
+          </Alert>
+        )}
+      </Container>
+    </MainLayout>
+  );
 
   if (pageDetail.type === 'Sitemap') {
     return (
@@ -347,7 +323,7 @@ const PageCatalogPage: React.FC = () => {
       <>
         <div className={`filter-backdrop${sidebarOpen ? ' is-open' : ''}`} onClick={() => setSidebarOpen(false)} />
 
-        <div className={`filter-panel${sidebarOpen ? ' is-open' : ''}`}>
+        <div ref={filterPanelRef} role="dialog" aria-modal="true" aria-label={t('filters.title')} className={`filter-panel${sidebarOpen ? ' is-open' : ''}`}>
           <div className="filter-panel-header">
             <span className="filter-panel-title">{t('filters.title')}</span>
             <IconTooltip label={t('filters.close')}>

@@ -8,6 +8,8 @@ import { getBoard, updateBoardItem, removeBoardItem, type BoardItem } from '../.
 import './BoardPage.css';
 import ScissorsLoader from '../../components/common/ScissorsLoader/ScissorsLoader';
 import IconTooltip from '../../components/common/IconTooltip/IconTooltip';
+import { useToast } from '../../contexts/ToastContext';
+import { getApiErrorMessage } from '../../utils/apiError';
 
 const MIN_SIZE = 60;
 const MAX_SIZE = 400;
@@ -24,16 +26,18 @@ interface DragState {
 }
 
 const BoardPage: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const [items, setItems] = useState<BoardItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const dragRef = useRef<DragState | null>(null);
 
+  // Reloaded on a language switch: the names come translated from the server.
   useEffect(() => {
     getBoard().then(setItems).catch(() => setError(true)).finally(() => setLoading(false));
-  }, []);
+  }, [i18n.language]);
 
   const bringToFront = (id: number) => {
     setItems(prev => {
@@ -82,18 +86,22 @@ const BoardPage: React.FC = () => {
     setItems(prev => {
       const item = prev.find(i => i.id === drag.id);
       if (item) {
-        updateBoardItem(item.id, { x: item.x, y: item.y, width: item.width, height: item.height }).catch(() => {});
+        updateBoardItem(item.id, { x: item.x, y: item.y, width: item.width, height: item.height })
+          .catch(err => showToast('danger', getApiErrorMessage(err, t('board.saveError'))));
       }
       return prev;
     });
   };
 
   const handleRemove = async (id: number) => {
+    const removed = items.find(i => i.id === id);
     setItems(prev => prev.filter(i => i.id !== id));
     try {
       await removeBoardItem(id);
-    } catch {
-      // Left removed locally — a page refresh will resync with the server if this failed.
+    } catch (err) {
+      // Put back and said: left removed locally, it came back on the next visit with no reason.
+      if (removed) setItems(prev => [...prev, removed]);
+      showToast('danger', getApiErrorMessage(err, t('board.removeError')));
     }
   };
 

@@ -96,6 +96,7 @@ const CartDrawer: React.FC = () => {
                   </div>
                   <div className="cart-item-info flex-grow-1">
                     <div className="cart-item-name">{cartItemName(item, t)}</div>
+                    {item.isAvailable === false && <div className="small text-danger fw-semibold">{t('cart.unavailable')}</div>}
                     {item.giftCard && <div className="small text-muted">{t('giftCard.lineFor', { name: item.giftCard.recipientName })}</div>}
                     <div className="cart-item-price">
                       {item.unitPrice < item.originalUnitPrice && (
@@ -136,6 +137,13 @@ const CartDrawer: React.FC = () => {
                   <span>−{formatPrice(cart!.items.reduce((s, i) => s + (i.originalUnitPrice - i.unitPrice) * i.quantity, 0))}</span>
                 </div>
               )}
+              {/* The total already has the coupon off: shown, or the lines don't add up to it. */}
+              {cart!.couponCode && (
+                <div className="d-flex justify-content-between small text-success mb-1">
+                  <span>{t('cart.couponDiscount', { code: cart!.couponCode })}</span>
+                  <span>−{formatPrice(cart!.couponDiscountAmount)}</span>
+                </div>
+              )}
               {cart!.recargoEquivalenciaAmount > 0 && (
                 <div className="d-flex justify-content-between small text-muted mb-1">
                   <span>{t('cart.recargoEquivalencia', { percent: cart!.recargoEquivalenciaPercent })}</span>
@@ -152,7 +160,8 @@ const CartDrawer: React.FC = () => {
                   <span>−{formatPrice(cart!.giftCardAmount)}</span>
                 </div>
               )}
-              <Button variant="primary" size="lg" className="w-100 mb-2" onClick={() => { closeDrawer(); navigate('/checkout'); }}>
+              <Button variant="primary" size="lg" className="w-100 mb-2" onClick={() => { closeDrawer(); navigate('/checkout'); }}
+                disabled={cart!.items.some(i => i.isAvailable === false)}>
                 {t('cart.checkout')}
               </Button>
               {/* react-bootstrap's Button.as prop type is too narrow for React Router's Link in this version combo */}

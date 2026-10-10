@@ -16,9 +16,11 @@ import type { CustomerAddress, CheckoutResponse, CheckoutRequest } from '../../t
 import PayPalCheckoutButton from './PayPalCheckoutButton';
 import { formatPrice } from '../../utils/pricing';
 import { cartItemName } from '../../utils/giftCard';
+import { loginUrl } from '../../utils/session';
+import { formatMeters } from '../../utils/locale';
 
 const CheckoutPage: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { siteName, companyAddress, companyPostalCode, companyCity } = useSiteSettings();
   // The tab title: this screen's, not the previous page's.
   useDocumentMeta(`${t('checkout.title')} — ${siteName}`);
@@ -38,13 +40,16 @@ const CheckoutPage: React.FC = () => {
   const [shippingOptions, setShippingOptions] = useState<ApplicableShippingRate[] | null | undefined>(undefined);
   const [chosenRateId, setChosenRateId] = useState<number | undefined>();
   const [shippingLoading, setShippingLoading] = useState(false);
+  const [shippingError, setShippingError] = useState(false);
+  const [shippingRetry, setShippingRetry] = useState(0);
+  const lastShippingIdRef = useRef<number | undefined>(undefined);
 
   // Redsys redirect state
   const [redsysData, setRedsysData] = useState<CheckoutResponse | null>(null);
   const redsysFormRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
-    if (!isAuthenticated) { navigate('/login'); return; }
+    if (!isAuthenticated) { navigate(loginUrl()); return; }
     fetchCart();
     getProfile().then(p => {
       setAddresses(p.addresses);
@@ -63,19 +68,26 @@ const CheckoutPage: React.FC = () => {
     }
     let cancelled = false;
     setShippingLoading(true);
+    setShippingError(false);
+    const addressChanged = lastShippingIdRef.current !== shippingId;
     getShippingOptions(shippingId)
       .then(options => {
         if (cancelled) return;
+        lastShippingIdRef.current = shippingId;
         setShippingOptions(options.length ? options : null);
-        // Keep the customer's choice while it's still offered; else the default delivery.
-        setChosenRateId(prev => options.some(o => o.id === prev) ? prev : (options.find(o => !o.isPickup) ?? options[0])?.id);
+        // Keep the customer's choice while it's still offered and the address is the same (a new
+        // address means delivery there, not the pickup chosen for the old one); else the default
+        // delivery. Never store pickup on its own: when nothing delivers to the address, the
+        // customer has to choose it.
+        setChosenRateId(prev => !addressChanged && options.some(o => o.id === prev) ? prev : options.find(o => !o.isPickup)?.id);
       })
+      .catch(() => { if (!cancelled) { setShippingOptions(undefined); setShippingError(true); } })
       .finally(() => { if (!cancelled) setShippingLoading(false); });
     // Switching the shipping address twice in quick succession (before the first lookup
     // resolves) must not let the slower, now-stale response overwrite the options for the
     // address actually selected now — same class of stale-response bug this codebase has hit before.
     return () => { cancelled = true; };
-  }, [shippingId, cart]);
+  }, [shippingId, cart, shippingRetry, i18n.language]); // option names come translated
 
   // The option in use: null when the address has none (or only pickup and nothing chosen).
   const shippingRate: ApplicableShippingRate | null | undefined = shippingOptions === undefined
@@ -141,10 +153,11 @@ const CheckoutPage: React.FC = () => {
   const isGiftCardPurchase = cart?.isGiftCardPurchase ?? false;
   // Nothing to pay: the gift card covers it all, or a coupon brought the order to 0 €. The order is
   // placed by the button below; PayPal can't take a 0 € payment.
-  const nothingToPay = amountDue <= 0;
+  const addressReady = isGiftCardPurchase || (!!shippingId && !shippingLoading && shippingRate != null);
+  // Only once the shipping is known: while it loads, a 0 € estimate briefly said "Confirmar pedido".
+  const nothingToPay = amountDue <= 0 && addressReady;
   const coveredByGiftCard = !!cart?.giftCardCode && nothingToPay;
-  // Gift cards are emailed: no address (and no shipping rate) needed to buy them.
-  const addressReady = isGiftCardPurchase || (!!shippingId && !shippingLoading && shippingRate !== null);
+  // Gift cards are emailed: no address (and no shipping rate) needed to buy them (addressReady).
 
   // Same request for both payment routes (Redsys page / PayPal button).
   const buildCheckoutRequest = (): CheckoutRequest => ({
@@ -220,13 +233,15 @@ const CheckoutPage: React.FC = () => {
                 ) : addresses.length === 0 ? (
                   <Alert variant="info">
                     {t('checkout.noAddresses')}{' '}
-                    <Button variant="link" className="p-0" onClick={() => navigate('/account')}>{t('checkout.addAddress')}</Button>
+                    {/* Straight to the new-address form, and back here once it's saved (it used to leave the
+                        first-time buyer on Mi cuenta with no way back). */}
+                    <Button variant="link" className="p-0" onClick={() => navigate('/account?nuevaDireccion=1&volver=/checkout')}>{t('checkout.addAddress')}</Button>
                   </Alert>
                 ) : (
                   <>
                     <Form.Group className="mb-3" controlId="checkout-shipping-address">
                       <Form.Label className="fw-semibold">{t('checkout.shippingAddress')}</Form.Label>
-                      <Form.Select value={shippingId ?? ''} onChange={e => setShippingId(Number(e.target.value))}>
+                      <Form.Select value={shippingId ?? ''} onChange={e => setShippingId(e.target.value ? Number(e.target.value) : undefined)}>
                         <option value="">{t('checkout.selectAddress')}</option>
                         {addresses.map(a => (
                           <option key={a.id} value={a.id}>{a.alias} — {a.street}, {a.city}</option>
@@ -234,7 +249,15 @@ const CheckoutPage: React.FC = () => {
                       </Form.Select>
                     </Form.Group>
 
-                    {shippingOptions && shippingOptions.length > 1 && (
+                    {shippingError && (
+                      <Alert variant="danger" className="py-2 small d-flex align-items-center justify-content-between gap-2">
+                        <span>{t('checkout.shippingLoadError')}</span>
+                        <Button size="sm" variant="outline-danger" onClick={() => setShippingRetry(n => n + 1)}>{t('checkout.shippingRetry')}</Button>
+                      </Alert>
+                    )}
+                    {/* The choice: several options, or only store pickup (nothing delivers here —
+                        the customer picks it explicitly, it's never chosen for them). */}
+                    {shippingOptions && (shippingOptions.length > 1 || !shippingOptions.some(o => !o.isPickup)) && (
                       <Form.Group className="mb-3" role="radiogroup" aria-label={t('checkout.shippingMethod')}>
                         <Form.Label className="fw-semibold d-block">{t('checkout.shippingMethod')}</Form.Label>
                         {shippingOptions.map(o => (
@@ -262,7 +285,7 @@ const CheckoutPage: React.FC = () => {
 
                     <Form.Group className="mb-3" controlId="checkout-billing-address">
                       <Form.Label className="fw-semibold">{t('checkout.billingAddress')}</Form.Label>
-                      <Form.Select value={billingId ?? ''} onChange={e => setBillingId(Number(e.target.value))}>
+                      <Form.Select value={billingId ?? ''} onChange={e => setBillingId(e.target.value ? Number(e.target.value) : undefined)}>
                         <option value="">{t('checkout.sameBilling')}</option>
                         {addresses.map(a => (
                           <option key={a.id} value={a.id}>{a.alias} — {a.street}, {a.city}</option>
@@ -319,7 +342,7 @@ const CheckoutPage: React.FC = () => {
                 <h5 className="fw-bold mb-3">{t('checkout.orderSummary')}</h5>
                 {cart.items.map(item => (
                   <div key={item.id} className="d-flex justify-content-between small mb-1">
-                    <span className="text-muted">{item.giftCard ? `${cartItemName(item, t)} · ${t('giftCard.lineFor', { name: item.giftCard.recipientName })}` : `${item.productName} x${item.quantity}m`}</span>
+                    <span className="text-muted">{item.giftCard ? `${cartItemName(item, t)} · ${t('giftCard.lineFor', { name: item.giftCard.recipientName })}` : `${item.productName} × ${formatMeters(item.quantity)}`}</span>
                     <span>{formatPrice(item.subtotal)}</span>
                   </div>
                 ))}
@@ -355,7 +378,8 @@ const CheckoutPage: React.FC = () => {
                 {shippingRate && shippingRate.freeShippingThreshold && !shippingRate.isFree && (
                   <div className="small text-muted mb-2">
                     {t('checkout.freeShippingFrom', { threshold: formatPrice(shippingRate.freeShippingThreshold) })}{' '}
-                    {t('checkout.missingForFree', { missing: formatPrice(shippingRate.freeShippingThreshold - cartSubtotal) })}
+                    {/* Shipped without VAT, the threshold counts what's paid: the subtotal without VAT. */}
+                    {t('checkout.missingForFree', { missing: formatPrice(shippingRate.freeShippingThreshold - (vatExempt ? withoutVat(cartSubtotal) : cartSubtotal)) })}
                   </div>
                 )}
                 {shippingRate === null && shippingId && (

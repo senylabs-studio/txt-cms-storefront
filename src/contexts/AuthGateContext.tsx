@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from './AuthContext';
 import { guestCheckout } from '../services/authService';
 import { getApiErrorMessage, parseFieldErrors, type FieldErrors } from '../utils/apiError';
+import { loginUrl } from '../utils/session';
 
 interface AuthGateContextType {
   // Opens a "continue as guest or log in" prompt when the visitor isn't authenticated yet.
@@ -74,7 +75,7 @@ export const AuthGateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const handleLoginInstead = () => {
     close(false);
-    navigate('/login');
+    navigate(loginUrl());
   };
 
   return (

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Container, Row, Col, Button, Badge } from 'react-bootstrap';
+import { Container, Row, Col, Button, Badge, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaHeart, FaShoppingCart, FaTrash } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +16,7 @@ import './FavoritesPage.css';
 import PageLoader from '../../components/common/ScissorsLoader/PageLoader';
 import { variantCardTitle } from '../../utils/variantTitle';
 import { formatPrice } from '../../utils/pricing';
+import { loginUrl } from '../../utils/session';
 
 const FavoritesPage: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -33,14 +34,17 @@ const FavoritesPage: React.FC = () => {
   // Reloads on every language switch; only the latest request may write, or a slower response
   // in the previous language could land last and show the favorites in the wrong language.
   const latestRequest = useRef(0);
+  const [loadFailed, setLoadFailed] = useState(false);
   const load = async () => {
     const request = ++latestRequest.current;
     setLoading(true);
+    setLoadFailed(false);
     try {
       const favorites = await getFavorites();
       if (request === latestRequest.current) setItems(favorites);
     }
-    catch { if (request === latestRequest.current) setItems([]); }
+    // A failed load isn't "no favourites yet": said, with a retry.
+    catch { if (request === latestRequest.current) { setItems([]); setLoadFailed(true); } }
     finally { if (request === latestRequest.current) setLoading(false); }
   };
 
@@ -56,12 +60,14 @@ const FavoritesPage: React.FC = () => {
   };
 
   const handleAddToCart = async (item: FavoriteItem) => {
-    if (!isAuthenticated) { navigate('/login'); return; }
+    if (!isAuthenticated) { navigate(loginUrl()); return; }
     const entity = item.variant ?? item.product;
     if (!entity) return;
     try {
-      if (item.variantId) await addItem(undefined, item.variantId, 1);
-      else if (item.productId && !entity.hasVariants) await addItem(item.productId, undefined, 1);
+      // The fabric's minimum, not 1 m: a minimum above 1 (or a step 1 m doesn't fit) was refused.
+      const quantity = entity.minQuantity > 0 ? entity.minQuantity : 1;
+      if (item.variantId) await addItem(undefined, item.variantId, quantity);
+      else if (item.productId && !entity.hasVariants) await addItem(item.productId, undefined, quantity);
       else if (item.productId) navigate(`/product/${entity.slug}`);
     } catch (e) {
       showToast('danger', getApiErrorMessage(e, t('product.addError')));
@@ -81,7 +87,12 @@ const FavoritesPage: React.FC = () => {
           {items.length > 0 && <Badge bg="secondary">{items.length}</Badge>}
         </div>
 
-        {items.length === 0 ? (
+        {loadFailed ? (
+          <Alert variant="danger" className="d-flex align-items-center justify-content-between gap-2">
+            <span>{t('favorites.loadError')}</span>
+            <Button size="sm" variant="outline-danger" onClick={load}>{t('checkout.shippingRetry')}</Button>
+          </Alert>
+        ) : items.length === 0 ? (
           <div className="text-center py-5 text-muted">
             <FaHeart size={48} className="mb-3 opacity-25" />
             <p className="fs-5">{t('favorites.empty')}</p>

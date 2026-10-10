@@ -65,7 +65,11 @@
     "giftCardApplySuccess": "Tarjeta regalo aplicada.",
     "giftCardApplyError": "No se ha podido aplicar la tarjeta regalo.",
     "giftCardAvailable": "Saldo disponible: {{amount}}",
-    "amountDue": "A pagar"
+    "amountDue": "A pagar",
+    "invalidQuantity": "Escribe una cantidad válida (mínimo {{min}}).",
+    "unavailable": "Ya no disponible",
+    "removeUnavailable": "Quita los artículos que ya no están disponibles para continuar.",
+    "quantityLabel": "Metros"
   },
   "auth": {
     "login": {
@@ -233,7 +237,9 @@
     "nothingToPay": "No tienes que pagar nada: el pedido se confirma al pulsar el botón.",
     "vatExempt": "IVA no aplicable (envío fuera del territorio IVA: exportación)",
     "shippingMethod": "Forma de envío",
-    "pickupAt": "Recogerás el pedido en la tienda: {{address}}. Te avisaremos cuando esté listo."
+    "pickupAt": "Recogerás el pedido en la tienda: {{address}}. Te avisaremos cuando esté listo.",
+    "shippingLoadError": "No se han podido cargar las formas de envío. Inténtalo de nuevo.",
+    "shippingRetry": "Reintentar"
   },
   "checkoutSuccess": {
     "title": "¡Pedido recibido!",
@@ -243,7 +249,10 @@
     "setPasswordTitle": "Guarda tu cuenta",
     "setPasswordSubtitle": "Crea una contraseña para poder iniciar sesión más adelante y seguir este y futuros pedidos.",
     "setPasswordSubmit": "Guardar",
-    "setPasswordSuccess": "Contraseña guardada. Ya puedes iniciar sesión con tu email cuando quieras."
+    "setPasswordSuccess": "Contraseña guardada. Ya puedes iniciar sesión con tu email cuando quieras.",
+    "confirmingTitle": "Confirmando tu pago…",
+    "confirmingMessage": "Esperamos la confirmación del banco. Son solo unos segundos; no cierres esta página ni vuelvas a pagar.",
+    "stillConfirming": "El banco aún no nos ha confirmado el pago. Te enviaremos un email en cuanto llegue; no vuelvas a pagar. Si en unas horas no lo recibes, contacta con nosotros."
   },
   "authGate": {
     "title": "Continuar con la compra",
@@ -406,7 +415,8 @@
     "downloadLetter": "Descargar carta",
     "letterError": "No se ha podido descargar la carta.",
     "cardBalance": "Saldo: {{amount}}",
-    "cardSentTo": "Enviada también a {{email}}"
+    "cardSentTo": "Enviada también a {{email}}",
+    "loadError": "No se ha podido abrir el pedido."
   },
   "favorites": {
     "title": "Mis favoritos",
@@ -415,7 +425,8 @@
     "remove": "Quitar de favoritos",
     "add": "Añadir a favoritos",
     "removeError": "No se pudo eliminar de favoritos.",
-    "toggleError": "No se pudo actualizar favoritos."
+    "toggleError": "No se pudo actualizar favoritos.",
+    "loadError": "No se han podido cargar tus favoritos."
   },
   "board": {
     "title": "Mi tablero",
@@ -426,7 +437,10 @@
     "added": "Añadido al tablero",
     "remove": "Quitar del tablero",
     "viewProduct": "Ver producto",
-    "noLongerAvailable": "Ya no disponible"
+    "noLongerAvailable": "Ya no disponible",
+    "addError": "No se ha podido añadir al tablero.",
+    "saveError": "No se ha podido guardar la posición.",
+    "removeError": "No se ha podido quitar del tablero."
   },
   "stockNotifications": {
     "notifyMe": "Avísame cuando esté disponible",
@@ -455,6 +469,7 @@
     "recentlyViewed": "Vistos recientemente",
     "goesWith": "Combina con",
     "reviewCount": "({{count}} reseñas)",
+    "reviewCount_one": "({{count}} reseña)",
     "reviewsTitle": "Reseñas de clientes",
     "noReviews": "Esta tela aún no tiene reseñas.",
     "writeReview": "Escribe una reseña",
@@ -478,6 +493,7 @@
     "addError": "Error al añadir al carrito",
     "productNotFound": "Producto no encontrado.",
     "referencesCount": "{{count}} referencias",
+    "referencesCount_one": "{{count}} referencia",
     "inStockCount": "{{count}} en stock",
     "openImage": "Ver imagen ampliada",
     "closeImage": "Cerrar",
@@ -496,7 +512,9 @@
     "seeAllNew": "Ver todas las novedades",
     "fibreGuideLink": "Qué es {{material}}: ver en la guía de tejidos",
     "pattern": "Diseño",
-    "colors": "Colores"
+    "colors": "Colores",
+    "rating": "Valoración",
+    "ratingOf": "{{value}} de 5 estrellas"
   },
   "filters": {
     "close": "Cerrar filtros",
@@ -554,6 +572,7 @@
     "home": {
       "title": "Nuestros productos",
       "itemsAvailable": "{{count}} referencias disponibles",
+      "itemsAvailable_one": "{{count}} referencia disponible",
       "searchPlaceholder": "Buscar productos...",
       "noResults": "No se encontraron productos.",
       "noResultsFor": "No se encontraron productos para \"{{search}}\".",
@@ -604,7 +623,9 @@
     "fieldRequired": "Este campo es obligatorio.",
     "unexpectedError": "Ha ocurrido un error inesperado. Inténtalo de nuevo.",
     "networkError": "No se ha podido conectar. Comprueba tu conexión e inténtalo de nuevo.",
-    "loading": "Cargando…"
+    "loading": "Cargando…",
+    "pageLoadError": "No se ha podido cargar esta página. Comprueba la conexión y vuelve a cargarla.",
+    "reload": "Volver a cargar"
   },
   "openingHours": {
     "title": "Horario",
@@ -713,5 +734,13 @@
     "changeError": "No se ha podido cambiar el email. Puede que el enlace haya caducado: vuelve a pedir el cambio desde Mi cuenta.",
     "goToAccount": "Ir a Mi cuenta",
     "backToHome": "Volver a la tienda"
+  },
+  "cartReminders": {
+    "unsubscribe": {
+      "title": "Avisos de carrito",
+      "instructions": "¿Quieres dejar de recibir emails cuando dejas productos en el carrito?",
+      "confirm": "Darme de baja",
+      "success": "Listo: no te enviaremos más avisos de carrito."
+    }
   }
 }

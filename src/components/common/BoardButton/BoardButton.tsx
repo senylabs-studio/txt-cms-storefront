@@ -6,6 +6,9 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { addBoardItem } from '../../../services/boardService';
 import './BoardButton.css';
 import IconTooltip from '../IconTooltip/IconTooltip';
+import { loginUrl } from '../../../utils/session';
+import { useToast } from '../../../contexts/ToastContext';
+import { getApiErrorMessage } from '../../../utils/apiError';
 
 interface Props {
   variantId: number;
@@ -18,20 +21,22 @@ const BoardButton: React.FC<Props> = ({ variantId, size = 'md', className = '' }
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [added, setAdded] = useState(false);
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
 
   const handleClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!isAuthenticated) { navigate('/login'); return; }
+    if (!isAuthenticated) { navigate(loginUrl()); return; }
     if (loading) return;
     setLoading(true);
     try {
       await addBoardItem(variantId);
       setAdded(true);
       setTimeout(() => setAdded(false), 2000);
-    } catch {
-      // silent — this is a low-stakes convenience action, not worth an error banner
+    } catch (err) {
+      // Said, not swallowed: otherwise the fabric just isn't on the board later, with no reason.
+      showToast('danger', getApiErrorMessage(err, t('board.addError')));
     } finally {
       setLoading(false);
     }

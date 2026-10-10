@@ -5,6 +5,7 @@ import {
   addGiftCardToCart, updateGiftCardInCart, applyGiftCard as applyGiftCardRequest, removeGiftCard as removeGiftCardRequest,
 } from '../services/cartService';
 import { useAuth } from './AuthContext';
+import { useTranslation } from 'react-i18next';
 
 interface CartContextType {
   cart: Cart | null;
@@ -53,7 +54,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Mirrors FavoritesContext's own useEffect(() => { load(); }, [load]) — runs fetchCart on every
   // auth transition (login AND logout), not just when a page happens to mount while logged in.
-  useEffect(() => { fetchCart(); }, [fetchCart]);
+  // ...and on a language switch: item names come translated from the server.
+  const { i18n } = useTranslation();
+  useEffect(() => { fetchCart(); }, [fetchCart, i18n.language]);
 
   const addItem = async (productId?: number, variantId?: number, quantity = 1) => {
     setLoading(true);
