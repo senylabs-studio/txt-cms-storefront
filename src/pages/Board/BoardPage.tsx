@@ -26,7 +26,7 @@ interface DragState {
 }
 
 const BoardPage: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { showToast } = useToast();
   const navigate = useNavigate();
   const [items, setItems] = useState<BoardItem[]>([]);
@@ -34,9 +34,10 @@ const BoardPage: React.FC = () => {
   const [error, setError] = useState(false);
   const dragRef = useRef<DragState | null>(null);
 
+  // Reloaded on a language switch: the names come translated from the server.
   useEffect(() => {
     getBoard().then(setItems).catch(() => setError(true)).finally(() => setLoading(false));
-  }, []);
+  }, [i18n.language]);
 
   const bringToFront = (id: number) => {
     setItems(prev => {
