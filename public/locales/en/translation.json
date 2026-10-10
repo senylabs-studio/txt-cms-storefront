@@ -422,7 +422,8 @@
     "remove": "Remove from favourites",
     "add": "Add to favourites",
     "removeError": "Failed to remove from favorites.",
-    "toggleError": "Failed to update favorites."
+    "toggleError": "Failed to update favorites.",
+    "loadError": "Your favourites couldn't be loaded."
   },
   "board": {
     "title": "My board",
@@ -433,7 +434,10 @@
     "added": "Added to board",
     "remove": "Remove from board",
     "viewProduct": "View product",
-    "noLongerAvailable": "No longer available"
+    "noLongerAvailable": "No longer available",
+    "addError": "Couldn't add it to the board.",
+    "saveError": "Couldn't save the position.",
+    "removeError": "Couldn't remove it from the board."
   },
   "stockNotifications": {
     "notifyMe": "Notify me when back in stock",

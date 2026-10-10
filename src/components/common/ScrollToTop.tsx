@@ -8,7 +8,7 @@ import { useLocation, useNavigationType } from 'react-router-dom';
  * (PUSH/REPLACE); leave back/forward (POP) to the browser.
  */
 export default function ScrollToTop() {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
   const navigationType = useNavigationType();
 
   const previousPathname = useRef(pathname);
@@ -16,8 +16,9 @@ export default function ScrollToTop() {
   useEffect(() => {
     if (previousPathname.current === pathname) return;
     previousPathname.current = pathname;
-    if (navigationType !== 'POP') window.scrollTo(0, 0);
-  }, [pathname, navigationType]);
+    // A link to a section (#reviews): the page scrolls there itself once it has loaded.
+    if (navigationType !== 'POP' && !hash) window.scrollTo(0, 0);
+  }, [pathname, navigationType, hash]);
 
   return null;
 }

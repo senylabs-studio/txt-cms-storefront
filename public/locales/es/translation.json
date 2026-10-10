@@ -422,7 +422,8 @@
     "remove": "Quitar de favoritos",
     "add": "Añadir a favoritos",
     "removeError": "No se pudo eliminar de favoritos.",
-    "toggleError": "No se pudo actualizar favoritos."
+    "toggleError": "No se pudo actualizar favoritos.",
+    "loadError": "No se han podido cargar tus favoritos."
   },
   "board": {
     "title": "Mi tablero",
@@ -433,7 +434,10 @@
     "added": "Añadido al tablero",
     "remove": "Quitar del tablero",
     "viewProduct": "Ver producto",
-    "noLongerAvailable": "Ya no disponible"
+    "noLongerAvailable": "Ya no disponible",
+    "addError": "No se ha podido añadir al tablero.",
+    "saveError": "No se ha podido guardar la posición.",
+    "removeError": "No se ha podido quitar del tablero."
   },
   "stockNotifications": {
     "notifyMe": "Avísame cuando esté disponible",

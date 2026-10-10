@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { Container, Row, Col, Button, Badge, Alert, Form } from 'react-bootstrap';
 import { FaShoppingCart, FaArrowLeft, FaChevronLeft, FaChevronRight, FaStar, FaRegStar, FaRulerHorizontal, FaExpand } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
@@ -30,6 +30,7 @@ import PageLoader from '../../../components/common/ScissorsLoader/PageLoader';
 import { formatPrice } from '../../../utils/pricing';
 import { parseFabricColors } from '../../../utils/fabricColors';
 import { formatDate } from '../../../utils/locale';
+import MetresInput from '../../../components/common/MetresInput/MetresInput';
 
 const DEFAULT_MIN_QTY = 0.3;
 const DESC_THRESHOLD = 300;
@@ -88,6 +89,13 @@ const VariantDetailPage: React.FC = () => {
   const [reloadKey, setReloadKey] = useState(0);
   // The quantity resets for a new fabric, not when the same one is reloaded in another language.
   const quantityForId = useRef<string | undefined>(undefined);
+  // «Dejar una reseña» links here with #reviews: the section renders after the variant loads,
+  // so the browser's own jump to it never happened — scroll once it's there.
+  const { hash } = useLocation();
+  useEffect(() => {
+    if (hash !== '#reviews' || loading || !variant) return;
+    document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [hash, loading, variant]);
   // Each fibre in the composition links to its section of the fabric guide (when the shop has one).
   const fibreCodes = useMaterialAbbreviations();
   const hasFabricGuide = useFabricGuide();
@@ -491,12 +499,12 @@ const VariantDetailPage: React.FC = () => {
               <div className="vdp-stepper">
                 <button className="vdp-stepper-btn" aria-label={t('cart.lessQuantity')} disabled={outOfStock || quantity <= minQty}
                   onClick={() => adj(-stepQty)}>−</button>
-                <input
+                <MetresInput
                   className="vdp-stepper-input"
                   aria-label={t('cart.quantityMetres')}
-                  type="number" value={quantity} min={minQty} step={stepQty}
+                  value={quantity} min={minQty}
                   disabled={outOfStock}
-                  onChange={e => { const v = parseFloat(e.target.value); if (!isNaN(v) && v >= minQty) setQuantity(Math.round(v * 100) / 100); }}
+                  onValue={setQuantity}
                 />
                 <button className="vdp-stepper-btn" aria-label={t('cart.moreQuantity')} disabled={outOfStock} onClick={() => adj(stepQty)}>+</button>
               </div>

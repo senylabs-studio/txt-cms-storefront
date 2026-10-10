@@ -422,7 +422,8 @@
     "remove": "Treure dels favorits",
     "add": "Afegir a favorits",
     "removeError": "No s'ha pogut eliminar de preferits.",
-    "toggleError": "No s'ha pogut actualitzar preferits."
+    "toggleError": "No s'ha pogut actualitzar preferits.",
+    "loadError": "No s'han pogut carregar els teus preferits."
   },
   "board": {
     "title": "El meu tauler",
@@ -433,7 +434,10 @@
     "added": "Afegit al tauler",
     "remove": "Treure del tauler",
     "viewProduct": "Veure producte",
-    "noLongerAvailable": "Ja no disponible"
+    "noLongerAvailable": "Ja no disponible",
+    "addError": "No s'ha pogut afegir al tauler.",
+    "saveError": "No s'ha pogut desar la posició.",
+    "removeError": "No s'ha pogut treure del tauler."
   },
   "stockNotifications": {
     "notifyMe": "Avisa'm quan estigui disponible",

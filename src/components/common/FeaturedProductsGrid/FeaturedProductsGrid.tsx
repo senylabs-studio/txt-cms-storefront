@@ -15,6 +15,8 @@ import './FeaturedProductsGrid.css';
 
 /** Shape the backend resolves variantIds/productIds into server-side (see homeService.ts). */
 export interface FeaturedProductItem {
+  /** Smallest quantity it can be bought in (metres): one-click «Añadir» adds this, not 1. */
+  minQuantity?: number;
   id: number;
   name: string;
   slug?: string;
@@ -81,8 +83,10 @@ const FeaturedProductsGrid: React.FC<Props> = ({ title, variants = [], products 
     const ok = await requireAuth();
     if (!ok) return;
     try {
-      if (item._isVariant) await addItem(undefined, item.id, 1);
-      else if (!item.hasVariants) await addItem(item.id, undefined, 1);
+      // The fabric's minimum, not 1 m: a minimum above 1 (or a step 1 m doesn't fit) was refused.
+      const quantity = item.minQuantity && item.minQuantity > 0 ? item.minQuantity : 1;
+      if (item._isVariant) await addItem(undefined, item.id, quantity);
+      else if (!item.hasVariants) await addItem(item.id, undefined, quantity);
       else navigate(`/product/${item.slug}`);
     } catch (err) {
       showToast('danger', getApiErrorMessage(err, t('product.addError')));
