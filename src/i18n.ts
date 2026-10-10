@@ -11,7 +11,10 @@ i18n
     supportedLngs: ['es', 'ca', 'en'],
     fallbackLng: 'es',
     detection: {
-      order: ['localStorage', 'navigator'],
+      // ?lng= first: links in emails carry the email's language (a Catalan reset email opened
+      // on a phone with a Spanish browser showed the page in Spanish).
+      order: ['querystring', 'localStorage', 'navigator'],
+      lookupQuerystring: 'lng',
       lookupLocalStorage: 'lng',
       caches: ['localStorage'],
     },
