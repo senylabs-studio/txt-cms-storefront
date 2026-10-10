@@ -65,7 +65,11 @@
     "giftCardApplySuccess": "Gift card applied.",
     "giftCardApplyError": "The gift card couldn't be applied.",
     "giftCardAvailable": "Available balance: {{amount}}",
-    "amountDue": "To pay"
+    "amountDue": "To pay",
+    "invalidQuantity": "Enter a valid quantity (minimum {{min}}).",
+    "unavailable": "No longer available",
+    "removeUnavailable": "Remove the items that are no longer available to continue.",
+    "quantityLabel": "Metres"
   },
   "auth": {
     "login": {
@@ -408,7 +412,8 @@
     "downloadLetter": "Download letter",
     "letterError": "The letter couldn't be downloaded.",
     "cardBalance": "Balance: {{amount}}",
-    "cardSentTo": "Also sent to {{email}}"
+    "cardSentTo": "Also sent to {{email}}",
+    "loadError": "The order couldn't be opened."
   },
   "favorites": {
     "title": "My favourites",
@@ -717,5 +722,13 @@
     "changeError": "Your email couldn't be changed. The link may have expired: request the change again from My account.",
     "goToAccount": "Go to My account",
     "backToHome": "Back to the shop"
+  },
+  "cartReminders": {
+    "unsubscribe": {
+      "title": "Cart reminders",
+      "instructions": "Stop getting emails when you leave items in your cart?",
+      "confirm": "Unsubscribe",
+      "success": "Done: we won't send you more cart reminders."
+    }
   }
 }

@@ -7,7 +7,7 @@ import type { ApplicableShippingRate } from '../../services/shippingService';
 
 vi.mock('../../contexts/SiteSettingsContext', () => ({ useSiteSettings: () => ({ siteName: 'Shop' }) }));
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
+  useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'es' } }),
 }));
 
 vi.mock('../../components/Layout/MainLayout', () => ({
@@ -92,7 +92,7 @@ describe('CheckoutPage', () => {
   it('redirects to /login when not authenticated', () => {
     mockAuth.isAuthenticated = false;
     render(<CheckoutPage />);
-    expect(navigate).toHaveBeenCalledWith('/login');
+    expect(navigate).toHaveBeenCalledWith(expect.stringMatching(/^\/login\?from=/)); // back here after logging in
   });
 
   it('shows an empty-cart message and no redsys form when the cart has no items', () => {

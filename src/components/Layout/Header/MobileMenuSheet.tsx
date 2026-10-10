@@ -8,6 +8,7 @@ import { getLanguages, type StorefrontLanguage } from '../../../services/languag
 import type { StorefrontMenuItem } from '../../../types';
 import { pageUrl, menuItemClass } from '../../../utils/pageUrl';
 import MenuItemLabel from '../MenuItemLabel';
+import { loginUrl } from '../../../utils/session';
 
 function resolveHref(item: StorefrontMenuItem): string {
   if (item.externalUrl) return item.externalUrl;
@@ -92,7 +93,7 @@ const MobileMenuSheet: React.FC<MobileMenuSheetProps> = ({ open, onClose }) => {
               </button>
             ) : (
               <>
-                <button className="mobile-menu-account" onClick={() => { navigate('/login'); onClose(); }}>
+                <button className="mobile-menu-account" onClick={() => { navigate(loginUrl()); onClose(); }}>
                   {t('header.login')}
                 </button>
                 <span className="mobile-menu-lang-sep">·</span>

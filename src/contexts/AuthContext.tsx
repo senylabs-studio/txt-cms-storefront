@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import i18n from '../i18n';
 import { updatePreferredLanguage } from '../services/profileService';
 import type { AuthResponse } from '../types';
+import { SESSION_EXPIRED_EVENT, isTokenExpired } from '../utils/session';
 
 interface AuthState {
   token: string | null;
@@ -25,7 +26,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [state, setState] = useState<AuthState>(() => {
     const token = localStorage.getItem('storefront_token');
     const user = localStorage.getItem('storefront_user');
-    if (token && user) {
+    // An expired token isn't a session: restored as one, the first API call on any page got a
+    // 401 and threw the visitor to the login page.
+    if (token && isTokenExpired(token)) {
+      localStorage.removeItem('storefront_token');
+      localStorage.removeItem('storefront_user');
+    } else if (token && user) {
       const u = JSON.parse(user);
       return { token, customerId: u.customerId, name: u.name, email: u.email, isGuest: !!u.isGuest, isAuthenticated: true };
     }
@@ -43,6 +49,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('storefront_user');
     setState({ token: null, customerId: null, name: '', email: '', isGuest: false, isAuthenticated: false });
   };
+
+  // The API refused the session (apiClient already cleared it): reflect it without a reload.
+  useEffect(() => {
+    const onExpired = () => setState({ token: null, customerId: null, name: '', email: '', isGuest: false, isAuthenticated: false });
+    window.addEventListener(SESSION_EXPIRED_EVENT, onExpired);
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, onExpired);
+  }, []);
 
   // Flips the locally-tracked guest flag once the account has been converted to a real one
   // (ConvertGuest already returns a fresh non-guest token, but the caller may prefer to just

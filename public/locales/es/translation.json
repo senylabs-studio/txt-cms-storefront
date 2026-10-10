@@ -65,7 +65,11 @@
     "giftCardApplySuccess": "Tarjeta regalo aplicada.",
     "giftCardApplyError": "No se ha podido aplicar la tarjeta regalo.",
     "giftCardAvailable": "Saldo disponible: {{amount}}",
-    "amountDue": "A pagar"
+    "amountDue": "A pagar",
+    "invalidQuantity": "Escribe una cantidad válida (mínimo {{min}}).",
+    "unavailable": "Ya no disponible",
+    "removeUnavailable": "Quita los artículos que ya no están disponibles para continuar.",
+    "quantityLabel": "Metros"
   },
   "auth": {
     "login": {
@@ -408,7 +412,8 @@
     "downloadLetter": "Descargar carta",
     "letterError": "No se ha podido descargar la carta.",
     "cardBalance": "Saldo: {{amount}}",
-    "cardSentTo": "Enviada también a {{email}}"
+    "cardSentTo": "Enviada también a {{email}}",
+    "loadError": "No se ha podido abrir el pedido."
   },
   "favorites": {
     "title": "Mis favoritos",
@@ -717,5 +722,13 @@
     "changeError": "No se ha podido cambiar el email. Puede que el enlace haya caducado: vuelve a pedir el cambio desde Mi cuenta.",
     "goToAccount": "Ir a Mi cuenta",
     "backToHome": "Volver a la tienda"
+  },
+  "cartReminders": {
+    "unsubscribe": {
+      "title": "Avisos de carrito",
+      "instructions": "¿Quieres dejar de recibir emails cuando dejas productos en el carrito?",
+      "confirm": "Darme de baja",
+      "success": "Listo: no te enviaremos más avisos de carrito."
+    }
   }
 }

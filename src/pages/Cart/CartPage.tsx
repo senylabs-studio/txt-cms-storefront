@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Button, Card, Alert, Form } from 'react-bootstrap';
+import { Container, Row, Col, Button, Card, Alert, Form, Badge } from 'react-bootstrap';
 import { FaTrash, FaArrowRight, FaTag, FaGift } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -15,6 +15,35 @@ import { formatPrice } from '../../utils/pricing';
 import { cartItemName } from '../../utils/giftCard';
 import GiftCardEditModal from '../../components/Cart/GiftCardEditModal/GiftCardEditModal';
 import type { CartItem } from '../../types';
+import { loginUrl } from '../../utils/session';
+import { formatMeters, parseQuantity, uiLocale } from '../../utils/locale';
+
+/** The line's metres: typed freely (comma or point) and applied on Enter or when leaving the
+ *  field — one request per keystroke disabled the field mid-typing (wanting 12, "1" went out). */
+const CartQuantityInput: React.FC<{ item: CartItem; onCommit: (quantity: number) => void; onInvalid: () => void }> = ({ item, onCommit, onInvalid }) => {
+  const { t } = useTranslation();
+  const [text, setText] = useState<string | null>(null);
+  const shown = text ?? new Intl.NumberFormat(uiLocale(), { useGrouping: false, maximumFractionDigits: 2 }).format(item.quantity);
+  const commit = () => {
+    if (text === null) return;
+    const value = parseQuantity(text);
+    setText(null);
+    if (isNaN(value) || value < item.minQuantity) { onInvalid(); return; }
+    if (value !== item.quantity) onCommit(value);
+  };
+  return (
+    <Form.Control
+      type="text"
+      inputMode="decimal"
+      aria-label={t('cart.quantityLabel')}
+      value={shown}
+      onChange={e => setText(e.target.value)}
+      onBlur={commit}
+      onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); commit(); } }}
+      style={{ width: 90 }}
+    />
+  );
+};
 
 const CartPage: React.FC = () => {
   const { t } = useTranslation();
@@ -22,6 +51,7 @@ const CartPage: React.FC = () => {
   // The tab title: this screen's, not the previous page's.
   useDocumentMeta(`${t('cart.title')} — ${siteName}`);
   const { cart, loading, fetchCart, updateItem, removeItem, applyCoupon, removeCoupon, applyGiftCard, removeGiftCard } = useCart();
+  const hasUnavailable = !!cart?.items.some(i => i.isAvailable === false);
   const { isAuthenticated } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
@@ -117,7 +147,7 @@ const CartPage: React.FC = () => {
     <MainLayout>
       <Container className="py-5 text-center">
         <h4>{t('cart.loginRequired')}</h4>
-        <Button variant="primary" onClick={() => navigate('/login')}>{t('header.login')}</Button>
+        <Button variant="primary" onClick={() => navigate(loginUrl())}>{t('header.login')}</Button>
       </Container>
     </MainLayout>
   );
@@ -167,6 +197,7 @@ const CartPage: React.FC = () => {
                         <>
                       <Col xs={9} sm={5}>
                         <div className="fw-semibold">{item.productName}</div>
+                        {item.isAvailable === false && <Badge bg="danger" className="mb-1">{t('cart.unavailable')}</Badge>}
                         <div className="text-muted small">{item.productCode}</div>
                         <div className="small">
                           {item.unitPrice < item.originalUnitPrice && (
@@ -180,18 +211,7 @@ const CartPage: React.FC = () => {
                         </div>
                       </Col>
                       <Col sm={3} className="d-flex align-items-center mt-2 mt-sm-0">
-                        <Form.Control
-                          type="number"
-                          min={item.minQuantity}
-                          step={item.quantityStep}
-                          value={item.quantity}
-                          onChange={(e) => {
-                            const v = parseFloat(e.target.value);
-                            if (!isNaN(v) && v >= item.minQuantity) handleUpdate(item.id, v);
-                          }}
-                          style={{ width: 90 }}
-                          disabled={loading}
-                        />
+                        <CartQuantityInput item={item} onCommit={q => handleUpdate(item.id, q)} onInvalid={() => setItemError(t('cart.invalidQuantity', { min: formatMeters(item.minQuantity) }))} />
                       </Col>
                         </>
                       )}
@@ -215,7 +235,7 @@ const CartPage: React.FC = () => {
                   <h5 className="fw-bold mb-3">{t('cart.summary')}</h5>
                   {cart!.items.map(item => (
                     <div key={item.id} className="d-flex justify-content-between small mb-1">
-                      <span className="text-muted">{item.giftCard ? cartItemName(item, t) : `${item.productName} x${item.quantity}m`}</span>
+                      <span className="text-muted">{item.giftCard ? cartItemName(item, t) : `${item.productName} × ${formatMeters(item.quantity)}`}</span>
                       <span>{formatPrice(item.subtotal)}</span>
                     </div>
                   ))}
@@ -318,7 +338,8 @@ const CartPage: React.FC = () => {
                     </>
                   )}
                   <div className="mb-3" />
-                  <Button variant="primary" size="lg" className="w-100" onClick={() => navigate('/checkout')}>
+                  {hasUnavailable && <Alert variant="warning" className="py-2 small">{t('cart.removeUnavailable')}</Alert>}
+                  <Button variant="primary" size="lg" className="w-100" onClick={() => navigate('/checkout')} disabled={hasUnavailable}>
                     {t('cart.checkout')} <FaArrowRight className="ms-1" />
                   </Button>
                 </Card.Body>

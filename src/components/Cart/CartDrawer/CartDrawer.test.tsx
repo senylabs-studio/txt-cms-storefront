@@ -7,7 +7,7 @@ import type { Cart } from '../../../types';
 const renderDrawer = () => render(<CartDrawer />, { wrapper: MemoryRouter });
 
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
+  useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'es' } }),
 }));
 
 const navigate = vi.fn();

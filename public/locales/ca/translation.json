@@ -65,7 +65,11 @@
     "giftCardApplySuccess": "Targeta regal aplicada.",
     "giftCardApplyError": "No s'ha pogut aplicar la targeta regal.",
     "giftCardAvailable": "Saldo disponible: {{amount}}",
-    "amountDue": "A pagar"
+    "amountDue": "A pagar",
+    "invalidQuantity": "Escriu una quantitat vàlida (mínim {{min}}).",
+    "unavailable": "Ja no disponible",
+    "removeUnavailable": "Treu els articles que ja no estan disponibles per continuar.",
+    "quantityLabel": "Metres"
   },
   "auth": {
     "login": {
@@ -408,7 +412,8 @@
     "downloadLetter": "Descarregar la carta",
     "letterError": "No s'ha pogut descarregar la carta.",
     "cardBalance": "Saldo: {{amount}}",
-    "cardSentTo": "Enviada també a {{email}}"
+    "cardSentTo": "Enviada també a {{email}}",
+    "loadError": "No s'ha pogut obrir la comanda."
   },
   "favorites": {
     "title": "Els meus favorits",
@@ -717,5 +722,13 @@
     "changeError": "No s'ha pogut canviar el correu. Potser l'enllaç ha caducat: torna a demanar el canvi des de El meu compte.",
     "goToAccount": "Anar a El meu compte",
     "backToHome": "Tornar a la botiga"
+  },
+  "cartReminders": {
+    "unsubscribe": {
+      "title": "Avisos de cistella",
+      "instructions": "Vols deixar de rebre correus quan deixes productes a la cistella?",
+      "confirm": "Donar-me de baixa",
+      "success": "Fet: no t'enviarem més avisos de cistella."
+    }
   }
 }

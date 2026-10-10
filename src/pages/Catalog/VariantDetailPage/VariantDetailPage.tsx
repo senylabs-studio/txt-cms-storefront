@@ -82,6 +82,12 @@ const VariantDetailPage: React.FC = () => {
   );
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  // A failed load that isn't a 404 (server error, timeout): said so with a retry, instead of
+  // silently sending the shopper to the catalog.
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
+  // The quantity resets for a new fabric, not when the same one is reloaded in another language.
+  const quantityForId = useRef<string | undefined>(undefined);
   // Each fibre in the composition links to its section of the fabric guide (when the shop has one).
   const fibreCodes = useMaterialAbbreviations();
   const hasFabricGuide = useFabricGuide();
@@ -135,12 +141,22 @@ const VariantDetailPage: React.FC = () => {
     if (!id) return;
     let cancelled = false;
     setLoading(true);
-    setSelectedImage(0);
-    setRulerActive(false);
-    setDescExpanded(false);
+    setNotFound(false);
+    setLoadFailed(false);
+    const sameFabric = quantityForId.current === id;
+    if (!sameFabric) {
+      setSelectedImage(0);
+      setRulerActive(false);
+      setDescExpanded(false);
+    }
     getVariantById(Number(id))
-      .then(v => { if (!cancelled) { setVariant(v); setQuantity(v.minQuantity); } })
-      .catch((e) => { if (!cancelled) { if (e?.response?.status === 404) setNotFound(true); else navigate('/catalog'); } })
+      .then(v => {
+        if (cancelled) return;
+        setVariant(v);
+        if (!sameFabric) setQuantity(v.minQuantity);
+        quantityForId.current = id;
+      })
+      .catch((e) => { if (!cancelled) { if (e?.response?.status === 404) setNotFound(true); else setLoadFailed(true); } })
       .finally(() => { if (!cancelled) setLoading(false); });
     // In-page "siblings"/"also bought"/"recently viewed" links navigate to another
     // /variant/:id without unmounting this component, and the browser Back/Forward buttons can
@@ -148,8 +164,7 @@ const VariantDetailPage: React.FC = () => {
     // newer id's and silently overwrite the page with the wrong variant's data while the URL
     // still shows the new id.
     return () => { cancelled = true; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- navigate is only the error fallback; refetch only on id/language change
-  }, [id, i18n.language]);
+  }, [id, i18n.language, reloadKey]);
 
   useEffect(() => {
     if (!variant?.id) return;
@@ -233,6 +248,14 @@ const VariantDetailPage: React.FC = () => {
 
   if (loading) return <MainLayout><PageLoader /></MainLayout>;
   if (notFound) return <MainLayout><Container className="py-5"><Alert variant="warning">{t('product.notFound')}</Alert></Container></MainLayout>;
+  if (loadFailed) return (
+    <MainLayout><Container className="py-5">
+      <Alert variant="danger" className="d-flex align-items-center justify-content-between gap-2">
+        <span>{t('common.pageLoadError')}</span>
+        <Button size="sm" variant="outline-danger" onClick={() => setReloadKey(k => k + 1)}>{t('checkout.shippingRetry')}</Button>
+      </Alert>
+    </Container></MainLayout>
+  );
   if (!variant) return null;
 
   const images = variant.images.length

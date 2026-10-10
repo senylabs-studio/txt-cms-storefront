@@ -6,6 +6,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { addBoardItem } from '../../../services/boardService';
 import './BoardButton.css';
 import IconTooltip from '../IconTooltip/IconTooltip';
+import { loginUrl } from '../../../utils/session';
 
 interface Props {
   variantId: number;
@@ -23,7 +24,7 @@ const BoardButton: React.FC<Props> = ({ variantId, size = 'md', className = '' }
   const handleClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!isAuthenticated) { navigate('/login'); return; }
+    if (!isAuthenticated) { navigate(loginUrl()); return; }
     if (loading) return;
     setLoading(true);
     try {

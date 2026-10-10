@@ -16,9 +16,11 @@ import type { CustomerAddress, CheckoutResponse, CheckoutRequest } from '../../t
 import PayPalCheckoutButton from './PayPalCheckoutButton';
 import { formatPrice } from '../../utils/pricing';
 import { cartItemName } from '../../utils/giftCard';
+import { loginUrl } from '../../utils/session';
+import { formatMeters } from '../../utils/locale';
 
 const CheckoutPage: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { siteName, companyAddress, companyPostalCode, companyCity } = useSiteSettings();
   // The tab title: this screen's, not the previous page's.
   useDocumentMeta(`${t('checkout.title')} — ${siteName}`);
@@ -47,7 +49,7 @@ const CheckoutPage: React.FC = () => {
   const redsysFormRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
-    if (!isAuthenticated) { navigate('/login'); return; }
+    if (!isAuthenticated) { navigate(loginUrl()); return; }
     fetchCart();
     getProfile().then(p => {
       setAddresses(p.addresses);
@@ -85,7 +87,7 @@ const CheckoutPage: React.FC = () => {
     // resolves) must not let the slower, now-stale response overwrite the options for the
     // address actually selected now — same class of stale-response bug this codebase has hit before.
     return () => { cancelled = true; };
-  }, [shippingId, cart, shippingRetry]);
+  }, [shippingId, cart, shippingRetry, i18n.language]); // option names come translated
 
   // The option in use: null when the address has none (or only pickup and nothing chosen).
   const shippingRate: ApplicableShippingRate | null | undefined = shippingOptions === undefined
@@ -237,7 +239,7 @@ const CheckoutPage: React.FC = () => {
                   <>
                     <Form.Group className="mb-3" controlId="checkout-shipping-address">
                       <Form.Label className="fw-semibold">{t('checkout.shippingAddress')}</Form.Label>
-                      <Form.Select value={shippingId ?? ''} onChange={e => setShippingId(Number(e.target.value))}>
+                      <Form.Select value={shippingId ?? ''} onChange={e => setShippingId(e.target.value ? Number(e.target.value) : undefined)}>
                         <option value="">{t('checkout.selectAddress')}</option>
                         {addresses.map(a => (
                           <option key={a.id} value={a.id}>{a.alias} — {a.street}, {a.city}</option>
@@ -281,7 +283,7 @@ const CheckoutPage: React.FC = () => {
 
                     <Form.Group className="mb-3" controlId="checkout-billing-address">
                       <Form.Label className="fw-semibold">{t('checkout.billingAddress')}</Form.Label>
-                      <Form.Select value={billingId ?? ''} onChange={e => setBillingId(Number(e.target.value))}>
+                      <Form.Select value={billingId ?? ''} onChange={e => setBillingId(e.target.value ? Number(e.target.value) : undefined)}>
                         <option value="">{t('checkout.sameBilling')}</option>
                         {addresses.map(a => (
                           <option key={a.id} value={a.id}>{a.alias} — {a.street}, {a.city}</option>
@@ -338,7 +340,7 @@ const CheckoutPage: React.FC = () => {
                 <h5 className="fw-bold mb-3">{t('checkout.orderSummary')}</h5>
                 {cart.items.map(item => (
                   <div key={item.id} className="d-flex justify-content-between small mb-1">
-                    <span className="text-muted">{item.giftCard ? `${cartItemName(item, t)} · ${t('giftCard.lineFor', { name: item.giftCard.recipientName })}` : `${item.productName} x${item.quantity}m`}</span>
+                    <span className="text-muted">{item.giftCard ? `${cartItemName(item, t)} · ${t('giftCard.lineFor', { name: item.giftCard.recipientName })}` : `${item.productName} × ${formatMeters(item.quantity)}`}</span>
                     <span>{formatPrice(item.subtotal)}</span>
                   </div>
                 ))}

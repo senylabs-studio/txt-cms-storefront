@@ -9,7 +9,7 @@ const renderCartPage = () => render(<ToastProvider><CartPage /></ToastProvider>)
 
 vi.mock('../../contexts/SiteSettingsContext', () => ({ useSiteSettings: () => ({ siteName: 'Shop' }) }));
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
+  useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'es' } }),
 }));
 
 vi.mock('../../components/Layout/MainLayout', () => ({
@@ -78,7 +78,7 @@ describe('CartPage', () => {
     renderCartPage();
 
     fireEvent.click(screen.getByText('header.login'));
-    expect(navigate).toHaveBeenCalledWith('/login');
+    expect(navigate).toHaveBeenCalledWith(expect.stringMatching(/^\/login\?from=/)); // back here after logging in
   });
 
   it('fetches the cart on mount when authenticated', () => {
@@ -116,7 +116,10 @@ describe('CartPage', () => {
     mockCart.cart = cartWithItems();
     renderCartPage();
 
-    fireEvent.change(screen.getByDisplayValue('2'), { target: { value: '3' } });
+    const input = screen.getByDisplayValue('2');
+    fireEvent.change(input, { target: { value: '3' } });
+    expect(mockCart.updateItem).not.toHaveBeenCalled(); // not on every keystroke
+    fireEvent.blur(input);
     expect(mockCart.updateItem).toHaveBeenCalledWith(1, 3);
   });
 
@@ -126,6 +129,7 @@ describe('CartPage', () => {
     renderCartPage();
 
     fireEvent.change(screen.getByDisplayValue('2'), { target: { value: '3' } });
+    fireEvent.blur(screen.getByDisplayValue('3'));
 
     expect(await screen.findByText('Stock insuficiente')).toBeInTheDocument();
   });
@@ -136,6 +140,7 @@ describe('CartPage', () => {
     renderCartPage();
 
     fireEvent.change(screen.getByDisplayValue('2'), { target: { value: '3' } });
+    fireEvent.blur(screen.getByDisplayValue('3'));
 
     expect(await screen.findByText('cart.updateError')).toBeInTheDocument();
   });

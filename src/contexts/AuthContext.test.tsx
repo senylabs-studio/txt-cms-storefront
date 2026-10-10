@@ -40,13 +40,28 @@ describe('AuthContext', () => {
     expect(state.token).toBeNull();
   });
 
+  const jwt = (exp: number) => `h.${btoa(JSON.stringify({ exp }))}.s`;
+
   it('hydrates from localStorage on mount', () => {
-    localStorage.setItem('storefront_token', 'stored-token');
+    const token = jwt(Math.floor(Date.now() / 1000) + 3600);
+    localStorage.setItem('storefront_token', token);
     localStorage.setItem('storefront_user', JSON.stringify({ customerId: 3, name: 'Stored', email: 's@e.com' }));
 
     render(<AuthProvider><Probe /></AuthProvider>);
     const state = JSON.parse(screen.getByTestId('state').textContent!);
-    expect(state).toEqual({ isAuthenticated: true, token: 'stored-token', customerId: 3, name: 'Stored', email: 's@e.com' });
+    expect(state).toEqual({ isAuthenticated: true, token, customerId: 3, name: 'Stored', email: 's@e.com' });
+  });
+
+  // Restored as a session, an expired token made the first API call of any page bounce the
+  // visitor to the login.
+  it('drops an expired token instead of restoring it', () => {
+    localStorage.setItem('storefront_token', jwt(Math.floor(Date.now() / 1000) - 60));
+    localStorage.setItem('storefront_user', JSON.stringify({ customerId: 3, name: 'Stored', email: 's@e.com' }));
+
+    render(<AuthProvider><Probe /></AuthProvider>);
+
+    expect(JSON.parse(screen.getByTestId('state').textContent!).isAuthenticated).toBe(false);
+    expect(localStorage.getItem('storefront_token')).toBeNull();
   });
 
   it('login() persists to localStorage and updates state', () => {

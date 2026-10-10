@@ -16,6 +16,7 @@ import './FavoritesPage.css';
 import PageLoader from '../../components/common/ScissorsLoader/PageLoader';
 import { variantCardTitle } from '../../utils/variantTitle';
 import { formatPrice } from '../../utils/pricing';
+import { loginUrl } from '../../utils/session';
 
 const FavoritesPage: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -56,7 +57,7 @@ const FavoritesPage: React.FC = () => {
   };
 
   const handleAddToCart = async (item: FavoriteItem) => {
-    if (!isAuthenticated) { navigate('/login'); return; }
+    if (!isAuthenticated) { navigate(loginUrl()); return; }
     const entity = item.variant ?? item.product;
     if (!entity) return;
     try {

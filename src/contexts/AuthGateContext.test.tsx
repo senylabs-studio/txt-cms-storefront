@@ -88,7 +88,7 @@ describe('AuthGateContext', () => {
     expect(await screen.findByText('authGate.title')).toBeInTheDocument();
     fireEvent.click(screen.getByText('authGate.haveAccount'));
 
-    expect(navigate).toHaveBeenCalledWith('/login');
+    expect(navigate).toHaveBeenCalledWith(expect.stringMatching(/^\/login\?from=/)); // back here after logging in
     await waitFor(() => expect(screen.getByText('false')).toBeInTheDocument());
   });
 

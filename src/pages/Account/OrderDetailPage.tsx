@@ -13,6 +13,7 @@ import PageLoader from '../../components/common/ScissorsLoader/PageLoader';
 import { formatPrice } from '../../utils/pricing';
 import { downloadGiftCardLetter } from '../../services/giftCardService';
 import { formatDate, countryName } from '../../utils/locale';
+import { formatMeters } from '../../utils/locale';
 
 const OrderDetailPage: React.FC = () => {
   const { t } = useTranslation();
@@ -36,7 +37,7 @@ const OrderDetailPage: React.FC = () => {
     if (!id) return;
     return getOrderDetail(Number(id))
       .then(setOrder)
-      .catch(() => navigate('/account/orders'));
+      .catch(err => { showToast('danger', getApiErrorMessage(err, t('orderDetail.loadError'))); navigate('/account/orders'); });
   };
 
   useEffect(() => {
@@ -45,7 +46,8 @@ const OrderDetailPage: React.FC = () => {
     setLoading(true);
     getOrderDetail(Number(id))
       .then(o => { if (!cancelled) setOrder(o); })
-      .catch(() => { if (!cancelled) navigate('/account/orders'); })
+      // Said, not a silent bounce: an emailed order link otherwise seemed to "do nothing".
+      .catch(err => { if (!cancelled) { showToast('danger', getApiErrorMessage(err, t('orderDetail.loadError'))); navigate('/account/orders'); } })
       .finally(() => { if (!cancelled) setLoading(false); });
     // Cancel/return/invoice-download all act on `order.id` from state, not the route `id` — the
     // account orders list links between different orders on the same /account/orders/:id route,
@@ -252,7 +254,7 @@ const OrderDetailPage: React.FC = () => {
                         </Link>
                       )}
                     </td>
-                    <td className="text-center">{line.giftCard ? line.quantity : `${line.quantity} m`}</td>
+                    <td className="text-center">{line.giftCard ? line.quantity : formatMeters(line.quantity)}</td>
                     <td className="text-end">{formatPrice(line.unitPrice)}</td>
                     <td className="text-end">{line.discountPercent > 0 ? `${line.discountPercent}%` : '—'}</td>
                     <td className="text-end fw-semibold">{formatPrice(line.subtotal)}</td>

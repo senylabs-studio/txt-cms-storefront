@@ -93,6 +93,10 @@ const PageCatalogPage: React.FC = () => {
   const filters = useMemo(() => filtersFromParams(searchParams), [filtersKey]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  // A failed load that isn't a 404: a message with a retry — not a blank page, nor the previous
+  // category's products left under the new URL.
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Phones get "Cargar más" instead of page numbers: each tap adds the next page's products
@@ -157,6 +161,7 @@ const PageCatalogPage: React.FC = () => {
     if (navigationType === 'PUSH') window.scrollTo(0, 0);
     setLoading(true);
     setNotFound(false);
+    setLoadFailed(false);
     setLoadingMore(false);
     setLoadMoreError(false);
     const request = isMobile
@@ -182,7 +187,7 @@ const PageCatalogPage: React.FC = () => {
         listedRef.current = isMobile ? { key: listKey, pages } : { key: '', pages: 0 };
         if (isMobile && pages !== currentPage) updateParams(p => p.set('pagina', String(pages)), true);
       })
-      .catch(e => { if (cancelled) return; if (e?.response?.status === 404) setNotFound(true); })
+      .catch(e => { if (cancelled) return; if (e?.response?.status === 404) setNotFound(true); else setLoadFailed(true); })
       .finally(() => { if (!cancelled) setLoading(false); });
     // Clicking a different category link (or rapidly toggling filters) before the previous
     // request resolves doesn't unmount this component — without this guard, an older slug's/
@@ -190,7 +195,7 @@ const PageCatalogPage: React.FC = () => {
     // page with the wrong category's products while the URL/filters still show the new state.
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- listKey covers slug, view, filters and language; navigationType is read, not a trigger
-  }, [listKey, currentPage, isMobile]);
+  }, [listKey, currentPage, isMobile, reloadKey]);
 
   // Back from a product: once the list is there again, return to where the visitor was. The
   // position is kept per history entry; the browser can't restore it itself because the list
@@ -305,7 +310,18 @@ const PageCatalogPage: React.FC = () => {
     </MainLayout>
   );
 
-  if (!pageDetail) return null;
+  if (loadFailed || !pageDetail) return (
+    <MainLayout>
+      <Container className="py-5">
+        {loadFailed && (
+          <Alert variant="danger" className="d-flex align-items-center justify-content-between gap-2">
+            <span>{t('common.pageLoadError')}</span>
+            <Button size="sm" variant="outline-danger" onClick={() => setReloadKey(k => k + 1)}>{t('checkout.shippingRetry')}</Button>
+          </Alert>
+        )}
+      </Container>
+    </MainLayout>
+  );
 
   if (pageDetail.type === 'Sitemap') {
     return (

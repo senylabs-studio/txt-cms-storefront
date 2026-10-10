@@ -6,6 +6,7 @@ import { useFavorites } from '../../../contexts/FavoritesContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import './FavoriteButton.css';
 import IconTooltip from '../IconTooltip/IconTooltip';
+import { loginUrl } from '../../../utils/session';
 
 interface Props {
   productId?: number;
@@ -25,7 +26,7 @@ const FavoriteButton: React.FC<Props> = ({ productId, variantId, size = 'md', cl
   const handleClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!isAuthenticated) { navigate('/login'); return; }
+    if (!isAuthenticated) { navigate(loginUrl()); return; }
     await toggle(productId, variantId);
   };
 
