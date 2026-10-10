@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import HomePage from './HomePage';
 import type { StorefrontVariant } from '../../types';
@@ -54,6 +54,18 @@ describe('HomePage catalog', () => {
 
     expect(screen.getByText('Lino Natural')).toBeInTheDocument();
     expect(screen.queryByText('Algodón Blanco')).not.toBeInTheDocument();
+  });
+
+  // Back from a fabric used to land on page 1 with no filters: they live in the URL now.
+  it('opens on the page and filters in the URL', async () => {
+    getVariantsPaged.mockResolvedValue(pageOf('Lino'));
+    render(<MemoryRouter initialEntries={['/catalog?search=lino&material=Lino&pagina=3']}><HomePage /></MemoryRouter>);
+
+    await waitFor(() => expect(getVariantsPaged).toHaveBeenCalled());
+    expect(getVariantsPaged.mock.calls[0][0]).toBe(3);
+    expect(getVariantsPaged.mock.calls[0][6]).toEqual(expect.objectContaining({ material: 'Lino' }));
+    await new Promise(r => setTimeout(r, 500)); // past the search debounce
+    expect(getVariantsPaged.mock.lastCall![0]).toBe(3); // the URL's own term doesn't reset the page
   });
 
   it('opens with the "only new" filter on from ?novedades=1 (the home block link), and keeps it while searching', async () => {

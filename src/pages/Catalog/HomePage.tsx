@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Container, Row, Col, Form, InputGroup, Button, Badge, Alert } from 'react-bootstrap';
 import { FaSearch, FaFilter, FaTimes } from 'react-icons/fa';
 import { useSearchParams } from 'react-router-dom';
@@ -17,7 +17,7 @@ import './PageCatalogPage/PageCatalogPage.css';
 import ScissorsLoader from '../../components/common/ScissorsLoader/ScissorsLoader';
 import IconTooltip from '../../components/common/IconTooltip/IconTooltip';
 import CatalogPagination from '../../components/common/CatalogPagination/CatalogPagination';
-import { NEW_ARRIVALS_PARAM } from '../../utils/catalogParams';
+import { NEW_ARRIVALS_PARAM, FILTER_PARAMS, filtersFromParams, writeFilterParams } from '../../utils/catalogParams';
 import ActiveFilters from '../../components/common/ActiveFilters/ActiveFilters';
 
 const EMPTY_FACETS: PageFilterFacets = { minPrice: 0, maxPrice: 0, widths: [], materials: [] };
@@ -40,9 +40,21 @@ const HomePage: React.FC = () => {
   useEffect(() => {
     setSearch(searchParams.get('search') ?? '');
   }, [searchParams]);
-  // ?novedades=1 (the home "new arrivals" block's link) opens with the "only new" filter on.
-  const [filters, setFilters] = useState<PageFilters>(() => searchParams.get(NEW_ARRIVALS_PARAM) === '1' ? { onlyNew: true } : {});
-  const [currentPage, setCurrentPage] = useState(1);
+  // Filters and page live in the URL (like category pages): Back from a fabric lands on the same
+  // filtered page instead of page 1 with nothing selected. ?novedades=1 (the home "new arrivals"
+  // block's link) opens with the "only new" filter on.
+  const filtersKey = [...FILTER_PARAMS, NEW_ARRIVALS_PARAM].map(p => searchParams.get(p) ?? '').join('|');
+  const filters = useMemo<PageFilters>(() => {
+    const f = filtersFromParams(searchParams);
+    return searchParams.get(NEW_ARRIVALS_PARAM) === '1' ? { ...f, onlyNew: true } : f;
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- filtersKey is what the filters depend on
+  }, [filtersKey]);
+  const currentPage = Math.max(1, Number.parseInt(searchParams.get('pagina') ?? '', 10) || 1);
+  const setCurrentPage = (page: number) => setSearchParams(prev => {
+    const next = new URLSearchParams(prev);
+    if (page > 1) next.set('pagina', String(page)); else next.delete('pagina');
+    return next;
+  });
   const debouncedSearch = useDebounce(search, 400);
 
   useEffect(() => {
@@ -60,28 +72,28 @@ const HomePage: React.FC = () => {
   }, [currentPage, debouncedSearch, filters, i18n.language]);
 
   useEffect(() => {
-    setCurrentPage(1);
-    // Only the search term lives here; keep the rest of the query (e.g. ?novedades=1).
+    // Only a new search term goes back to page 1 (arriving with the URL's own term — Back from a
+    // fabric — keeps the page).
     setSearchParams(prev => {
+      if ((prev.get('search') ?? '') === debouncedSearch) return prev;
       const next = new URLSearchParams(prev);
       if (debouncedSearch) next.set('search', debouncedSearch);
       else next.delete('search');
+      next.delete('pagina');
       return next;
-    });
+    }, { replace: true });
   // eslint-disable-next-line react-hooks/exhaustive-deps -- setSearchParams changes identity on every navigation, so listing it would loop; sync only when the debounced search changes
   }, [debouncedSearch]);
 
   const handleFilterChange = (f: PageFilters) => {
-    setFilters(f);
-    setCurrentPage(1);
-    // Turning "only new" off drops ?novedades=1 too, so a reload doesn't switch it back on.
-    if (!f.onlyNew && searchParams.has(NEW_ARRIVALS_PARAM)) {
-      setSearchParams(prev => {
-        const next = new URLSearchParams(prev);
-        next.delete(NEW_ARRIVALS_PARAM);
-        return next;
-      });
-    }
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      writeFilterParams(next, f);
+      next.delete('pagina');
+      // ?novedades=1 is just the home link's way in: the filter itself is now onlyNew.
+      next.delete(NEW_ARRIVALS_PARAM);
+      return next;
+    });
   };
 
   const activeCount = [
