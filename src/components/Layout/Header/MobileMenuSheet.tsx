@@ -31,8 +31,11 @@ const MobileMenuSheet: React.FC<MobileMenuSheetProps> = ({ open, onClose }) => {
   const loadedFor = useRef<string | null>(null);
   useEffect(() => {
     if (!open || loadedFor.current === i18n.language) return;
-    loadedFor.current = i18n.language;
-    getMenu().then(setItems).catch(() => {});
+    const language = i18n.language;
+    loadedFor.current = language;
+    // A failed load is forgotten, so opening the sheet again retries (it stayed empty until a
+    // full page reload).
+    getMenu().then(setItems).catch(() => { if (loadedFor.current === language) loadedFor.current = null; });
     if (languages.length === 0) getLanguages().then(setLanguages).catch(() => {});
   }, [open, i18n.language, languages.length]);
 

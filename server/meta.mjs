@@ -128,7 +128,7 @@ function storeLd(site) {
     ...(site.companyEmail ? { email: site.companyEmail } : {}),
     ...(site.companyAddress ? { address: {
       '@type': 'PostalAddress', streetAddress: site.companyAddress, addressLocality: site.companyCity,
-      postalCode: site.companyPostalCode, addressCountry: 'ES',
+      postalCode: site.companyPostalCode, addressCountry: site.companyCountry || 'ES',
     } } : {}),
     ...(sameAs.length ? { sameAs } : {}),
   };
@@ -147,18 +147,36 @@ const ldScript = (data, url) => data
  */
 export function createJsonCache(load, { ttlMs = 5 * 60 * 1000, retryMs = 30 * 1000, max = 2000, now = Date.now } = {}) {
   const cache = new Map();
-  return async (path, { refresh = false } = {}) => {
-    const hit = cache.get(path);
-    if (!refresh && hit && hit.until > now()) return hit.value;
+  const inFlight = new Map();
+  // Least recently used goes first: a Map keeps insertion order, so every use re-inserts the key
+  // at the end (plain insertion order evicted the site settings — the first key — once a crawler
+  // walked the sitemap, bringing back the generic "Tienda" preview).
+  const put = (path, entry) => {
+    cache.delete(path);
+    cache.set(path, entry);
+    if (cache.size > max) cache.delete(cache.keys().next().value);
+  };
+  const fetchAndStore = async (path, hit) => {
     let value = null;
     try { value = await load(path); } catch { value = null; }
     if (value === null && hit?.value) {
-      cache.set(path, { value: hit.value, until: now() + retryMs });
+      put(path, { value: hit.value, until: now() + retryMs });
       return hit.value;
     }
-    cache.set(path, { value, until: now() + (value ? ttlMs : retryMs) });
-    if (cache.size > max) cache.delete(cache.keys().next().value);
+    put(path, { value, until: now() + (value ? ttlMs : retryMs) });
     return value;
+  };
+  return async (path, { refresh = false } = {}) => {
+    const hit = cache.get(path);
+    if (!refresh && hit && hit.until > now()) {
+      put(path, hit);
+      return hit.value;
+    }
+    // Several requests for the same page at once (a shared link) share one API call.
+    if (inFlight.has(path)) return inFlight.get(path);
+    const pending = fetchAndStore(path, hit).finally(() => inFlight.delete(path));
+    inFlight.set(path, pending);
+    return pending;
   };
 }
 
@@ -189,3 +207,12 @@ export function injectMeta(html, meta, url) {
     .replace(/<title>[\s\S]*?<\/title>/, () => `<title>${escapeHtml(meta.title)}</title>`)
     .replace(/<meta name="description"[^>]*>/, () => tags);
 }
+
+/** A path on this site: "/x", never "//host" or "/\\host" (protocol-relative to a browser). */
+export const isLocalPath = (path) => typeof path === 'string' && path.startsWith('/') && !/^\/[\/\\]/.test(path);
+
+/** The request's host name, only if it looks like one (the header is the client's to set). */
+export const requestHost = (headers) => {
+  const host = String(headers['x-forwarded-host'] || headers.host || '').split(',')[0].trim().toLowerCase();
+  return /^[a-z0-9.-]+(:\d+)?$/.test(host) ? host : '';
+};

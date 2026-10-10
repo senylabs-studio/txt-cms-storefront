@@ -171,6 +171,7 @@ describe('CheckoutPage', () => {
 
     await waitFor(() => expect(getProfile).toHaveBeenCalled());
     const proceedBtn = await screen.findByRole('button', { name: 'checkout.proceed' });
+    await waitFor(() => expect(proceedBtn).toBeEnabled()); // once the shipping is known
     fireEvent.click(proceedBtn);
 
     await waitFor(() => expect(checkout).toHaveBeenCalled());
@@ -184,6 +185,7 @@ describe('CheckoutPage', () => {
 
     await waitFor(() => expect(getProfile).toHaveBeenCalled());
     const proceedBtn = await screen.findByRole('button', { name: 'checkout.proceed' });
+    await waitFor(() => expect(proceedBtn).toBeEnabled()); // once the shipping is known
     fireEvent.click(proceedBtn);
 
     expect(await screen.findByText('Stock insuficiente')).toBeInTheDocument();
@@ -202,6 +204,7 @@ describe('CheckoutPage', () => {
 
     await waitFor(() => expect(getProfile).toHaveBeenCalled());
     const proceedBtn = await screen.findByRole('button', { name: 'checkout.proceed' });
+    await waitFor(() => expect(proceedBtn).toBeEnabled()); // once the shipping is known
     fireEvent.click(proceedBtn);
 
     await waitFor(() => expect(HTMLFormElement.prototype.submit).toHaveBeenCalled());
@@ -284,8 +287,33 @@ describe('CheckoutPage', () => {
 
     await waitFor(() => expect(getShippingOptions).toHaveBeenCalled());
     const proceedBtn = await screen.findByRole('button', { name: 'checkout.proceed' });
+    expect(await screen.findByText('checkout.noShippingRate')).toBeInTheDocument();
     expect(proceedBtn).toBeDisabled();
-    expect(screen.getByText('checkout.noShippingRate')).toBeInTheDocument();
+  });
+
+  // Nothing delivers to the address (abroad, too heavy): store pickup used to be chosen for the
+  // customer without asking. Now they have to pick it.
+  it('never chooses store pickup on its own', async () => {
+    mockCart.cart = cartWithItems();
+    getShippingOptions.mockResolvedValue([{ id: 3, name: 'Recogida en tienda', price: 0, shippingCost: 0, isFree: false, isPickup: true }]);
+    render(<CheckoutPage />);
+
+    const pickup = await screen.findByLabelText(/Recogida en tienda/);
+    expect(pickup).not.toBeChecked();
+    expect(screen.getByRole('button', { name: 'checkout.proceed' })).toBeDisabled();
+    fireEvent.click(pickup);
+    await waitFor(() => expect(screen.getByRole('button', { name: 'checkout.proceed' })).toBeEnabled());
+  });
+
+  // A failed lookup (API waking up) said "we don't ship there"; now it says so and can retry.
+  it('shows a failed shipping lookup as an error with a retry', async () => {
+    mockCart.cart = cartWithItems();
+    getShippingOptions.mockRejectedValueOnce(new Error('timeout')).mockResolvedValue([validShippingRate]);
+    render(<CheckoutPage />);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'checkout.shippingRetry' }));
+    expect(screen.queryByText('checkout.noShippingRate')).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole('button', { name: 'checkout.proceed' })).toBeEnabled());
   });
 
   it('buys gift cards without an address or shipping', async () => {

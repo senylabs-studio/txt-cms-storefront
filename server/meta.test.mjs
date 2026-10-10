@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildMeta, injectMeta, cleanText, createJsonCache, NOT_FOUND } from './meta.mjs';
+import { buildMeta, injectMeta, cleanText, createJsonCache, NOT_FOUND, isLocalPath, requestHost } from './meta.mjs';
 
 const site = { siteName: 'Tejidos Pulido', siteDescription: 'Tu tienda de tejidos de confianza.', logoUrl: 'https://cdn/logo.png' };
 const api = (routes) => async (path) => (path === '/storefront/site-settings' ? site : routes[path] ?? null);
@@ -129,9 +129,49 @@ describe('API cache for previews', () => {
     expect(await get('/s')).toEqual({ siteName: 'Nuevo' });
   });
 
+  // Plain insertion order evicted the site settings (the first key) once a crawler walked the
+  // sitemap: the generic "Tienda" preview came back while the API was asleep.
+  it('evicts the least recently used entry, not the oldest one', async () => {
+    const get = createJsonCache(async (p) => ({ p }), { max: 2 });
+    await get('/site');
+    await get('/a');
+    await get('/site');            // used again
+    await get('/b');               // over the limit: /a goes, /site stays
+    let calls = 0;
+    const counted = createJsonCache(async (p) => { calls++; return { p }; }, { max: 2 });
+    await counted('/site'); await counted('/a'); await counted('/site'); await counted('/b');
+    await counted('/site');
+    expect(calls).toBe(3);
+    expect(await get('/site')).toEqual({ p: '/site' });
+  });
+
+  it('shares one API call between simultaneous requests for the same path', async () => {
+    let calls = 0;
+    const get = createJsonCache(async () => { calls++; await new Promise(r => setTimeout(r, 10)); return { ok: 1 }; });
+    await Promise.all([get('/x'), get('/x'), get('/x')]);
+    expect(calls).toBe(1);
+  });
+
   it('remembers a 404 and a first failure only as such', async () => {
     const get = createJsonCache(async (p) => (p === '/gone' ? NOT_FOUND : null));
     expect(await get('/gone')).toBe(NOT_FOUND);
     expect(await get('/down')).toBeNull();
+  });
+});
+
+describe('server helpers', () => {
+  // "//evil.com" is protocol-relative to a browser: an open redirect.
+  it('only redirects to paths on this site', () => {
+    expect(isLocalPath('/variant/12')).toBe(true);
+    expect(isLocalPath('//evil.com')).toBe(false);
+    expect(isLocalPath('/\\evil.com')).toBe(false);
+    expect(isLocalPath('https://evil.com')).toBe(false);
+  });
+
+  // The header is the client's: it lands in canonical, og:url and robots.txt.
+  it('takes the host header only when it looks like a host name', () => {
+    expect(requestHost({ host: 'Tejidospulido.com' })).toBe('tejidospulido.com');
+    expect(requestHost({ 'x-forwarded-host': 'shop.test:8443, proxy' })).toBe('shop.test:8443');
+    expect(requestHost({ host: 'evil.com/"><script>' })).toBe('');
   });
 });

@@ -233,7 +233,9 @@
     "nothingToPay": "No has de pagar res: la comanda es confirma en prémer el botó.",
     "vatExempt": "IVA no aplicable (enviament fora del territori IVA: exportació)",
     "shippingMethod": "Forma d'enviament",
-    "pickupAt": "Recolliràs la comanda a la botiga: {{address}}. T'avisarem quan estigui a punt."
+    "pickupAt": "Recolliràs la comanda a la botiga: {{address}}. T'avisarem quan estigui a punt.",
+    "shippingLoadError": "No s'han pogut carregar les formes d'enviament. Torna-ho a provar.",
+    "shippingRetry": "Torna-ho a provar"
   },
   "checkoutSuccess": {
     "title": "Comanda rebuda!",
@@ -604,7 +606,9 @@
     "fieldRequired": "Aquest camp és obligatori.",
     "unexpectedError": "S'ha produït un error inesperat. Torna-ho a provar.",
     "networkError": "No s'ha pogut connectar. Comprova la connexió i torna-ho a provar.",
-    "loading": "Carregant…"
+    "loading": "Carregant…",
+    "pageLoadError": "No s'ha pogut carregar aquesta pàgina. Comprova la connexió i torna-la a carregar.",
+    "reload": "Torna a carregar"
   },
   "openingHours": {
     "title": "Horari",

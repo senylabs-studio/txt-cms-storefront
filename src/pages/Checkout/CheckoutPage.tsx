@@ -38,6 +38,9 @@ const CheckoutPage: React.FC = () => {
   const [shippingOptions, setShippingOptions] = useState<ApplicableShippingRate[] | null | undefined>(undefined);
   const [chosenRateId, setChosenRateId] = useState<number | undefined>();
   const [shippingLoading, setShippingLoading] = useState(false);
+  const [shippingError, setShippingError] = useState(false);
+  const [shippingRetry, setShippingRetry] = useState(0);
+  const lastShippingIdRef = useRef<number | undefined>(undefined);
 
   // Redsys redirect state
   const [redsysData, setRedsysData] = useState<CheckoutResponse | null>(null);
@@ -63,19 +66,26 @@ const CheckoutPage: React.FC = () => {
     }
     let cancelled = false;
     setShippingLoading(true);
+    setShippingError(false);
+    const addressChanged = lastShippingIdRef.current !== shippingId;
     getShippingOptions(shippingId)
       .then(options => {
         if (cancelled) return;
+        lastShippingIdRef.current = shippingId;
         setShippingOptions(options.length ? options : null);
-        // Keep the customer's choice while it's still offered; else the default delivery.
-        setChosenRateId(prev => options.some(o => o.id === prev) ? prev : (options.find(o => !o.isPickup) ?? options[0])?.id);
+        // Keep the customer's choice while it's still offered and the address is the same (a new
+        // address means delivery there, not the pickup chosen for the old one); else the default
+        // delivery. Never store pickup on its own: when nothing delivers to the address, the
+        // customer has to choose it.
+        setChosenRateId(prev => !addressChanged && options.some(o => o.id === prev) ? prev : options.find(o => !o.isPickup)?.id);
       })
+      .catch(() => { if (!cancelled) { setShippingOptions(undefined); setShippingError(true); } })
       .finally(() => { if (!cancelled) setShippingLoading(false); });
     // Switching the shipping address twice in quick succession (before the first lookup
     // resolves) must not let the slower, now-stale response overwrite the options for the
     // address actually selected now — same class of stale-response bug this codebase has hit before.
     return () => { cancelled = true; };
-  }, [shippingId, cart]);
+  }, [shippingId, cart, shippingRetry]);
 
   // The option in use: null when the address has none (or only pickup and nothing chosen).
   const shippingRate: ApplicableShippingRate | null | undefined = shippingOptions === undefined
@@ -141,10 +151,11 @@ const CheckoutPage: React.FC = () => {
   const isGiftCardPurchase = cart?.isGiftCardPurchase ?? false;
   // Nothing to pay: the gift card covers it all, or a coupon brought the order to 0 €. The order is
   // placed by the button below; PayPal can't take a 0 € payment.
-  const nothingToPay = amountDue <= 0;
+  const addressReady = isGiftCardPurchase || (!!shippingId && !shippingLoading && shippingRate != null);
+  // Only once the shipping is known: while it loads, a 0 € estimate briefly said "Confirmar pedido".
+  const nothingToPay = amountDue <= 0 && addressReady;
   const coveredByGiftCard = !!cart?.giftCardCode && nothingToPay;
-  // Gift cards are emailed: no address (and no shipping rate) needed to buy them.
-  const addressReady = isGiftCardPurchase || (!!shippingId && !shippingLoading && shippingRate !== null);
+  // Gift cards are emailed: no address (and no shipping rate) needed to buy them (addressReady).
 
   // Same request for both payment routes (Redsys page / PayPal button).
   const buildCheckoutRequest = (): CheckoutRequest => ({
@@ -234,7 +245,15 @@ const CheckoutPage: React.FC = () => {
                       </Form.Select>
                     </Form.Group>
 
-                    {shippingOptions && shippingOptions.length > 1 && (
+                    {shippingError && (
+                      <Alert variant="danger" className="py-2 small d-flex align-items-center justify-content-between gap-2">
+                        <span>{t('checkout.shippingLoadError')}</span>
+                        <Button size="sm" variant="outline-danger" onClick={() => setShippingRetry(n => n + 1)}>{t('checkout.shippingRetry')}</Button>
+                      </Alert>
+                    )}
+                    {/* The choice: several options, or only store pickup (nothing delivers here —
+                        the customer picks it explicitly, it's never chosen for them). */}
+                    {shippingOptions && (shippingOptions.length > 1 || !shippingOptions.some(o => !o.isPickup)) && (
                       <Form.Group className="mb-3" role="radiogroup" aria-label={t('checkout.shippingMethod')}>
                         <Form.Label className="fw-semibold d-block">{t('checkout.shippingMethod')}</Form.Label>
                         {shippingOptions.map(o => (
@@ -355,7 +374,8 @@ const CheckoutPage: React.FC = () => {
                 {shippingRate && shippingRate.freeShippingThreshold && !shippingRate.isFree && (
                   <div className="small text-muted mb-2">
                     {t('checkout.freeShippingFrom', { threshold: formatPrice(shippingRate.freeShippingThreshold) })}{' '}
-                    {t('checkout.missingForFree', { missing: formatPrice(shippingRate.freeShippingThreshold - cartSubtotal) })}
+                    {/* Shipped without VAT, the threshold counts what's paid: the subtotal without VAT. */}
+                    {t('checkout.missingForFree', { missing: formatPrice(shippingRate.freeShippingThreshold - (vatExempt ? withoutVat(cartSubtotal) : cartSubtotal)) })}
                   </div>
                 )}
                 {shippingRate === null && shippingId && (
