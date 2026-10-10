@@ -469,6 +469,7 @@
     "recentlyViewed": "Vistos recentment",
     "goesWith": "Combina amb",
     "reviewCount": "({{count}} ressenyes)",
+    "reviewCount_one": "({{count}} ressenya)",
     "reviewsTitle": "Ressenyes de clients",
     "noReviews": "Aquesta tela encara no té ressenyes.",
     "writeReview": "Escriu una ressenya",
@@ -492,6 +493,7 @@
     "addError": "Error en afegir a la cistella",
     "productNotFound": "Producte no trobat.",
     "referencesCount": "{{count}} referències",
+    "referencesCount_one": "{{count}} referència",
     "inStockCount": "{{count}} en estoc",
     "openImage": "Veure la imatge ampliada",
     "closeImage": "Tanca",
@@ -568,6 +570,7 @@
     "home": {
       "title": "Els nostres productes",
       "itemsAvailable": "{{count}} referències disponibles",
+      "itemsAvailable_one": "{{count}} referència disponible",
       "searchPlaceholder": "Cerca productes...",
       "noResults": "No s'han trobat productes.",
       "noResultsFor": "No s'han trobat productes per a \"{{search}}\".",

@@ -469,6 +469,7 @@
     "recentlyViewed": "Vistos recientemente",
     "goesWith": "Combina con",
     "reviewCount": "({{count}} reseñas)",
+    "reviewCount_one": "({{count}} reseña)",
     "reviewsTitle": "Reseñas de clientes",
     "noReviews": "Esta tela aún no tiene reseñas.",
     "writeReview": "Escribe una reseña",
@@ -492,6 +493,7 @@
     "addError": "Error al añadir al carrito",
     "productNotFound": "Producto no encontrado.",
     "referencesCount": "{{count}} referencias",
+    "referencesCount_one": "{{count}} referencia",
     "inStockCount": "{{count}} en stock",
     "openImage": "Ver imagen ampliada",
     "closeImage": "Cerrar",
@@ -568,6 +570,7 @@
     "home": {
       "title": "Nuestros productos",
       "itemsAvailable": "{{count}} referencias disponibles",
+      "itemsAvailable_one": "{{count}} referencia disponible",
       "searchPlaceholder": "Buscar productos...",
       "noResults": "No se encontraron productos.",
       "noResultsFor": "No se encontraron productos para \"{{search}}\".",
