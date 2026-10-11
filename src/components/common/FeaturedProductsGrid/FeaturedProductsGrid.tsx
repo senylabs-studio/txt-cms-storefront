@@ -105,7 +105,7 @@ const FeaturedProductsGrid: React.FC<Props> = ({ title, variants = [], products 
 
           return (
             <Col key={`${item._isVariant ? 'v' : 'p'}-${item.id}`} xs={6} sm={4} md={3} lg={2}>
-              <div className="home-featured-card h-100">
+              <div className="home-featured-card h-100 d-flex flex-column">
                 <Link to={slug} className="d-block position-relative">
                   {thumbnail
                     ? <img src={thumbnail} alt={item.name} className="home-featured-img" />
@@ -122,11 +122,12 @@ const FeaturedProductsGrid: React.FC<Props> = ({ title, variants = [], products 
                   )}
                   {outOfStock && <div className="home-featured-outofstock">{t('product.outOfStock')}</div>}
                 </Link>
-                <div className="p-2">
+                {/* Column + mt-auto: the button sits at the bottom whether the name takes one line or two. */}
+                <div className="p-2 d-flex flex-column flex-grow-1">
                   {/* Variants read like the catalog cards: product name small, value as the title. */}
                   {item._isVariant && <div className="home-featured-product">{variantCardTitle(item).productLabel}</div>}
                   <div className="home-featured-name"><Link to={slug}>{item._isVariant ? variantCardTitle(item).title : item.name}</Link></div>
-                  <div className="d-flex align-items-baseline gap-1 mt-1">
+                  <div className="d-flex align-items-baseline gap-1 mt-1 mb-2">
                     <span className="sf-price">{formatPrice(item.price)}</span>
                     {hasDiscount && (
                       <span className="text-muted text-decoration-line-through small">{formatPrice(item.originalPrice)}</span>
@@ -134,7 +135,7 @@ const FeaturedProductsGrid: React.FC<Props> = ({ title, variants = [], products 
                   </div>
                   <Button
                     variant={outOfStock ? 'outline-secondary' : 'primary'}
-                    size="sm" className="w-100 mt-2"
+                    size="sm" className="w-100 mt-auto"
                     disabled={outOfStock || cartLoading}
                     onClick={e => handleAdd(e, item)}
                   >
