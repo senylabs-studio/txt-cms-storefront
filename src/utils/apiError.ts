@@ -1,3 +1,4 @@
+import i18n from 'i18next';
 // Duck-types the error shape (`{ response: { data: {...} } }`) instead of requiring
 // axios.isAxiosError() to pass — a real AxiosError always has this shape, but so do the
 // plain-object rejections this codebase's existing tests commonly mock with, and there's
@@ -18,6 +19,10 @@ const getResponseData = (err: unknown): Record<string, unknown> | undefined => {
  * live against the real backend) from [Required]/[StringLength] etc.
  */
 export const getApiErrorMessage = (err: unknown, fallback: string): string => {
+  // The API's per-minute limit (login, password reset, contact…) answers 429 with no body: said as
+  // such, not with the screen's own fallback (the login said «Credenciales incorrectas»).
+  const status = (err as { response?: { status?: number } } | null)?.response?.status;
+  if (status === 429) return i18n.t('common.tooManyRequests') || fallback;
   const data = getResponseData(err);
   if (data) {
     if (data.errors && typeof data.errors === 'object') {

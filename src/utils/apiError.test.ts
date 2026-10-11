@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { AxiosError } from 'axios';
+import i18next from 'i18next';
 import { getApiErrorMessage, parseFieldErrors } from './apiError';
 
 // Shape confirmed live against the real backend (see [ApiController] defaults):
@@ -61,5 +62,11 @@ describe('parseFieldErrors', () => {
 
   it('returns null for a non-axios error', () => {
     expect(parseFieldErrors(new Error('boom'))).toBeNull();
+  });
+
+  // The per-minute limit answers 429 with no body: the login showed «Credenciales incorrectas».
+  it('says "too many attempts" for a 429, not the screen\'s fallback', async () => {
+    await i18next.init({ lng: 'es', resources: { es: { translation: { common: { tooManyRequests: 'Demasiados intentos seguidos.' } } } } });
+    expect(getApiErrorMessage({ response: { status: 429 } }, 'Credenciales incorrectas')).toBe('Demasiados intentos seguidos.');
   });
 });
