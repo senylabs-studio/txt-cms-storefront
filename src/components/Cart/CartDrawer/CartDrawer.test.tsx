@@ -140,6 +140,17 @@ describe('CartDrawer', () => {
     expect(await screen.findByText('cart.removeError')).toBeInTheDocument();
   });
 
+  // The floating chat button sits above the drawer and covered «Finalizar compra»; the body class
+  // lets ChatWidget.css hide it while the drawer is open.
+  it('marks the body while open, so the chat button hides, and unmarks it when closed', () => {
+    const { rerender } = renderDrawer();
+    expect(document.body.classList.contains('cart-drawer-open')).toBe(true);
+
+    mockCart.drawerOpen = false;
+    rerender(<CartDrawer />);
+    expect(document.body.classList.contains('cart-drawer-open')).toBe(false);
+  });
+
   it('clears any item error when the drawer is reopened', async () => {
     mockCart.cart = cartWithItems();
     mockCart.removeItem.mockRejectedValue(new Error('boom'));
