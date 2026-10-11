@@ -57,6 +57,13 @@ const CartDrawer: React.FC = () => {
   // eslint-disable-next-line react-hooks/set-state-in-effect -- clears a stale item error each time the drawer opens
   useEffect(() => { if (drawerOpen) setItemError(''); }, [drawerOpen]);
 
+  // The floating chat button (z-index 1050) sits above the drawer (1045) and covered «Finalizar compra».
+  useEffect(() => {
+    if (!drawerOpen) return;
+    document.body.classList.add('cart-drawer-open');
+    return () => document.body.classList.remove('cart-drawer-open');
+  }, [drawerOpen]);
+
   const isEmpty = !cart?.items?.length;
 
   return (

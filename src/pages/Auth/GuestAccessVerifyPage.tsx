@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Container, Card, Alert } from 'react-bootstrap';
+import React, { useState } from 'react';
+import { Container, Card, Alert, Button } from 'react-bootstrap';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
@@ -15,11 +15,14 @@ const GuestAccessVerifyPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token') ?? '';
 
-  const [status, setStatus] = useState<'verifying' | 'error'>(token ? 'verifying' : 'error');
+  // The link is used only when the person presses the button: opened automatically on load, a
+  // company mail scanner that renders links (e.g. Microsoft Defender Safe Links) spent the
+  // single-use token before the person ever clicked, and they got «enlace caducado».
+  const [status, setStatus] = useState<'ready' | 'verifying' | 'error'>(token ? 'ready' : 'error');
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (!token) return;
+  const handleAccess = () => {
+    setStatus('verifying');
     verifyGuestAccessLink(token)
       .then(data => {
         login(data);
@@ -29,16 +32,20 @@ const GuestAccessVerifyPage: React.FC = () => {
         setError(getApiErrorMessage(e, t('auth.guestAccess.verifyError')));
         setStatus('error');
       });
-    // Only ever run once per token — re-running would try to consume an already-used token.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  };
 
   return (
     <MainLayout>
       <Container className="py-5 d-flex justify-content-center">
         <Card style={{ width: '100%', maxWidth: 420 }}>
           <Card.Body className="p-4 text-center">
-            {status === 'verifying' ? (
+            {status === 'ready' ? (
+              <>
+                <h4 className="fw-bold mb-3">{t('auth.guestAccess.title')}</h4>
+                <p className="text-muted">{t('auth.guestAccess.pressToAccess')}</p>
+                <Button variant="primary" className="w-100" onClick={handleAccess}>{t('auth.guestAccess.accessButton')}</Button>
+              </>
+            ) : status === 'verifying' ? (
               <>
                 <ScissorsLoader className="mb-3" />
                 <p className="text-muted mb-0">{t('auth.guestAccess.verifying')}</p>

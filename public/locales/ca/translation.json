@@ -135,7 +135,9 @@
       "error": "No s'ha pogut processar la sol·licitud. Torna-ho a intentar.",
       "verifying": "Verificant el teu enllaç d'accés...",
       "verifyError": "L'enllaç no és vàlid o ha caducat.",
-      "tryAgain": "Sol·licitar un nou enllaç"
+      "tryAgain": "Sol·licitar un nou enllaç",
+      "pressToAccess": "Prem el botó per entrar a la teva comanda. L’enllaç només es pot fer servir una vegada.",
+      "accessButton": "Accedir a la meva comanda"
     }
   },
   "contact": {
@@ -625,7 +627,8 @@
     "networkError": "No s'ha pogut connectar. Comprova la connexió i torna-ho a provar.",
     "loading": "Carregant…",
     "pageLoadError": "No s'ha pogut carregar aquesta pàgina. Comprova la connexió i torna-la a carregar.",
-    "reload": "Torna a carregar"
+    "reload": "Torna a carregar",
+    "tooManyRequests": "Massa intents seguits. Espera un minut i torna-ho a provar."
   },
   "openingHours": {
     "title": "Horari",

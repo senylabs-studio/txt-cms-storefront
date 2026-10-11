@@ -146,5 +146,6 @@
   }
 }
 
-/* Hidden while the mobile menu sheet is open (see MobileMenuSheet). */
-body.mobile-menu-open .chat-widget { display: none; }
+/* Hidden while the mobile menu sheet or the cart drawer is open (see MobileMenuSheet, CartDrawer). */
+body.mobile-menu-open .chat-widget,
+body.cart-drawer-open .chat-widget { display: none; }

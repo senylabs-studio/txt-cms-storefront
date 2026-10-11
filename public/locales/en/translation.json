@@ -135,7 +135,9 @@
       "error": "Could not process the request. Please try again.",
       "verifying": "Verifying your access link...",
       "verifyError": "The link is invalid or has expired.",
-      "tryAgain": "Request a new link"
+      "tryAgain": "Request a new link",
+      "pressToAccess": "Press the button to open your order. The link can only be used once.",
+      "accessButton": "Open my order"
     }
   },
   "contact": {
@@ -625,7 +627,8 @@
     "networkError": "Could not connect. Check your connection and try again.",
     "loading": "Loading…",
     "pageLoadError": "This page couldn't be loaded. Check your connection and reload it.",
-    "reload": "Reload"
+    "reload": "Reload",
+    "tooManyRequests": "Too many attempts in a row. Wait a minute and try again."
   },
   "openingHours": {
     "title": "Opening hours",

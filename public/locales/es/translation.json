@@ -135,7 +135,9 @@
       "error": "No se pudo procesar la solicitud. Inténtalo de nuevo.",
       "verifying": "Verificando tu enlace de acceso...",
       "verifyError": "El enlace no es válido o ha caducado.",
-      "tryAgain": "Solicitar un nuevo enlace"
+      "tryAgain": "Solicitar un nuevo enlace",
+      "pressToAccess": "Pulsa el botón para entrar en tu pedido. El enlace solo se puede usar una vez.",
+      "accessButton": "Acceder a mi pedido"
     }
   },
   "contact": {
@@ -625,7 +627,8 @@
     "networkError": "No se ha podido conectar. Comprueba tu conexión e inténtalo de nuevo.",
     "loading": "Cargando…",
     "pageLoadError": "No se ha podido cargar esta página. Comprueba la conexión y vuelve a cargarla.",
-    "reload": "Volver a cargar"
+    "reload": "Volver a cargar",
+    "tooManyRequests": "Demasiados intentos seguidos. Espera un minuto y vuelve a probar."
   },
   "openingHours": {
     "title": "Horario",
