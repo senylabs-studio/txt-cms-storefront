@@ -7,7 +7,7 @@ import MainLayout from '../../components/Layout/MainLayout';
 import { getOrders } from '../../services/profileService';
 import { getApiErrorMessage } from '../../utils/apiError';
 import type { StorefrontOrder } from '../../types';
-import { ORDER_STATUS_VARIANT } from '../../utils/orderStatus';
+import { ORDER_STATUS_VARIANT, orderStatusKey } from '../../utils/orderStatus';
 import ScissorsLoader from '../../components/common/ScissorsLoader/ScissorsLoader';
 import { formatPrice } from '../../utils/pricing';
 import { formatDate } from '../../utils/locale';
@@ -72,7 +72,7 @@ const OrdersPage: React.FC = () => {
                     <td>{formatDate(o.createdAt)}</td>
                     <td>
                       <Badge bg={ORDER_STATUS_VARIANT[o.status] ?? 'secondary'}>
-                        {t(`orders.statuses.${o.status}`, { defaultValue: o.status })}
+                        {t(orderStatusKey(o.status, o.isPickup), { defaultValue: o.status })}
                       </Badge>
                     </td>
                     <td className="text-end fw-bold">{formatPrice(o.total)}</td>

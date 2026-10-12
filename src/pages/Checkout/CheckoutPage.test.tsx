@@ -41,8 +41,8 @@ const { getProfile, addAddress } = vi.hoisted(() => ({ getProfile: vi.fn(), addA
 vi.mock('../../services/profileService', () => ({ getProfile, addAddress, updateAddress: vi.fn() }));
 vi.mock('../../services/countryService', () => ({ getVisibleCountries: vi.fn().mockResolvedValue([{ isoCode: 'ES' }]) }));
 
-const { getShippingOptions } = vi.hoisted(() => ({ getShippingOptions: vi.fn() }));
-vi.mock('../../services/shippingService', () => ({ getShippingOptions }));
+const { getShippingOptions, getPickupOptions } = vi.hoisted(() => ({ getShippingOptions: vi.fn(), getPickupOptions: vi.fn() }));
+vi.mock('../../services/shippingService', () => ({ getShippingOptions, getPickupOptions }));
 // PayPal has its own tests (PayPalCheckoutButton.test.tsx); here it just must not load the SDK.
 vi.mock('./PayPalCheckoutButton', () => ({ default: () => null }));
 
@@ -91,6 +91,7 @@ describe('CheckoutPage', () => {
     mockCart.cart = null;
     getProfile.mockResolvedValue(profile());
     getShippingOptions.mockResolvedValue([validShippingRate]);
+    getPickupOptions.mockResolvedValue([]);
     HTMLFormElement.prototype.submit = vi.fn();
   });
 
@@ -207,7 +208,7 @@ describe('CheckoutPage', () => {
     expect(screen.getByText('20,66 €')).toBeInTheDocument();
   });
 
-  it('lets the customer choose another shipping option, such as store pickup', async () => {
+  it('lets the customer choose another delivery option; pickup is not one of them', async () => {
     mockCart.cart = cartWithItems();
     getShippingOptions.mockResolvedValue([
       { id: 1, name: 'Península', price: 5.4, shippingCost: 5.4, isFree: false },
@@ -217,13 +218,51 @@ describe('CheckoutPage', () => {
     checkout.mockResolvedValue(checkoutResponse);
     render(<CheckoutPage />);
 
-    const pickup = await screen.findByRole('radio', { name: /Recogida en tienda/ });
+    const urgent = await screen.findByRole('radio', { name: /Urgente/ });
     expect(screen.getByRole('radio', { name: /Península/ })).toBeChecked();
-    fireEvent.click(pickup);
+    expect(screen.queryByRole('radio', { name: /Recogida en tienda/ })).not.toBeInTheDocument();
+    fireEvent.click(urgent);
+
+    fireEvent.click(screen.getByText('checkout.proceed'));
+    await waitFor(() => expect(checkout).toHaveBeenCalledWith(expect.objectContaining({ shippingAddressId: 1, shippingRateId: 2 })));
+  });
+
+  // Picked up in the shop: no delivery address is asked for or sent (nobody can ship it there).
+  it('store pickup is chosen first and needs no shipping address', async () => {
+    mockCart.cart = cartWithItems();
+    const pickupRate = { id: 3, name: 'Recogida en tienda', price: 0, shippingCost: 0, isFree: false, isPickup: true };
+    getShippingOptions.mockResolvedValue([validShippingRate, pickupRate]);
+    getPickupOptions.mockResolvedValue([pickupRate]);
+    checkout.mockResolvedValue(checkoutResponse);
+    render(<CheckoutPage />);
+
+    expect(await screen.findByLabelText(/checkout.homeDelivery/)).toBeChecked();
+    fireEvent.click(screen.getByLabelText(/checkout.storePickup/));
 
     expect(await screen.findByText(/checkout.pickupAt/)).toBeInTheDocument();
+    expect(screen.queryByLabelText('checkout.shippingAddress')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('checkout.billingAddress')).toBeInTheDocument();
     fireEvent.click(screen.getByText('checkout.proceed'));
-    await waitFor(() => expect(checkout).toHaveBeenCalledWith(expect.objectContaining({ shippingAddressId: 1, shippingRateId: 3 })));
+    await waitFor(() => expect(checkout).toHaveBeenCalledWith(expect.objectContaining({ shippingAddressId: undefined, shippingRateId: 3, billingAddressId: 1 })));
+  });
+
+  it('a customer without addresses can still pick it up', async () => {
+    mockCart.cart = cartWithItems();
+    getProfile.mockResolvedValue({ ...profile(), addresses: [] });
+    getPickupOptions.mockResolvedValue([{ id: 3, name: 'Recogida en tienda', price: 0, shippingCost: 0, isFree: false, isPickup: true }]);
+    render(<CheckoutPage />);
+
+    fireEvent.click(await screen.findByLabelText(/checkout.storePickup/));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'checkout.proceed' })).toBeEnabled());
+  });
+
+  it('offers no delivery choice when the shop has no pickup', async () => {
+    mockCart.cart = cartWithItems();
+    render(<CheckoutPage />);
+
+    await waitFor(() => expect(getPickupOptions).toHaveBeenCalled());
+    await waitFor(() => expect(screen.getByRole('button', { name: 'checkout.proceed' })).toBeEnabled());
+    expect(screen.queryByLabelText(/checkout.storePickup/)).not.toBeInTheDocument();
   });
 
   it('submits the Redsys form automatically once checkout() succeeds', async () => {
@@ -357,10 +396,13 @@ describe('CheckoutPage', () => {
   // customer without asking. Now they have to pick it.
   it('never chooses store pickup on its own', async () => {
     mockCart.cart = cartWithItems();
-    getShippingOptions.mockResolvedValue([{ id: 3, name: 'Recogida en tienda', price: 0, shippingCost: 0, isFree: false, isPickup: true }]);
+    const pickupRate = { id: 3, name: 'Recogida en tienda', price: 0, shippingCost: 0, isFree: false, isPickup: true };
+    getShippingOptions.mockResolvedValue([pickupRate]);
+    getPickupOptions.mockResolvedValue([pickupRate]);
     render(<CheckoutPage />);
 
-    const pickup = await screen.findByLabelText(/Recogida en tienda/);
+    expect(await screen.findByText('checkout.noShippingRatePickup')).toBeInTheDocument();
+    const pickup = screen.getByLabelText(/checkout.storePickup/);
     expect(pickup).not.toBeChecked();
     expect(screen.getByRole('button', { name: 'checkout.proceed' })).toBeDisabled();
     fireEvent.click(pickup);

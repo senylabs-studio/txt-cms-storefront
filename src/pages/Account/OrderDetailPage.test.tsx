@@ -10,6 +10,7 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string, opts?: { defaultValue?: string; id?: number }) => opts?.defaultValue ?? key }),
 }));
 
+vi.mock('../../contexts/SiteSettingsContext', () => ({ useSiteSettings: () => ({ siteName: 'Shop', companyAddress: 'C/ Mayor 1', companyPostalCode: '08301', companyCity: 'Mataró' }) }));
 vi.mock('../../components/Layout/MainLayout', () => ({
   default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
@@ -113,6 +114,15 @@ describe('OrderDetailPage', () => {
     renderDetail();
 
     await screen.findByText('Tela azul');
+    expect(screen.queryByText('orderDetail.shippingAddress')).not.toBeInTheDocument();
+  });
+
+  it('a store pickup shows where to collect it instead of a shipping address', async () => {
+    getOrderDetail.mockResolvedValue(order({ isPickup: true }));
+    renderDetail();
+
+    expect(await screen.findByText('orderDetail.storePickup')).toBeInTheDocument();
+    expect(screen.getByText('orderDetail.pickupAt')).toBeInTheDocument();
     expect(screen.queryByText('orderDetail.shippingAddress')).not.toBeInTheDocument();
   });
 

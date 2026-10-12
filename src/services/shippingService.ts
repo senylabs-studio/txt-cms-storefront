@@ -23,3 +23,9 @@ export const getShippingOptions = async (shippingAddressId: number): Promise<App
   const res = await apiClient.get('/storefront/checkout/shipping-options', { params: { shippingAddressId } });
   return res.data ?? [];
 };
+
+/** The shop pickups for the customer's cart: no address needed (nothing is shipped). */
+export const getPickupOptions = async (): Promise<ApplicableShippingRate[]> => {
+  const res = await apiClient.get('/storefront/checkout/pickup-options');
+  return res.data ?? [];
+};

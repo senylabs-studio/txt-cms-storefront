@@ -251,7 +251,12 @@
     "pickupAt": "Recolliràs la comanda a la botiga: {{address}}. T'avisarem quan estigui a punt.",
     "shippingLoadError": "No s'han pogut carregar les formes d'enviament. Torna-ho a provar.",
     "shippingRetry": "Torna-ho a provar",
-    "backToCart": "Torna al carretó"
+    "backToCart": "Torna al carretó",
+    "deliveryMode": "Com el vols rebre?",
+    "homeDelivery": "Enviament a domicili",
+    "storePickup": "Recollida a la botiga",
+    "noBillingAddress": "-- Sense adreça (factura simplificada) --",
+    "noShippingRatePickup": "No enviem a aquesta adreça. Pots triar «Recollida a la botiga» o fer servir una altra adreça."
   },
   "checkoutSuccess": {
     "title": "Comanda rebuda!",
@@ -379,7 +384,8 @@
       "Shipped": "Enviat",
       "Delivered": "Entregat",
       "Cancelled": "Cancel·lat",
-      "Returned": "Retornat"
+      "Returned": "Retornat",
+      "ReadyForPickup": "A punt per recollir"
     },
     "loadError": "No s'han pogut carregar les teves comandes."
   },
@@ -428,7 +434,9 @@
     "letterError": "No s'ha pogut descarregar la carta.",
     "cardBalance": "Saldo: {{amount}}",
     "cardSentTo": "Enviada també a {{email}}",
-    "loadError": "No s'ha pogut obrir la comanda."
+    "loadError": "No s'ha pogut obrir la comanda.",
+    "storePickup": "Recollida a la botiga",
+    "pickupAt": "Recolliràs la comanda a la botiga: {{address}}."
   },
   "favorites": {
     "title": "Els meus favorits",

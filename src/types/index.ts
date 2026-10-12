@@ -254,6 +254,8 @@ export interface StorefrontOrder {
   status: string;
   total: number;
   createdAt: string;
+  /** Recogida en tienda: nothing shipped, «Enviado» reads «Listo para recoger». */
+  isPickup?: boolean;
 }
 
 export interface StorefrontOrderDetail {
@@ -278,6 +280,8 @@ export interface StorefrontOrderDetail {
   hasInvoice?: boolean;
   /** The order bought gift cards: no invoice, nothing shipped. */
   isGiftCardPurchase?: boolean;
+  /** Recogida en tienda: no delivery address, «Enviado» reads «Listo para recoger». */
+  isPickup?: boolean;
   shippingAddress?: AddressSummary;
   billingAddress?: AddressSummary;
   lines: OrderLine[];

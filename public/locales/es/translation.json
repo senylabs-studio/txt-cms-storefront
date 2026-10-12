@@ -251,7 +251,12 @@
     "pickupAt": "Recogerás el pedido en la tienda: {{address}}. Te avisaremos cuando esté listo.",
     "shippingLoadError": "No se han podido cargar las formas de envío. Inténtalo de nuevo.",
     "shippingRetry": "Reintentar",
-    "backToCart": "Volver al carrito"
+    "backToCart": "Volver al carrito",
+    "deliveryMode": "¿Cómo quieres recibirlo?",
+    "homeDelivery": "Envío a domicilio",
+    "storePickup": "Recogida en tienda",
+    "noBillingAddress": "-- Sin dirección (factura simplificada) --",
+    "noShippingRatePickup": "No enviamos a esta dirección. Puedes elegir «Recogida en tienda» o usar otra dirección."
   },
   "checkoutSuccess": {
     "title": "¡Pedido recibido!",
@@ -379,7 +384,8 @@
       "Shipped": "Enviado",
       "Delivered": "Entregado",
       "Cancelled": "Cancelado",
-      "Returned": "Devuelto"
+      "Returned": "Devuelto",
+      "ReadyForPickup": "Listo para recoger"
     },
     "loadError": "No se pudieron cargar tus pedidos."
   },
@@ -428,7 +434,9 @@
     "letterError": "No se ha podido descargar la carta.",
     "cardBalance": "Saldo: {{amount}}",
     "cardSentTo": "Enviada también a {{email}}",
-    "loadError": "No se ha podido abrir el pedido."
+    "loadError": "No se ha podido abrir el pedido.",
+    "storePickup": "Recogida en tienda",
+    "pickupAt": "Recogerás el pedido en la tienda: {{address}}."
   },
   "favorites": {
     "title": "Mis favoritos",
