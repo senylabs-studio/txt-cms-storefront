@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Button, Card, Alert, Form, Badge } from 'react-bootstrap';
+import { Container, Row, Col, Button, Card, Alert, Badge } from 'react-bootstrap';
 import { FaTrash, FaArrowRight, FaGift } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -15,36 +15,10 @@ import { formatPrice } from '../../utils/pricing';
 import { cartItemName } from '../../utils/giftCard';
 import GiftCardEditModal from '../../components/Cart/GiftCardEditModal/GiftCardEditModal';
 import CartCodes from '../../components/Cart/CartCodes/CartCodes';
+import CartQuantityInput from '../../components/Cart/CartQuantityInput/CartQuantityInput';
 import type { CartItem } from '../../types';
 import { loginUrl } from '../../utils/session';
-import { formatMeters, parseQuantity, uiLocale } from '../../utils/locale';
-
-/** The line's metres: typed freely (comma or point) and applied on Enter or when leaving the
- *  field — one request per keystroke disabled the field mid-typing (wanting 12, "1" went out). */
-const CartQuantityInput: React.FC<{ item: CartItem; onCommit: (quantity: number) => void; onInvalid: () => void }> = ({ item, onCommit, onInvalid }) => {
-  const { t } = useTranslation();
-  const [text, setText] = useState<string | null>(null);
-  const shown = text ?? new Intl.NumberFormat(uiLocale(), { useGrouping: false, maximumFractionDigits: 2 }).format(item.quantity);
-  const commit = () => {
-    if (text === null) return;
-    const value = parseQuantity(text);
-    setText(null);
-    if (isNaN(value) || value < item.minQuantity) { onInvalid(); return; }
-    if (value !== item.quantity) onCommit(value);
-  };
-  return (
-    <Form.Control
-      type="text"
-      inputMode="decimal"
-      aria-label={t('cart.quantityLabel')}
-      value={shown}
-      onChange={e => setText(e.target.value)}
-      onBlur={commit}
-      onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); commit(); } }}
-      style={{ width: 90 }}
-    />
-  );
-};
+import { formatMeters } from '../../utils/locale';
 
 const CartPage: React.FC = () => {
   const { t } = useTranslation();
