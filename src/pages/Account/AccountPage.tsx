@@ -1,17 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert, Spinner, Badge, Modal } from 'react-bootstrap';
 import { FaPlus, FaEdit, FaTrash, FaMapMarkerAlt, FaUser, FaLock, FaShieldAlt, FaEnvelope } from 'react-icons/fa';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { safeReturnPath } from '../../utils/session';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useDocumentMeta } from '../../hooks/useDocumentMeta';
 import { useSiteSettings } from '../../contexts/SiteSettingsContext';
 import MainLayout from '../../components/Layout/MainLayout';
 import {
-  getProfile, updateProfile, changePassword, updateEmail, resendEmailConfirmation, addAddress, updateAddress, deleteAddress, updateNewsletterSubscription,
+  getProfile, updateProfile, changePassword, updateEmail, resendEmailConfirmation, deleteAddress, updateNewsletterSubscription,
   downloadMyDataExport, requestAccountDeletion,
 } from '../../services/profileService';
-import { getVisibleCountries, type VisibleCountry } from '../../services/countryService';
 import { useToast } from '../../contexts/ToastContext';
 import { getApiErrorMessage, parseFieldErrors, withoutFieldError, type FieldErrors } from '../../utils/apiError';
 import type { StorefrontProfile, CustomerAddress } from '../../types';
@@ -20,12 +18,8 @@ import { meetsPasswordRules } from '../../utils/password';
 import IconTooltip from '../../components/common/IconTooltip/IconTooltip';
 import PageLoader from '../../components/common/ScissorsLoader/PageLoader';
 import { countryName } from '../../utils/locale';
-import AddressAutocomplete from '../../components/common/AddressAutocomplete/AddressAutocomplete';
+import AddressFormModal from '../../components/Address/AddressFormModal';
 import PasswordInput from '../../components/common/PasswordInput/PasswordInput';
-
-const emptyAddress: Partial<CustomerAddress> = {
-  alias: '', recipientName: '', street: '', city: '', postalCode: '', province: '', country: 'ES', phone: '', isDefault: false,
-};
 
 const AccountPage: React.FC = () => {
   const { t } = useTranslation();
@@ -94,15 +88,9 @@ const AccountPage: React.FC = () => {
   const [emailError, setEmailError] = useState('');
   const [emailFieldErrors, setEmailFieldErrors] = useState<FieldErrors>({});
 
-  // Address modal
-  const [showAddr, setShowAddr] = useState(false);
-  const [addrForm, setAddrForm] = useState<Partial<CustomerAddress>>(emptyAddress);
-  const [editAddrId, setEditAddrId] = useState<number | null>(null);
-  const [addrSaving, setAddrSaving] = useState(false);
-  const [addrError, setAddrError] = useState('');
-  const [addrFieldErrors, setAddrFieldErrors] = useState<FieldErrors>({});
+  // Address modal: closed, a new address (null) or the one being edited.
+  const [addrModal, setAddrModal] = useState<{ address: CustomerAddress | null } | null>(null);
   const [addrListError, setAddrListError] = useState('');
-  const [countries, setCountries] = useState<VisibleCountry[]>([]);
 
   // Privacy (GDPR)
   const [exporting, setExporting] = useState(false);
@@ -115,11 +103,8 @@ const AccountPage: React.FC = () => {
   const loadInitialData = () => {
     setLoading(true);
     setLoadError('');
-    Promise.all([
-      getProfile(),
-      getVisibleCountries(),
-    ])
-      .then(([p, c]) => { setProfile(p); setName(p.name); setPhone(p.phone ?? ''); setTaxId(p.taxId ?? ''); setCountries(c); })
+    getProfile()
+      .then(p => { setProfile(p); setName(p.name); setPhone(p.phone ?? ''); setTaxId(p.taxId ?? ''); })
       .catch(err => setLoadError(getApiErrorMessage(err, t('account.loadError'))))
       .finally(() => setLoading(false));
   };
@@ -202,63 +187,13 @@ const AccountPage: React.FC = () => {
     }
   };
 
-  // Typing into a field that was flagged by the last save clears that field's message.
-  const updateAddr = (patch: Partial<CustomerAddress>) => {
-    setAddrForm(f => ({ ...f, ...patch }));
-    setAddrFieldErrors(errs => {
-      const fixed = Object.keys(patch).filter(k => errs[k] && String(patch[k as keyof CustomerAddress] ?? '').trim());
-      if (fixed.length === 0) return errs;
-      const rest = { ...errs };
-      fixed.forEach(k => delete rest[k]);
-      return rest;
-    });
-  };
-
-  const openAddAddr = () => { setAddrForm(emptyAddress); setEditAddrId(null); setAddrError(''); setAddrFieldErrors({}); setShowAddr(true); };
-
-  // From checkout with no address yet: the form opens straight away, and saving goes back there.
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const returnTo = safeReturnPath(searchParams.get('volver'));
-  useEffect(() => {
-    if (searchParams.get('nuevaDireccion') === '1') openAddAddr();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, on arriving from checkout
-  }, []);
-  const openEditAddr = (a: CustomerAddress) => { setAddrForm({ ...a }); setEditAddrId(a.id); setAddrError(''); setAddrFieldErrors({}); setShowAddr(true); };
-
-  const handleSaveAddr = async () => {
-    const errs: FieldErrors = {};
-    if (!addrForm.alias?.trim()) errs.alias = t('common.fieldRequired');
-    if (!addrForm.recipientName?.trim()) errs.recipientName = t('common.fieldRequired');
-    if (!addrForm.street?.trim()) errs.street = t('common.fieldRequired');
-    if (!addrForm.city?.trim()) errs.city = t('common.fieldRequired');
-    if (!addrForm.postalCode?.trim()) errs.postalCode = t('common.fieldRequired');
-    if (!addrForm.country?.trim()) errs.country = t('common.fieldRequired');
-    if (Object.keys(errs).length > 0) {
-      setAddrFieldErrors(errs);
-      return;
-    }
-    setAddrSaving(true);
-    setAddrError('');
-    setAddrFieldErrors({});
-    try {
-      if (editAddrId) {
-        await updateAddress(editAddrId, addrForm);
-      } else {
-        await addAddress(addrForm);
-      }
-      const p = await getProfile();
-      setProfile(p);
-      setShowAddr(false);
-      showToast('success', t('account.addrSaveSuccess'));
-      if (!editAddrId && returnTo) navigate(returnTo);
-    } catch (e) {
-      const fe = parseFieldErrors(e);
-      if (fe) setAddrFieldErrors(fe);
-      else setAddrError(getApiErrorMessage(e, t('account.addrSaveError')));
-    } finally {
-      setAddrSaving(false);
-    }
+  const openAddAddr = () => setAddrModal({ address: null });
+  const openEditAddr = (a: CustomerAddress) => setAddrModal({ address: a });
+  const handleAddrSaved = async () => {
+    setAddrModal(null);
+    showToast('success', t('account.addrSaveSuccess'));
+    try { setProfile(await getProfile()); }
+    catch (e) { setAddrListError(getApiErrorMessage(e, t('account.loadError'))); }
   };
 
   const handleDeleteAddr = async (id: number) => {
@@ -536,130 +471,12 @@ const AccountPage: React.FC = () => {
         </Form>
       </Modal>
 
-      {/* Address Modal */}
-      <Modal show={showAddr} onHide={() => setShowAddr(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>{editAddrId ? t('account.editAddress') : t('account.newAddress')}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {addrError && <Alert variant="danger" className="py-2">{addrError}</Alert>}
-          <Row>
-            <Col sm={6}>
-              <Form.Group className="mb-2">
-                <Form.Label>{t('account.alias')}</Form.Label>
-                <Form.Control
-                  value={addrForm.alias ?? ''}
-                  onChange={e => updateAddr({ alias: e.target.value })}
-                  placeholder={t('account.aliasPlaceholder')}
-                  isInvalid={!!addrFieldErrors.alias}
-                />
-                <Form.Control.Feedback type="invalid">{addrFieldErrors.alias}</Form.Control.Feedback>
-              </Form.Group>
-            </Col>
-            <Col sm={6}>
-              <Form.Group className="mb-2">
-                <Form.Label>{t('account.recipient')}</Form.Label>
-                <Form.Control
-                  value={addrForm.recipientName ?? ''}
-                  onChange={e => updateAddr({ recipientName: e.target.value })}
-                  isInvalid={!!addrFieldErrors.recipientName}
-                />
-                <Form.Control.Feedback type="invalid">{addrFieldErrors.recipientName}</Form.Control.Feedback>
-              </Form.Group>
-            </Col>
-          </Row>
-          {/* Country first: the street suggestions search in the chosen country. */}
-          <Row>
-            <Col sm={6}>
-              <Form.Group className="mb-2" controlId="address-country">
-                <Form.Label>{t('account.country')}</Form.Label>
-                <Form.Select
-                  value={addrForm.country ?? 'ES'}
-                  onChange={e => updateAddr({ country: e.target.value })}
-                  isInvalid={!!addrFieldErrors.country}
-                >
-                  <option value="">{t('account.selectCountry')}</option>
-                  {countries.map(c => (
-                    <option key={c.isoCode} value={c.isoCode}>{countryName(c.isoCode)}</option>
-                  ))}
-                </Form.Select>
-                <Form.Control.Feedback type="invalid">{addrFieldErrors.country}</Form.Control.Feedback>
-              </Form.Group>
-            </Col>
-          </Row>
-          <Form.Group className="mb-2">
-            <Form.Label>{t('account.street')}</Form.Label>
-            <AddressAutocomplete
-              value={addrForm.street ?? ''}
-              onChange={street => updateAddr({ street })}
-              // The picked address replaces the old one's parts: a part Google doesn't know stays
-              // empty (and is asked for on save) rather than keeping the previous address's.
-              onSelect={a => updateAddr({
-                street: a.street,
-                postalCode: a.postalCode,
-                city: a.city,
-                province: a.province,
-                // Only a country the shop ships to; otherwise keep the one already chosen.
-                country: countries.some(c => c.isoCode === a.country) ? a.country : addrForm.country,
-              })}
-              regionCodes={addrForm.country ? [addrForm.country] : []}
-              isInvalid={!!addrFieldErrors.street}
-              feedback={<Form.Control.Feedback type="invalid">{addrFieldErrors.street}</Form.Control.Feedback>}
-            />
-          </Form.Group>
-          <Row>
-            <Col sm={4}>
-              <Form.Group className="mb-2">
-                <Form.Label>{t('account.postalCode')}</Form.Label>
-                <Form.Control
-                  value={addrForm.postalCode ?? ''}
-                  onChange={e => updateAddr({ postalCode: e.target.value })}
-                  isInvalid={!!addrFieldErrors.postalCode}
-                />
-                <Form.Control.Feedback type="invalid">{addrFieldErrors.postalCode}</Form.Control.Feedback>
-              </Form.Group>
-            </Col>
-            <Col sm={8}>
-              <Form.Group className="mb-2">
-                <Form.Label>{t('account.city')}</Form.Label>
-                <Form.Control
-                  value={addrForm.city ?? ''}
-                  onChange={e => updateAddr({ city: e.target.value })}
-                  isInvalid={!!addrFieldErrors.city}
-                />
-                <Form.Control.Feedback type="invalid">{addrFieldErrors.city}</Form.Control.Feedback>
-              </Form.Group>
-            </Col>
-          </Row>
-          <Row>
-            <Col sm={6}>
-              <Form.Group className="mb-2">
-                <Form.Label>{t('account.province')}</Form.Label>
-                <Form.Control value={addrForm.province ?? ''} onChange={e => updateAddr({ province: e.target.value })} />
-              </Form.Group>
-            </Col>
-            <Col sm={6}>
-              <Form.Group className="mb-2">
-                <Form.Label>{t('account.phone')}</Form.Label>
-                <Form.Control value={addrForm.phone ?? ''} onChange={e => updateAddr({ phone: e.target.value })} />
-              </Form.Group>
-            </Col>
-          </Row>
-          <Form.Check
-            type="checkbox"
-            label={t('account.defaultAddress')}
-            checked={addrForm.isDefault ?? false}
-            onChange={e => updateAddr({ isDefault: e.target.checked })}
-            className="mt-2"
-          />
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowAddr(false)}>{t('account.cancel')}</Button>
-          <Button variant="primary" onClick={handleSaveAddr} disabled={addrSaving}>
-            {addrSaving ? <Spinner size="sm" animation="border" /> : t('account.save')}
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      <AddressFormModal
+        show={addrModal !== null}
+        address={addrModal?.address}
+        onHide={() => setAddrModal(null)}
+        onSaved={handleAddrSaved}
+      />
 
       <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} centered>
         <Modal.Header closeButton>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import CheckoutPage from './CheckoutPage';
 import type { Cart, CheckoutResponse, StorefrontProfile } from '../../types';
 import type { ApplicableShippingRate } from '../../services/shippingService';
@@ -37,8 +37,9 @@ vi.mock('../../contexts/ToastContext', () => ({ useToast: () => ({ showToast: vi
 const { checkout } = vi.hoisted(() => ({ checkout: vi.fn() }));
 vi.mock('../../services/cartService', () => ({ checkout }));
 
-const { getProfile } = vi.hoisted(() => ({ getProfile: vi.fn() }));
-vi.mock('../../services/profileService', () => ({ getProfile }));
+const { getProfile, addAddress } = vi.hoisted(() => ({ getProfile: vi.fn(), addAddress: vi.fn() }));
+vi.mock('../../services/profileService', () => ({ getProfile, addAddress, updateAddress: vi.fn() }));
+vi.mock('../../services/countryService', () => ({ getVisibleCountries: vi.fn().mockResolvedValue([{ isoCode: 'ES' }]) }));
 
 const { getShippingOptions } = vi.hoisted(() => ({ getShippingOptions: vi.fn() }));
 vi.mock('../../services/shippingService', () => ({ getShippingOptions }));
@@ -113,6 +114,36 @@ describe('CheckoutPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'checkout.backToCart' }));
     expect(navigate).toHaveBeenCalledWith('/cart');
     await waitFor(() => expect(getProfile).toHaveBeenCalled());
+  });
+
+  // With saved addresses there was no way to add another one from here, and going to Mi cuenta for
+  // it lost the order notes typed.
+  it('adds another address in place, ships to it and keeps the notes', async () => {
+    mockCart.cart = cartWithItems();
+    const casa = { id: 1, alias: 'Casa', recipientName: 'Jane', street: 'Calle 1', city: 'Madrid', postalCode: '28001', country: 'ES', isDefault: true };
+    const trabajo = { id: 2, alias: 'Trabajo', recipientName: 'Jane', street: 'Calle 2', city: 'Madrid', postalCode: '28002', country: 'ES', isDefault: false };
+    getProfile.mockResolvedValueOnce({ ...profile(), addresses: [casa] }).mockResolvedValueOnce({ ...profile(), addresses: [casa, trabajo] });
+    addAddress.mockResolvedValue(trabajo);
+    render(<CheckoutPage />);
+    await waitFor(() => expect(getShippingOptions).toHaveBeenCalled());
+    const notes = screen.getByPlaceholderText('checkout.notesPlaceholder');
+    fireEvent.change(notes, { target: { value: 'Llamar antes' } });
+
+    fireEvent.click(screen.getByRole('button', { name: 'checkout.addOtherAddress' }));
+    const dialog = await screen.findByRole('dialog');
+    const [alias, recipient, street, postalCode, city] = within(dialog).getAllByRole('textbox');
+    fireEvent.change(alias, { target: { value: 'Trabajo' } });
+    fireEvent.change(recipient, { target: { value: 'Jane' } });
+    fireEvent.change(street, { target: { value: 'Calle 2' } });
+    fireEvent.change(postalCode, { target: { value: '28002' } });
+    fireEvent.change(city, { target: { value: 'Madrid' } });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'account.save' }));
+
+    await waitFor(() => expect(addAddress).toHaveBeenCalled());
+    await waitFor(() => expect((screen.getAllByRole('combobox')[0] as HTMLSelectElement).value).toBe('2'));
+    expect((screen.getAllByRole('combobox')[1] as HTMLSelectElement).value).toBe('1');
+    expect(navigate).not.toHaveBeenCalled();
+    expect((screen.getByPlaceholderText('checkout.notesPlaceholder') as HTMLTextAreaElement).value).toBe('Llamar antes');
   });
 
   // A customer who skipped the cart's code fields can still enter one here.

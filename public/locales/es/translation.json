@@ -209,6 +209,7 @@
     "shippingBilling": "Envío y facturación",
     "noAddresses": "No tienes direcciones guardadas.",
     "addAddress": "Añadir dirección",
+    "addOtherAddress": "Añadir otra dirección",
     "shippingAddress": "Dirección de envío",
     "selectAddress": "-- Seleccionar --",
     "billingAddress": "Dirección de facturación",
