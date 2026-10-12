@@ -4,12 +4,14 @@ import { Link } from 'react-router-dom';
 import {
   FaInstagram, FaFacebook, FaTiktok, FaPinterest,
   FaTwitter, FaYoutube, FaLinkedin,
+  FaMapMarkerAlt, FaPhoneAlt, FaEnvelope, FaClock,
 } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import { useSiteSettings, type SiteSettings } from '../../contexts/SiteSettingsContext';
 import { usePaymentMethods } from '../../contexts/PaymentMethodsContext';
 import { usePartners } from '../../contexts/PartnersContext';
 import type { FooterColumn } from '../../services/siteSettingsService';
+import { groupOpeningHours, rowLabel } from '../../utils/openingHours';
 
 const SOCIAL: { field: keyof SiteSettings; Icon: React.ElementType; label: string }[] = [
   { field: 'instagramUrl', Icon: FaInstagram, label: 'Instagram' },
@@ -27,6 +29,62 @@ const LEGAL_LINKS = [
   { tKey: 'footer.privacy', slug: 'proteccion-de-datos' },
   { tKey: 'footer.cookies', slug: 'politica-de-cookies' },
 ];
+
+/** "937906859" → "937 90 68 59" (Spanish 9-digit numbers); anything else as typed. */
+const formatPhone = (phone: string): string => {
+  const digits = phone.replace(/\D/g, '');
+  return digits.length === 9 ? digits.replace(/(\d{3})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4') : phone.trim();
+};
+
+/** The shop's address, phone, email and opening hours, straight from the site settings, so the
+ *  footer never goes out of date when they change. Lines with no data are left out. */
+function FooterContact() {
+  const { t, i18n } = useTranslation();
+  const { companyAddress, companyPostalCode, companyCity, companyPhone, companyEmail, openingHours } = useSiteSettings();
+  const locale = i18n.resolvedLanguage ?? i18n.language ?? 'es';
+  const address = [companyAddress, [companyPostalCode, companyCity].filter(Boolean).join(' ')]
+    .map(part => part?.trim()).filter(Boolean).join(', ');
+  const hours = openingHours ?? [];
+
+  return (
+    <ul className="list-unstyled footer-contact-list">
+      {address && (
+        <li>
+          <FaMapMarkerAlt aria-hidden="true" className="footer-contact-icon" />
+          <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`}
+            target="_blank" rel="noopener noreferrer" className="footer-contact-link">{address}</a>
+        </li>
+      )}
+      {companyPhone?.trim() && (
+        <li>
+          <FaPhoneAlt aria-hidden="true" className="footer-contact-icon" />
+          <a href={`tel:${companyPhone.replace(/[^\d+]/g, '')}`} className="footer-contact-link">{formatPhone(companyPhone)}</a>
+        </li>
+      )}
+      {companyEmail?.trim() && (
+        <li>
+          <FaEnvelope aria-hidden="true" className="footer-contact-icon" />
+          <a href={`mailto:${companyEmail.trim()}`} className="footer-contact-link">{companyEmail.trim()}</a>
+        </li>
+      )}
+      {hours.length > 0 && (
+        <li>
+          <FaClock aria-hidden="true" className="footer-contact-icon" />
+          <span className="footer-contact-hours">
+            {groupOpeningHours(hours).map(row => (
+              <span key={row.days.join('-')} className="footer-contact-hours-row">
+                {rowLabel(row, locale)}:{' '}
+                {row.ranges.length > 0
+                  ? row.ranges.map(r => `${r.open}–${r.close}`).join(' · ')
+                  : t('openingHours.closed')}
+              </span>
+            ))}
+          </span>
+        </li>
+      )}
+    </ul>
+  );
+}
 
 function FooterColContent({ col }: { col: FooterColumn }) {
   const { t } = useTranslation();
@@ -92,6 +150,8 @@ function FooterColContent({ col }: { col: FooterColumn }) {
       </div>
     );
   }
+
+  if (col.type === 'contact') return <FooterContact />;
 
   if (col.type === 'features') {
     return (

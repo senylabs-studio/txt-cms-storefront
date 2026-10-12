@@ -1,6 +1,7 @@
 import apiClient from '../apiClient';
 
-export type FooterColumnType = 'links' | 'logos' | 'features' | 'paymentMethods' | 'partners';
+/** 'contact' shows the shop's address, phone, email and opening hours from the settings. */
+export type FooterColumnType = 'links' | 'logos' | 'features' | 'paymentMethods' | 'partners' | 'contact';
 
 export interface FooterLink {
   text: string;
@@ -52,6 +53,8 @@ export interface SiteSettings {
   companyAddress?: string;
   companyPostalCode?: string;
   companyCity?: string;
+  companyPhone?: string;
+  companyEmail?: string;
   instagramUrl?: string;
   facebookUrl?: string;
   tikTokUrl?: string;
