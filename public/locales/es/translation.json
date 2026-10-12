@@ -138,7 +138,9 @@
       "tryAgain": "Solicitar un nuevo enlace",
       "pressToAccess": "Pulsa el botón para entrar en tu pedido. El enlace solo se puede usar una vez.",
       "accessButton": "Acceder a mi pedido"
-    }
+    },
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña"
   },
   "contact": {
     "title": "Envíanos un mensaje",

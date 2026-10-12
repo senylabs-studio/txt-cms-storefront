@@ -6,6 +6,7 @@ import MainLayout from '../../components/Layout/MainLayout';
 import { resetPassword } from '../../services/authService';
 import { getApiErrorMessage, parseFieldErrors, type FieldErrors } from '../../utils/apiError';
 import { meetsPasswordRules } from '../../utils/password';
+import PasswordInput from '../../components/common/PasswordInput/PasswordInput';
 
 const ResetPasswordPage: React.FC = () => {
   const { t } = useTranslation();
@@ -69,29 +70,27 @@ const ResetPasswordPage: React.FC = () => {
                 <Form onSubmit={handleSubmit}>
                   <Form.Group className="mb-3">
                     <Form.Label>{t('auth.resetPassword.newPassword')}</Form.Label>
-                    <Form.Control
-                      type="password"
+                    <PasswordInput
                       value={newPassword}
                       onChange={e => setNewPassword(e.target.value)}
                       minLength={6}
                       isInvalid={!!fieldErrors.newPassword}
+                      feedback={fieldErrors.newPassword}
                       required
                       autoFocus
                     />
-                    <Form.Control.Feedback type="invalid">{fieldErrors.newPassword}</Form.Control.Feedback>
                   </Form.Group>
 
                   <Form.Group className="mb-4">
                     <Form.Label>{t('auth.resetPassword.confirmPassword')}</Form.Label>
-                    <Form.Control
-                      type="password"
+                    <PasswordInput
                       value={confirmPassword}
                       onChange={e => setConfirmPassword(e.target.value)}
                       minLength={6}
                       isInvalid={!!fieldErrors.confirmPassword}
+                      feedback={fieldErrors.confirmPassword}
                       required
                     />
-                    <Form.Control.Feedback type="invalid">{fieldErrors.confirmPassword}</Form.Control.Feedback>
                   </Form.Group>
 
                   <Button type="submit" variant="primary" className="w-100" disabled={loading}>

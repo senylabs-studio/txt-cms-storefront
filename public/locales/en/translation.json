@@ -138,7 +138,9 @@
       "tryAgain": "Request a new link",
       "pressToAccess": "Press the button to open your order. The link can only be used once.",
       "accessButton": "Open my order"
-    }
+    },
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "contact": {
     "title": "Send us a message",

@@ -138,7 +138,9 @@
       "tryAgain": "Sol·licitar un nou enllaç",
       "pressToAccess": "Prem el botó per entrar a la teva comanda. L’enllaç només es pot fer servir una vegada.",
       "accessButton": "Accedir a la meva comanda"
-    }
+    },
+    "showPassword": "Mostra la contrasenya",
+    "hidePassword": "Amaga la contrasenya"
   },
   "contact": {
     "title": "Envia'ns un missatge",

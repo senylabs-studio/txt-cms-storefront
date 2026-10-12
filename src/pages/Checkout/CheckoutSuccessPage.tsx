@@ -10,6 +10,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { convertGuestAccount } from '../../services/authService';
 import { getApiErrorMessage } from '../../utils/apiError';
 import { meetsPasswordRules } from '../../utils/password';
+import PasswordInput from '../../components/common/PasswordInput/PasswordInput';
 
 const CheckoutSuccessPage: React.FC = () => {
   const { t } = useTranslation();
@@ -93,8 +94,7 @@ const CheckoutSuccessPage: React.FC = () => {
               <p className="text-muted small">{t('checkoutSuccess.setPasswordSubtitle')}</p>
               {error && <Alert variant="danger" className="py-2">{error}</Alert>}
               <Form onSubmit={handleSetPassword} className="d-flex gap-2">
-                <Form.Control
-                  type="password"
+                <PasswordInput
                   placeholder={t('authGate.password')}
                   value={password}
                   onChange={e => setPassword(e.target.value)}

@@ -9,6 +9,7 @@ import { login as loginService } from '../../services/authService';
 import { useAuth } from '../../contexts/AuthContext';
 import { getApiErrorMessage } from '../../utils/apiError';
 import { safeReturnPath } from '../../utils/session';
+import PasswordInput from '../../components/common/PasswordInput/PasswordInput';
 
 const LoginPage: React.FC = () => {
   const { t } = useTranslation();
@@ -71,8 +72,7 @@ const LoginPage: React.FC = () => {
 
               <Form.Group className="mb-2">
                 <Form.Label>{t('auth.login.password')}</Form.Label>
-                <Form.Control
-                  type="password"
+                <PasswordInput
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   placeholder={t('auth.login.passwordPlaceholder')}
