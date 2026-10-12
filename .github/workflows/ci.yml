@@ -78,3 +78,6 @@ jobs:
           app-name: 'txt-cms-storefront'
           slot-name: 'Production'
           package: package
+          # Empty wwwroot first: without it every deploy left the previous one's files behind
+          # and filled the plan's shared 1 GB disk (2026-10-12).
+          clean: true
