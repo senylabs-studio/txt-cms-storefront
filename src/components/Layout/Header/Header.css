@@ -192,20 +192,24 @@
    wider than the icon, and a fixed offset from their edge put it on top of the heart. */
 .header-icon-glyph { position: relative; display: inline-flex; }
 
-.header-icon-badge {
+/* `.badge.` beats Bootstrap's own .badge (padding .35em .65em, font-size .75em), which loads
+   later and used to win: the digit was squeezed into an 8 px box and hung low. Centred with a
+   16 px line instead of flex: Barlow sits its digits high in the line box and text snaps to
+   whole pixels, so 11 px digits on a 16 px line are what measure even above and below. */
+.badge.header-icon-badge {
   position: absolute;
   top: -7px;
   left: 14px;
+  display: block;
   min-width: 16px;
   height: 16px;
   padding: 0 4px;
   border-radius: 8px;
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
   box-shadow: 0 0 0 2px #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 .header-icon-badge--cart { background: var(--brand-color, #06b773) !important; }
 
