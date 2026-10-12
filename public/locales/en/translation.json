@@ -140,7 +140,13 @@
       "accessButton": "Open my order"
     },
     "showPassword": "Show password",
-    "hidePassword": "Hide password"
+    "hidePassword": "Hide password",
+    "sessionClosed": {
+      "title": "You've been signed out",
+      "body": "Your session is no longer valid: it expired or the password was changed on another device. Log in again to see your account, orders and favourites.",
+      "login": "Log in",
+      "continue": "Continue signed out"
+    }
   },
   "contact": {
     "title": "Send us a message",

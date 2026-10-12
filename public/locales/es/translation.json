@@ -140,7 +140,13 @@
       "accessButton": "Acceder a mi pedido"
     },
     "showPassword": "Mostrar contraseña",
-    "hidePassword": "Ocultar contraseña"
+    "hidePassword": "Ocultar contraseña",
+    "sessionClosed": {
+      "title": "Se ha cerrado tu sesión",
+      "body": "Tu sesión ya no es válida: ha caducado o se ha cambiado la contraseña desde otro dispositivo. Vuelve a iniciar sesión para ver tu cuenta, tus pedidos y tus favoritos.",
+      "login": "Iniciar sesión",
+      "continue": "Seguir sin sesión"
+    }
   },
   "contact": {
     "title": "Envíanos un mensaje",
