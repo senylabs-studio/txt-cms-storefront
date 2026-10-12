@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Container, Row, Col, Form, Button, Card, Alert, Spinner, Badge } from 'react-bootstrap';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useDocumentMeta } from '../../hooks/useDocumentMeta';
 import { useSiteSettings } from '../../contexts/SiteSettingsContext';
@@ -15,6 +15,7 @@ import { getApiErrorMessage } from '../../utils/apiError';
 import type { CustomerAddress, CheckoutResponse, CheckoutRequest } from '../../types';
 import PayPalCheckoutButton from './PayPalCheckoutButton';
 import CartCodes from '../../components/Cart/CartCodes/CartCodes';
+import AddressFormModal from '../../components/Address/AddressFormModal';
 import { formatPrice } from '../../utils/pricing';
 import { cartItemName } from '../../utils/giftCard';
 import { loginUrl } from '../../utils/session';
@@ -45,9 +46,8 @@ const CheckoutPage: React.FC = () => {
   const [shippingRetry, setShippingRetry] = useState(0);
   const lastShippingIdRef = useRef<number | undefined>(undefined);
 
-  const [searchParams] = useSearchParams();
-  // New addresses are added on Mi cuenta, which comes back here with the new one selected.
-  const addAddressUrl = '/account?nuevaDireccion=1&volver=/checkout';
+  // New address form, right here: going to Mi cuenta for it lost the order notes typed.
+  const [showAddAddress, setShowAddAddress] = useState(false);
 
   // Redsys redirect state
   const [redsysData, setRedsysData] = useState<CheckoutResponse | null>(null);
@@ -59,15 +59,27 @@ const CheckoutPage: React.FC = () => {
     getProfile().then(p => {
       setAddresses(p.addresses);
       const def = p.addresses.find(a => a.isDefault);
-      // Back from adding an address (?direccion=<id>): ship to that one; billing stays the default.
-      const added = p.addresses.find(a => a.id === Number(searchParams.get('direccion')));
-      const ship = added ?? def;
-      const bill = def ?? added;
-      if (ship) setShippingId(ship.id);
-      if (bill) setBillingId(bill.id);
+      if (def) { setShippingId(def.id); setBillingId(def.id); }
     }).catch(err => setAddressesError(getApiErrorMessage(err, t('checkout.loadAddressesError'))));
   // eslint-disable-next-line react-hooks/exhaustive-deps -- one-off checkout bootstrap per auth state; fetchCart/navigate/t don't change what's loaded
   }, [isAuthenticated]);
+
+  // A new address ships the order (that's why it was added); billing keeps the one chosen, or
+  // takes the new one when there was none.
+  const handleAddressAdded = async (createdId?: number) => {
+    setShowAddAddress(false);
+    try {
+      const p = await getProfile();
+      setAddresses(p.addresses);
+      if (createdId) {
+        setShippingId(createdId);
+        setBillingId(prev => prev ?? createdId);
+      }
+    } catch (err) {
+      // Saved, but the list didn't refresh: say so where the order is placed, keep the form usable.
+      setError(getApiErrorMessage(err, t('checkout.loadAddressesError')));
+    }
+  };
 
   // Fetch the shipping options whenever the shipping address or the cart changes (the price
   // depends on the cart's weight and total, worked out server-side).
@@ -247,9 +259,8 @@ const CheckoutPage: React.FC = () => {
                 ) : addresses.length === 0 ? (
                   <Alert variant="info">
                     {t('checkout.noAddresses')}{' '}
-                    {/* Straight to the new-address form, and back here once it's saved (it used to leave the
-                        first-time buyer on Mi cuenta with no way back). */}
-                    <Button variant="link" className="p-0" onClick={() => navigate(addAddressUrl)}>{t('checkout.addAddress')}</Button>
+                    {/* The new-address form opens here (it used to send the first-time buyer to Mi cuenta). */}
+                    <Button variant="link" className="p-0" onClick={() => setShowAddAddress(true)}>{t('checkout.addAddress')}</Button>
                   </Alert>
                 ) : (
                   <>
@@ -261,7 +272,7 @@ const CheckoutPage: React.FC = () => {
                           <option key={a.id} value={a.id}>{a.alias} — {a.street}, {a.city}</option>
                         ))}
                       </Form.Select>
-                      <Button variant="link" size="sm" className="p-0 mt-1 d-inline-flex align-items-center gap-1" onClick={() => navigate(addAddressUrl)}>
+                      <Button variant="link" size="sm" className="p-0 mt-1 d-inline-flex align-items-center gap-1" onClick={() => setShowAddAddress(true)}>
                         <FaPlus aria-hidden />{t('checkout.addOtherAddress')}
                       </Button>
                     </Form.Group>
@@ -457,6 +468,7 @@ const CheckoutPage: React.FC = () => {
           </Col>
         </Row>
       </Container>
+      <AddressFormModal show={showAddAddress} onHide={() => setShowAddAddress(false)} onSaved={handleAddressAdded} />
     </MainLayout>
   );
 };
