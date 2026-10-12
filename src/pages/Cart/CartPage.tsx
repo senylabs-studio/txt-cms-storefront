@@ -230,7 +230,8 @@ const CartPage: React.FC = () => {
             </Col>
 
             <Col lg={4}>
-              <Card className="sticky-top" style={{ top: 90 }}>
+              {/* sticky-top brings z-index 1020, above the header (1000): the open mega menu went under the summary. */}
+              <Card className="sticky-top" style={{ top: 90, zIndex: 1 }}>
                 <Card.Body>
                   <h5 className="fw-bold mb-3">{t('cart.summary')}</h5>
                   {cart!.items.map(item => (

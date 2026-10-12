@@ -337,7 +337,8 @@ const CheckoutPage: React.FC = () => {
 
           {/* Right: order summary */}
           <Col lg={5}>
-            <Card className="sticky-top" style={{ top: 90 }}>
+            {/* sticky-top brings z-index 1020, above the header (1000): the open mega menu went under the summary. */}
+            <Card className="sticky-top" style={{ top: 90, zIndex: 1 }}>
               <Card.Body>
                 <h5 className="fw-bold mb-3">{t('checkout.orderSummary')}</h5>
                 {cart.items.map(item => (
