@@ -15,6 +15,7 @@ import { getApiErrorMessage } from '../../utils/apiError';
 import './FavoritesPage.css';
 import PageLoader from '../../components/common/ScissorsLoader/PageLoader';
 import { variantCardTitle } from '../../utils/variantTitle';
+import IconTooltip from '../../components/common/IconTooltip/IconTooltip';
 import { formatPrice } from '../../utils/pricing';
 import { loginUrl } from '../../utils/session';
 
@@ -112,7 +113,7 @@ const FavoritesPage: React.FC = () => {
 
               return (
                 <Col key={item.id} xs={6} sm={4} md={3} lg={2}>
-                  <div className="fav-card h-100">
+                  <div className="fav-card h-100 d-flex flex-column">
                     <Link to={slug} className="d-block position-relative">
                       {thumbnail
                         ? <img src={thumbnail} alt={entity.name} className="fav-card-img" />
@@ -124,7 +125,8 @@ const FavoritesPage: React.FC = () => {
                       )}
                       {outOfStock && <div className="fav-card-outofstock">{t('product.outOfStock')}</div>}
                     </Link>
-                    <div className="p-2 d-flex flex-column gap-1">
+                    {/* Column + mt-auto: the buttons sit at the bottom whether the name takes one line or two. */}
+                    <div className="p-2 d-flex flex-column gap-1 flex-grow-1">
                       {/* Variants read like the catalog cards: product name small, value as the title. */}
                       {item.variant && <div className="fav-card-product">{variantCardTitle(item.variant).productLabel}</div>}
                       <div className="fav-card-name">
@@ -136,7 +138,7 @@ const FavoritesPage: React.FC = () => {
                           <span className="text-muted text-decoration-line-through small">{formatPrice(entity.originalPrice)}</span>
                         )}
                       </div>
-                      <div className="d-flex gap-1 mt-1">
+                      <div className="d-flex gap-1 mt-auto pt-1">
                         <Button
                           variant={outOfStock ? 'outline-secondary' : 'primary'}
                           size="sm"
@@ -147,9 +149,11 @@ const FavoritesPage: React.FC = () => {
                           <FaShoppingCart className="me-1" />
                           {outOfStock ? t('product.outOfStock') : !item.variantId && entity.hasVariants ? t('product.viewOptions') : t('product.add')}
                         </Button>
-                        <Button variant="outline-danger" size="sm" onClick={() => handleRemove(item)} title={t('favorites.remove')}>
-                          <FaTrash />
-                        </Button>
+                        <IconTooltip label={t('favorites.remove')}>
+                          <Button variant="outline-danger" size="sm" onClick={() => handleRemove(item)} aria-label={t('favorites.remove')}>
+                            <FaTrash />
+                          </Button>
+                        </IconTooltip>
                       </div>
                     </div>
                   </div>
