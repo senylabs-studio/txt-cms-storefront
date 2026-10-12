@@ -137,8 +137,10 @@ const Header: React.FC = () => {
       {isAuthenticated && (
         <>
           <Link to="/favorites" className="header-icon-btn text-decoration-none" aria-label={t('header.favorites')}>
-            <FaHeart size={20} />
-            {favCount > 0 && <Badge bg="danger" className="header-icon-badge">{favCount}</Badge>}
+            <span className="header-icon-glyph">
+              <FaHeart size={20} />
+              {favCount > 0 && <Badge bg="danger" className="header-icon-badge">{favCount}</Badge>}
+            </span>
             {labeled && <span className="header-icon-label">{t('header.favorites')}</span>}
           </Link>
           <Link to="/board" className="header-icon-btn text-decoration-none" title={t('board.title')} aria-label={t('board.title')}>
@@ -148,8 +150,10 @@ const Header: React.FC = () => {
         </>
       )}
       <button className="header-icon-btn" onClick={openDrawer} aria-label={t('header.cart')}>
-        <FaShoppingCart size={20} />
-        {itemCount > 0 && <Badge bg="success" className="header-icon-badge header-icon-badge--cart">{itemCount}</Badge>}
+        <span className="header-icon-glyph">
+          <FaShoppingCart size={20} />
+          {itemCount > 0 && <Badge bg="success" className="header-icon-badge header-icon-badge--cart">{itemCount}</Badge>}
+        </span>
         {labeled && <span className="header-icon-label">{t('header.cart')}</span>}
       </button>
     </div>
