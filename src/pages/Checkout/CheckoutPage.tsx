@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useDocumentMeta } from '../../hooks/useDocumentMeta';
 import { useSiteSettings } from '../../contexts/SiteSettingsContext';
-import { FaTruck, FaGift, FaStore } from 'react-icons/fa';
+import { FaTruck, FaGift, FaStore, FaArrowLeft } from 'react-icons/fa';
 import MainLayout from '../../components/Layout/MainLayout';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -14,6 +14,7 @@ import { getShippingOptions, type ApplicableShippingRate } from '../../services/
 import { getApiErrorMessage } from '../../utils/apiError';
 import type { CustomerAddress, CheckoutResponse, CheckoutRequest } from '../../types';
 import PayPalCheckoutButton from './PayPalCheckoutButton';
+import CartCodes from '../../components/Cart/CartCodes/CartCodes';
 import { formatPrice } from '../../utils/pricing';
 import { cartItemName } from '../../utils/giftCard';
 import { loginUrl } from '../../utils/session';
@@ -205,6 +206,10 @@ const CheckoutPage: React.FC = () => {
   return (
     <MainLayout>
       <Container className="py-4" style={{ maxWidth: 860 }}>
+        {/* Quantities and lines are edited in the cart: checkout only shows them. */}
+        <Button variant="link" className="d-inline-flex align-items-center gap-1 small p-0 mb-2" onClick={() => navigate('/cart')}>
+          <FaArrowLeft />{t('checkout.backToCart')}
+        </Button>
         <h2 className="fw-bold mb-4">{t('checkout.title')}</h2>
 
         {/* Hidden Redsys form — auto-submitted once redsysData is set */}
@@ -337,7 +342,8 @@ const CheckoutPage: React.FC = () => {
 
           {/* Right: order summary */}
           <Col lg={5}>
-            <Card className="sticky-top" style={{ top: 90 }}>
+            {/* sticky-top brings z-index 1020, above the header (1000): the open mega menu went under the summary. */}
+            <Card className="sticky-top" style={{ top: 90, zIndex: 1 }}>
               <Card.Body>
                 <h5 className="fw-bold mb-3">{t('checkout.orderSummary')}</h5>
                 {cart.items.map(item => (
@@ -402,7 +408,10 @@ const CheckoutPage: React.FC = () => {
                   </div>
                 )}
 
+                {/* A code not entered in the cart can still go in here (only while none is applied:
+                    the applied one shows with its «Quitar»). */}
                 <hr className="my-2" />
+                <CartCodes />
                 <div className="d-flex justify-content-between fw-bold fs-5">
                   <span>{t('checkout.total')}</span>
                   <span>{formatPrice(estimatedTotal)}</span>

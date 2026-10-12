@@ -249,7 +249,8 @@
     "shippingMethod": "Forma de envío",
     "pickupAt": "Recogerás el pedido en la tienda: {{address}}. Te avisaremos cuando esté listo.",
     "shippingLoadError": "No se han podido cargar las formas de envío. Inténtalo de nuevo.",
-    "shippingRetry": "Reintentar"
+    "shippingRetry": "Reintentar",
+    "backToCart": "Volver al carrito"
   },
   "checkoutSuccess": {
     "title": "¡Pedido recibido!",

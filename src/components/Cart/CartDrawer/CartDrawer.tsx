@@ -4,11 +4,13 @@ import { FaTrash, FaMinus, FaPlus, FaShoppingBag, FaGift } from 'react-icons/fa'
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import IconTooltip from '../../common/IconTooltip/IconTooltip';
+import CartQuantityInput from '../CartQuantityInput/CartQuantityInput';
 import { useCart } from '../../../contexts/CartContext';
 import { getApiErrorMessage } from '../../../utils/apiError';
 import './CartDrawer.css';
 import { formatPrice } from '../../../utils/pricing';
 import { cartItemName } from '../../../utils/giftCard';
+import { formatMeters } from '../../../utils/locale';
 
 // Avoids floating-point artifacts from repeated +/- quantityStep arithmetic (e.g. 0.5 - 0.05
 // would otherwise become 0.44999999999999996 in JS).
@@ -119,7 +121,12 @@ const CartDrawer: React.FC = () => {
                       <button className="qty-btn" aria-label={t('cart.lessQuantity')} disabled={loading || item.quantity <= item.minQuantity} onClick={() => handleUpdate(item.id, roundToStep(item.quantity - item.quantityStep))}>
                         <FaMinus size={10} />
                       </button>
-                      <span className="qty-value">{item.quantity}</span>
+                      {/* Typed directly too: stepping 0,05 m at a time to go from 1 to 8 m was a lot of clicks. */}
+                      <CartQuantityInput
+                        item={item} size="sm" disabled={loading}
+                        onCommit={q => handleUpdate(item.id, q)}
+                        onInvalid={() => setItemError(t('cart.invalidQuantity', { min: formatMeters(item.minQuantity) }))}
+                      />
                       <button className="qty-btn" aria-label={t('cart.moreQuantity')} disabled={loading || item.quantity + item.quantityStep > item.availableStock} onClick={() => handleUpdate(item.id, roundToStep(item.quantity + item.quantityStep))}>
                         <FaPlus size={10} />
                       </button>

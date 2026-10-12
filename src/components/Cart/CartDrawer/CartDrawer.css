@@ -30,7 +30,6 @@
 .qty-btn { background: #f0f0f0; border: none; border-radius: 4px; width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .qty-btn:hover:not(:disabled) { background: #dee2e6; }
 .qty-btn:disabled { opacity: .4; cursor: not-allowed; }
-.qty-value { font-size: 14px; font-weight: 600; min-width: 20px; text-align: center; }
 
 .cart-item-subtotal { display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; min-width: 70px; }
 .remove-btn { background: none; border: none; color: #adb5bd; cursor: pointer; padding: 4px; }

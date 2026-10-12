@@ -249,7 +249,8 @@
     "shippingMethod": "Shipping method",
     "pickupAt": "You'll collect your order at the shop: {{address}}. We'll let you know when it's ready.",
     "shippingLoadError": "The shipping options couldn't be loaded. Please try again.",
-    "shippingRetry": "Try again"
+    "shippingRetry": "Try again",
+    "backToCart": "Back to cart"
   },
   "checkoutSuccess": {
     "title": "Order received!",

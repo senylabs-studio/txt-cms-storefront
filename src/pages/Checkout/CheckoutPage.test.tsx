@@ -25,10 +25,14 @@ vi.mock('../../contexts/AuthContext', () => ({
   useAuth: () => mockAuth,
 }));
 
-const mockCart = vi.hoisted(() => ({ cart: null as Cart | null, fetchCart: vi.fn() }));
+const mockCart = vi.hoisted(() => ({
+  cart: null as Cart | null, fetchCart: vi.fn(), loading: false,
+  applyCoupon: vi.fn(), removeCoupon: vi.fn(), applyGiftCard: vi.fn(), removeGiftCard: vi.fn(),
+}));
 vi.mock('../../contexts/CartContext', () => ({
   useCart: () => mockCart,
 }));
+vi.mock('../../contexts/ToastContext', () => ({ useToast: () => ({ showToast: vi.fn() }) }));
 
 const { checkout } = vi.hoisted(() => ({ checkout: vi.fn() }));
 vi.mock('../../services/cartService', () => ({ checkout }));
@@ -100,6 +104,33 @@ describe('CheckoutPage', () => {
     render(<CheckoutPage />);
     expect(screen.getByText('checkout.cartEmpty')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'checkout.proceed' })).not.toBeInTheDocument();
+  });
+
+  // Lines and quantities are edited in the cart; checkout had no way back but the browser's.
+  it('goes back to the cart from the «Volver al carrito» button', async () => {
+    mockCart.cart = cartWithItems();
+    render(<CheckoutPage />);
+    fireEvent.click(screen.getByRole('button', { name: 'checkout.backToCart' }));
+    expect(navigate).toHaveBeenCalledWith('/cart');
+    await waitFor(() => expect(getProfile).toHaveBeenCalled());
+  });
+
+  // A customer who skipped the cart's code fields can still enter one here.
+  it('offers the coupon field in the summary and applies the code typed there', async () => {
+    mockCart.cart = cartWithItems();
+    mockCart.applyCoupon.mockResolvedValue(undefined);
+    render(<CheckoutPage />);
+    fireEvent.change(screen.getByPlaceholderText('cart.couponPlaceholder'), { target: { value: 'PRUEBA10' } });
+    fireEvent.click(screen.getByRole('button', { name: 'cart.applyCoupon' }));
+    await waitFor(() => expect(mockCart.applyCoupon).toHaveBeenCalledWith('PRUEBA10'));
+  });
+
+  it('shows the applied coupon with its remove button instead of the field', async () => {
+    mockCart.cart = { ...cartWithItems(), couponCode: 'PRUEBA10', couponDiscountAmount: 2 };
+    render(<CheckoutPage />);
+    expect(screen.queryByPlaceholderText('cart.couponPlaceholder')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'cart.removeCoupon' })).toBeInTheDocument();
+    await waitFor(() => expect(getProfile).toHaveBeenCalled());
   });
 
   it('navigates to /catalog from the empty-cart state', () => {

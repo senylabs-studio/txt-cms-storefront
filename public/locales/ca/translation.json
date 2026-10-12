@@ -249,7 +249,8 @@
     "shippingMethod": "Forma d'enviament",
     "pickupAt": "Recolliràs la comanda a la botiga: {{address}}. T'avisarem quan estigui a punt.",
     "shippingLoadError": "No s'han pogut carregar les formes d'enviament. Torna-ho a provar.",
-    "shippingRetry": "Torna-ho a provar"
+    "shippingRetry": "Torna-ho a provar",
+    "backToCart": "Torna al carretó"
   },
   "checkoutSuccess": {
     "title": "Comanda rebuda!",

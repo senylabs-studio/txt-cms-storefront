@@ -89,6 +89,28 @@ describe('CartDrawer', () => {
     expect(mockCart.updateItem).toHaveBeenCalledWith(1, 1.95);
   });
 
+  // Stepping 0,05 m at a time was the only way to change a line here; the metres can be typed too.
+  it('applies the metres typed into the quantity field on Enter', () => {
+    mockCart.cart = cartWithItems();
+    renderDrawer();
+
+    const input = screen.getByLabelText('cart.quantityLabel');
+    fireEvent.change(input, { target: { value: '3,5' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+    expect(mockCart.updateItem).toHaveBeenCalledWith(1, 3.5);
+  });
+
+  it('does not apply typed metres below the minimum and says what the minimum is', () => {
+    mockCart.cart = cartWithItems();
+    renderDrawer();
+
+    const input = screen.getByLabelText('cart.quantityLabel');
+    fireEvent.change(input, { target: { value: '0,1' } });
+    fireEvent.blur(input);
+    expect(mockCart.updateItem).not.toHaveBeenCalled();
+    expect(screen.getByText('cart.invalidQuantity')).toBeInTheDocument();
+  });
+
   it('uses a non-default quantityStep instead of always stepping by 1', () => {
     mockCart.cart = cartWithItems({ items: [{ id: 1, productName: 'Tela azul', productCode: 'TA1', originalUnitPrice: 10, unitPrice: 10, quantity: 4, subtotal: 40, availableStock: 20, minQuantity: 2, quantityStep: 2 }] });
     renderDrawer();

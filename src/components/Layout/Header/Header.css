@@ -188,10 +188,14 @@
 
 .header-icon-label { font-size: 11px; color: #4b5563; }
 
+/* The badge hangs off the icon's top-right corner, not the button's: the labeled buttons are
+   wider than the icon, and a fixed offset from their edge put it on top of the heart. */
+.header-icon-glyph { position: relative; display: inline-flex; }
+
 .header-icon-badge {
   position: absolute;
-  top: 2px;
-  right: 6px;
+  top: -7px;
+  left: 14px;
   min-width: 16px;
   height: 16px;
   padding: 0 4px;
@@ -203,7 +207,6 @@
   align-items: center;
   justify-content: center;
 }
-.header-icons--labeled .header-icon-badge { top: 2px; right: 12px; }
 .header-icon-badge--cart { background: var(--brand-color, #06b773) !important; }
 
 /* ── Mobile-only search row ──────────────────────────────────────────── */
@@ -562,7 +565,6 @@
      the brand row's copy would otherwise duplicate it. */
   .header-main-row .header-search { display: none; }
   .header-icons--labeled .header-icon-btn { width: 42px; padding: 0; flex-direction: row; }
-  .header-icons--labeled .header-icon-badge { top: 2px; right: 6px; }
   .header-icon-label { display: none; }
   .nav-menu-bar { display: none; }
   .brand-logo { height: 48px; }
@@ -576,7 +578,6 @@
 @media (min-width: 992px) and (max-width: 1199.98px) {
   .header-icons--labeled .header-icon-btn { flex-direction: row; width: 42px; padding: 0; }
   .header-icon-label { display: none; }
-  .header-icons--labeled .header-icon-badge { top: 2px; right: 6px; }
 }
 
 /* Phones: the top bar is one line. The promo text gives way (ellipsis) so the language switch and
