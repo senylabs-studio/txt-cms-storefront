@@ -6,7 +6,8 @@ import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { getOrderDetail, downloadOrderInvoice, cancelOrder, requestReturn } from '../../services/profileService';
 import type { StorefrontOrderDetail } from '../../types';
-import { ORDER_STATUS_VARIANT } from '../../utils/orderStatus';
+import { ORDER_STATUS_VARIANT, orderStatusKey } from '../../utils/orderStatus';
+import { useSiteSettings } from '../../contexts/SiteSettingsContext';
 import { useToast } from '../../contexts/ToastContext';
 import { getApiErrorMessage } from '../../utils/apiError';
 import PageLoader from '../../components/common/ScissorsLoader/PageLoader';
@@ -17,6 +18,7 @@ import { formatMeters } from '../../utils/locale';
 
 const OrderDetailPage: React.FC = () => {
   const { t } = useTranslation();
+  const { siteName, companyAddress, companyPostalCode, companyCity } = useSiteSettings();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -125,7 +127,7 @@ const OrderDetailPage: React.FC = () => {
         <div className="d-flex align-items-center gap-3 mb-4 flex-wrap">
           <h2 className="fw-bold mb-0">{t('orderDetail.order', { id: order.id })}</h2>
           <Badge bg={ORDER_STATUS_VARIANT[order.status] ?? 'secondary'} className="fs-6">
-            {t(`orders.statuses.${order.status}`, { defaultValue: order.status })}
+            {t(orderStatusKey(order.status, order.isPickup), { defaultValue: order.status })}
           </Badge>
           <div className="ms-auto d-flex gap-2">
             {canCancelOrder && (
@@ -188,6 +190,18 @@ const OrderDetailPage: React.FC = () => {
               </Card.Body>
             </Card>
           </Col>
+          {!order.shippingAddress && order.isPickup && (
+            <Col md={6} className="mb-3">
+              <Card className="h-100">
+                <Card.Body>
+                  <h6 className="fw-semibold mb-2">{t('orderDetail.storePickup')}</h6>
+                  <div className="text-muted small">
+                    {t('orderDetail.pickupAt', { address: [companyAddress, [companyPostalCode, companyCity].filter(Boolean).join(' ')].filter(Boolean).join(', ') || siteName })}
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+          )}
           {order.shippingAddress && (
             <Col md={6} className="mb-3">
               <Card className="h-100">

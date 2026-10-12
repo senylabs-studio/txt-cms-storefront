@@ -10,7 +10,7 @@ import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { checkout } from '../../services/cartService';
 import { getProfile } from '../../services/profileService';
-import { getShippingOptions, type ApplicableShippingRate } from '../../services/shippingService';
+import { getShippingOptions, getPickupOptions, type ApplicableShippingRate } from '../../services/shippingService';
 import { getApiErrorMessage } from '../../utils/apiError';
 import type { CustomerAddress, CheckoutResponse, CheckoutRequest } from '../../types';
 import PayPalCheckoutButton from './PayPalCheckoutButton';
@@ -45,6 +45,11 @@ const CheckoutPage: React.FC = () => {
   const [shippingError, setShippingError] = useState(false);
   const [shippingRetry, setShippingRetry] = useState(0);
   const lastShippingIdRef = useRef<number | undefined>(undefined);
+  // Home delivery or store pickup: chosen first, the shipping address only matters for delivery.
+  const [deliveryMode, setDeliveryMode] = useState<'delivery' | 'pickup'>('delivery');
+  const [pickupOptions, setPickupOptions] = useState<ApplicableShippingRate[]>([]);
+  const [chosenPickupId, setChosenPickupId] = useState<number | undefined>();
+  const [pickupLoading, setPickupLoading] = useState(false);
 
   // New address form, right here: going to Mi cuenta for it lost the order notes typed.
   const [showAddAddress, setShowAddAddress] = useState(false);
@@ -97,11 +102,9 @@ const CheckoutPage: React.FC = () => {
         if (cancelled) return;
         lastShippingIdRef.current = shippingId;
         setShippingOptions(options.length ? options : null);
-        // Keep the customer's choice while it's still offered and the address is the same (a new
-        // address means delivery there, not the pickup chosen for the old one); else the default
-        // delivery. Never store pickup on its own: when nothing delivers to the address, the
-        // customer has to choose it.
-        setChosenRateId(prev => !addressChanged && options.some(o => o.id === prev) ? prev : options.find(o => !o.isPickup)?.id);
+        // Keep the customer's delivery choice while it's still offered and the address is the
+        // same; else the default delivery (pickup is chosen above, never from this list).
+        setChosenRateId(prev => !addressChanged && options.some(o => o.id === prev && !o.isPickup) ? prev : options.find(o => !o.isPickup)?.id);
       })
       .catch(() => { if (!cancelled) { setShippingOptions(undefined); setShippingError(true); } })
       .finally(() => { if (!cancelled) setShippingLoading(false); });
@@ -111,10 +114,30 @@ const CheckoutPage: React.FC = () => {
     return () => { cancelled = true; };
   }, [shippingId, cart, shippingRetry, i18n.language]); // option names come translated
 
-  // The option in use: null when the address has none (or only pickup and nothing chosen).
-  const shippingRate: ApplicableShippingRate | null | undefined = shippingOptions === undefined
-    ? undefined
-    : shippingOptions?.find(o => o.id === chosenRateId) ?? null;
+  // The shop pickups need no address. A failed lookup just doesn't offer pickup: delivery works.
+  useEffect(() => {
+    if (!cart?.items?.length || cart.isGiftCardPurchase) { setPickupOptions([]); return; }
+    let cancelled = false;
+    setPickupLoading(true);
+    getPickupOptions()
+      .then(options => { if (!cancelled) setPickupOptions(options); })
+      .catch(() => { if (!cancelled) setPickupOptions([]); })
+      .finally(() => { if (!cancelled) setPickupLoading(false); });
+    return () => { cancelled = true; };
+  }, [cart, i18n.language]);
+  // Pickup no longer offered (switched off meanwhile): back to delivery.
+  useEffect(() => {
+    if (deliveryMode === 'pickup' && !pickupLoading && pickupOptions.length === 0) setDeliveryMode('delivery');
+  }, [deliveryMode, pickupLoading, pickupOptions]);
+
+  const isPickup = deliveryMode === 'pickup';
+  // Delivery options for the chosen address (pickup is its own choice above, not one of them).
+  const deliveryOptions = shippingOptions === undefined ? undefined : (shippingOptions ?? []).filter(o => !o.isPickup);
+  // The option in use: null when nothing delivers to the address.
+  const shippingRate: ApplicableShippingRate | null | undefined = isPickup
+    ? pickupOptions.find(o => o.id === chosenPickupId) ?? pickupOptions[0] ?? null
+    : deliveryOptions === undefined ? undefined : deliveryOptions.find(o => o.id === chosenRateId) ?? null;
+  const rateLoading = isPickup ? pickupLoading : shippingLoading;
 
   // Auto-submit the Redsys form once we have the data
   useEffect(() => {
@@ -175,7 +198,9 @@ const CheckoutPage: React.FC = () => {
   const isGiftCardPurchase = cart?.isGiftCardPurchase ?? false;
   // Nothing to pay: the gift card covers it all, or a coupon brought the order to 0 €. The order is
   // placed by the button below; PayPal can't take a 0 € payment.
-  const addressReady = isGiftCardPurchase || (!!shippingId && !shippingLoading && shippingRate != null);
+  const addressReady = isGiftCardPurchase || (isPickup
+    ? !pickupLoading && shippingRate != null
+    : !!shippingId && !shippingLoading && shippingRate != null);
   // Only once the shipping is known: while it loads, a 0 € estimate briefly said "Confirmar pedido".
   const nothingToPay = amountDue <= 0 && addressReady;
   const coveredByGiftCard = !!cart?.giftCardCode && nothingToPay;
@@ -183,7 +208,8 @@ const CheckoutPage: React.FC = () => {
 
   // Same request for both payment routes (Redsys page / PayPal button).
   const buildCheckoutRequest = (): CheckoutRequest => ({
-    shippingAddressId: cart?.isGiftCardPurchase ? undefined : shippingId,
+    // A pickup ships nothing: no delivery address is sent (nor kept on the order).
+    shippingAddressId: cart?.isGiftCardPurchase || isPickup ? undefined : shippingId,
     shippingRateId: cart?.isGiftCardPurchase ? undefined : shippingRate?.id,
     billingAddressId: billingId,
     notes: notes || undefined,
@@ -254,72 +280,132 @@ const CheckoutPage: React.FC = () => {
                     <FaGift className="mt-1 flex-shrink-0" />
                     <span>{t('checkout.giftCardDelivery')}</span>
                   </Alert>
-                ) : addressesError ? (
-                  <Alert variant="danger">{addressesError}</Alert>
-                ) : addresses.length === 0 ? (
-                  <Alert variant="info">
-                    {t('checkout.noAddresses')}{' '}
-                    {/* The new-address form opens here (it used to send the first-time buyer to Mi cuenta). */}
-                    <Button variant="link" className="p-0" onClick={() => setShowAddAddress(true)}>{t('checkout.addAddress')}</Button>
-                  </Alert>
                 ) : (
                   <>
-                    <Form.Group className="mb-3" controlId="checkout-shipping-address">
-                      <Form.Label className="fw-semibold">{t('checkout.shippingAddress')}</Form.Label>
-                      <Form.Select value={shippingId ?? ''} onChange={e => setShippingId(e.target.value ? Number(e.target.value) : undefined)}>
-                        <option value="">{t('checkout.selectAddress')}</option>
-                        {addresses.map(a => (
-                          <option key={a.id} value={a.id}>{a.alias} — {a.street}, {a.city}</option>
-                        ))}
-                      </Form.Select>
-                      <Button variant="link" size="sm" className="p-0 mt-1 d-inline-flex align-items-center gap-1" onClick={() => setShowAddAddress(true)}>
-                        <FaPlus aria-hidden />{t('checkout.addOtherAddress')}
-                      </Button>
-                    </Form.Group>
-
-                    {shippingError && (
-                      <Alert variant="danger" className="py-2 small d-flex align-items-center justify-content-between gap-2">
-                        <span>{t('checkout.shippingLoadError')}</span>
-                        <Button size="sm" variant="outline-danger" onClick={() => setShippingRetry(n => n + 1)}>{t('checkout.shippingRetry')}</Button>
-                      </Alert>
-                    )}
-                    {/* The choice: several options, or only store pickup (nothing delivers here —
-                        the customer picks it explicitly, it's never chosen for them). */}
-                    {shippingOptions && (shippingOptions.length > 1 || !shippingOptions.some(o => !o.isPickup)) && (
-                      <Form.Group className="mb-3" role="radiogroup" aria-label={t('checkout.shippingMethod')}>
-                        <Form.Label className="fw-semibold d-block">{t('checkout.shippingMethod')}</Form.Label>
-                        {shippingOptions.map(o => (
-                          <Form.Check
-                            key={o.id}
-                            type="radio"
-                            id={`shipping-option-${o.id}`}
-                            name="shipping-option"
-                            checked={o.id === chosenRateId}
-                            onChange={() => setChosenRateId(o.id)}
-                            label={<>
-                              {o.isPickup ? <FaStore className="me-1" aria-hidden /> : <FaTruck className="me-1" aria-hidden />}
-                              {o.name} — {o.isFree || o.shippingCost === 0 ? t('checkout.free') : formatPrice(o.shippingCost)}
-                            </>}
-                          />
-                        ))}
+                    {/* How to get it, first: the address is asked for only when it's delivered. */}
+                    {pickupOptions.length > 0 && (
+                      <Form.Group className="mb-3" role="radiogroup" aria-label={t('checkout.deliveryMode')}>
+                        <Form.Label className="fw-semibold d-block">{t('checkout.deliveryMode')}</Form.Label>
+                        <Form.Check
+                          type="radio"
+                          id="delivery-mode-delivery"
+                          name="delivery-mode"
+                          checked={!isPickup}
+                          onChange={() => setDeliveryMode('delivery')}
+                          label={<><FaTruck className="me-1" aria-hidden />{t('checkout.homeDelivery')}</>}
+                        />
+                        <Form.Check
+                          type="radio"
+                          id="delivery-mode-pickup"
+                          name="delivery-mode"
+                          checked={isPickup}
+                          onChange={() => setDeliveryMode('pickup')}
+                          label={<>
+                            <FaStore className="me-1" aria-hidden />
+                            {t('checkout.storePickup')}
+                            {pickupOptions.length === 1 && <> — {pickupOptions[0].isFree || pickupOptions[0].shippingCost === 0 ? t('checkout.free') : formatPrice(pickupOptions[0].shippingCost)}</>}
+                          </>}
+                        />
                       </Form.Group>
                     )}
-                    {shippingRate?.isPickup && (
-                      <Alert variant="info" className="py-2 small">
-                        <FaStore className="me-1" aria-hidden />
-                        {t('checkout.pickupAt', { address: [companyAddress, [companyPostalCode, companyCity].filter(Boolean).join(' ')].filter(Boolean).join(', ') || siteName })}
-                      </Alert>
-                    )}
 
-                    <Form.Group className="mb-3" controlId="checkout-billing-address">
-                      <Form.Label className="fw-semibold">{t('checkout.billingAddress')}</Form.Label>
-                      <Form.Select value={billingId ?? ''} onChange={e => setBillingId(e.target.value ? Number(e.target.value) : undefined)}>
-                        <option value="">{t('checkout.sameBilling')}</option>
-                        {addresses.map(a => (
-                          <option key={a.id} value={a.id}>{a.alias} — {a.street}, {a.city}</option>
-                        ))}
-                      </Form.Select>
-                    </Form.Group>
+                    {addressesError && <Alert variant="danger">{addressesError}</Alert>}
+
+                    {isPickup ? (
+                      <>
+                        {pickupOptions.length > 1 && (
+                          <Form.Group className="mb-3" role="radiogroup" aria-label={t('checkout.storePickup')}>
+                            {pickupOptions.map(o => (
+                              <Form.Check
+                                key={o.id}
+                                type="radio"
+                                id={`pickup-option-${o.id}`}
+                                name="pickup-option"
+                                checked={o.id === shippingRate?.id}
+                                onChange={() => setChosenPickupId(o.id)}
+                                label={<>{o.name} — {o.isFree || o.shippingCost === 0 ? t('checkout.free') : formatPrice(o.shippingCost)}</>}
+                              />
+                            ))}
+                          </Form.Group>
+                        )}
+                        <Alert variant="info" className="py-2 small">
+                          <FaStore className="me-1" aria-hidden />
+                          {t('checkout.pickupAt', { address: [companyAddress, [companyPostalCode, companyCity].filter(Boolean).join(' ')].filter(Boolean).join(', ') || siteName })}
+                        </Alert>
+                        {/* Only for the invoice: optional, except for an invoice with the customer's NIF (the API says so). */}
+                        <Form.Group className="mb-3" controlId="checkout-billing-address">
+                          <Form.Label className="fw-semibold">{t('checkout.billingAddress')}</Form.Label>
+                          {addresses.length > 0 && (
+                            <Form.Select value={billingId ?? ''} onChange={e => setBillingId(e.target.value ? Number(e.target.value) : undefined)}>
+                              <option value="">{t('checkout.noBillingAddress')}</option>
+                              {addresses.map(a => (
+                                <option key={a.id} value={a.id}>{a.alias} — {a.street}, {a.city}</option>
+                              ))}
+                            </Form.Select>
+                          )}
+                          <Button variant="link" size="sm" className="p-0 mt-1 d-inline-flex align-items-center gap-1" onClick={() => setShowAddAddress(true)}>
+                            <FaPlus aria-hidden />{addresses.length > 0 ? t('checkout.addOtherAddress') : t('checkout.addAddress')}
+                          </Button>
+                        </Form.Group>
+                      </>
+                    ) : addresses.length === 0 && !addressesError ? (
+                      <Alert variant="info">
+                        {t('checkout.noAddresses')}{' '}
+                        {/* The new-address form opens here (it used to send the first-time buyer to Mi cuenta). */}
+                        <Button variant="link" className="p-0" onClick={() => setShowAddAddress(true)}>{t('checkout.addAddress')}</Button>
+                      </Alert>
+                    ) : addresses.length > 0 && (
+                      <>
+                        <Form.Group className="mb-3" controlId="checkout-shipping-address">
+                          <Form.Label className="fw-semibold">{t('checkout.shippingAddress')}</Form.Label>
+                          <Form.Select value={shippingId ?? ''} onChange={e => setShippingId(e.target.value ? Number(e.target.value) : undefined)}>
+                            <option value="">{t('checkout.selectAddress')}</option>
+                            {addresses.map(a => (
+                              <option key={a.id} value={a.id}>{a.alias} — {a.street}, {a.city}</option>
+                            ))}
+                          </Form.Select>
+                          <Button variant="link" size="sm" className="p-0 mt-1 d-inline-flex align-items-center gap-1" onClick={() => setShowAddAddress(true)}>
+                            <FaPlus aria-hidden />{t('checkout.addOtherAddress')}
+                          </Button>
+                        </Form.Group>
+
+                        {shippingError && (
+                          <Alert variant="danger" className="py-2 small d-flex align-items-center justify-content-between gap-2">
+                            <span>{t('checkout.shippingLoadError')}</span>
+                            <Button size="sm" variant="outline-danger" onClick={() => setShippingRetry(n => n + 1)}>{t('checkout.shippingRetry')}</Button>
+                          </Alert>
+                        )}
+                        {deliveryOptions && deliveryOptions.length > 1 && (
+                          <Form.Group className="mb-3" role="radiogroup" aria-label={t('checkout.shippingMethod')}>
+                            <Form.Label className="fw-semibold d-block">{t('checkout.shippingMethod')}</Form.Label>
+                            {deliveryOptions.map(o => (
+                              <Form.Check
+                                key={o.id}
+                                type="radio"
+                                id={`shipping-option-${o.id}`}
+                                name="shipping-option"
+                                checked={o.id === chosenRateId}
+                                onChange={() => setChosenRateId(o.id)}
+                                label={<>
+                                  <FaTruck className="me-1" aria-hidden />
+                                  {o.name} — {o.isFree || o.shippingCost === 0 ? t('checkout.free') : formatPrice(o.shippingCost)}
+                                </>}
+                              />
+                            ))}
+                          </Form.Group>
+                        )}
+
+                        <Form.Group className="mb-3" controlId="checkout-billing-address">
+                          <Form.Label className="fw-semibold">{t('checkout.billingAddress')}</Form.Label>
+                          <Form.Select value={billingId ?? ''} onChange={e => setBillingId(e.target.value ? Number(e.target.value) : undefined)}>
+                            <option value="">{t('checkout.sameBilling')}</option>
+                            {addresses.map(a => (
+                              <option key={a.id} value={a.id}>{a.alias} — {a.street}, {a.city}</option>
+                            ))}
+                          </Form.Select>
+                        </Form.Group>
+                      </>
+                    )}
                   </>
                 )}
 
@@ -390,10 +476,10 @@ const CheckoutPage: React.FC = () => {
                 {!isGiftCardPurchase && <div className="d-flex justify-content-between small mb-2">
                   <span className="text-muted">{t('checkout.shipping')}</span>
                   <span>
-                    {shippingLoading ? (
+                    {rateLoading ? (
                       <Spinner size="sm" animation="border" />
                     ) : shippingRate == null ? (
-                      shippingId && shippingRate === null
+                      !isPickup && shippingId && shippingRate === null
                         ? <Badge bg="warning" text="dark">{t('checkout.notAvailable')}</Badge>
                         : <span className="text-muted">—</span>
                     ) : shippingRate.isFree ? (
@@ -411,9 +497,9 @@ const CheckoutPage: React.FC = () => {
                     {t('checkout.missingForFree', { missing: formatPrice(shippingRate.freeShippingThreshold - (vatExempt ? withoutVat(cartSubtotal) : cartSubtotal)) })}
                   </div>
                 )}
-                {shippingRate === null && shippingId && (
+                {!isPickup && shippingRate === null && shippingId && (
                   <Alert variant="warning" className="py-2 small">
-                    {t('checkout.noShippingRate')}
+                    {pickupOptions.length > 0 ? t('checkout.noShippingRatePickup') : t('checkout.noShippingRate')}
                   </Alert>
                 )}
 

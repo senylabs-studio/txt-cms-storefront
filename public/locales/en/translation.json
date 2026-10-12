@@ -251,7 +251,12 @@
     "pickupAt": "You'll collect your order at the shop: {{address}}. We'll let you know when it's ready.",
     "shippingLoadError": "The shipping options couldn't be loaded. Please try again.",
     "shippingRetry": "Try again",
-    "backToCart": "Back to cart"
+    "backToCart": "Back to cart",
+    "deliveryMode": "How would you like to get it?",
+    "homeDelivery": "Home delivery",
+    "storePickup": "Store pickup",
+    "noBillingAddress": "-- No address (simplified invoice) --",
+    "noShippingRatePickup": "We don't ship to this address. You can choose «Store pickup» or use another address."
   },
   "checkoutSuccess": {
     "title": "Order received!",
@@ -379,7 +384,8 @@
       "Shipped": "Shipped",
       "Delivered": "Delivered",
       "Cancelled": "Cancelled",
-      "Returned": "Returned"
+      "Returned": "Returned",
+      "ReadyForPickup": "Ready for pickup"
     },
     "loadError": "Failed to load your orders."
   },
@@ -428,7 +434,9 @@
     "letterError": "The letter couldn't be downloaded.",
     "cardBalance": "Balance: {{amount}}",
     "cardSentTo": "Also sent to {{email}}",
-    "loadError": "The order couldn't be opened."
+    "loadError": "The order couldn't be opened.",
+    "storePickup": "Store pickup",
+    "pickupAt": "You will collect the order at the shop: {{address}}."
   },
   "favorites": {
     "title": "My favourites",

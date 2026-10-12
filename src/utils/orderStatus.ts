@@ -8,3 +8,8 @@ export const ORDER_STATUS_VARIANT: Record<string, string> = {
   Cancelled: 'danger',
   Returned: 'secondary',
 };
+
+/** The status as the customer should read it: a store pickup is never shipped, so its «Enviado»
+ *  is «Listo para recoger». */
+export const orderStatusKey = (status: string, isPickup?: boolean): string =>
+  isPickup && status === 'Shipped' ? 'orders.statuses.ReadyForPickup' : `orders.statuses.${status}`;
