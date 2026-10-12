@@ -13,7 +13,7 @@ import {
 } from '../../services/profileService';
 import { getVisibleCountries, type VisibleCountry } from '../../services/countryService';
 import { useToast } from '../../contexts/ToastContext';
-import { getApiErrorMessage, parseFieldErrors, type FieldErrors } from '../../utils/apiError';
+import { getApiErrorMessage, parseFieldErrors, withoutFieldError, type FieldErrors } from '../../utils/apiError';
 import type { StorefrontProfile, CustomerAddress } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { meetsPasswordRules } from '../../utils/password';
@@ -382,7 +382,8 @@ const AccountPage: React.FC = () => {
                     <Form.Group className="mb-3">
                       <Form.Label>{t('account.currentPassword')}</Form.Label>
                       <PasswordInput
-                        value={currentPassword} onChange={e => setCurrentPassword(e.target.value)}
+                        value={currentPassword}
+                        onChange={e => { setCurrentPassword(e.target.value); setPwdFieldErrors(errs => withoutFieldError(errs, 'currentPassword')); }}
                         required autoComplete="current-password" isInvalid={!!pwdFieldErrors.currentPassword}
                         feedback={pwdFieldErrors.currentPassword}
                       />
@@ -390,7 +391,8 @@ const AccountPage: React.FC = () => {
                     <Form.Group className="mb-3">
                       <Form.Label>{t('account.newPassword')}</Form.Label>
                       <PasswordInput
-                        value={newPassword} onChange={e => setNewPassword(e.target.value)}
+                        value={newPassword}
+                        onChange={e => { setNewPassword(e.target.value); setPwdFieldErrors(errs => withoutFieldError(errs, 'newPassword')); }}
                         required autoComplete="new-password" minLength={6} isInvalid={!!pwdFieldErrors.newPassword}
                         feedback={pwdFieldErrors.newPassword}
                       />
@@ -398,7 +400,8 @@ const AccountPage: React.FC = () => {
                     <Form.Group className="mb-3">
                       <Form.Label>{t('account.confirmPassword')}</Form.Label>
                       <PasswordInput
-                        value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
+                        value={confirmPassword}
+                        onChange={e => { setConfirmPassword(e.target.value); setPwdFieldErrors(errs => withoutFieldError(errs, 'confirmPassword')); }}
                         required autoComplete="new-password" isInvalid={!!pwdFieldErrors.confirmPassword}
                         feedback={pwdFieldErrors.confirmPassword}
                       />
@@ -503,7 +506,7 @@ const AccountPage: React.FC = () => {
               <Form.Control
                 type="email"
                 value={newEmail}
-                onChange={e => setNewEmail(e.target.value)}
+                onChange={e => { setNewEmail(e.target.value); setEmailFieldErrors(errs => withoutFieldError(errs, 'newEmail')); }}
                 required
                 autoComplete="email"
                 isInvalid={!!emailFieldErrors.newEmail}
@@ -515,7 +518,7 @@ const AccountPage: React.FC = () => {
                 <Form.Label>{t('account.currentPasswordForEmail')}</Form.Label>
                 <PasswordInput
                   value={emailPassword}
-                  onChange={e => setEmailPassword(e.target.value)}
+                  onChange={e => { setEmailPassword(e.target.value); setEmailFieldErrors(errs => withoutFieldError(errs, 'currentPassword')); }}
                   required
                   autoComplete="current-password"
                   isInvalid={!!emailFieldErrors.currentPassword}

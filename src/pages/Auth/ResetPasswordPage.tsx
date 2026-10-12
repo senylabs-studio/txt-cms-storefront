@@ -4,7 +4,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { resetPassword } from '../../services/authService';
-import { getApiErrorMessage, parseFieldErrors, type FieldErrors } from '../../utils/apiError';
+import { getApiErrorMessage, parseFieldErrors, withoutFieldError, type FieldErrors } from '../../utils/apiError';
 import { meetsPasswordRules } from '../../utils/password';
 import PasswordInput from '../../components/common/PasswordInput/PasswordInput';
 
@@ -72,7 +72,7 @@ const ResetPasswordPage: React.FC = () => {
                     <Form.Label>{t('auth.resetPassword.newPassword')}</Form.Label>
                     <PasswordInput
                       value={newPassword}
-                      onChange={e => setNewPassword(e.target.value)}
+                      onChange={e => { setNewPassword(e.target.value); setFieldErrors(errs => withoutFieldError(errs, 'newPassword')); }}
                       minLength={6}
                       isInvalid={!!fieldErrors.newPassword}
                       feedback={fieldErrors.newPassword}
@@ -85,7 +85,7 @@ const ResetPasswordPage: React.FC = () => {
                     <Form.Label>{t('auth.resetPassword.confirmPassword')}</Form.Label>
                     <PasswordInput
                       value={confirmPassword}
-                      onChange={e => setConfirmPassword(e.target.value)}
+                      onChange={e => { setConfirmPassword(e.target.value); setFieldErrors(errs => withoutFieldError(errs, 'confirmPassword')); }}
                       minLength={6}
                       isInvalid={!!fieldErrors.confirmPassword}
                       feedback={fieldErrors.confirmPassword}

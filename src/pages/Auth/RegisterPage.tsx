@@ -8,7 +8,7 @@ import MainLayout from '../../components/Layout/MainLayout';
 import { register as registerService } from '../../services/authService';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
-import { getApiErrorMessage, parseFieldErrors, type FieldErrors } from '../../utils/apiError';
+import { getApiErrorMessage, parseFieldErrors, withoutFieldError, type FieldErrors } from '../../utils/apiError';
 import { meetsPasswordRules } from '../../utils/password';
 import PasswordInput from '../../components/common/PasswordInput/PasswordInput';
 
@@ -68,7 +68,7 @@ const RegisterPage: React.FC = () => {
                 <Form.Control
                   type="text"
                   value={name}
-                  onChange={e => setName(e.target.value)}
+                  onChange={e => { setName(e.target.value); setFieldErrors(errs => withoutFieldError(errs, 'name')); }}
                   placeholder={t('auth.register.namePlaceholder')}
                   isInvalid={!!fieldErrors.name}
                   required
@@ -82,7 +82,7 @@ const RegisterPage: React.FC = () => {
                 <Form.Control
                   type="email"
                   value={email}
-                  onChange={e => setEmail(e.target.value)}
+                  onChange={e => { setEmail(e.target.value); setFieldErrors(errs => withoutFieldError(errs, 'email')); }}
                   placeholder={t('auth.login.emailPlaceholder')}
                   isInvalid={!!fieldErrors.email}
                   required
@@ -94,7 +94,7 @@ const RegisterPage: React.FC = () => {
                 <Form.Label>{t('auth.login.password')}</Form.Label>
                 <PasswordInput
                   value={password}
-                  onChange={e => setPassword(e.target.value)}
+                  onChange={e => { setPassword(e.target.value); setFieldErrors(errs => withoutFieldError(errs, 'password')); }}
                   placeholder={t('auth.register.passwordHint')}
                   minLength={6}
                   isInvalid={!!fieldErrors.password}
