@@ -209,6 +209,7 @@
     "shippingBilling": "Enviament i facturació",
     "noAddresses": "No tens adreces desades.",
     "addAddress": "Afegir adreça",
+    "addOtherAddress": "Afegir una altra adreça",
     "shippingAddress": "Adreça d'enviament",
     "selectAddress": "-- Seleccionar --",
     "billingAddress": "Adreça de facturació",

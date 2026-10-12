@@ -15,9 +15,10 @@ vi.mock('../../components/Layout/MainLayout', () => ({
 }));
 
 const navigate = vi.fn();
+const router = { search: new URLSearchParams() };
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
-  return { ...actual, useNavigate: () => navigate };
+  return { ...actual, useNavigate: () => navigate, useSearchParams: () => [router.search, vi.fn()] };
 });
 
 const mockAuth = vi.hoisted(() => ({ isAuthenticated: true }));
@@ -88,6 +89,7 @@ describe('CheckoutPage', () => {
     vi.clearAllMocks();
     mockAuth.isAuthenticated = true;
     mockCart.cart = null;
+    router.search = new URLSearchParams();
     getProfile.mockResolvedValue(profile());
     getShippingOptions.mockResolvedValue([validShippingRate]);
     HTMLFormElement.prototype.submit = vi.fn();
@@ -113,6 +115,28 @@ describe('CheckoutPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'checkout.backToCart' }));
     expect(navigate).toHaveBeenCalledWith('/cart');
     await waitFor(() => expect(getProfile).toHaveBeenCalled());
+  });
+
+  // With saved addresses there was no way to add another one from here.
+  it('offers adding another address and ships to it on coming back', async () => {
+    mockCart.cart = cartWithItems();
+    router.search = new URLSearchParams('direccion=2');
+    getProfile.mockResolvedValue({
+      ...profile(),
+      addresses: [
+        { id: 1, alias: 'Casa', recipientName: 'Jane', street: 'Calle 1', city: 'Madrid', postalCode: '28001', country: 'ES', isDefault: true },
+        { id: 2, alias: 'Trabajo', recipientName: 'Jane', street: 'Calle 2', city: 'Madrid', postalCode: '28002', country: 'ES', isDefault: false },
+      ],
+    });
+    render(<CheckoutPage />);
+
+    await waitFor(() => expect(getShippingOptions).toHaveBeenCalled());
+    const [shipping, billing] = screen.getAllByRole('combobox') as HTMLSelectElement[];
+    expect(shipping.value).toBe('2');
+    expect(billing.value).toBe('1');
+
+    fireEvent.click(screen.getByRole('button', { name: 'checkout.addOtherAddress' }));
+    expect(navigate).toHaveBeenCalledWith('/account?nuevaDireccion=1&volver=/checkout');
   });
 
   // A customer who skipped the cart's code fields can still enter one here.

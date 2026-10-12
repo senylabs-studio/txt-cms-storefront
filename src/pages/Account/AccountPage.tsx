@@ -242,16 +242,18 @@ const AccountPage: React.FC = () => {
     setAddrError('');
     setAddrFieldErrors({});
     try {
+      let createdId: number | undefined;
       if (editAddrId) {
         await updateAddress(editAddrId, addrForm);
       } else {
-        await addAddress(addrForm);
+        createdId = (await addAddress(addrForm)).id;
       }
       const p = await getProfile();
       setProfile(p);
       setShowAddr(false);
       showToast('success', t('account.addrSaveSuccess'));
-      if (!editAddrId && returnTo) navigate(returnTo);
+      // Back where the shopper came from (checkout), which then picks the address just created.
+      if (!editAddrId && returnTo) navigate(createdId ? `${returnTo}${returnTo.includes('?') ? '&' : '?'}direccion=${createdId}` : returnTo);
     } catch (e) {
       const fe = parseFieldErrors(e);
       if (fe) setAddrFieldErrors(fe);

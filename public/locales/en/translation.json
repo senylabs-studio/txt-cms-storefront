@@ -209,6 +209,7 @@
     "shippingBilling": "Shipping & billing",
     "noAddresses": "You have no saved addresses.",
     "addAddress": "Add address",
+    "addOtherAddress": "Add another address",
     "shippingAddress": "Shipping address",
     "selectAddress": "-- Select --",
     "billingAddress": "Billing address",

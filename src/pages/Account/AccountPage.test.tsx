@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom';
 import AccountPage from './AccountPage';
 import { ToastProvider } from '../../contexts/ToastContext';
 import GlobalToast from '../../components/common/GlobalToast/GlobalToast';
@@ -140,6 +140,28 @@ describe('AccountPage', () => {
     await waitFor(() => expect(addAddress).toHaveBeenCalled());
     expect(await screen.findByText('Oficina')).toBeInTheDocument();
     expect(screen.queryByText('account.newAddress')).not.toBeInTheDocument();
+  });
+
+  // Checkout sends the shopper here to add an address and expects the new one back, to ship to it.
+  it('returns to checkout with the new address after adding it from there', async () => {
+    addAddress.mockResolvedValue({ id: 7 });
+    getProfile.mockResolvedValue(profile());
+    const Where = () => { const l = useLocation(); return <div>en {l.pathname}{l.search}</div>; };
+    render(
+      <MemoryRouter initialEntries={['/account?nuevaDireccion=1&volver=/checkout']}>
+        <ToastProvider>
+          <Routes>
+            <Route path="/account" element={<AccountPage />} />
+            <Route path="/checkout" element={<Where />} />
+          </Routes>
+        </ToastProvider>
+      </MemoryRouter>,
+    );
+    await screen.findByRole('dialog');
+    fillRequiredAddressFields();
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'account.save' }));
+
+    expect(await screen.findByText('en /checkout?direccion=7')).toBeInTheDocument();
   });
 
   it('clears a field\'s "required" message as soon as it is filled in', async () => {

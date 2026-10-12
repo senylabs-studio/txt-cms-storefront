@@ -61,6 +61,18 @@
 .btn-outline-primary:focus-visible {
   box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--brand-color) 35%, transparent);
 }
+/* Bootstrap paints disabled outline buttons and link-style buttons from its own variables (its
+   blue), not from the rules above: e.g. the cart's "Aplicar"/"Usar" while their field is empty,
+   or "Volver al carrito". */
+.btn-outline-primary {
+  --bs-btn-disabled-color: var(--brand-text-color);
+  --bs-btn-disabled-border-color: var(--brand-text-color);
+}
+.btn-link {
+  --bs-btn-color: var(--brand-text-color);
+  --bs-btn-hover-color: color-mix(in srgb, var(--brand-text-color) 80%, black);
+  --bs-btn-active-color: color-mix(in srgb, var(--brand-text-color) 80%, black);
+}
 .bg-primary     { background-color: var(--brand-color) !important; }
 
 /* Paginator (catalog pages, orders): separate rounded buttons in the brand colour instead of

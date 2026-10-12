@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Container, Row, Col, Form, Button, Card, Alert, Spinner, Badge } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useDocumentMeta } from '../../hooks/useDocumentMeta';
 import { useSiteSettings } from '../../contexts/SiteSettingsContext';
-import { FaTruck, FaGift, FaStore, FaArrowLeft } from 'react-icons/fa';
+import { FaTruck, FaGift, FaStore, FaArrowLeft, FaPlus } from 'react-icons/fa';
 import MainLayout from '../../components/Layout/MainLayout';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -45,6 +45,10 @@ const CheckoutPage: React.FC = () => {
   const [shippingRetry, setShippingRetry] = useState(0);
   const lastShippingIdRef = useRef<number | undefined>(undefined);
 
+  const [searchParams] = useSearchParams();
+  // New addresses are added on Mi cuenta, which comes back here with the new one selected.
+  const addAddressUrl = '/account?nuevaDireccion=1&volver=/checkout';
+
   // Redsys redirect state
   const [redsysData, setRedsysData] = useState<CheckoutResponse | null>(null);
   const redsysFormRef = useRef<HTMLFormElement>(null);
@@ -55,7 +59,12 @@ const CheckoutPage: React.FC = () => {
     getProfile().then(p => {
       setAddresses(p.addresses);
       const def = p.addresses.find(a => a.isDefault);
-      if (def) { setShippingId(def.id); setBillingId(def.id); }
+      // Back from adding an address (?direccion=<id>): ship to that one; billing stays the default.
+      const added = p.addresses.find(a => a.id === Number(searchParams.get('direccion')));
+      const ship = added ?? def;
+      const bill = def ?? added;
+      if (ship) setShippingId(ship.id);
+      if (bill) setBillingId(bill.id);
     }).catch(err => setAddressesError(getApiErrorMessage(err, t('checkout.loadAddressesError'))));
   // eslint-disable-next-line react-hooks/exhaustive-deps -- one-off checkout bootstrap per auth state; fetchCart/navigate/t don't change what's loaded
   }, [isAuthenticated]);
@@ -240,7 +249,7 @@ const CheckoutPage: React.FC = () => {
                     {t('checkout.noAddresses')}{' '}
                     {/* Straight to the new-address form, and back here once it's saved (it used to leave the
                         first-time buyer on Mi cuenta with no way back). */}
-                    <Button variant="link" className="p-0" onClick={() => navigate('/account?nuevaDireccion=1&volver=/checkout')}>{t('checkout.addAddress')}</Button>
+                    <Button variant="link" className="p-0" onClick={() => navigate(addAddressUrl)}>{t('checkout.addAddress')}</Button>
                   </Alert>
                 ) : (
                   <>
@@ -252,6 +261,9 @@ const CheckoutPage: React.FC = () => {
                           <option key={a.id} value={a.id}>{a.alias} — {a.street}, {a.city}</option>
                         ))}
                       </Form.Select>
+                      <Button variant="link" size="sm" className="p-0 mt-1 d-inline-flex align-items-center gap-1" onClick={() => navigate(addAddressUrl)}>
+                        <FaPlus aria-hidden />{t('checkout.addOtherAddress')}
+                      </Button>
                     </Form.Group>
 
                     {shippingError && (
