@@ -290,6 +290,21 @@ describe('AccountPage', () => {
       expect(changePassword).not.toHaveBeenCalled();
     });
 
+    // Regression: the message stayed under the field after the password was corrected, until the
+    // next save — typing into the flagged field now clears it.
+    it('clears the new-password message as soon as the customer edits that field', async () => {
+      renderAccount();
+      await screen.findByDisplayValue('Jane');
+
+      fillPasswordForm('OldP@ss1!', 'password1', 'password1');
+      fireEvent.click(screen.getByText('account.changePassword'));
+      expect(await screen.findByText('auth.register.passwordHint')).toBeInTheDocument();
+
+      const newInput = document.querySelectorAll('input[type="password"]')[1];
+      fireEvent.change(newInput, { target: { value: 'NewP@ss2!' } });
+      expect(screen.queryByText('auth.register.passwordHint')).not.toBeInTheDocument();
+    });
+
     it('shows a mismatch error and does not call the API when the confirmation differs', async () => {
       renderAccount();
       await screen.findByDisplayValue('Jane');

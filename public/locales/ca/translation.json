@@ -138,6 +138,14 @@
       "tryAgain": "Sol·licitar un nou enllaç",
       "pressToAccess": "Prem el botó per entrar a la teva comanda. L’enllaç només es pot fer servir una vegada.",
       "accessButton": "Accedir a la meva comanda"
+    },
+    "showPassword": "Mostra la contrasenya",
+    "hidePassword": "Amaga la contrasenya",
+    "sessionClosed": {
+      "title": "S'ha tancat la teva sessió",
+      "body": "La teva sessió ja no és vàlida: ha caducat o s'ha canviat la contrasenya des d'un altre dispositiu. Torna a iniciar sessió per veure el teu compte, les teves comandes i els teus preferits.",
+      "login": "Inicia sessió",
+      "continue": "Continua sense sessió"
     }
   },
   "contact": {

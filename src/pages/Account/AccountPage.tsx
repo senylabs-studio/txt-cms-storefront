@@ -13,7 +13,7 @@ import {
 } from '../../services/profileService';
 import { getVisibleCountries, type VisibleCountry } from '../../services/countryService';
 import { useToast } from '../../contexts/ToastContext';
-import { getApiErrorMessage, parseFieldErrors, type FieldErrors } from '../../utils/apiError';
+import { getApiErrorMessage, parseFieldErrors, withoutFieldError, type FieldErrors } from '../../utils/apiError';
 import type { StorefrontProfile, CustomerAddress } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { meetsPasswordRules } from '../../utils/password';
@@ -21,6 +21,7 @@ import IconTooltip from '../../components/common/IconTooltip/IconTooltip';
 import PageLoader from '../../components/common/ScissorsLoader/PageLoader';
 import { countryName } from '../../utils/locale';
 import AddressAutocomplete from '../../components/common/AddressAutocomplete/AddressAutocomplete';
+import PasswordInput from '../../components/common/PasswordInput/PasswordInput';
 
 const emptyAddress: Partial<CustomerAddress> = {
   alias: '', recipientName: '', street: '', city: '', postalCode: '', province: '', country: 'ES', phone: '', isDefault: false,
@@ -380,27 +381,30 @@ const AccountPage: React.FC = () => {
                   <Form onSubmit={handleChangePassword}>
                     <Form.Group className="mb-3">
                       <Form.Label>{t('account.currentPassword')}</Form.Label>
-                      <Form.Control
-                        type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)}
+                      <PasswordInput
+                        value={currentPassword}
+                        onChange={e => { setCurrentPassword(e.target.value); setPwdFieldErrors(errs => withoutFieldError(errs, 'currentPassword')); }}
                         required autoComplete="current-password" isInvalid={!!pwdFieldErrors.currentPassword}
+                        feedback={pwdFieldErrors.currentPassword}
                       />
-                      <Form.Control.Feedback type="invalid">{pwdFieldErrors.currentPassword}</Form.Control.Feedback>
                     </Form.Group>
                     <Form.Group className="mb-3">
                       <Form.Label>{t('account.newPassword')}</Form.Label>
-                      <Form.Control
-                        type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)}
+                      <PasswordInput
+                        value={newPassword}
+                        onChange={e => { setNewPassword(e.target.value); setPwdFieldErrors(errs => withoutFieldError(errs, 'newPassword')); }}
                         required autoComplete="new-password" minLength={6} isInvalid={!!pwdFieldErrors.newPassword}
+                        feedback={pwdFieldErrors.newPassword}
                       />
-                      <Form.Control.Feedback type="invalid">{pwdFieldErrors.newPassword}</Form.Control.Feedback>
                     </Form.Group>
                     <Form.Group className="mb-3">
                       <Form.Label>{t('account.confirmPassword')}</Form.Label>
-                      <Form.Control
-                        type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
+                      <PasswordInput
+                        value={confirmPassword}
+                        onChange={e => { setConfirmPassword(e.target.value); setPwdFieldErrors(errs => withoutFieldError(errs, 'confirmPassword')); }}
                         required autoComplete="new-password" isInvalid={!!pwdFieldErrors.confirmPassword}
+                        feedback={pwdFieldErrors.confirmPassword}
                       />
-                      <Form.Control.Feedback type="invalid">{pwdFieldErrors.confirmPassword}</Form.Control.Feedback>
                     </Form.Group>
                     <Button type="submit" variant="primary" disabled={pwdSaving}>
                       {pwdSaving ? <Spinner size="sm" animation="border" /> : t('account.changePassword')}
@@ -502,7 +506,7 @@ const AccountPage: React.FC = () => {
               <Form.Control
                 type="email"
                 value={newEmail}
-                onChange={e => setNewEmail(e.target.value)}
+                onChange={e => { setNewEmail(e.target.value); setEmailFieldErrors(errs => withoutFieldError(errs, 'newEmail')); }}
                 required
                 autoComplete="email"
                 isInvalid={!!emailFieldErrors.newEmail}
@@ -512,15 +516,14 @@ const AccountPage: React.FC = () => {
             {!profile.isGuest && (
               <Form.Group className="mb-2">
                 <Form.Label>{t('account.currentPasswordForEmail')}</Form.Label>
-                <Form.Control
-                  type="password"
+                <PasswordInput
                   value={emailPassword}
-                  onChange={e => setEmailPassword(e.target.value)}
+                  onChange={e => { setEmailPassword(e.target.value); setEmailFieldErrors(errs => withoutFieldError(errs, 'currentPassword')); }}
                   required
                   autoComplete="current-password"
                   isInvalid={!!emailFieldErrors.currentPassword}
+                  feedback={emailFieldErrors.currentPassword}
                 />
-                <Form.Control.Feedback type="invalid">{emailFieldErrors.currentPassword}</Form.Control.Feedback>
               </Form.Group>
             )}
           </Modal.Body>

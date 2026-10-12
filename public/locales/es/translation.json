@@ -138,6 +138,14 @@
       "tryAgain": "Solicitar un nuevo enlace",
       "pressToAccess": "Pulsa el botón para entrar en tu pedido. El enlace solo se puede usar una vez.",
       "accessButton": "Acceder a mi pedido"
+    },
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña",
+    "sessionClosed": {
+      "title": "Se ha cerrado tu sesión",
+      "body": "Tu sesión ya no es válida: ha caducado o se ha cambiado la contraseña desde otro dispositivo. Vuelve a iniciar sesión para ver tu cuenta, tus pedidos y tus favoritos.",
+      "login": "Iniciar sesión",
+      "continue": "Seguir sin sesión"
     }
   },
   "contact": {

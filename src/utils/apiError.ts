@@ -51,6 +51,15 @@ const toCamelCase = (field: string): string =>
  * (`{ status, message }`) and can't be mapped to a specific input, so callers
  * should fall back to getApiErrorMessage for those.
  */
+/** The messages without `field`'s — for onChange: once the customer starts fixing a field, its
+ *  message goes (the save checks it again). Same object back when there was none, so no re-render. */
+export const withoutFieldError = (errs: FieldErrors, field: string): FieldErrors => {
+  if (!errs[field]) return errs;
+  const rest = { ...errs };
+  delete rest[field];
+  return rest;
+};
+
 export const parseFieldErrors = (err: unknown): FieldErrors | null => {
   const data = getResponseData(err);
   if (!data?.errors || typeof data.errors !== 'object' || Array.isArray(data.errors)) return null;

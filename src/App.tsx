@@ -12,6 +12,7 @@ import ProtectedRoute from './components/Auth/ProtectedRoute';
 import ChatWidget from './components/ChatWidget/ChatWidget';
 import GlobalToast from './components/common/GlobalToast/GlobalToast';
 import UnhandledApiErrorToaster from './components/common/UnhandledApiErrorToaster';
+import SessionExpiredModal from './components/common/SessionExpiredModal/SessionExpiredModal';
 import ScrollToTop from './components/common/ScrollToTop';
 import { useSyncDocumentLang } from './hooks/useSyncDocumentLang';
 import { Suspense } from 'react';
@@ -104,6 +105,7 @@ function App() {
             <ChatWidget />
             <GlobalToast />
             <UnhandledApiErrorToaster />
+            <SessionExpiredModal />
           </StockNotificationProvider>
           </FavoritesProvider>
         </CartProvider>

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { AxiosError } from 'axios';
 import i18next from 'i18next';
-import { getApiErrorMessage, parseFieldErrors } from './apiError';
+import { getApiErrorMessage, parseFieldErrors, withoutFieldError } from './apiError';
 
 // Shape confirmed live against the real backend (see [ApiController] defaults):
 // POST with an empty required field returns `{ errors: { Code: [...], Name: [...] } }`.
@@ -68,5 +68,16 @@ describe('parseFieldErrors', () => {
   it('says "too many attempts" for a 429, not the screen\'s fallback', async () => {
     await i18next.init({ lng: 'es', resources: { es: { translation: { common: { tooManyRequests: 'Demasiados intentos seguidos.' } } } } });
     expect(getApiErrorMessage({ response: { status: 429 } }, 'Credenciales incorrectas')).toBe('Demasiados intentos seguidos.');
+  });
+});
+
+describe('withoutFieldError', () => {
+  it('drops only that field\'s message', () => {
+    expect(withoutFieldError({ newPassword: 'a', confirmPassword: 'b' }, 'newPassword')).toEqual({ confirmPassword: 'b' });
+  });
+
+  it('returns the same object when the field had no message (no re-render on every keystroke)', () => {
+    const errs = { confirmPassword: 'b' };
+    expect(withoutFieldError(errs, 'newPassword')).toBe(errs);
   });
 });
