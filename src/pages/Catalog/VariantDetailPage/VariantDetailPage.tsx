@@ -108,11 +108,28 @@ const VariantDetailPage: React.FC = () => {
   // The quantity resets for a new fabric, not when the same one is reloaded in another language.
   const quantityForId = useRef<string | undefined>(undefined);
   // «Dejar una reseña» links here with #reviews: the section renders after the variant loads,
-  // so the browser's own jump to it never happened — scroll once it's there.
+  // so the browser's own jump to it never happened — scroll once it's there. The rails above it
+  // («Combina con», same product, recently viewed) arrive later and pushed the reviews back down
+  // out of view: keep them in place while the page settles, until the shopper scrolls themselves.
   const { hash } = useLocation();
   useEffect(() => {
     if (hash !== '#reviews' || loading || !variant) return;
-    document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const target = document.getElementById('reviews');
+    if (!target) return;
+    const scroll = () => target.scrollIntoView({ block: 'start' });
+    scroll();
+    if (typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(scroll);
+    observer.observe(document.body);
+    const userEvents = ['wheel', 'touchstart', 'keydown', 'mousedown'] as const;
+    const release = () => {
+      observer.disconnect();
+      window.clearTimeout(timer);
+      userEvents.forEach(e => window.removeEventListener(e, release));
+    };
+    const timer = window.setTimeout(release, 5000);
+    userEvents.forEach(e => window.addEventListener(e, release, { passive: true }));
+    return release;
   }, [hash, loading, variant]);
   // Each fibre in the composition links to its section of the fabric guide (when the shop has one).
   const fibreCodes = useMaterialAbbreviations();

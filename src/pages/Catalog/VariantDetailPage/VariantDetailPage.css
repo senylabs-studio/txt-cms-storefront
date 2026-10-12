@@ -371,3 +371,6 @@
 /* A fibre in the composition, linking to the fabric guide. */
 .vdp-fibre-link { color: inherit; text-decoration: underline dotted; text-underline-offset: 3px; }
 .vdp-fibre-link:hover { color: var(--brand-text-color); text-decoration-style: solid; }
+
+/* «Dejar una reseña» scrolls here: the heading clears the sticky header. */
+.vdp-reviews { scroll-margin-top: 6rem; }

@@ -458,3 +458,45 @@ describe('VariantDetailPage composition', () => {
     expect(screen.getByText('product.pattern')).toBeInTheDocument();
   });
 });
+
+describe('VariantDetailPage «Dejar una reseña» link (#reviews)', () => {
+  let resize: () => void;
+  const scrollIntoView = vi.fn();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    getVariantReviews.mockResolvedValue(reviewsPage([]));
+    getMyReview.mockResolvedValue({ hasPurchased: true, review: null });
+    getVariantById.mockResolvedValue(variant());
+    Element.prototype.scrollIntoView = scrollIntoView;
+    vi.stubGlobal('ResizeObserver', class {
+      constructor(cb: () => void) { resize = cb; }
+      observe() {}
+      disconnect() { resize = () => {}; }
+    });
+  });
+
+  const renderAtReviews = () => render(
+    <MemoryRouter initialEntries={['/variant/1#reviews']}>
+      <Routes><Route path="/variant/:id" element={<VariantDetailPage />} /></Routes>
+    </MemoryRouter>,
+  );
+
+  it('scrolls to the reviews and keeps them in view while the rails above load', async () => {
+    renderAtReviews();
+    await waitFor(() => expect(scrollIntoView).toHaveBeenCalledTimes(1));
+    expect(scrollIntoView.mock.contexts[0]).toBe(document.getElementById('reviews'));
+
+    resize();
+    expect(scrollIntoView).toHaveBeenCalledTimes(2);
+  });
+
+  it('lets the shopper scroll away once they move the page themselves', async () => {
+    renderAtReviews();
+    await waitFor(() => expect(scrollIntoView).toHaveBeenCalledTimes(1));
+
+    fireEvent.wheel(window);
+    resize();
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+  });
+});
