@@ -37,6 +37,18 @@ describe('Footer contact column', () => {
     expect(screen.getByText('Domingo: openingHours.closed')).toBeTruthy();
   });
 
+  it('lists the column\'s own links first', () => {
+    renderFooter({
+      companyCity: 'Mataró',
+      footerColumns: [{ ...contactColumn, links: [{ text: '¿Quiénes somos?', href: '/quienes-somos' }] }],
+    });
+
+    const items = document.querySelectorAll('.footer-contact-list li');
+    expect(items[0].textContent).toBe('¿Quiénes somos?');
+    expect(screen.getByText('¿Quiénes somos?').closest('a')!.getAttribute('href')).toBe('/quienes-somos');
+    expect(items[1].textContent).toBe('Mataró');
+  });
+
   it('leaves out the lines with no data', () => {
     renderFooter({ companyCity: 'Mataró' });
 

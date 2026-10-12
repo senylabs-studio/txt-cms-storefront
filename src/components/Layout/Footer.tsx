@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import {
   FaInstagram, FaFacebook, FaTiktok, FaPinterest,
   FaTwitter, FaYoutube, FaLinkedin,
-  FaMapMarkerAlt, FaPhoneAlt, FaEnvelope, FaClock,
+  FaMapMarkerAlt, FaPhoneAlt, FaEnvelope, FaClock, FaInfoCircle,
 } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import { useSiteSettings, type SiteSettings } from '../../contexts/SiteSettingsContext';
@@ -37,8 +37,9 @@ const formatPhone = (phone: string): string => {
 };
 
 /** The shop's address, phone, email and opening hours, straight from the site settings, so the
- *  footer never goes out of date when they change. Lines with no data are left out. */
-function FooterContact() {
+ *  footer never goes out of date when they change. Lines with no data are left out. The column's
+ *  own links (e.g. "¿Quiénes somos?") come first. */
+function FooterContact({ links }: { links: FooterColumn['links'] }) {
   const { t, i18n } = useTranslation();
   const { companyAddress, companyPostalCode, companyCity, companyPhone, companyEmail, openingHours } = useSiteSettings();
   const locale = i18n.resolvedLanguage ?? i18n.language ?? 'es';
@@ -48,6 +49,16 @@ function FooterContact() {
 
   return (
     <ul className="list-unstyled footer-contact-list">
+      {(links ?? []).filter(l => l.text?.trim()).map((l, i) => (
+        <li key={`link-${i}`}>
+          <FaInfoCircle aria-hidden="true" className="footer-contact-icon" />
+          {l.href.startsWith('/') || l.href.startsWith('#')
+            ? <Link to={l.href} className="footer-contact-link">{l.text}</Link>
+            : l.href
+              ? <a href={l.href} target="_blank" rel="noopener noreferrer" className="footer-contact-link">{l.text}</a>
+              : <span>{l.text}</span>}
+        </li>
+      ))}
       {address && (
         <li>
           <FaMapMarkerAlt aria-hidden="true" className="footer-contact-icon" />
@@ -151,7 +162,7 @@ function FooterColContent({ col }: { col: FooterColumn }) {
     );
   }
 
-  if (col.type === 'contact') return <FooterContact />;
+  if (col.type === 'contact') return <FooterContact links={col.links} />;
 
   if (col.type === 'features') {
     return (
