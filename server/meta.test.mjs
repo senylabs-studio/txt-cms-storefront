@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildMeta, injectMeta, cleanText, createJsonCache, NOT_FOUND, isLocalPath, requestHost } from './meta.mjs';
+import { buildMeta, injectMeta, cleanText, createJsonCache, NOT_FOUND, isLocalPath, requestHost, categoryRedirect, legacyAnswer, pickEncoding } from './meta.mjs';
 
 const site = { siteName: 'Tejidos Pulido', siteDescription: 'Tu tienda de tejidos de confianza.', logoUrl: 'https://cdn/logo.png' };
 const api = (routes) => async (path) => (path === '/storefront/site-settings' ? site : routes[path] ?? null);
@@ -7,7 +7,7 @@ const api = (routes) => async (path) => (path === '/storefront/site-settings' ? 
 describe('share preview meta', () => {
   it('uses the variant name, description and first photo on a variant page', async () => {
     const meta = await buildMeta('/variant/42', api({
-      '/storefront/products/variants/42': { name: 'Cretona lisa 1019 cardinal', description: 'Algodón **100%**', images: [{ url: 'https://cdn/v42.jpg' }] },
+      '/storefront/products/variants/42/meta': { title: 'Cretona lisa 1019 cardinal', description: 'Algodón **100%**', imageUrl: 'https://cdn/v42.jpg' },
     }));
     expect(meta).toMatchObject({ title: 'Cretona lisa 1019 cardinal — Tejidos Pulido', description: 'Algodón 100%', image: 'https://cdn/v42.jpg', type: 'product' });
   });
@@ -59,7 +59,7 @@ describe('share preview meta', () => {
   // search engines index as a duplicate). "The API didn't answer" (null) is not "doesn't exist".
   it('marks unknown routes and items the API says don\'t exist as not found', async () => {
     const missing = api({
-      '/storefront/products/variants/999': NOT_FOUND,
+      '/storefront/products/variants/999/meta': NOT_FOUND,
       '/storefront/pages/no-existe?pageSize=1': NOT_FOUND,
       '/storefront/products/borrado': NOT_FOUND,
     });
@@ -86,7 +86,7 @@ describe('share preview meta', () => {
   // Audit 2026-10-09: no structured data for search engines.
   it('adds schema.org Product data with price and availability on a variant page', async () => {
     const meta = await buildMeta('/variant/42', api({
-      '/storefront/products/variants/42': { name: 'Cretona </script> lisa', code: '1019-01', description: 'Algodón', price: 11.5, availableStock: 0, images: [{ url: 'https://cdn/v.jpg' }] },
+      '/storefront/products/variants/42/meta': { title: 'Cretona </script> lisa', code: '1019-01', description: 'Algodón', price: 11.5, inStock: false, imageUrl: 'https://cdn/v.jpg' },
     }));
     const html = injectMeta('<head><title>x</title>\n<meta name="description" content="x" /></head>', meta, 'https://shop/variant/42');
     const json = html.match(/<script type="application\/ld\+json">(.*?)<\/script>/)[1];
@@ -173,5 +173,30 @@ describe('server helpers', () => {
     expect(requestHost({ host: 'Tejidospulido.com' })).toBe('tejidospulido.com');
     expect(requestHost({ 'x-forwarded-host': 'shop.test:8443, proxy' })).toBe('shop.test:8443');
     expect(requestHost({ host: 'evil.com/"><script>' })).toBe('');
+  });
+
+  // Audit 2026-10-14: categories answered at /pages/x and /x, each its own canonical.
+  it('sends /pages/<slug> to /<slug> keeping the query', () => {
+    expect(categoryRedirect('/pages/cortinas', '?pagina=2')).toBe('/cortinas?pagina=2');
+    expect(categoryRedirect('/pages/cortinas/', '')).toBe('/cortinas');
+    expect(categoryRedirect('/pages', '')).toBeNull();
+    expect(categoryRedirect('/cortinas', '')).toBeNull();
+  });
+
+  // Unknown old links went to the home page: a soft 404 for Google. Gone is 410.
+  it('answers an old ePages link with its new place, 410 when gone, and a temporary home when the API is down', () => {
+    expect(legacyAnswer('/Shops/x/Products/1', { path: '/variant/5' })).toEqual({ redirect: '/variant/5', permanent: true });
+    expect(legacyAnswer('/Shops/x/Products/1', NOT_FOUND)).toEqual({ gone: true });
+    expect(legacyAnswer('', undefined)).toEqual({ gone: true }); // ?ObjectID=… links we can't map
+    expect(legacyAnswer('/Shops/x/Products/1', null)).toEqual({ redirect: '/', permanent: false });
+    expect(legacyAnswer('/Shops/x/Products/1', { path: '//evil.com' })).toEqual({ gone: true });
+  });
+
+  it('picks brotli, then gzip, from Accept-Encoding', () => {
+    expect(pickEncoding('gzip, deflate, br')).toBe('br');
+    expect(pickEncoding('gzip')).toBe('gzip');
+    expect(pickEncoding('br;q=0, gzip')).toBe('gzip');
+    expect(pickEncoding('')).toBeNull();
+    expect(pickEncoding(undefined)).toBeNull();
   });
 });

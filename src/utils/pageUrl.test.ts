@@ -7,7 +7,7 @@ describe('pageUrl', () => {
   });
 
   it('routes Category pages under /pages/:slug', () => {
-    expect(pageUrl('Category', 'camisas')).toBe('/pages/camisas');
+    expect(pageUrl('Category', 'camisas')).toBe('/camisas');
   });
 
   it('routes the gift card menu entry to the gift card page whatever its slug', () => {

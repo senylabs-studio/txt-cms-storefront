@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useParams, useLocation } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { AuthGateProvider } from './contexts/AuthGateContext';
 import { CartProvider } from './contexts/CartContext';
@@ -45,6 +45,14 @@ const OrderDetailPage = lazyPage(() => import('./pages/Account/OrderDetailPage')
 const FavoritesPage = lazyPage(() => import('./pages/Favorites/FavoritesPage'));
 const BoardPage = lazyPage(() => import('./pages/Board/BoardPage'));
 
+
+/** /pages/<slug>, the old category URL (a link typed into content before): the page's one URL. */
+const OldCategoryUrl: React.FC = () => {
+  const { slug } = useParams();
+  const { search } = useLocation();
+  return <Navigate to={`/${slug}${search}`} replace />;
+};
+
 function App() {
   useSyncDocumentLang();
 
@@ -72,7 +80,7 @@ function App() {
               <Route path="/variant/:id" element={<VariantDetailPage />} />
               <Route path="/cart" element={<CartPage />} />
               <Route path="/tarjeta-regalo" element={<GiftCardPage />} />
-              <Route path="/pages/:slug" element={<PageCatalogPage />} />
+              <Route path="/pages/:slug" element={<OldCategoryUrl />} />
               <Route path="/:slug" element={<PageCatalogPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />

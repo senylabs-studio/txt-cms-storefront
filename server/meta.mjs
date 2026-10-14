@@ -60,16 +60,18 @@ export async function buildMeta(pathname, getJson) {
 
   try {
     if (segments[0] === 'variant' && /^\d+$/.test(segments[1] ?? '')) {
-      const v = await getJson(`/storefront/products/variants/${segments[1]}`);
+      // The light meta endpoint (a handful of queries, not the ~25 of the full page data):
+      // crawlers walk ~5,000 of these URLs. Its title is product + colour, as the cards show.
+      const v = await getJson(`/storefront/products/variants/${segments[1]}/meta`);
       if (v === NOT_FOUND) return { ...base, notFound: true };
       if (v) {
-        const image = v.images?.[0]?.url || v.thumbnailUrl || base.image;
+        const image = v.imageUrl || base.image;
         return {
-          ...base, type: 'product', title: titled(v.name),
+          ...base, type: 'product', title: titled(v.title),
           description: cleanText(v.description) || base.description,
           image,
-          jsonLd: productLd({ name: v.name, description: cleanText(v.description), image, sku: v.code,
-            brand: siteName, price: v.price, inStock: v.availableStock > 0 }),
+          jsonLd: productLd({ name: v.title, description: cleanText(v.description), image, sku: v.code,
+            brand: siteName, price: v.price, inStock: v.inStock }),
         };
       }
     } else if (segments[0] === 'product' && segments[1]) {
@@ -215,4 +217,30 @@ export const isLocalPath = (path) => typeof path === 'string' && path.startsWith
 export const requestHost = (headers) => {
   const host = String(headers['x-forwarded-host'] || headers.host || '').split(',')[0].trim().toLowerCase();
   return /^[a-z0-9.-]+(:\d+)?$/.test(host) ? host : '';
+};
+
+/** /pages/<slug> (the old category URL) → /<slug>, the one every link now uses; else null. */
+export const categoryRedirect = (pathname, search) => {
+  const m = /^\/pages\/([^/]+)\/?$/.exec(pathname);
+  return m ? `/${m[1]}${search || ''}` : null;
+};
+
+/**
+ * What to answer an old ePages link with, from the API's answer for its ObjectPath: its new
+ * place (301); 410 Gone when it has none (sending every unknown link home is a soft 404 for
+ * Google); a temporary home (302) when the API didn't answer.
+ */
+export const legacyAnswer = (objectPath, target) => {
+  if (!objectPath || target === NOT_FOUND) return { gone: true };
+  if (target == null) return { redirect: '/', permanent: false };
+  return isLocalPath(target.path) ? { redirect: target.path, permanent: true } : { gone: true };
+};
+
+/** br, else gzip, if the client takes it (q=0 means "not this one"). */
+export const pickEncoding = (acceptEncoding) => {
+  const accepted = new Set(String(acceptEncoding ?? '').split(',')
+    .map(part => part.trim().split(';'))
+    .filter(([, q]) => !q || !/^q=0(\.0*)?$/.test(q.trim()))
+    .map(([name]) => name.trim().toLowerCase()));
+  return accepted.has('br') ? 'br' : accepted.has('gzip') ? 'gzip' : null;
 };

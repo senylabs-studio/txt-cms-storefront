@@ -8,7 +8,8 @@ import { existsSync } from 'node:fs';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildMeta, injectMeta, safeDecode, createJsonCache, NOT_FOUND, isLocalPath, requestHost } from './meta.mjs';
+import { buildMeta, injectMeta, safeDecode, createJsonCache, NOT_FOUND, requestHost, categoryRedirect, legacyAnswer, pickEncoding } from './meta.mjs';
+import { brotliCompressSync, gzipSync, constants as zlibConstants } from 'node:zlib';
 
 const here = dirname(fileURLToPath(import.meta.url));
 // Deployed next to dist/ (Azure package root); in the repo it lives in server/, beside ../dist.
@@ -23,6 +24,9 @@ const indexHtml = await readFile(join(DIST, 'index.html'), 'utf8');
 // one copy for search engines. Unset (test environment): no redirect.
 const CANONICAL_HOST = (process.env.CANONICAL_HOST || '').trim().toLowerCase();
 const API_ORIGIN = API_URL ? new URL(API_URL).origin : '';
+// Without CANONICAL_HOST this is the test environment (azurewebsites): kept out of search
+// engines, which could otherwise index the test shop until D-day.
+const noIndex = CANONICAL_HOST ? {} : { 'X-Robots-Tag': 'noindex, nofollow' };
 
 const TYPES = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
@@ -44,15 +48,40 @@ const refreshSite = () => getJson('/storefront/site-settings', { refresh: true }
 refreshSite();
 setInterval(refreshSite, 4 * 60 * 1000).unref();
 
-async function sendFile(res, file) {
+// Text goes compressed (audit 2026-10-14: ~950 KB of JS/CSS went raw on a first visit; Azure
+// passes Node's responses through as they are). Files never change while the server runs, so
+// each is compressed once and kept; pages (index.html with their own meta) on the fly, fast.
+const COMPRESSIBLE = new Set(['.html', '.js', '.css', '.json', '.svg', '.txt', '.xml', '.webmanifest']);
+const compressedFiles = new Map();
+const compress = (body, encoding, quality) => encoding === 'br'
+  ? brotliCompressSync(body, { params: { [zlibConstants.BROTLI_PARAM_QUALITY]: quality } })
+  : gzipSync(body, { level: quality >= 9 ? 9 : 6 });
+
+/** Sends body, compressed when the client takes it and it's text worth compressing. */
+function sendBody(req, res, status, headers, body, { cacheKey = null, extension = '.html' } = {}) {
+  const encoding = COMPRESSIBLE.has(extension) && body.length > 1024 ? pickEncoding(req.headers['accept-encoding']) : null;
+  if (!encoding) {
+    res.writeHead(status, { ...headers, Vary: 'Accept-Encoding' });
+    return res.end(req.method === 'HEAD' ? undefined : body);
+  }
+  let out = cacheKey ? compressedFiles.get(`${encoding}:${cacheKey}`) : undefined;
+  if (!out) {
+    out = compress(body, encoding, cacheKey ? 11 : 4);
+    if (cacheKey) compressedFiles.set(`${encoding}:${cacheKey}`, out);
+  }
+  res.writeHead(status, { ...headers, 'Content-Encoding': encoding, Vary: 'Accept-Encoding' });
+  res.end(req.method === 'HEAD' ? undefined : out);
+}
+
+async function sendFile(req, res, file) {
   const body = await readFile(file);
   const hashedAsset = file.startsWith(join(DIST, 'assets') + '/');
-  res.writeHead(200, {
+  const extension = extname(file).toLowerCase();
+  sendBody(req, res, 200, {
     ...SECURITY_HEADERS,
-    'Content-Type': TYPES[extname(file).toLowerCase()] || 'application/octet-stream',
+    'Content-Type': TYPES[extension] || 'application/octet-stream',
     'Cache-Control': hashedAsset ? 'public, max-age=31536000, immutable' : 'public, max-age=300',
-  });
-  res.end(body);
+  }, body, { cacheKey: file, extension });
 }
 
 // Audit 2026-10-08: no one may frame the shop (clickjacking), sniff files as another type or
@@ -121,23 +150,30 @@ createServer(async (req, res) => {
     // Old shop (ePages) links: /epages/<shop>.sf/<lang>/?ObjectPath=/Shops/<id>/… → where it lives now.
     if (url.pathname.startsWith('/epages/')) {
       const objectPath = url.searchParams.get('ObjectPath') || url.searchParams.get('ViewObjectPath') || '';
-      const target = objectPath ? await getJson(`/storefront/legacy-redirect?objectPath=${encodeURIComponent(objectPath)}`) : NOT_FOUND;
-      if (target === null) return redirect(res, '/', false); // API asleep or failing: try again later
-      return redirect(res, target !== NOT_FOUND && isLocalPath(target.path) ? target.path : '/');
+      const target = objectPath ? await getJson(`/storefront/legacy-redirect?objectPath=${encodeURIComponent(objectPath)}`) : undefined;
+      const answer = legacyAnswer(objectPath, target);
+      if (!answer.gone) return redirect(res, answer.redirect, answer.permanent);
+      // Gone: the shop's own "not found" page, as 410 so search engines drop it for good.
+      const meta = await buildMeta('/gone/old/link', getJson); // an unknown shape: the not-found meta
+      return sendBody(req, res, 410, { ...SECURITY_HEADERS, ...noIndex, 'Content-Type': TYPES['.html'], 'Cache-Control': 'no-cache' },
+        Buffer.from(injectMeta(indexHtml, meta, null)));
     }
+    // Categories used to answer at /pages/<slug> too: one URL each (audit 2026-10-14).
+    const category = categoryRedirect(url.pathname, url.search);
+    if (category) return redirect(res, category);
 
     const filePath = normalize(join(DIST, safeDecode(url.pathname)));
     if (filePath.startsWith(DIST + '/') && filePath !== join(DIST, 'index.html')) {
       const info = await stat(filePath).catch(() => null);
-      if (info?.isFile()) return await sendFile(res, filePath);
+      if (info?.isFile()) return await sendFile(req, res, filePath);
       // A missing hashed asset (old tab after a deploy) is a real 404, not the app.
       if (url.pathname.startsWith('/assets/')) { res.writeHead(404); return res.end(); }
     }
     const meta = await buildMeta(url.pathname, getJson);
     const pageUrl = host || CANONICAL_HOST ? `${origin}${url.pathname}` : null;
     // A page that doesn't exist answers 404 (still the app, which shows its own message).
-    res.writeHead(meta.notFound ? 404 : 200, { ...SECURITY_HEADERS, 'Content-Type': TYPES['.html'], 'Cache-Control': 'no-cache' });
-    res.end(req.method === 'HEAD' ? undefined : injectMeta(indexHtml, meta, pageUrl));
+    sendBody(req, res, meta.notFound ? 404 : 200, { ...SECURITY_HEADERS, ...noIndex, 'Content-Type': TYPES['.html'], 'Cache-Control': 'no-cache' },
+      Buffer.from(injectMeta(indexHtml, meta, pageUrl)));
   } catch (err) {
     console.error(err);
     if (!res.headersSent) res.writeHead(500);
