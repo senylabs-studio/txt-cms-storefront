@@ -8,7 +8,7 @@ import { existsSync } from 'node:fs';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildMeta, injectMeta, safeDecode, createJsonCache, NOT_FOUND, requestHost, categoryRedirect, legacyAnswer, pickEncoding } from './meta.mjs';
+import { buildMeta, injectMeta, safeDecode, createJsonCache, NOT_FOUND, requestHost, categoryRedirect, legacyAnswer, pickEncoding, canonicalPath } from './meta.mjs';
 import { brotliCompressSync, gzipSync, constants as zlibConstants } from 'node:zlib';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -169,6 +169,9 @@ createServer(async (req, res) => {
       // A missing hashed asset (old tab after a deploy) is a real 404, not the app.
       if (url.pathname.startsWith('/assets/')) { res.writeHead(404); return res.end(); }
     }
+    // One URL per page: /Cortinas/ → /cortinas (query kept).
+    const canonical = canonicalPath(url.pathname);
+    if (canonical) return redirect(res, canonical + url.search);
     const meta = await buildMeta(url.pathname, getJson);
     const pageUrl = host || CANONICAL_HOST ? `${origin}${url.pathname}` : null;
     // A page that doesn't exist answers 404 (still the app, which shows its own message).
