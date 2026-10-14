@@ -29,7 +29,9 @@
     "legalNotice": "Avís Legal",
     "terms": "Termes i condicions",
     "privacy": "Protecció de dades",
-    "cookies": "Política de cookies"
+    "cookies": "Política de cookies",
+    "withdrawal": "Desistiment i devolucions",
+    "cookieSettings": "Configurar galetes"
   },
   "cart": {
     "title": "La meva cistella",
@@ -242,7 +244,7 @@
     "paypalUnconfirmed": "No hem pogut confirmar el teu pagament amb PayPal. Si s'ha completat, rebràs el correu de confirmació de la comanda d'aquí a uns minuts i el veuràs a Les meves comandes; no el tornis a pagar.",
     "paypalError": "No s'ha pogut completar el pagament amb PayPal. No s'ha fet cap càrrec.",
     "giftCardDelivery": "Les targetes regal s'envien per correu en confirmar el pagament: no cal adreça d'enviament.",
-    "confirmWithGiftCard": "Confirmar la comanda",
+    "confirmWithGiftCard": "Confirmar la comanda amb obligació de pagament",
     "coveredByGiftCard": "La teva targeta regal cobreix tota la comanda: no has de pagar res més.",
     "confirmFree": "Confirmar la comanda",
     "nothingToPay": "No has de pagar res: la comanda es confirma en prémer el botó.",
@@ -256,7 +258,13 @@
     "homeDelivery": "Enviament a domicili",
     "storePickup": "Recollida a la botiga",
     "noBillingAddress": "-- Sense adreça (factura simplificada) --",
-    "noShippingRatePickup": "No enviem a aquesta adreça. Pots triar «Recollida a la botiga» o fer servir una altra adreça."
+    "noShippingRatePickup": "No enviem a aquesta adreça. Pots triar «Recollida a la botiga» o fer servir una altra adreça.",
+    "legal": {
+      "accept": "En confirmar la comanda acceptes les nostres",
+      "terms": "condicions de venda",
+      "withdrawal": "Retalls i articles per unitats: tens 14 dies per desistir. Les teles tallades a mida no admeten desistiment (art. 103 c del TRLGDCU), tot i que n’acceptem la devolució si assumeixes les despeses d’enviament d’anada i tornada.",
+      "withdrawalLink": "Desistiment i devolucions"
+    }
   },
   "checkoutSuccess": {
     "title": "Comanda rebuda!",
@@ -625,7 +633,7 @@
   },
   "cookies": {
     "bannerLabel": "Avís de galetes",
-    "bannerText": "Utilitzem galetes pròpies i de tercers per millorar la teva experiència i analitzar l'ús del nostre web.",
+    "bannerText": "Fem servir galetes tècniques, necessàries perquè la botiga funcioni (sessió, cistella, idioma). Les opcionals només s’activen si les acceptes.",
     "learnMore": "Més informació",
     "rejectAll": "Rebutjar",
     "configure": "Configurar",

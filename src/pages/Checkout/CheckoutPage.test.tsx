@@ -464,6 +464,19 @@ describe('CheckoutPage', () => {
     expect(getShippingOptions).not.toHaveBeenCalled();
   });
 
+  // Audit 2026-10-14 (TRLGDCU art. 97–98, LSSI art. 27): right before ordering, the terms and
+  // the withdrawal rules — including that fabric cut to measure has no right of withdrawal.
+  it('shows the terms and the withdrawal rules before the order button, opening in a new tab', async () => {
+    mockCart.cart = cartWithItems();
+    render(<CheckoutPage />);
+
+    const terms = await screen.findByRole('link', { name: 'checkout.legal.terms' });
+    expect(terms).toHaveAttribute('href', '/terminos-condiciones');
+    expect(terms).toHaveAttribute('target', '_blank');
+    expect(screen.getByRole('link', { name: 'checkout.legal.withdrawalLink' })).toHaveAttribute('href', '/politica-de-retirada');
+    expect(screen.getByText(/^checkout\.legal\.withdrawal\b/)).toBeInTheDocument();
+  });
+
   it('a gift card covering everything places the order without going to Redsys', async () => {
     mockCart.cart = { ...cartWithItems(), giftCardCode: 'ABCD-EFGH-JKLM', giftCardAvailable: 200, giftCardAmount: 20, amountDue: 0 };
     checkout.mockResolvedValue({ ...checkoutResponse, merchantParameters: '', amount: 0, giftCardAmount: 25, orderId: 9 });

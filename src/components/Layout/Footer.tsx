@@ -12,6 +12,7 @@ import { usePaymentMethods } from '../../contexts/PaymentMethodsContext';
 import { usePartners } from '../../contexts/PartnersContext';
 import type { FooterColumn } from '../../services/siteSettingsService';
 import { groupOpeningHours, rowLabel } from '../../utils/openingHours';
+import { openCookieSettings } from '../CookieBanner/cookieSettings';
 
 const SOCIAL: { field: keyof SiteSettings; Icon: React.ElementType; label: string }[] = [
   { field: 'instagramUrl', Icon: FaInstagram, label: 'Instagram' },
@@ -26,6 +27,7 @@ const SOCIAL: { field: keyof SiteSettings; Icon: React.ElementType; label: strin
 const LEGAL_LINKS = [
   { tKey: 'footer.legalNotice', slug: 'aviso-legal' },
   { tKey: 'footer.terms', slug: 'terminos-condiciones' },
+  { tKey: 'footer.withdrawal', slug: 'politica-de-retirada' },
   { tKey: 'footer.privacy', slug: 'proteccion-de-datos' },
   { tKey: 'footer.cookies', slug: 'politica-de-cookies' },
 ];
@@ -228,12 +230,14 @@ const Footer: React.FC = () => {
         <Container>
           <div className="footer-bottom-inner">
             <div className="footer-legal">
-              {LEGAL_LINKS.map((l, i) => (
+              {LEGAL_LINKS.map(l => (
                 <React.Fragment key={l.slug}>
                   <Link to={`/${l.slug}`} className="footer-legal-link">{t(l.tKey)}</Link>
-                  {i < LEGAL_LINKS.length - 1 && <span className="footer-legal-sep">·</span>}
+                  <span className="footer-legal-sep">·</span>
                 </React.Fragment>
               ))}
+              {/* Consent can be changed or withdrawn at any time. */}
+              <button type="button" className="footer-legal-link btn btn-link p-0 border-0 align-baseline" onClick={openCookieSettings}>{t('footer.cookieSettings')}</button>
             </div>
             {activeSocials.length > 0 && (
               <div className="footer-social">

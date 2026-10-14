@@ -422,6 +422,21 @@ const CheckoutPage: React.FC = () => {
 
                 {error && <Alert variant="danger" className="py-2">{error}</Alert>}
 
+                {/* Right before ordering (TRLGDCU art. 97–98, LSSI art. 27): the terms, and the
+                    withdrawal rules — fabric cut to measure has none. In a new tab: the form stays. */}
+                <div className="small text-muted mb-2">
+                  <p className="mb-1">
+                    {t('checkout.legal.accept')}{' '}
+                    <a href="/terminos-condiciones" target="_blank" rel="noopener noreferrer">{t('checkout.legal.terms')}</a>.
+                  </p>
+                  {!isGiftCardPurchase && (
+                    <p className="mb-0">
+                      {t('checkout.legal.withdrawal')}{' '}
+                      <a href="/politica-de-retirada" target="_blank" rel="noopener noreferrer">{t('checkout.legal.withdrawalLink')}</a>.
+                    </p>
+                  )}
+                </div>
+
                 <Button
                   variant="primary"
                   size="lg"
