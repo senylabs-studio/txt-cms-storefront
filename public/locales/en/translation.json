@@ -102,7 +102,9 @@
       "loginLink": "Log in",
       "error": "Error creating account",
       "newsletter": "Send me news and offers by email (we'll email you to confirm)",
-      "confirmEmailSent": "Account created! We've sent a link to {{email}} to confirm your email."
+      "confirmEmailSent": "Account created! We've sent a link to {{email}} to confirm your email.",
+      "privacyNotice": "We use your data to manage your account and orders and, if you tick the box, to send you news. We may also email you about a cart you left or to ask what you thought of a purchase; you can unsubscribe in every email.",
+      "privacyLink": "Privacy policy"
     },
     "forgotPasswordLink": "Forgot your password?",
     "forgotPassword": {

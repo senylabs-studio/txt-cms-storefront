@@ -102,7 +102,9 @@
       "loginLink": "Inicia sessió",
       "error": "Error en crear el compte",
       "newsletter": "Vull rebre novetats i ofertes per correu (t'enviarem un correu per confirmar-ho)",
-      "confirmEmailSent": "Compte creat! T'hem enviat un enllaç a {{email}} per confirmar el teu correu."
+      "confirmEmailSent": "Compte creat! T'hem enviat un enllaç a {{email}} per confirmar el teu correu.",
+      "privacyNotice": "Fem servir les teves dades per gestionar el teu compte i les teves comandes i, si ho marques, per enviar-te novetats. També et podem escriure per recordar-te una cistella a mitges o demanar-te la teva opinió sobre el que compris; et pots donar de baixa a cada correu.",
+      "privacyLink": "Política de privadesa"
     },
     "forgotPasswordLink": "Has oblidat la contrasenya?",
     "forgotPassword": {

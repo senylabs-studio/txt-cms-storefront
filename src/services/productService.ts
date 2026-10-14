@@ -9,7 +9,9 @@ export const getProductBySlug = async (slug: string): Promise<StorefrontProduct>
 
 export const getVariantsPaged = async (
   page = 1, pageSize = 12, search = '', productTypeId?: number, orderBy = 'name', orderDir = 'asc',
-  filters: PageFilters = {}
+  filters: PageFilters = {},
+  /** false for quick lookups (header suggestions): the API skips the filter facets, a pass over every match. */
+  withFacets = true,
 ): Promise<PaginatedResponse<StorefrontVariant>> => {
   const res = await apiClient.get('/storefront/products/variants', {
     params: {
@@ -19,6 +21,7 @@ export const getVariantsPaged = async (
       colors: filters.colors?.length ? filters.colors.join(',') : undefined,
       onlyNew: filters.onlyNew || undefined,
       onlyOffers: filters.onlyOffers || undefined,
+      facets: withFacets ? undefined : false,
     }
   });
   return res.data;

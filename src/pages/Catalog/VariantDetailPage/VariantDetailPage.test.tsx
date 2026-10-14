@@ -500,3 +500,26 @@ describe('VariantDetailPage «Dejar una reseña» link (#reviews)', () => {
     expect(scrollIntoView).toHaveBeenCalledTimes(1);
   });
 });
+
+// Audit 2026-10-14: the thumbnail strip downloaded every original photo; it uses the small WebP.
+describe('VariantDetailPage photos', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    getVariantReviews.mockResolvedValue(reviewsPage([]));
+    getMyReview.mockResolvedValue({ hasPurchased: false, review: null });
+  });
+
+  it('shows the thumbnails in the strip and the original as the main photo', async () => {
+    getVariantById.mockResolvedValue(variant({ images: [
+      { url: 'https://img/1.jpg', thumbnailUrl: 'https://img/1.webp', isRealScale: false, altText: 'uno' },
+      { url: 'https://img/2.jpg', thumbnailUrl: 'https://img/2.webp', isRealScale: false, altText: 'dos' },
+    ] }));
+    const { container } = renderPage();
+    await screen.findByText('Tela Azul');
+
+    const strip = [...container.querySelectorAll('.vdp-thumb img')] as HTMLImageElement[];
+    expect(strip.map(i => i.getAttribute('src'))).toEqual(['https://img/1.webp', 'https://img/2.webp']);
+    expect(strip[0]).toHaveAttribute('loading', 'lazy');
+    expect(container.querySelector('.vdp-main-img')).toHaveAttribute('src', 'https://img/1.jpg');
+  });
+});

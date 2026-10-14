@@ -219,6 +219,17 @@ export const requestHost = (headers) => {
   return /^[a-z0-9.-]+(:\d+)?$/.test(host) ? host : '';
 };
 
+/**
+ * The one form of an app path: no trailing slash, lower case (slugs and routes are lower case;
+ * SQL matched /Cortinas/ too, so each spelling was its own 200 page with its own canonical).
+ * Null when the path already is it. Not for files (their hashed names are case-sensitive).
+ */
+export const canonicalPath = (pathname) => {
+  const trimmed = pathname.length > 1 ? pathname.replace(/\/+$/, '') || '/' : pathname;
+  const lower = trimmed.toLowerCase();
+  return lower === pathname ? null : lower;
+};
+
 /** /pages/<slug> (the old category URL) → /<slug>, the one every link now uses; else null. */
 export const categoryRedirect = (pathname, search) => {
   const m = /^\/pages\/([^/]+)\/?$/.exec(pathname);

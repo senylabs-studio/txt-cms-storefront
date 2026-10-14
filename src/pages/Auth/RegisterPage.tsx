@@ -120,6 +120,13 @@ const RegisterPage: React.FC = () => {
                 label={t('auth.register.newsletter')}
               />
 
+              {/* First-layer privacy notice (RGPD art. 13), including the cart and review emails
+                  an account receives (LSSI art. 21.2: opt-out in every one). */}
+              <p className="small text-muted">
+                {t('auth.register.privacyNotice')}{' '}
+                <Link to="/proteccion-de-datos" target="_blank" rel="noopener noreferrer">{t('auth.register.privacyLink')}</Link>.
+              </p>
+
               <Button type="submit" variant="primary" className="w-100" disabled={loading}>
                 {loading ? <><Spinner size="sm" animation="border" className="me-2" />{t('auth.register.loading')}</> : t('auth.register.submit')}
               </Button>

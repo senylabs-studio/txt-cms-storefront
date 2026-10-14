@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildMeta, injectMeta, cleanText, createJsonCache, NOT_FOUND, isLocalPath, requestHost, categoryRedirect, legacyAnswer, pickEncoding } from './meta.mjs';
+import { buildMeta, injectMeta, cleanText, createJsonCache, NOT_FOUND, isLocalPath, requestHost, categoryRedirect, legacyAnswer, pickEncoding, canonicalPath } from './meta.mjs';
 
 const site = { siteName: 'Tejidos Pulido', siteDescription: 'Tu tienda de tejidos de confianza.', logoUrl: 'https://cdn/logo.png' };
 const api = (routes) => async (path) => (path === '/storefront/site-settings' ? site : routes[path] ?? null);
@@ -198,5 +198,14 @@ describe('server helpers', () => {
     expect(pickEncoding('br;q=0, gzip')).toBe('gzip');
     expect(pickEncoding('')).toBeNull();
     expect(pickEncoding(undefined)).toBeNull();
+  });
+
+  // Audit 2026-10-14: /Cortinas/ and /cortinas were each a 200 page with its own canonical.
+  it('gives the one form of an app path: no trailing slash, lower case', () => {
+    expect(canonicalPath('/Cortinas/')).toBe('/cortinas');
+    expect(canonicalPath('/variant/12/')).toBe('/variant/12');
+    expect(canonicalPath('/cortinas')).toBeNull();
+    expect(canonicalPath('/')).toBeNull();
+    expect(canonicalPath('//')).toBe('/');
   });
 });
