@@ -68,7 +68,8 @@ const OrderDetailPage: React.FC = () => {
   const canDownloadInvoice = order.status !== 'PendingPayment' && !order.isGiftCardPurchase
     && (order.status !== 'Cancelled' || !!order.hasInvoice);
   const canCancelOrder = order.status === 'PendingPayment' || order.status === 'Paid';
-  const canRequestReturn = order.status === 'Delivered' && !order.returnRequestedAt;
+  // From shipping on: withdrawal doesn't wait for staff to mark the order delivered.
+  const canRequestReturn = (order.status === 'Shipped' || order.status === 'Delivered') && !order.returnRequestedAt;
   const canReview = order.status === 'Delivered';
 
   const handleDownloadLetter = async (giftCardId: number, code: string) => {

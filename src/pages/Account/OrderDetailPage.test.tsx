@@ -237,8 +237,16 @@ describe('OrderDetailPage', () => {
     expect(screen.getByText('orderDetail.returnRequested')).toBeInTheDocument();
   });
 
-  it('hides the request-return button for a non-delivered order', async () => {
+  // Audit 2026-10-14: withdrawal doesn't wait for the order to be marked delivered.
+  it('offers the request-return button once the order has shipped', async () => {
     getOrderDetail.mockResolvedValue(order({ status: 'Shipped' }));
+    renderDetail();
+
+    expect(await screen.findByText('orderDetail.requestReturn')).toBeInTheDocument();
+  });
+
+  it('hides the request-return button before the order ships (it can be cancelled instead)', async () => {
+    getOrderDetail.mockResolvedValue(order({ status: 'Paid' }));
     renderDetail();
 
     await screen.findByText('Tela azul');
