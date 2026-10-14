@@ -49,7 +49,7 @@ const Header: React.FC = () => {
     if (query.length < 2) { setSuggestions([]); setSuggestionsLoading(false); return; }
     let cancelled = false;
     setSuggestionsLoading(true);
-    getVariantsPaged(1, 6, query)
+    getVariantsPaged(1, 6, query, undefined, 'name', 'asc', {}, false)
       .then(res => { if (!cancelled) setSuggestions(res.items); })
       .catch(() => { if (!cancelled) setSuggestions([]); })
       .finally(() => { if (!cancelled) setSuggestionsLoading(false); });
