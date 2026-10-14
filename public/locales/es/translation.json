@@ -102,7 +102,9 @@
       "loginLink": "Inicia sesión",
       "error": "Error al crear la cuenta",
       "newsletter": "Quiero recibir novedades y ofertas por email (te enviaremos un email para confirmarlo)",
-      "confirmEmailSent": "¡Cuenta creada! Te hemos enviado un enlace a {{email}} para confirmar tu email."
+      "confirmEmailSent": "¡Cuenta creada! Te hemos enviado un enlace a {{email}} para confirmar tu email.",
+      "privacyNotice": "Usamos tus datos para gestionar tu cuenta y tus pedidos y, si lo marcas, para enviarte novedades. También te podemos escribir para recordarte una cesta a medias o pedirte tu opinión sobre lo que compres; puedes darte de baja en cada correo.",
+      "privacyLink": "Política de privacidad"
     },
     "forgotPasswordLink": "¿Olvidaste tu contraseña?",
     "forgotPassword": {
