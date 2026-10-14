@@ -70,7 +70,7 @@ const CheckoutPage: React.FC = () => {
   }, [isAuthenticated]);
 
   // A new address ships the order (that's why it was added); billing keeps the one chosen, or
-  // takes the new one when there was none.
+  // takes the new one when there was none. Picking up, it can only be for the invoice.
   const handleAddressAdded = async (createdId?: number) => {
     setShowAddAddress(false);
     try {
@@ -78,7 +78,7 @@ const CheckoutPage: React.FC = () => {
       setAddresses(p.addresses);
       if (createdId) {
         setShippingId(createdId);
-        setBillingId(prev => prev ?? createdId);
+        setBillingId(prev => deliveryMode === 'pickup' ? createdId : prev ?? createdId);
       }
     } catch (err) {
       // Saved, but the list didn't refresh: say so where the order is placed, keep the form usable.

@@ -12,6 +12,9 @@ const emptyAddress: Partial<CustomerAddress> = {
   alias: '', recipientName: '', street: '', city: '', postalCode: '', province: '', country: 'ES', phone: '', isDefault: false,
 };
 
+// The fields with an input of their own (and so their own error message).
+const SHOWN_FIELDS = new Set(['alias', 'recipientName', 'street', 'city', 'postalCode', 'country', 'province', 'phone']);
+
 interface Props {
   show: boolean;
   /** The address to edit; null/undefined adds a new one. */
@@ -86,7 +89,12 @@ const AddressFormModal: React.FC<Props> = ({ show, address, onHide, onSaved }) =
       onSaved(createdId);
     } catch (e) {
       const fe = parseFieldErrors(e);
-      if (fe) setFieldErrors(fe);
+      if (fe) {
+        setFieldErrors(fe);
+        // An error for a field without an input here would leave Save doing nothing visible.
+        const unshown = Object.entries(fe).filter(([field]) => !SHOWN_FIELDS.has(field)).map(([, message]) => message);
+        if (unshown.length > 0) setError(unshown.join(' '));
+      }
       else setError(getApiErrorMessage(e, t('account.addrSaveError')));
     } finally {
       setSaving(false);
@@ -192,13 +200,15 @@ const AddressFormModal: React.FC<Props> = ({ show, address, onHide, onSaved }) =
           <Col sm={6}>
             <Form.Group className="mb-2">
               <Form.Label>{t('account.province')}</Form.Label>
-              <Form.Control value={form.province ?? ''} onChange={e => update({ province: e.target.value })} />
+              <Form.Control value={form.province ?? ''} onChange={e => update({ province: e.target.value })} isInvalid={!!fieldErrors.province} />
+              <Form.Control.Feedback type="invalid">{fieldErrors.province}</Form.Control.Feedback>
             </Form.Group>
           </Col>
           <Col sm={6}>
             <Form.Group className="mb-2">
               <Form.Label>{t('account.phone')}</Form.Label>
-              <Form.Control value={form.phone ?? ''} onChange={e => update({ phone: e.target.value })} />
+              <Form.Control value={form.phone ?? ''} onChange={e => update({ phone: e.target.value })} isInvalid={!!fieldErrors.phone} />
+              <Form.Control.Feedback type="invalid">{fieldErrors.phone}</Form.Control.Feedback>
             </Form.Group>
           </Col>
         </Row>

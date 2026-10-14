@@ -367,7 +367,9 @@
     "confirmationSent": "Te hemos enviado el enlace de confirmación. Revisa tu correo (y la carpeta de spam).",
     "confirmationRecentlySent": "Ya te lo enviamos hace poco. Revisa tu correo o vuelve a intentarlo en unos minutos.",
     "confirmationAlready": "Tu email ya está confirmado.",
-    "confirmationError": "No se ha podido enviar el enlace. Inténtalo de nuevo."
+    "confirmationError": "No se ha podido enviar el enlace. Inténtalo de nuevo.",
+    "deleteAddress": "Eliminar dirección",
+    "deleteAddressConfirm": "Eliminar"
   },
   "orders": {
     "backToAccount": "Volver a mi cuenta",

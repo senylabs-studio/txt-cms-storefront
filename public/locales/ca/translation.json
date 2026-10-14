@@ -367,7 +367,9 @@
     "confirmationSent": "T'hem enviat l'enllaç de confirmació. Revisa el correu (i la carpeta de correu brossa).",
     "confirmationRecentlySent": "Ja te l'hem enviat fa poc. Revisa el correu o torna-ho a provar d'aquí a uns minuts.",
     "confirmationAlready": "El teu correu ja està confirmat.",
-    "confirmationError": "No s'ha pogut enviar l'enllaç. Torna-ho a provar."
+    "confirmationError": "No s'ha pogut enviar l'enllaç. Torna-ho a provar.",
+    "deleteAddress": "Eliminar adreça",
+    "deleteAddressConfirm": "Eliminar"
   },
   "orders": {
     "backToAccount": "Tornar al meu compte",

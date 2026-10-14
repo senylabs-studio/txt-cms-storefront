@@ -246,6 +246,31 @@ describe('CheckoutPage', () => {
     await waitFor(() => expect(checkout).toHaveBeenCalledWith(expect.objectContaining({ shippingAddressId: undefined, shippingRateId: 3, billingAddressId: 1 })));
   });
 
+  // Audit 2026-10-14: picking up, the address added from here is for the invoice — it went to
+  // the (unused) shipping address and the invoice kept the old one.
+  it('picking up, an address added here becomes the billing address', async () => {
+    mockCart.cart = cartWithItems();
+    const casa = { id: 1, alias: 'Casa', recipientName: 'Jane', street: 'Calle 1', city: 'Madrid', postalCode: '28001', country: 'ES', isDefault: true };
+    const empresa = { id: 2, alias: 'Empresa', recipientName: 'Jane SL', street: 'Calle 2', city: 'Madrid', postalCode: '28002', country: 'ES', isDefault: false };
+    getProfile.mockResolvedValueOnce({ ...profile(), addresses: [casa] }).mockResolvedValueOnce({ ...profile(), addresses: [casa, empresa] });
+    addAddress.mockResolvedValue(empresa);
+    getPickupOptions.mockResolvedValue([{ id: 3, name: 'Recogida en tienda', price: 0, shippingCost: 0, isFree: false, isPickup: true }]);
+    render(<CheckoutPage />);
+    fireEvent.click(await screen.findByLabelText(/checkout.storePickup/));
+
+    fireEvent.click(await screen.findByRole('button', { name: 'checkout.addOtherAddress' }));
+    const dialog = await screen.findByRole('dialog');
+    const [alias, recipient, street, postalCode, city] = within(dialog).getAllByRole('textbox');
+    fireEvent.change(alias, { target: { value: 'Empresa' } });
+    fireEvent.change(recipient, { target: { value: 'Jane SL' } });
+    fireEvent.change(street, { target: { value: 'Calle 2' } });
+    fireEvent.change(postalCode, { target: { value: '28002' } });
+    fireEvent.change(city, { target: { value: 'Madrid' } });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'account.save' }));
+
+    await waitFor(() => expect((screen.getByLabelText('checkout.billingAddress') as HTMLSelectElement).value).toBe('2'));
+  });
+
   it('a customer without addresses can still pick it up', async () => {
     mockCart.cart = cartWithItems();
     getProfile.mockResolvedValue({ ...profile(), addresses: [] });

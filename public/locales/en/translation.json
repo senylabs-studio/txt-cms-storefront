@@ -367,7 +367,9 @@
     "confirmationSent": "We've sent you the confirmation link. Check your inbox (and spam folder).",
     "confirmationRecentlySent": "We sent it a moment ago. Check your inbox or try again in a few minutes.",
     "confirmationAlready": "Your email is already confirmed.",
-    "confirmationError": "The link couldn't be sent. Please try again."
+    "confirmationError": "The link couldn't be sent. Please try again.",
+    "deleteAddress": "Delete address",
+    "deleteAddressConfirm": "Delete"
   },
   "orders": {
     "backToAccount": "Back to my account",
