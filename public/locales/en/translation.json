@@ -29,7 +29,9 @@
     "legalNotice": "Legal Notice",
     "terms": "Terms & Conditions",
     "privacy": "Data Protection",
-    "cookies": "Cookie Policy"
+    "cookies": "Cookie Policy",
+    "withdrawal": "Withdrawal and returns",
+    "cookieSettings": "Cookie settings"
   },
   "cart": {
     "title": "My cart",
@@ -242,7 +244,7 @@
     "paypalUnconfirmed": "We couldn't confirm your PayPal payment. If it went through, you'll get the order confirmation email in a few minutes and see it under My orders; please don't pay again.",
     "paypalError": "The PayPal payment could not be completed. You have not been charged.",
     "giftCardDelivery": "Gift cards are emailed once payment is confirmed: no shipping address needed.",
-    "confirmWithGiftCard": "Place order",
+    "confirmWithGiftCard": "Place order with obligation to pay",
     "coveredByGiftCard": "Your gift card covers the whole order: there's nothing more to pay.",
     "confirmFree": "Confirm order",
     "nothingToPay": "There is nothing to pay: the order is placed when you press the button.",
@@ -256,7 +258,13 @@
     "homeDelivery": "Home delivery",
     "storePickup": "Store pickup",
     "noBillingAddress": "-- No address (simplified invoice) --",
-    "noShippingRatePickup": "We don't ship to this address. You can choose «Store pickup» or use another address."
+    "noShippingRatePickup": "We don't ship to this address. You can choose «Store pickup» or use another address.",
+    "legal": {
+      "accept": "By placing the order you accept our",
+      "terms": "terms of sale",
+      "withdrawal": "Remnants and items sold by the unit: you have 14 days to withdraw. Fabric cut to measure has no right of withdrawal (art. 103 c of the Spanish consumer law), though we accept its return if you pay the shipping both ways.",
+      "withdrawalLink": "Withdrawal and returns"
+    }
   },
   "checkoutSuccess": {
     "title": "Order received!",
@@ -367,7 +375,9 @@
     "confirmationSent": "We've sent you the confirmation link. Check your inbox (and spam folder).",
     "confirmationRecentlySent": "We sent it a moment ago. Check your inbox or try again in a few minutes.",
     "confirmationAlready": "Your email is already confirmed.",
-    "confirmationError": "The link couldn't be sent. Please try again."
+    "confirmationError": "The link couldn't be sent. Please try again.",
+    "deleteAddress": "Delete address",
+    "deleteAddressConfirm": "Delete"
   },
   "orders": {
     "backToAccount": "Back to my account",
@@ -623,7 +633,7 @@
   },
   "cookies": {
     "bannerLabel": "Cookie notice",
-    "bannerText": "We use our own and third-party cookies to improve your experience and analyse the use of our website.",
+    "bannerText": "We use technical cookies the shop needs to work (session, cart, language). Optional ones are only switched on if you accept them.",
     "learnMore": "Learn more",
     "rejectAll": "Reject all",
     "configure": "Configure",
@@ -742,19 +752,21 @@
   },
   "emailConfirm": {
     "title": "Confirm email",
-    "instructions": "Press the button to confirm this email address is yours.",
+    "instructions": "Enter your account password and press the button to confirm this email is yours.",
     "confirm": "Confirm my email",
     "loading": "Confirming…",
     "success": "Done! Your email is confirmed.",
     "invalidLink": "The link is invalid or incomplete.",
     "error": "Your email couldn't be confirmed. The link may have expired: request a new one from My account.",
     "changeTitle": "Confirm your new email",
-    "changeInstructions": "Press the button to change your account email to {{email}}.",
+    "changeInstructions": "Enter your account password and press the button to change its email to {{email}}.",
     "changeConfirm": "Confirm the change",
     "changeSuccess": "Done! Your account email is now {{email}}.",
     "changeError": "Your email couldn't be changed. The link may have expired: request the change again from My account.",
     "goToAccount": "Go to My account",
-    "backToHome": "Back to the shop"
+    "backToHome": "Back to the shop",
+    "password": "Your account password",
+    "notYou": "Didn't create this account or ask for this change? Don't confirm it. If the email is yours, you can recover the account with “Forgot your password?” on the sign-in page."
   },
   "cartReminders": {
     "unsubscribe": {

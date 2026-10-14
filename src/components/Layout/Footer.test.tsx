@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Footer from './Footer';
 import type { SiteSettings } from '../../services/siteSettingsService';
@@ -8,6 +8,8 @@ const settings: { current: SiteSettings } = { current: {} as SiteSettings };
 vi.mock('../../contexts/SiteSettingsContext', () => ({ useSiteSettings: () => settings.current }));
 vi.mock('../../contexts/PaymentMethodsContext', () => ({ usePaymentMethods: () => [] }));
 vi.mock('../../contexts/PartnersContext', () => ({ usePartners: () => [] }));
+const cookies = vi.hoisted(() => ({ openCookieSettings: vi.fn() }));
+vi.mock('../CookieBanner/cookieSettings', () => cookies);
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'es', resolvedLanguage: 'es' } }),
 }));
@@ -56,5 +58,17 @@ describe('Footer contact column', () => {
     expect(document.querySelector('a[href^="tel:"]')).toBeNull();
     expect(document.querySelector('a[href^="mailto:"]')).toBeNull();
     expect(document.querySelector('.footer-contact-hours')).toBeNull();
+  });
+});
+
+// Audit 2026-10-14: the withdrawal policy wasn't linked anywhere, and cookie consent couldn't be
+// changed once given.
+describe('Footer legal links', () => {
+  it('links the withdrawal policy and reopens the cookie settings', () => {
+    renderFooter({});
+
+    expect(screen.getByRole('link', { name: 'footer.withdrawal' })).toHaveAttribute('href', '/politica-de-retirada');
+    fireEvent.click(screen.getByRole('button', { name: 'footer.cookieSettings' }));
+    expect(cookies.openCookieSettings).toHaveBeenCalled();
   });
 });

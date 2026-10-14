@@ -215,39 +215,39 @@ describe('AccountPage', () => {
     expect(await screen.findByText('Código postal inválido')).toBeInTheDocument();
   });
 
+  // House rule (audit 2026-10-14): a modal, never window.confirm.
   it('deletes an address after confirming, and removes it from the list', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
     deleteAddress.mockResolvedValue(undefined);
     getProfile.mockResolvedValueOnce(profile()).mockResolvedValueOnce(profile({ addresses: [] }));
     renderAccount();
     await screen.findByDisplayValue('Jane');
 
-    const deleteBtn = document.querySelectorAll('.border.rounded button')[1];
-    fireEvent.click(deleteBtn);
+    fireEvent.click(screen.getByRole('button', { name: 'account.deleteAddress' }));
+    expect(await screen.findByText('account.deleteConfirm')).toBeInTheDocument();
+    expect(deleteAddress).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'account.deleteAddressConfirm' }));
 
     await waitFor(() => expect(deleteAddress).toHaveBeenCalledWith(1));
     await waitFor(() => expect(screen.queryByText('Casa')).not.toBeInTheDocument());
   });
 
   it('does not delete when the confirm dialog is dismissed', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(false);
     renderAccount();
     await screen.findByDisplayValue('Jane');
 
-    const deleteBtn = document.querySelectorAll('.border.rounded button')[1];
-    fireEvent.click(deleteBtn);
+    fireEvent.click(screen.getByRole('button', { name: 'account.deleteAddress' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'account.cancel' }));
 
     expect(deleteAddress).not.toHaveBeenCalled();
   });
 
   it('shows a generic error message when deleting an address fails', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
     deleteAddress.mockRejectedValue(new Error('boom'));
     renderAccount();
     await screen.findByDisplayValue('Jane');
 
-    const deleteBtn = document.querySelectorAll('.border.rounded button')[1];
-    fireEvent.click(deleteBtn);
+    fireEvent.click(screen.getByRole('button', { name: 'account.deleteAddress' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'account.deleteAddressConfirm' }));
 
     expect(await screen.findByText('account.addrDeleteError')).toBeInTheDocument();
   });
@@ -388,7 +388,6 @@ describe('AccountPage', () => {
   // ── 50th audit batch regressions ─────────────────────────────────────────
 
   it('shows the promoted default address after deleting the default one', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
     deleteAddress.mockResolvedValue(undefined);
     const second = { id: 2, alias: 'Oficina', recipientName: 'Jane', street: 'Calle 2', city: 'Madrid', postalCode: '28002', country: 'ES', isDefault: false };
     getProfile
@@ -397,7 +396,8 @@ describe('AccountPage', () => {
     renderAccount();
     await screen.findByText('Oficina');
 
-    fireEvent.click(document.querySelectorAll('.border.rounded button')[1]);
+    fireEvent.click(screen.getAllByRole('button', { name: 'account.deleteAddress' })[0]);
+    fireEvent.click(await screen.findByRole('button', { name: 'account.deleteAddressConfirm' }));
 
     await waitFor(() => expect(screen.queryByText('Casa')).not.toBeInTheDocument());
     expect(getProfile).toHaveBeenCalledTimes(2);

@@ -29,7 +29,9 @@
     "legalNotice": "Aviso Legal",
     "terms": "Términos y condiciones",
     "privacy": "Protección de datos",
-    "cookies": "Política de cookies"
+    "cookies": "Política de cookies",
+    "withdrawal": "Desistimiento y devoluciones",
+    "cookieSettings": "Configurar cookies"
   },
   "cart": {
     "title": "Mi carrito",
@@ -242,7 +244,7 @@
     "paypalUnconfirmed": "No hemos podido confirmar tu pago con PayPal. Si se ha completado, recibirás el email de confirmación del pedido en unos minutos y lo verás en Mis pedidos; no vuelvas a pagarlo.",
     "paypalError": "No se ha podido completar el pago con PayPal. No se ha hecho ningún cargo.",
     "giftCardDelivery": "Las tarjetas regalo se envían por email al confirmar el pago: no hace falta dirección de envío.",
-    "confirmWithGiftCard": "Confirmar pedido",
+    "confirmWithGiftCard": "Confirmar pedido con obligación de pago",
     "coveredByGiftCard": "Tu tarjeta regalo cubre todo el pedido: no tienes que pagar nada más.",
     "confirmFree": "Confirmar pedido",
     "nothingToPay": "No tienes que pagar nada: el pedido se confirma al pulsar el botón.",
@@ -256,7 +258,13 @@
     "homeDelivery": "Envío a domicilio",
     "storePickup": "Recogida en tienda",
     "noBillingAddress": "-- Sin dirección (factura simplificada) --",
-    "noShippingRatePickup": "No enviamos a esta dirección. Puedes elegir «Recogida en tienda» o usar otra dirección."
+    "noShippingRatePickup": "No enviamos a esta dirección. Puedes elegir «Recogida en tienda» o usar otra dirección.",
+    "legal": {
+      "accept": "Al confirmar el pedido aceptas nuestras",
+      "terms": "condiciones de venta",
+      "withdrawal": "Retales y artículos por unidades: tienes 14 días para desistir. Las telas cortadas a medida no admiten desistimiento (art. 103 c del TRLGDCU), aunque aceptamos su devolución si asumes los gastos de envío de ida y vuelta.",
+      "withdrawalLink": "Desistimiento y devoluciones"
+    }
   },
   "checkoutSuccess": {
     "title": "¡Pedido recibido!",
@@ -367,7 +375,9 @@
     "confirmationSent": "Te hemos enviado el enlace de confirmación. Revisa tu correo (y la carpeta de spam).",
     "confirmationRecentlySent": "Ya te lo enviamos hace poco. Revisa tu correo o vuelve a intentarlo en unos minutos.",
     "confirmationAlready": "Tu email ya está confirmado.",
-    "confirmationError": "No se ha podido enviar el enlace. Inténtalo de nuevo."
+    "confirmationError": "No se ha podido enviar el enlace. Inténtalo de nuevo.",
+    "deleteAddress": "Eliminar dirección",
+    "deleteAddressConfirm": "Eliminar"
   },
   "orders": {
     "backToAccount": "Volver a mi cuenta",
@@ -623,7 +633,7 @@
   },
   "cookies": {
     "bannerLabel": "Aviso de cookies",
-    "bannerText": "Utilizamos cookies propias y de terceros para mejorar tu experiencia y analizar el uso de nuestra web.",
+    "bannerText": "Usamos cookies técnicas, necesarias para que la tienda funcione (sesión, carrito, idioma). Las opcionales solo se activan si las aceptas.",
     "learnMore": "Más información",
     "rejectAll": "Rechazar",
     "configure": "Configurar",
@@ -742,19 +752,21 @@
   },
   "emailConfirm": {
     "title": "Confirmar email",
-    "instructions": "Pulsa el botón para confirmar que este email es tuyo.",
+    "instructions": "Escribe la contraseña de tu cuenta y pulsa el botón para confirmar que este email es tuyo.",
     "confirm": "Confirmar mi email",
     "loading": "Confirmando…",
     "success": "¡Listo! Tu email está confirmado.",
     "invalidLink": "El enlace no es válido o está incompleto.",
     "error": "No se ha podido confirmar el email. Puede que el enlace haya caducado: pide otro desde Mi cuenta.",
     "changeTitle": "Confirmar el nuevo email",
-    "changeInstructions": "Pulsa el botón para cambiar el email de tu cuenta a {{email}}.",
+    "changeInstructions": "Escribe la contraseña de tu cuenta y pulsa el botón para cambiar su email a {{email}}.",
     "changeConfirm": "Confirmar el cambio",
     "changeSuccess": "¡Listo! El email de tu cuenta ahora es {{email}}.",
     "changeError": "No se ha podido cambiar el email. Puede que el enlace haya caducado: vuelve a pedir el cambio desde Mi cuenta.",
     "goToAccount": "Ir a Mi cuenta",
-    "backToHome": "Volver a la tienda"
+    "backToHome": "Volver a la tienda",
+    "password": "Contraseña de tu cuenta",
+    "notYou": "¿No has creado tú esta cuenta ni pedido este cambio? No la confirmes. Si el email es tuyo, puedes recuperar la cuenta con «¿Olvidaste tu contraseña?» al iniciar sesión."
   },
   "cartReminders": {
     "unsubscribe": {

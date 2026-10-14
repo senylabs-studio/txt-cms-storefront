@@ -196,8 +196,10 @@ const AccountPage: React.FC = () => {
     catch (e) { setAddrListError(getApiErrorMessage(e, t('account.loadError'))); }
   };
 
+  // Asked in a modal (house rule: never window.confirm).
+  const [addrToDelete, setAddrToDelete] = useState<number | null>(null);
   const handleDeleteAddr = async (id: number) => {
-    if (!confirm(t('account.deleteConfirm'))) return;
+    setAddrToDelete(null);
     setAddrListError('');
     try {
       await deleteAddress(id);
@@ -416,8 +418,12 @@ const AccountPage: React.FC = () => {
                         <div className="text-muted small">{countryName(a.country)}{a.phone ? ` · ${a.phone}` : ''}</div>
                       </div>
                       <div className="d-flex gap-1 ms-2">
-                        <Button size="sm" variant="outline-secondary" onClick={() => openEditAddr(a)}><FaEdit /></Button>
-                        <Button size="sm" variant="outline-danger" onClick={() => handleDeleteAddr(a.id)}><FaTrash /></Button>
+                        <IconTooltip label={t('account.editAddress')}>
+                          <Button size="sm" variant="outline-secondary" aria-label={t('account.editAddress')} onClick={() => openEditAddr(a)}><FaEdit /></Button>
+                        </IconTooltip>
+                        <IconTooltip label={t('account.deleteAddress')}>
+                          <Button size="sm" variant="outline-danger" aria-label={t('account.deleteAddress')} onClick={() => setAddrToDelete(a.id)}><FaTrash /></Button>
+                        </IconTooltip>
                       </div>
                     </div>
                   ))
@@ -477,6 +483,14 @@ const AccountPage: React.FC = () => {
         onHide={() => setAddrModal(null)}
         onSaved={handleAddrSaved}
       />
+
+      <Modal show={addrToDelete != null} onHide={() => setAddrToDelete(null)} centered>
+        <Modal.Body>{t('account.deleteConfirm')}</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setAddrToDelete(null)}>{t('account.cancel')}</Button>
+          <Button variant="danger" onClick={() => addrToDelete != null && handleDeleteAddr(addrToDelete)}>{t('account.deleteAddressConfirm')}</Button>
+        </Modal.Footer>
+      </Modal>
 
       <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} centered>
         <Modal.Header closeButton>

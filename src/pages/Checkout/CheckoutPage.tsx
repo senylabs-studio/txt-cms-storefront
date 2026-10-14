@@ -70,7 +70,7 @@ const CheckoutPage: React.FC = () => {
   }, [isAuthenticated]);
 
   // A new address ships the order (that's why it was added); billing keeps the one chosen, or
-  // takes the new one when there was none.
+  // takes the new one when there was none. Picking up, it can only be for the invoice.
   const handleAddressAdded = async (createdId?: number) => {
     setShowAddAddress(false);
     try {
@@ -78,7 +78,7 @@ const CheckoutPage: React.FC = () => {
       setAddresses(p.addresses);
       if (createdId) {
         setShippingId(createdId);
-        setBillingId(prev => prev ?? createdId);
+        setBillingId(prev => deliveryMode === 'pickup' ? createdId : prev ?? createdId);
       }
     } catch (err) {
       // Saved, but the list didn't refresh: say so where the order is placed, keep the form usable.
@@ -421,6 +421,21 @@ const CheckoutPage: React.FC = () => {
                 </Form.Group>
 
                 {error && <Alert variant="danger" className="py-2">{error}</Alert>}
+
+                {/* Right before ordering (TRLGDCU art. 97–98, LSSI art. 27): the terms, and the
+                    withdrawal rules — fabric cut to measure has none. In a new tab: the form stays. */}
+                <div className="small text-muted mb-2">
+                  <p className="mb-1">
+                    {t('checkout.legal.accept')}{' '}
+                    <a href="/terminos-condiciones" target="_blank" rel="noopener noreferrer">{t('checkout.legal.terms')}</a>.
+                  </p>
+                  {!isGiftCardPurchase && (
+                    <p className="mb-0">
+                      {t('checkout.legal.withdrawal')}{' '}
+                      <a href="/politica-de-retirada" target="_blank" rel="noopener noreferrer">{t('checkout.legal.withdrawalLink')}</a>.
+                    </p>
+                  )}
+                </div>
 
                 <Button
                   variant="primary"

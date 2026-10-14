@@ -12,8 +12,10 @@ i18n
     fallbackLng: 'es',
     detection: {
       // ?lng= first: links in emails carry the email's language (a Catalan reset email opened
-      // on a phone with a Spanish browser showed the page in Spanish).
-      order: ['querystring', 'localStorage', 'navigator'],
+      // on a phone with a Spanish browser showed the page in Spanish). Not the browser's
+      // language (audit 2026-10-14): Googlebot browses as en-US and indexed Spanish URLs with
+      // English text; the shop is Spanish unless the visitor picks another language.
+      order: ['querystring', 'localStorage'],
       lookupQuerystring: 'lng',
       lookupLocalStorage: 'lng',
       caches: ['localStorage'],
