@@ -108,7 +108,7 @@ const FeaturedProductsGrid: React.FC<Props> = ({ title, variants = [], products 
               <div className="home-featured-card h-100 d-flex flex-column">
                 <Link to={slug} className="d-block position-relative">
                   {thumbnail
-                    ? <img src={thumbnail} alt={item.name} className="home-featured-img" />
+                    ? <img src={thumbnail} alt={item.name} className="home-featured-img" loading="lazy" decoding="async" />
                     : <div className="home-featured-placeholder">📦</div>}
                   {(hasDiscount || item.isNew) && (
                     <div className="position-absolute top-0 start-0 m-2 d-flex flex-column align-items-start gap-1">
