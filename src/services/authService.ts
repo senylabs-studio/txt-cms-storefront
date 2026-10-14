@@ -36,14 +36,15 @@ export const requestGuestAccessLink = async (data: { email: string; orderNumber:
   return res.data;
 };
 
-export const confirmEmail = async (userId: string, token: string): Promise<void> => {
-  await apiClient.post('/storefront/auth/confirm-email', { userId, token });
+/** The password too: the link proves the email, the password that the account is theirs. */
+export const confirmEmail = async (userId: string, token: string, password: string): Promise<void> => {
+  await apiClient.post('/storefront/auth/confirm-email', { userId, token, password });
 };
 
 /** Applies the change and signs in (the change ended every session of the account). Null when
  *  the change had already been applied (a second click): confirmed, but no session comes back. */
-export const confirmEmailChange = async (userId: string, email: string, token: string): Promise<AuthResponse | null> => {
-  const res = await apiClient.post('/storefront/auth/confirm-email-change', { userId, email, token });
+export const confirmEmailChange = async (userId: string, email: string, token: string, password: string): Promise<AuthResponse | null> => {
+  const res = await apiClient.post('/storefront/auth/confirm-email-change', { userId, email, token, password });
   return res.data?.token ? res.data : null;
 };
 

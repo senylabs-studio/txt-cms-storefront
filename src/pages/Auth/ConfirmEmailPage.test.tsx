@@ -11,6 +11,9 @@ vi.mock('../../services/authService', () => api);
 const auth = vi.hoisted(() => ({ login: vi.fn() }));
 vi.mock('../../contexts/AuthContext', () => ({ useAuth: () => auth }));
 
+const typePassword = (value: string) =>
+  fireEvent.change(screen.getByLabelText('emailConfirm.password'), { target: { value } });
+
 const renderAt = (url: string, change = false) =>
   render(<MemoryRouter initialEntries={[url]}><ConfirmEmailPage change={change} /></MemoryRouter>);
 
@@ -23,10 +26,11 @@ describe('ConfirmEmailPage', () => {
     renderAt('/email/confirmar?user=u1&token=t%2B1');
 
     expect(api.confirmEmail).not.toHaveBeenCalled();
+    typePassword('S3cret!');
     fireEvent.click(screen.getByRole('button', { name: 'emailConfirm.confirm' }));
 
     expect(await screen.findByText('emailConfirm.success')).toBeInTheDocument();
-    expect(api.confirmEmail).toHaveBeenCalledWith('u1', 't+1');
+    expect(api.confirmEmail).toHaveBeenCalledWith('u1', 't+1', 'S3cret!');
   });
 
   // The change ends every session, so the page signs in with the token it gets back.
@@ -35,10 +39,11 @@ describe('ConfirmEmailPage', () => {
     api.confirmEmailChange.mockResolvedValue(session);
     renderAt('/email/cambio?user=u1&email=new%40example.com&token=abc', true);
 
+    typePassword('S3cret!');
     fireEvent.click(screen.getByRole('button', { name: 'emailConfirm.changeConfirm' }));
 
     expect(await screen.findByText('emailConfirm.changeSuccess')).toBeInTheDocument();
-    expect(api.confirmEmailChange).toHaveBeenCalledWith('u1', 'new@example.com', 'abc');
+    expect(api.confirmEmailChange).toHaveBeenCalledWith('u1', 'new@example.com', 'abc', 'S3cret!');
     expect(auth.login).toHaveBeenCalledWith(session);
   });
 
@@ -46,8 +51,19 @@ describe('ConfirmEmailPage', () => {
     api.confirmEmail.mockRejectedValue(new Error('400'));
     renderAt('/email/confirmar?user=u1&token=old');
 
+    typePassword('S3cret!');
     fireEvent.click(screen.getByRole('button', { name: 'emailConfirm.confirm' }));
     expect(await screen.findByText('emailConfirm.error')).toBeInTheDocument();
+  });
+
+  // Audit 2026-10-14: the link proves the email, not the account — the password is asked too.
+  it('needs the account password before confirming', () => {
+    renderAt('/email/confirmar?user=u1&token=t1');
+
+    const button = screen.getByRole('button', { name: 'emailConfirm.confirm' });
+    expect(button).toBeDisabled();
+    typePassword('S3cret!');
+    expect(button).toBeEnabled();
   });
 
   it('a change link without the new address is incomplete', () => {
@@ -61,6 +77,7 @@ describe('ConfirmEmailPage', () => {
     api.confirmEmailChange.mockResolvedValue(null);
     renderAt('/email/cambio?user=u1&email=new%40example.com&token=abc', true);
 
+    typePassword('S3cret!');
     fireEvent.click(screen.getByRole('button', { name: 'emailConfirm.changeConfirm' }));
 
     expect(await screen.findByText('emailConfirm.changeSuccess')).toBeInTheDocument();

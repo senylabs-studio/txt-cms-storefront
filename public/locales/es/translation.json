@@ -742,19 +742,21 @@
   },
   "emailConfirm": {
     "title": "Confirmar email",
-    "instructions": "Pulsa el botón para confirmar que este email es tuyo.",
+    "instructions": "Escribe la contraseña de tu cuenta y pulsa el botón para confirmar que este email es tuyo.",
     "confirm": "Confirmar mi email",
     "loading": "Confirmando…",
     "success": "¡Listo! Tu email está confirmado.",
     "invalidLink": "El enlace no es válido o está incompleto.",
     "error": "No se ha podido confirmar el email. Puede que el enlace haya caducado: pide otro desde Mi cuenta.",
     "changeTitle": "Confirmar el nuevo email",
-    "changeInstructions": "Pulsa el botón para cambiar el email de tu cuenta a {{email}}.",
+    "changeInstructions": "Escribe la contraseña de tu cuenta y pulsa el botón para cambiar su email a {{email}}.",
     "changeConfirm": "Confirmar el cambio",
     "changeSuccess": "¡Listo! El email de tu cuenta ahora es {{email}}.",
     "changeError": "No se ha podido cambiar el email. Puede que el enlace haya caducado: vuelve a pedir el cambio desde Mi cuenta.",
     "goToAccount": "Ir a Mi cuenta",
-    "backToHome": "Volver a la tienda"
+    "backToHome": "Volver a la tienda",
+    "password": "Contraseña de tu cuenta",
+    "notYou": "¿No has creado tú esta cuenta ni pedido este cambio? No la confirmes. Si el email es tuyo, puedes recuperar la cuenta con «¿Olvidaste tu contraseña?» al iniciar sesión."
   },
   "cartReminders": {
     "unsubscribe": {
