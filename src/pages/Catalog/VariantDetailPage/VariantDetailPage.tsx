@@ -393,6 +393,7 @@ const VariantDetailPage: React.FC = () => {
                     ref={imgRef}
                     src={currentImage.url}
                     alt={currentImage.altText || variant.name}
+                    fetchPriority="high"
                     className={`vdp-main-img${lensEnabled ? ' vdp-main-img--lens' : ' vdp-main-img--clickable'}`}
                     style={lensEnabled && lensAt ? { transform: 'scale(2.5)', transformOrigin: `${lensAt.x}% ${lensAt.y}%` } : undefined}
                     onClick={() => setLightboxOpen(true)}
@@ -457,7 +458,8 @@ const VariantDetailPage: React.FC = () => {
                     aria-pressed={i === selectedImage}
                     onClick={() => setSelectedImage(i)}
                   >
-                    <img src={img.url} alt={img.altText || `${variant.name} ${i + 1}`} />
+                    {/* The small WebP, not the original (the strip downloaded every full photo). */}
+                    <img src={img.thumbnailUrl || img.url} alt={img.altText || `${variant.name} ${i + 1}`} loading="lazy" decoding="async" />
                   </button>
                 ))}
               </div>

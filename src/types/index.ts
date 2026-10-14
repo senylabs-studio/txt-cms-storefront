@@ -50,6 +50,8 @@ export interface StorefrontVariant {
 
 export interface StorefrontImage {
   url: string;
+  /** 600px WebP (the original when there's none): thumbnail strips. */
+  thumbnailUrl?: string;
   isRealScale: boolean;
   realWidthCm?: number;
   altText?: string;
