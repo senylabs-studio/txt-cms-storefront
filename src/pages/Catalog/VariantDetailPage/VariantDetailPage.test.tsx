@@ -522,4 +522,14 @@ describe('VariantDetailPage photos', () => {
     expect(strip[0]).toHaveAttribute('loading', 'lazy');
     expect(container.querySelector('.vdp-main-img')).toHaveAttribute('src', 'https://img/1.jpg');
   });
+
+  it('shows the screen-size copy as the main photo when there is one', async () => {
+    getVariantById.mockResolvedValue(variant({ images: [
+      { url: 'https://img/1.jpg', thumbnailUrl: 'https://img/1.webp', displayUrl: 'https://img/1-display.webp', isRealScale: false, altText: 'uno' },
+    ] }));
+    const { container } = renderPage();
+    await screen.findByText('Tela Azul');
+
+    expect(container.querySelector('.vdp-main-img')).toHaveAttribute('src', 'https://img/1-display.webp');
+  });
 });

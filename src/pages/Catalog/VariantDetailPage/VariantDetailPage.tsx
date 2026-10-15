@@ -391,7 +391,7 @@ const VariantDetailPage: React.FC = () => {
               {currentImage
                 ? <img
                     ref={imgRef}
-                    src={currentImage.url}
+                    src={currentImage.displayUrl || currentImage.url}
                     alt={currentImage.altText || variant.name}
                     fetchPriority="high"
                     className={`vdp-main-img${lensEnabled ? ' vdp-main-img--lens' : ' vdp-main-img--clickable'}`}
