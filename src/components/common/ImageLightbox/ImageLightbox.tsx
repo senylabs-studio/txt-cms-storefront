@@ -6,7 +6,10 @@ import IconTooltip from '../IconTooltip/IconTooltip';
 import './ImageLightbox.css';
 
 export interface LightboxImage {
+  /** The original: only loaded once zoomed in. */
   url: string;
+  displayUrl?: string;
+  thumbnailUrl?: string;
   altText?: string | null;
 }
 
@@ -76,7 +79,7 @@ const ImageLightbox: React.FC<Props> = ({ images, index, show, title, onClose, o
         title={zoomed ? t('product.zoomOut') : t('product.zoomIn')}
       >
         <img
-          src={current.url}
+          src={zoomed ? current.url : current.displayUrl || current.url}
           alt={current.altText || title}
           draggable={false}
           style={{ transform: zoomed ? `scale(${ZOOM})` : undefined, transformOrigin: `${origin.x}% ${origin.y}%` }}
@@ -104,7 +107,7 @@ const ImageLightbox: React.FC<Props> = ({ images, index, show, title, onClose, o
                 onClick={() => onIndexChange(i)}
                 aria-label={t('product.goToImage', { count: i + 1 })}
               >
-                <img src={img.url} alt="" />
+                <img src={img.thumbnailUrl || img.url} alt="" />
               </button>
             ))}
           </div>

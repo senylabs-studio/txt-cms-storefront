@@ -96,6 +96,30 @@ describe('share preview meta', () => {
       offers: { '@type': 'Offer', price: '11.50', priceCurrency: 'EUR', availability: 'https://schema.org/OutOfStock', url: 'https://shop/variant/42' } });
   });
 
+  // 2026-10-14: stars and a breadcrumb trail in search results.
+  it('adds the rating and a breadcrumb on a variant page with reviews', async () => {
+    const meta = await buildMeta('/variant/42', api({
+      '/storefront/products/variants/42/meta': { title: 'Cretona lisa Azul', code: 'C1', description: 'x', price: 9, inStock: true,
+        productName: 'Cretona lisa', productSlug: 'cretona-lisa', averageRating: 4.666, reviewCount: 3 },
+    }));
+    const html = injectMeta('<head><title>x</title>\n<meta name="description" content="x" /></head>', meta, 'https://shop/variant/42');
+    const [product, crumbs] = [...html.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/g)].map(m => JSON.parse(m[1]));
+
+    expect(product.aggregateRating).toMatchObject({ '@type': 'AggregateRating', ratingValue: '4.7', reviewCount: 3 });
+    expect(crumbs).toMatchObject({ '@type': 'BreadcrumbList', itemListElement: [
+      { position: 1, name: 'Tejidos Pulido', item: 'https://shop/' },
+      { position: 2, name: 'Cretona lisa', item: 'https://shop/product/cretona-lisa' },
+      { position: 3, name: 'Cretona lisa Azul', item: 'https://shop/variant/42' },
+    ] });
+  });
+
+  it('gives no rating without reviews', async () => {
+    const meta = await buildMeta('/variant/42', api({
+      '/storefront/products/variants/42/meta': { title: 'T', code: 'C1', description: 'x', price: 9, inStock: true, reviewCount: 0 },
+    }));
+    expect(meta.jsonLd.aggregateRating).toBeUndefined();
+  });
+
   it('uses a price range for a product with variants, and the shop (Store) on the home page', async () => {
     const product = await buildMeta('/product/stof', api({
       '/storefront/products/stof': { name: 'Stof', code: '1272', price: 9, variants: [{ price: 9, availableStock: 0 }, { price: 12.5, availableStock: 2 }] },

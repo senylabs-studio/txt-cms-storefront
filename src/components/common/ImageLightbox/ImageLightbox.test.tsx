@@ -39,6 +39,21 @@ describe('ImageLightbox', () => {
     expect(img.style.transform).toBe('');
   });
 
+  it('shows the screen-size copy, the original once zoomed, and the thumbnails in the strip', () => {
+    const sized = [
+      { url: 'https://img.example.com/1.jpg', displayUrl: 'https://img.example.com/1-display.webp', thumbnailUrl: 'https://img.example.com/1.webp', altText: 'Lino rojo' },
+      { url: 'https://img.example.com/2.jpg' },
+    ];
+    render(<ImageLightbox images={sized} index={0} show title="Lino" onClose={() => {}} onIndexChange={() => {}} />);
+    const img = screen.getByAltText('Lino rojo');
+
+    expect(img).toHaveAttribute('src', 'https://img.example.com/1-display.webp');
+    fireEvent.click(img);
+    expect(img).toHaveAttribute('src', 'https://img.example.com/1.jpg');
+    const strip = [...document.querySelectorAll('.image-lightbox__thumb img')].map(i => i.getAttribute('src'));
+    expect(strip).toEqual(['https://img.example.com/1.webp', 'https://img.example.com/2.jpg']);
+  });
+
   it('closes from the close button', () => {
     const onClose = vi.fn();
     render(<ImageLightbox images={images} index={0} show title="Lino" onClose={onClose} onIndexChange={() => {}} />);

@@ -71,7 +71,13 @@ export async function buildMeta(pathname, getJson) {
           description: cleanText(v.description) || base.description,
           image,
           jsonLd: productLd({ name: v.title, description: cleanText(v.description), image, sku: v.code,
-            brand: siteName, price: v.price, inStock: v.inStock }),
+            brand: siteName, price: v.price, inStock: v.inStock, averageRating: v.averageRating, reviewCount: v.reviewCount }),
+          // Inicio › product › this variant (the results show the trail instead of the URL).
+          breadcrumb: v.productSlug ? [
+            { name: siteName, path: '/' },
+            { name: v.productName, path: `/product/${v.productSlug}` },
+            { name: v.title, path: pathname },
+          ] : null,
         };
       }
     } else if (segments[0] === 'product' && segments[1]) {
@@ -107,7 +113,7 @@ export async function buildMeta(pathname, getJson) {
 }
 
 /** schema.org Product for search results (price, availability). Prices are per metre / unit in EUR. */
-function productLd({ name, description, image, sku, brand, price, highPrice, inStock }) {
+function productLd({ name, description, image, sku, brand, price, highPrice, inStock, averageRating, reviewCount }) {
   if (typeof price !== 'number' || !isFinite(price)) return null;
   const availability = `https://schema.org/${inStock ? 'InStock' : 'OutOfStock'}`;
   const offers = highPrice != null && highPrice > price
@@ -117,6 +123,20 @@ function productLd({ name, description, image, sku, brand, price, highPrice, inS
     '@context': 'https://schema.org', '@type': 'Product', name,
     ...(description ? { description } : {}), ...(image ? { image: [image] } : {}), ...(sku ? { sku } : {}),
     brand: { '@type': 'Brand', name: brand }, offers,
+    // The stars in search results, from the variant's own reviews.
+    ...(reviewCount > 0 && typeof averageRating === 'number'
+      ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: averageRating.toFixed(1), reviewCount, bestRating: '5', worstRating: '1' } }
+      : {}),
+  };
+}
+
+/** schema.org BreadcrumbList; needs the page URL for absolute links. */
+function breadcrumbLd(trail, url) {
+  if (!trail?.length || !url) return null;
+  const origin = new URL(url).origin;
+  return {
+    '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+    itemListElement: trail.map((step, i) => ({ '@type': 'ListItem', position: i + 1, name: step.name, item: origin + step.path })),
   };
 }
 
@@ -202,6 +222,7 @@ export function injectMeta(html, meta, url) {
     meta.image ? `<meta property="og:image" content="${escapeHtml(meta.image)}" />` : '',
     `<meta name="twitter:card" content="${meta.image ? 'summary_large_image' : 'summary'}" />`,
     meta.notFound ? '' : ldScript(meta.jsonLd, url),
+    meta.notFound ? '' : ldScript(breadcrumbLd(meta.breadcrumb, url)),
   ].filter(Boolean).join('\n    ');
   // Replacer functions, not strings: a "$'" or "$&" in a CMS title is a replacement pattern in a
   // string and used to splice parts of index.html into the <title> (audit 2026-10-08).
