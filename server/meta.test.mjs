@@ -26,6 +26,19 @@ describe('share preview meta', () => {
     expect((await buildMeta('/variant/999', api({}))).title).toBe('Tejidos Pulido');
   });
 
+  it('preloads the home banner photo when the banner opens the page', async () => {
+    const banner = (url) => ({ type: 'Banner', isActive: true, sortOrder: 0, config: { slides: [{ imageUrl: url }, { imageUrl: 'https://cdn/2.webp' }] } });
+    const home = await buildMeta('/', api({ '/storefront/home': [banner('https://cdn/hero.webp'), { type: 'FeaturedProducts', sortOrder: 1, config: {} }] }));
+    expect(home.preloadImage).toBe('https://cdn/hero.webp');
+    // Further down the page it isn't what paints first: no preload.
+    const later = await buildMeta('/', api({ '/storefront/home': [{ type: 'Features', sortOrder: 0, config: {} }, { ...banner('https://cdn/hero.webp'), sortOrder: 1 }] }));
+    expect(later.preloadImage).toBeUndefined();
+    expect((await buildMeta('/', api({}))).preloadImage).toBeUndefined();
+
+    const html = injectMeta('<head><title>x</title>\n<meta name="description" content="x" /></head>', { ...home, preloadImage: 'https://cdn/a.webp?x=1&y=2' }, 'https://shop/');
+    expect(html).toContain('<link rel="preload" as="image" href="https://cdn/a.webp?x=1&amp;y=2" fetchpriority="high" />');
+  });
+
   it('writes escaped tags into index.html, replacing the static title and description', () => {
     const html = '<head><title>TXT Shop</title>\n<meta name="description" content="x" /></head>';
     const out = injectMeta(html, { siteName: 'A&B', title: 'Tela "roja" <b>', description: 'd', image: 'https://cdn/i.jpg', type: 'product' }, 'https://shop/variant/1');

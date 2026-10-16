@@ -110,7 +110,21 @@ export async function buildMeta(pathname, getJson) {
     // Any lookup problem: the shop's own preview below.
   }
   // The home page tells search engines who the shop is (name, logo, address, phone, socials).
-  return segments.length === 0 ? { ...base, jsonLd: storeLd(site) } : base;
+  if (segments.length > 0) return base;
+  const home = { ...base, jsonLd: storeLd(site) };
+  const hero = await homeHeroImage(getJson).catch(() => null);
+  return hero ? { ...home, preloadImage: hero } : home;
+}
+
+/** The home banner's first photo when the banner opens the page: it paints first (the LCP), but as
+ *  a CSS background it's only found once the app has run and asked the API — a preload in the HTML
+ *  starts it with the page. */
+async function homeHeroImage(getJson) {
+  const blocks = await getJson('/storefront/home');
+  if (!Array.isArray(blocks)) return null;
+  const first = blocks.filter(b => b?.isActive !== false).sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))[0];
+  const url = first?.type === 'Banner' ? first.config?.slides?.[0]?.imageUrl : null;
+  return typeof url === 'string' && /^https?:\/\//.test(url) ? url : null;
 }
 
 /** schema.org Product for search results (price, availability). Prices are per metre / unit in EUR. */
@@ -224,6 +238,7 @@ export function injectMeta(html, meta, url) {
     `<meta name="twitter:card" content="${meta.image ? 'summary_large_image' : 'summary'}" />`,
     meta.notFound ? '' : ldScript(meta.jsonLd, url),
     meta.notFound ? '' : ldScript(breadcrumbLd(meta.breadcrumb, url)),
+    meta.preloadImage ? `<link rel="preload" as="image" href="${escapeHtml(meta.preloadImage)}" fetchpriority="high" />` : '',
   ].filter(Boolean).join('\n    ');
   // Replacer functions, not strings: a "$'" or "$&" in a CMS title is a replacement pattern in a
   // string and used to splice parts of index.html into the <title> (audit 2026-10-08).

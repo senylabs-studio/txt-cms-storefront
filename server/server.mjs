@@ -43,8 +43,9 @@ const getJson = createJsonCache(async (path) => {
   return res.status === 404 ? NOT_FOUND : null;
 });
 // The shop's name and logo are in every preview: fetched at start and kept fresh, so a preview
-// asked while the API is waking up still has them.
-const refreshSite = () => getJson('/storefront/site-settings', { refresh: true }).catch(() => {});
+// asked while the API is waking up still has them. The home blocks too (the banner preload).
+const refreshSite = () => Promise.all(['/storefront/site-settings', '/storefront/home']
+  .map(path => getJson(path, { refresh: true }).catch(() => {})));
 refreshSite();
 setInterval(refreshSite, 4 * 60 * 1000).unref();
 
