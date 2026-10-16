@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildMeta, injectMeta, cleanText, createJsonCache, NOT_FOUND, isLocalPath, requestHost, categoryRedirect, legacyAnswer, pickEncoding, canonicalPath } from './meta.mjs';
+import { buildMeta, injectMeta, cleanText, createJsonCache, NOT_FOUND, isLocalPath, requestHost, categoryRedirect, legacyAnswer, pickEncoding, canonicalPath, etagFor, isNotModified } from './meta.mjs';
 
 const site = { siteName: 'Tejidos Pulido', siteDescription: 'Tu tienda de tejidos de confianza.', logoUrl: 'https://cdn/logo.png' };
 const api = (routes) => async (path) => (path === '/storefront/site-settings' ? site : routes[path] ?? null);
@@ -24,6 +24,19 @@ describe('share preview meta', () => {
     expect(home).toMatchObject({ title: 'Tejidos Pulido', description: 'Tu tienda de tejidos de confianza.', image: 'https://cdn/logo.png' });
     expect((await buildMeta('/cart', api({}))).title).toBe('Tejidos Pulido');
     expect((await buildMeta('/variant/999', api({}))).title).toBe('Tejidos Pulido');
+  });
+
+  it('preloads the home banner photo when the banner opens the page', async () => {
+    const banner = (url) => ({ type: 'Banner', isActive: true, sortOrder: 0, config: { slides: [{ imageUrl: url }, { imageUrl: 'https://cdn/2.webp' }] } });
+    const home = await buildMeta('/', api({ '/storefront/home': [banner('https://cdn/hero.webp'), { type: 'FeaturedProducts', sortOrder: 1, config: {} }] }));
+    expect(home.preloadImage).toBe('https://cdn/hero.webp');
+    // Further down the page it isn't what paints first: no preload.
+    const later = await buildMeta('/', api({ '/storefront/home': [{ type: 'Features', sortOrder: 0, config: {} }, { ...banner('https://cdn/hero.webp'), sortOrder: 1 }] }));
+    expect(later.preloadImage).toBeUndefined();
+    expect((await buildMeta('/', api({}))).preloadImage).toBeUndefined();
+
+    const html = injectMeta('<head><title>x</title>\n<meta name="description" content="x" /></head>', { ...home, preloadImage: 'https://cdn/a.webp?x=1&y=2' }, 'https://shop/');
+    expect(html).toContain('<link rel="preload" as="image" href="https://cdn/a.webp?x=1&amp;y=2" fetchpriority="high" />');
   });
 
   it('writes escaped tags into index.html, replacing the static title and description', () => {
@@ -214,6 +227,18 @@ describe('server helpers', () => {
     expect(legacyAnswer('', undefined)).toEqual({ gone: true }); // ?ObjectID=… links we can't map
     expect(legacyAnswer('/Shops/x/Products/1', null)).toEqual({ redirect: '/', permanent: false });
     expect(legacyAnswer('/Shops/x/Products/1', { path: '//evil.com' })).toEqual({ gone: true });
+  });
+
+  it('answers a revalidation of an unchanged file with 304 (translations, favicon…)', () => {
+    const etag = etagFor(Buffer.from('{"a":1}'));
+    expect(etag).toMatch(/^"[\w-]{16}"$/);
+    expect(etagFor(Buffer.from('{"a":1}'))).toBe(etag);
+    expect(etagFor(Buffer.from('{"a":2}'))).not.toBe(etag);
+    expect(isNotModified(etag, etag)).toBe(true);
+    expect(isNotModified(`W/${etag}, "other"`, etag)).toBe(true);
+    expect(isNotModified('*', etag)).toBe(true);
+    expect(isNotModified('"other"', etag)).toBe(false);
+    expect(isNotModified(undefined, etag)).toBe(false);
   });
 
   it('picks brotli, then gzip, from Accept-Encoding', () => {

@@ -2,6 +2,7 @@
 // only see index.html. This builds the title/description/image of a URL from the API and writes
 // them into index.html before it's sent — the same texts the page itself shows once React runs.
 // Plain Node, no dependencies (Azure runs it directly, see server.mjs).
+import { createHash } from 'node:crypto';
 
 const MAX_DESCRIPTION = 200;
 
@@ -109,7 +110,21 @@ export async function buildMeta(pathname, getJson) {
     // Any lookup problem: the shop's own preview below.
   }
   // The home page tells search engines who the shop is (name, logo, address, phone, socials).
-  return segments.length === 0 ? { ...base, jsonLd: storeLd(site) } : base;
+  if (segments.length > 0) return base;
+  const home = { ...base, jsonLd: storeLd(site) };
+  const hero = await homeHeroImage(getJson).catch(() => null);
+  return hero ? { ...home, preloadImage: hero } : home;
+}
+
+/** The home banner's first photo when the banner opens the page: it paints first (the LCP), but as
+ *  a CSS background it's only found once the app has run and asked the API — a preload in the HTML
+ *  starts it with the page. */
+async function homeHeroImage(getJson) {
+  const blocks = await getJson('/storefront/home');
+  if (!Array.isArray(blocks)) return null;
+  const first = blocks.filter(b => b?.isActive !== false).sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))[0];
+  const url = first?.type === 'Banner' ? first.config?.slides?.[0]?.imageUrl : null;
+  return typeof url === 'string' && /^https?:\/\//.test(url) ? url : null;
 }
 
 /** schema.org Product for search results (price, availability). Prices are per metre / unit in EUR. */
@@ -223,6 +238,7 @@ export function injectMeta(html, meta, url) {
     `<meta name="twitter:card" content="${meta.image ? 'summary_large_image' : 'summary'}" />`,
     meta.notFound ? '' : ldScript(meta.jsonLd, url),
     meta.notFound ? '' : ldScript(breadcrumbLd(meta.breadcrumb, url)),
+    meta.preloadImage ? `<link rel="preload" as="image" href="${escapeHtml(meta.preloadImage)}" fetchpriority="high" />` : '',
   ].filter(Boolean).join('\n    ');
   // Replacer functions, not strings: a "$'" or "$&" in a CMS title is a replacement pattern in a
   // string and used to splice parts of index.html into the <title> (audit 2026-10-08).
@@ -269,6 +285,17 @@ export const legacyAnswer = (objectPath, target) => {
 };
 
 /** br, else gzip, if the client takes it (q=0 means "not this one"). */
+/** Strong validator for a file served with a short max-age (translations, favicon, robots…):
+ *  once it expires the browser asks again and gets a bodiless 304 while it hasn't changed. */
+export const etagFor = (body) => `"${createHash('sha256').update(body).digest('base64url').slice(0, 16)}"`;
+
+/** If-None-Match against the file's ETag: any listed tag (weak or strong) or "*". */
+export const isNotModified = (ifNoneMatch, etag) => {
+  if (!ifNoneMatch) return false;
+  const tags = String(ifNoneMatch).split(',').map(tag => tag.trim().replace(/^W\//, ''));
+  return tags.includes('*') || tags.includes(etag);
+};
+
 export const pickEncoding = (acceptEncoding) => {
   const accepted = new Set(String(acceptEncoding ?? '').split(',')
     .map(part => part.trim().split(';'))
