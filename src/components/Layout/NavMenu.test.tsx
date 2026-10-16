@@ -176,3 +176,28 @@ describe('NavMenu keyboard', () => {
     expect(document.getElementById('mega-panel-1')).not.toBeInTheDocument();
   });
 });
+
+// Audit 2026-10-14 (SEO): the submenu links only existed while the mouse was over the menu, so
+// search engines (which don't hover) only reached those categories through the sitemap.
+describe('NavMenu links for crawlers', () => {
+  it('has every subcategory link in the page before any hover, hidden and without images', async () => {
+    getMenu.mockResolvedValue(menu);
+    const { container } = render(<MemoryRouter><NavMenu /></MemoryRouter>);
+    await screen.findByText('Tejidos');
+
+    const hiddenLinks = [...container.querySelectorAll('[hidden] a')].map(a => a.getAttribute('href'));
+    expect(hiddenLinks).toEqual(expect.arrayContaining(['/lino', '/seda', '/botones']));
+    expect(container.querySelector('[hidden] img')).toBeNull();
+    expect(container.querySelector('.mega-panel')).toBeNull();
+  });
+
+  it('does not repeat the links of the open panel', async () => {
+    getMenu.mockResolvedValue(menu);
+    const { container } = render(<MemoryRouter><NavMenu /></MemoryRouter>);
+    await openPanel('Tejidos');
+
+    expect([...container.querySelectorAll('a')].filter(a => a.getAttribute('href') === '/lino')).toHaveLength(1);
+    expect([...container.querySelectorAll('[hidden] a')].map(a => a.getAttribute('href'))).toEqual(['/botones']);
+  });
+});
+
