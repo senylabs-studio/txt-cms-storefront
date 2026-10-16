@@ -8,7 +8,7 @@ import { existsSync } from 'node:fs';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildMeta, injectMeta, safeDecode, createJsonCache, NOT_FOUND, requestHost, categoryRedirect, legacyAnswer, pickEncoding, canonicalPath } from './meta.mjs';
+import { buildMeta, injectMeta, safeDecode, createJsonCache, NOT_FOUND, requestHost, categoryRedirect, legacyAnswer, pickEncoding, canonicalPath, etagFor, isNotModified } from './meta.mjs';
 import { brotliCompressSync, gzipSync, constants as zlibConstants } from 'node:zlib';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -53,6 +53,7 @@ setInterval(refreshSite, 4 * 60 * 1000).unref();
 // each is compressed once and kept; pages (index.html with their own meta) on the fly, fast.
 const COMPRESSIBLE = new Set(['.html', '.js', '.css', '.json', '.svg', '.txt', '.xml', '.webmanifest']);
 const compressedFiles = new Map();
+const etags = new Map();
 const compress = (body, encoding, quality) => encoding === 'br'
   ? brotliCompressSync(body, { params: { [zlibConstants.BROTLI_PARAM_QUALITY]: quality } })
   : gzipSync(body, { level: quality >= 9 ? 9 : 6 });
@@ -77,11 +78,22 @@ async function sendFile(req, res, file) {
   const body = await readFile(file);
   const hashedAsset = file.startsWith(join(DIST, 'assets') + '/');
   const extension = extname(file).toLowerCase();
-  sendBody(req, res, 200, {
+  const headers = {
     ...SECURITY_HEADERS,
     'Content-Type': TYPES[extension] || 'application/octet-stream',
     'Cache-Control': hashedAsset ? 'public, max-age=31536000, immutable' : 'public, max-age=300',
-  }, body, { cacheKey: file, extension });
+  };
+  // Files never change while the server runs: each tag is computed once.
+  if (!hashedAsset) {
+    let etag = etags.get(file);
+    if (!etag) etags.set(file, etag = etagFor(body));
+    headers.ETag = etag;
+    if (isNotModified(req.headers['if-none-match'], etag)) {
+      res.writeHead(304, { ...headers, Vary: 'Accept-Encoding' });
+      return res.end();
+    }
+  }
+  sendBody(req, res, 200, headers, body, { cacheKey: file, extension });
 }
 
 // Audit 2026-10-08: no one may frame the shop (clickjacking), sniff files as another type or

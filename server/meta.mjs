@@ -2,6 +2,7 @@
 // only see index.html. This builds the title/description/image of a URL from the API and writes
 // them into index.html before it's sent — the same texts the page itself shows once React runs.
 // Plain Node, no dependencies (Azure runs it directly, see server.mjs).
+import { createHash } from 'node:crypto';
 
 const MAX_DESCRIPTION = 200;
 
@@ -269,6 +270,17 @@ export const legacyAnswer = (objectPath, target) => {
 };
 
 /** br, else gzip, if the client takes it (q=0 means "not this one"). */
+/** Strong validator for a file served with a short max-age (translations, favicon, robots…):
+ *  once it expires the browser asks again and gets a bodiless 304 while it hasn't changed. */
+export const etagFor = (body) => `"${createHash('sha256').update(body).digest('base64url').slice(0, 16)}"`;
+
+/** If-None-Match against the file's ETag: any listed tag (weak or strong) or "*". */
+export const isNotModified = (ifNoneMatch, etag) => {
+  if (!ifNoneMatch) return false;
+  const tags = String(ifNoneMatch).split(',').map(tag => tag.trim().replace(/^W\//, ''));
+  return tags.includes('*') || tags.includes(etag);
+};
+
 export const pickEncoding = (acceptEncoding) => {
   const accepted = new Set(String(acceptEncoding ?? '').split(',')
     .map(part => part.trim().split(';'))

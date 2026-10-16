@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildMeta, injectMeta, cleanText, createJsonCache, NOT_FOUND, isLocalPath, requestHost, categoryRedirect, legacyAnswer, pickEncoding, canonicalPath } from './meta.mjs';
+import { buildMeta, injectMeta, cleanText, createJsonCache, NOT_FOUND, isLocalPath, requestHost, categoryRedirect, legacyAnswer, pickEncoding, canonicalPath, etagFor, isNotModified } from './meta.mjs';
 
 const site = { siteName: 'Tejidos Pulido', siteDescription: 'Tu tienda de tejidos de confianza.', logoUrl: 'https://cdn/logo.png' };
 const api = (routes) => async (path) => (path === '/storefront/site-settings' ? site : routes[path] ?? null);
@@ -214,6 +214,18 @@ describe('server helpers', () => {
     expect(legacyAnswer('', undefined)).toEqual({ gone: true }); // ?ObjectID=… links we can't map
     expect(legacyAnswer('/Shops/x/Products/1', null)).toEqual({ redirect: '/', permanent: false });
     expect(legacyAnswer('/Shops/x/Products/1', { path: '//evil.com' })).toEqual({ gone: true });
+  });
+
+  it('answers a revalidation of an unchanged file with 304 (translations, favicon…)', () => {
+    const etag = etagFor(Buffer.from('{"a":1}'));
+    expect(etag).toMatch(/^"[\w-]{16}"$/);
+    expect(etagFor(Buffer.from('{"a":1}'))).toBe(etag);
+    expect(etagFor(Buffer.from('{"a":2}'))).not.toBe(etag);
+    expect(isNotModified(etag, etag)).toBe(true);
+    expect(isNotModified(`W/${etag}, "other"`, etag)).toBe(true);
+    expect(isNotModified('*', etag)).toBe(true);
+    expect(isNotModified('"other"', etag)).toBe(false);
+    expect(isNotModified(undefined, etag)).toBe(false);
   });
 
   it('picks brotli, then gzip, from Accept-Encoding', () => {
