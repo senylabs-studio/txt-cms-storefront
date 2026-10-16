@@ -72,7 +72,8 @@ export async function buildMeta(pathname, getJson) {
           description: cleanText(v.description) || base.description,
           image,
           jsonLd: productLd({ name: v.title, description: cleanText(v.description), image, sku: v.code,
-            brand: siteName, price: v.price, inStock: v.inStock, averageRating: v.averageRating, reviewCount: v.reviewCount }),
+            brand: siteName, price: v.price, inStock: v.inStock, averageRating: v.averageRating, reviewCount: v.reviewCount,
+            shipping: shippingLd(v) }),
           // Inicio › product › this variant (the results show the trail instead of the URL).
           breadcrumb: v.productSlug ? [
             { name: siteName, path: '/' },
@@ -128,12 +129,12 @@ async function homeHeroImage(getJson) {
 }
 
 /** schema.org Product for search results (price, availability). Prices are per metre / unit in EUR. */
-function productLd({ name, description, image, sku, brand, price, highPrice, inStock, averageRating, reviewCount }) {
+function productLd({ name, description, image, sku, brand, price, highPrice, inStock, averageRating, reviewCount, shipping }) {
   if (typeof price !== 'number' || !isFinite(price)) return null;
   const availability = `https://schema.org/${inStock ? 'InStock' : 'OutOfStock'}`;
   const offers = highPrice != null && highPrice > price
     ? { '@type': 'AggregateOffer', priceCurrency: 'EUR', lowPrice: price.toFixed(2), highPrice: highPrice.toFixed(2), availability }
-    : { '@type': 'Offer', priceCurrency: 'EUR', price: price.toFixed(2), availability };
+    : { '@type': 'Offer', priceCurrency: 'EUR', price: price.toFixed(2), availability, ...(shipping ? { shippingDetails: shipping } : {}) };
   return {
     '@context': 'https://schema.org', '@type': 'Product', name,
     ...(description ? { description } : {}), ...(image ? { image: [image] } : {}), ...(sku ? { sku } : {}),
@@ -142,6 +143,29 @@ function productLd({ name, description, image, sku, brand, price, highPrice, inS
     ...(reviewCount > 0 && typeof averageRating === 'number'
       ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: averageRating.toFixed(1), reviewCount, bestRating: '5', worstRating: '1' } }
       : {}),
+  };
+}
+
+// Mainland Spain by postal code: Baleares (07), Canarias (35, 38), Ceuta (51) and Melilla (52)
+// have rates of their own.
+const MAINLAND_POSTAL_CODES = [['01000', '06999'], ['08000', '34999'], ['36000', '37999'], ['39000', '50999']]
+  .map(([postalCodeBegin, postalCodeEnd]) => ({ postalCodeBegin, postalCodeEnd }));
+
+/** What one unit costs to send to mainland Spain (the API works it out from the checkout rates);
+ *  null when it couldn't. */
+function shippingLd({ shippingCost, deliveryDaysMin, deliveryDaysMax }) {
+  if (typeof shippingCost !== 'number' || !isFinite(shippingCost)) return null;
+  const days = Number.isInteger(deliveryDaysMin) && Number.isInteger(deliveryDaysMax);
+  return {
+    '@type': 'OfferShippingDetails',
+    shippingRate: { '@type': 'MonetaryAmount', value: shippingCost.toFixed(2), currency: 'EUR' },
+    shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'ES', postalCodeRange: MAINLAND_POSTAL_CODES },
+    // The rate's estimated days are the whole wait, as checkout shows them: all of it as transit.
+    ...(days ? { deliveryTime: {
+      '@type': 'ShippingDeliveryTime',
+      handlingTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 0, unitCode: 'DAY' },
+      transitTime: { '@type': 'QuantitativeValue', minValue: deliveryDaysMin, maxValue: deliveryDaysMax, unitCode: 'DAY' },
+    } } : {}),
   };
 }
 

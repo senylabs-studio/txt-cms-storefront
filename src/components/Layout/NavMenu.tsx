@@ -238,6 +238,14 @@ const NavMenu: React.FC<NavMenuProps> = ({ leading, trailing }) => {
         </div>
       </Container>
 
+      {/* Search engines don't hover: every closed panel's subcategory links stay in the page,
+          hidden (and so out of the keyboard/screen-reader order) and without their photos. */}
+      <ul hidden>
+        {items.filter(item => item.id !== activeId).flatMap(item => item.children)
+          .filter(child => !child.externalUrl)
+          .map(child => <li key={child.id}><Link to={resolveHref(child)} tabIndex={-1}>{child.name}</Link></li>)}
+      </ul>
+
       {/* Mega panel */}
       {activeItem && activeItem.children.length > 0 && (
         <div id={`mega-panel-${activeItem.id}`} ref={panelRef} onMouseEnter={() => handleEnter(activeItem.id)}>

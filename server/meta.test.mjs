@@ -133,6 +133,34 @@ describe('share preview meta', () => {
     expect(meta.jsonLd.aggregateRating).toBeUndefined();
   });
 
+  it('gives the mainland shipping cost and delivery days as shippingDetails', async () => {
+    const meta = await buildMeta('/variant/42', api({
+      '/storefront/products/variants/42/meta': { title: 'T', code: 'C1', price: 9, inStock: true, reviewCount: 0,
+        shippingCost: 5.4, deliveryDaysMin: 2, deliveryDaysMax: 4 },
+    }));
+    const shipping = meta.jsonLd.offers.shippingDetails;
+    expect(shipping).toMatchObject({ '@type': 'OfferShippingDetails',
+      shippingRate: { '@type': 'MonetaryAmount', value: '5.40', currency: 'EUR' },
+      deliveryTime: { '@type': 'ShippingDeliveryTime', transitTime: { '@type': 'QuantitativeValue', minValue: 2, maxValue: 4, unitCode: 'DAY' } } });
+    // Mainland only: Baleares (07), Canarias (35, 38), Ceuta (51) and Melilla (52) pay other rates.
+    expect(shipping.shippingDestination.addressCountry).toBe('ES');
+    expect(shipping.shippingDestination.postalCodeRange).toEqual([
+      { postalCodeBegin: '01000', postalCodeEnd: '06999' }, { postalCodeBegin: '08000', postalCodeEnd: '34999' },
+      { postalCodeBegin: '36000', postalCodeEnd: '37999' }, { postalCodeBegin: '39000', postalCodeEnd: '50999' },
+    ]);
+
+    const free = await buildMeta('/variant/42', api({
+      '/storefront/products/variants/42/meta': { title: 'T', code: 'C1', price: 90, inStock: true, shippingCost: 0 },
+    }));
+    expect(free.jsonLd.offers.shippingDetails.shippingRate.value).toBe('0.00');
+    expect(free.jsonLd.offers.shippingDetails.deliveryTime).toBeUndefined();
+
+    const unknown = await buildMeta('/variant/42', api({
+      '/storefront/products/variants/42/meta': { title: 'T', code: 'C1', price: 9, inStock: true, shippingCost: null },
+    }));
+    expect(unknown.jsonLd.offers.shippingDetails).toBeUndefined();
+  });
+
   it('uses a price range for a product with variants, and the shop (Store) on the home page', async () => {
     const product = await buildMeta('/product/stof', api({
       '/storefront/products/stof': { name: 'Stof', code: '1272', price: 9, variants: [{ price: 9, availableStock: 0 }, { price: 12.5, availableStock: 2 }] },
