@@ -86,7 +86,9 @@
       "registerLink": "Regístrate aquí",
       "error": "Credenciales incorrectas",
       "sessionExpired": "Tu sesión ha expirado. Inicia sesión de nuevo.",
-      "guestAccessLink": "¿Compraste como invitado y perdiste el acceso?"
+      "guestAccessLink": "¿Compraste como invitado y perdiste el acceso?",
+      "oldShopNotice": "¿Tenías cuenta en la tienda anterior? No ha pasado a la web nueva.",
+      "oldShopLink": "Créala de nuevo"
     },
     "register": {
       "title": "Crear cuenta",
@@ -104,7 +106,8 @@
       "newsletter": "Quiero recibir novedades y ofertas por email (te enviaremos un email para confirmarlo)",
       "confirmEmailSent": "¡Cuenta creada! Te hemos enviado un enlace a {{email}} para confirmar tu email.",
       "privacyNotice": "Usamos tus datos para gestionar tu cuenta y tus pedidos y, si lo marcas, para enviarte novedades. También te podemos escribir para recordarte una cesta a medias o pedirte tu opinión sobre lo que compres; puedes darte de baja en cada correo.",
-      "privacyLink": "Política de privacidad"
+      "privacyLink": "Política de privacidad",
+      "oldShopNotice": "¿Tenías cuenta en nuestra tienda anterior? Las cuentas no han pasado a la web nueva: créala de nuevo aquí, es un minuto."
     },
     "forgotPasswordLink": "¿Olvidaste tu contraseña?",
     "forgotPassword": {

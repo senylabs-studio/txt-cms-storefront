@@ -94,6 +94,11 @@ const LoginPage: React.FC = () => {
               {t('auth.login.noAccount')}{' '}
               <Link to="/register">{t('auth.login.registerLink')}</Link>
             </p>
+            {/* The old shop's accounts weren't carried over (decision 2026-10-14). */}
+            <p className="text-center text-muted small mb-0 mt-2">
+              {t('auth.login.oldShopNotice')}{' '}
+              <Link to="/register">{t('auth.login.oldShopLink')}</Link>
+            </p>
             <p className="text-center text-muted small mb-0 mt-2">
               <Link to="/guest-access">{t('auth.login.guestAccessLink')}</Link>
             </p>

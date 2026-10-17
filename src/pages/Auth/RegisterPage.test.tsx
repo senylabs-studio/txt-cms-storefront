@@ -20,4 +20,11 @@ describe('RegisterPage', () => {
     expect(screen.getByText(/auth\.register\.privacyNotice/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'auth.register.privacyLink' })).toHaveAttribute('href', '/proteccion-de-datos');
   });
+
+  // 2026-10-17: the old shop's accounts aren't carried over (decision 2026-10-14).
+  it('tells customers of the old shop to create their account again', () => {
+    render(<MemoryRouter><RegisterPage /></MemoryRouter>);
+
+    expect(screen.getByText('auth.register.oldShopNotice')).toBeInTheDocument();
+  });
 });
