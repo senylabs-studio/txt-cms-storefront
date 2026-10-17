@@ -86,7 +86,9 @@
       "registerLink": "Sign up here",
       "error": "Invalid credentials",
       "sessionExpired": "Your session has expired. Please log in again.",
-      "guestAccessLink": "Checked out as a guest and lost access?"
+      "guestAccessLink": "Checked out as a guest and lost access?",
+      "oldShopNotice": "Had an account in our previous shop? It wasn't carried over to the new website.",
+      "oldShopLink": "Create it again"
     },
     "register": {
       "title": "Create account",
@@ -104,7 +106,8 @@
       "newsletter": "Send me news and offers by email (we'll email you to confirm)",
       "confirmEmailSent": "Account created! We've sent a link to {{email}} to confirm your email.",
       "privacyNotice": "We use your data to manage your account and orders and, if you tick the box, to send you news. We may also email you about a cart you left or to ask what you thought of a purchase; you can unsubscribe in every email.",
-      "privacyLink": "Privacy policy"
+      "privacyLink": "Privacy policy",
+      "oldShopNotice": "Had an account in our previous shop? Accounts weren't carried over to the new website: create yours again here, it takes a minute."
     },
     "forgotPasswordLink": "Forgot your password?",
     "forgotPassword": {
@@ -145,6 +148,15 @@
     },
     "showPassword": "Show password",
     "hidePassword": "Hide password",
+    "passwordRules": {
+      "title": "Your password needs:",
+      "minLength": "At least 6 characters",
+      "uppercase": "An uppercase letter",
+      "lowercase": "A lowercase letter",
+      "digit": "A number",
+      "symbol": "A symbol (e.g. ! @ # ?)",
+      "info": "Password requirements"
+    },
     "sessionClosed": {
       "title": "You've been signed out",
       "body": "Your session is no longer valid: it expired or the password was changed on another device. Log in again to see your account, orders and favourites.",

@@ -86,7 +86,9 @@
       "registerLink": "Registra't aquí",
       "error": "Credencials incorrectes",
       "sessionExpired": "La teva sessió ha caducat. Torna a iniciar sessió.",
-      "guestAccessLink": "Vas comprar com a convidat i has perdut l'accés?"
+      "guestAccessLink": "Vas comprar com a convidat i has perdut l'accés?",
+      "oldShopNotice": "Tenies compte a la botiga anterior? No ha passat al web nou.",
+      "oldShopLink": "Crea'l de nou"
     },
     "register": {
       "title": "Crear compte",
@@ -104,7 +106,8 @@
       "newsletter": "Vull rebre novetats i ofertes per correu (t'enviarem un correu per confirmar-ho)",
       "confirmEmailSent": "Compte creat! T'hem enviat un enllaç a {{email}} per confirmar el teu correu.",
       "privacyNotice": "Fem servir les teves dades per gestionar el teu compte i les teves comandes i, si ho marques, per enviar-te novetats. També et podem escriure per recordar-te una cistella a mitges o demanar-te la teva opinió sobre el que compris; et pots donar de baixa a cada correu.",
-      "privacyLink": "Política de privadesa"
+      "privacyLink": "Política de privadesa",
+      "oldShopNotice": "Tenies compte a la nostra botiga anterior? Els comptes no han passat al web nou: crea'l de nou aquí, és un minut."
     },
     "forgotPasswordLink": "Has oblidat la contrasenya?",
     "forgotPassword": {
@@ -145,6 +148,15 @@
     },
     "showPassword": "Mostra la contrasenya",
     "hidePassword": "Amaga la contrasenya",
+    "passwordRules": {
+      "title": "La contrasenya ha de tenir:",
+      "minLength": "Mínim 6 caràcters",
+      "uppercase": "Una lletra majúscula",
+      "lowercase": "Una lletra minúscula",
+      "digit": "Un número",
+      "symbol": "Un símbol (p. ex. ! @ # ?)",
+      "info": "Requisits de la contrasenya"
+    },
     "sessionClosed": {
       "title": "S'ha tancat la teva sessió",
       "body": "La teva sessió ja no és vàlida: ha caducat o s'ha canviat la contrasenya des d'un altre dispositiu. Torna a iniciar sessió per veure el teu compte, les teves comandes i els teus preferits.",

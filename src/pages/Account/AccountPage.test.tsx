@@ -286,7 +286,7 @@ describe('AccountPage', () => {
       fillPasswordForm('OldP@ss1!', 'password1', 'password1');
       fireEvent.click(screen.getByText('account.changePassword'));
 
-      expect(await screen.findByText('auth.register.passwordHint')).toBeInTheDocument();
+      expect(await screen.findByText('auth.register.passwordHint', { selector: '.invalid-feedback' })).toBeInTheDocument();
       expect(changePassword).not.toHaveBeenCalled();
     });
 
@@ -298,11 +298,11 @@ describe('AccountPage', () => {
 
       fillPasswordForm('OldP@ss1!', 'password1', 'password1');
       fireEvent.click(screen.getByText('account.changePassword'));
-      expect(await screen.findByText('auth.register.passwordHint')).toBeInTheDocument();
+      expect(await screen.findByText('auth.register.passwordHint', { selector: '.invalid-feedback' })).toBeInTheDocument();
 
       const newInput = document.querySelectorAll('input[type="password"]')[1];
       fireEvent.change(newInput, { target: { value: 'NewP@ss2!' } });
-      expect(screen.queryByText('auth.register.passwordHint')).not.toBeInTheDocument();
+      expect(screen.queryByText('auth.register.passwordHint', { selector: '.invalid-feedback' })).not.toBeInTheDocument();
     });
 
     it('shows a mismatch error and does not call the API when the confirmation differs', async () => {

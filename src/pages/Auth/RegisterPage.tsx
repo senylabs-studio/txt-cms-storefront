@@ -58,7 +58,9 @@ const RegisterPage: React.FC = () => {
       <Container className="py-5 d-flex justify-content-center">
         <Card style={{ width: '100%', maxWidth: 460 }}>
           <Card.Body className="p-4">
-            <h4 className="fw-bold mb-4 text-center">{t('auth.register.title')}</h4>
+            <h4 className="fw-bold mb-3 text-center">{t('auth.register.title')}</h4>
+            {/* The old shop's accounts weren't carried over (decision 2026-10-14). */}
+            <p className="text-muted small text-center mb-4">{t('auth.register.oldShopNotice')}</p>
 
             {error && <Alert variant="danger" className="py-2">{error}</Alert>}
 
@@ -93,6 +95,7 @@ const RegisterPage: React.FC = () => {
               <Form.Group className="mb-3">
                 <Form.Label>{t('auth.login.password')}</Form.Label>
                 <PasswordInput
+                  showRules
                   value={password}
                   onChange={e => { setPassword(e.target.value); setFieldErrors(errs => withoutFieldError(errs, 'password')); }}
                   placeholder={t('auth.register.passwordHint')}
