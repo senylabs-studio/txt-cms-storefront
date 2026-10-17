@@ -145,6 +145,15 @@
     },
     "showPassword": "Show password",
     "hidePassword": "Hide password",
+    "passwordRules": {
+      "title": "Your password needs:",
+      "minLength": "At least 6 characters",
+      "uppercase": "An uppercase letter",
+      "lowercase": "A lowercase letter",
+      "digit": "A number",
+      "symbol": "A symbol (e.g. ! @ # ?)",
+      "info": "Password requirements"
+    },
     "sessionClosed": {
       "title": "You've been signed out",
       "body": "Your session is no longer valid: it expired or the password was changed on another device. Log in again to see your account, orders and favourites.",

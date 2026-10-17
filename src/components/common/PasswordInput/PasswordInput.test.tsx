@@ -21,4 +21,13 @@ describe('PasswordInput', () => {
     render(<PasswordInput aria-label="pwd" isInvalid feedback="Mínimo 6 caracteres" />);
     expect(screen.getByText('Mínimo 6 caracteres')).toBeInTheDocument();
   });
+
+  it('adds the rules info button only when asked, and describes the field with the rules', () => {
+    const { rerender } = render(<PasswordInput aria-label="pwd" />);
+    expect(screen.queryByRole('button', { name: 'auth.passwordRules.info' })).not.toBeInTheDocument();
+
+    rerender(<PasswordInput aria-label="pwd" showRules />);
+    expect(screen.getByRole('button', { name: 'auth.passwordRules.info' })).toBeInTheDocument();
+    expect(screen.getByLabelText('pwd')).toHaveAccessibleDescription('auth.register.passwordHint');
+  });
 });

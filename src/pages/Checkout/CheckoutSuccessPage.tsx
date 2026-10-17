@@ -95,6 +95,7 @@ const CheckoutSuccessPage: React.FC = () => {
               {error && <Alert variant="danger" className="py-2">{error}</Alert>}
               <Form onSubmit={handleSetPassword} className="d-flex gap-2">
                 <PasswordInput
+                  showRules
                   placeholder={t('authGate.password')}
                   value={password}
                   onChange={e => setPassword(e.target.value)}

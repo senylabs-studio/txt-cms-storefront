@@ -328,6 +328,7 @@ const AccountPage: React.FC = () => {
                     <Form.Group className="mb-3">
                       <Form.Label>{t('account.newPassword')}</Form.Label>
                       <PasswordInput
+                        showRules
                         value={newPassword}
                         onChange={e => { setNewPassword(e.target.value); setPwdFieldErrors(errs => withoutFieldError(errs, 'newPassword')); }}
                         required autoComplete="new-password" minLength={6} isInvalid={!!pwdFieldErrors.newPassword}

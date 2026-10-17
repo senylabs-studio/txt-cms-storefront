@@ -93,6 +93,7 @@ const RegisterPage: React.FC = () => {
               <Form.Group className="mb-3">
                 <Form.Label>{t('auth.login.password')}</Form.Label>
                 <PasswordInput
+                  showRules
                   value={password}
                   onChange={e => { setPassword(e.target.value); setFieldErrors(errs => withoutFieldError(errs, 'password')); }}
                   placeholder={t('auth.register.passwordHint')}

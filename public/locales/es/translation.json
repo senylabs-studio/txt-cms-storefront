@@ -145,6 +145,15 @@
     },
     "showPassword": "Mostrar contraseña",
     "hidePassword": "Ocultar contraseña",
+    "passwordRules": {
+      "title": "La contraseña debe tener:",
+      "minLength": "Mínimo 6 caracteres",
+      "uppercase": "Una letra mayúscula",
+      "lowercase": "Una letra minúscula",
+      "digit": "Un número",
+      "symbol": "Un símbolo (p. ej. ! @ # ?)",
+      "info": "Requisitos de la contraseña"
+    },
     "sessionClosed": {
       "title": "Se ha cerrado tu sesión",
       "body": "Tu sesión ya no es válida: ha caducado o se ha cambiado la contraseña desde otro dispositivo. Vuelve a iniciar sesión para ver tu cuenta, tus pedidos y tus favoritos.",

@@ -71,6 +71,7 @@ const ResetPasswordPage: React.FC = () => {
                   <Form.Group className="mb-3">
                     <Form.Label>{t('auth.resetPassword.newPassword')}</Form.Label>
                     <PasswordInput
+                      showRules
                       value={newPassword}
                       onChange={e => { setNewPassword(e.target.value); setFieldErrors(errs => withoutFieldError(errs, 'newPassword')); }}
                       minLength={6}
