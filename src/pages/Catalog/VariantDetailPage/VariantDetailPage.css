@@ -374,3 +374,91 @@
 
 /* «Dejar una reseña» scrolls here: the heading clears the sticky header. */
 .vdp-reviews { scroll-margin-top: 6rem; }
+
+/* ── Reviews, under the description (2026-10-18, design A) ── */
+.vdp-reviews { margin-top: 28px; }
+.vdp-rv-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 4px 12px;
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+}
+.vdp-rv-title {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #212529;
+}
+.vdp-rv-note { font-size: 0.8rem; color: #6c757d; }
+.vdp-rv-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 28px;
+}
+.vdp-rv-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 110px;
+}
+.vdp-rv-average { font-size: 2.6rem; font-weight: 700; line-height: 1; color: #212529; }
+.vdp-rv-total { font-size: 0.8rem; color: #6c757d; }
+.vdp-rv-bars {
+  flex: 1 1 180px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.vdp-rv-bar-row { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: #495057; }
+.vdp-rv-bar { flex: 1; height: 6px; background: #e9ecef; border-radius: 3px; overflow: hidden; }
+.vdp-rv-bar > span { display: block; height: 100%; background: var(--brand-color); }
+.vdp-rv-bar-count { width: 18px; text-align: right; }
+.vdp-rv-write { border-radius: 8px; font-weight: 600; font-size: 0.875rem; white-space: nowrap; }
+.vdp-rv-empty { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.vdp-rv-form {
+  margin-top: 16px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+}
+.vdp-rv-form .form-control { border-radius: 8px; }
+.vdp-rv-form .btn-dark { border-radius: 8px; font-weight: 600; }
+.vdp-rv-list { margin-top: 12px; }
+.vdp-rv-item { display: flex; gap: 14px; padding: 16px 0; border-top: 1px solid #e9ecef; }
+.vdp-rv-avatar {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--brand-color) 14%, white);
+  color: var(--brand-text-color);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.vdp-rv-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.vdp-rv-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 0.85rem; }
+.vdp-rv-verified { color: var(--brand-text-color); font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px; }
+.vdp-rv-comment { margin: 0; font-size: 0.9rem; color: #343a40; line-height: 1.6; }
+.vdp-rating-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: #6c757d;
+  text-decoration: none;
+}
+.vdp-rating-link:hover span:last-child { text-decoration: underline; }

@@ -96,6 +96,8 @@ export interface StorefrontVariantDetail {
   alsoBoughtIsFallback: boolean;
   averageRating?: number;
   reviewCount: number;
+  /** Reviews per star, one to five stars (index 0 = one star). */
+  ratingCounts?: number[];
 }
 
 export interface ProductReview {

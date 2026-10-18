@@ -93,6 +93,21 @@ describe('VariantDetailPage reviews', () => {
     expect(await screen.findByText('product.reviewCount(8)')).toBeInTheDocument();
   });
 
+  // 2026-10-18: the reviews section sits right under the description, with the average, the
+  // count and a bar per star, and the stars by the title jump to it.
+  it('summarises the reviews with a bar per star, linked from the stars by the title', async () => {
+    getVariantById.mockResolvedValue(variant({ averageRating: 4.666, reviewCount: 3, ratingCounts: [0, 0, 0, 1, 2], description: 'Franela suave' }));
+    renderPage();
+
+    expect(await screen.findByText('4.7')).toBeInTheDocument();
+    expect(screen.getByText('product.reviewTotal(3)')).toBeInTheDocument();
+    expect(screen.getAllByText('product.ratingBar(2)')).toHaveLength(1);
+    expect(screen.getByText('product.reviewCount(3)').closest('a')).toHaveAttribute('href', '#reviews');
+    const section = document.getElementById('reviews')!;
+    const description = screen.getAllByText('product.description')[0];
+    expect(description.compareDocumentPosition(section) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it('hides the rating summary when there are no reviews yet', async () => {
     getVariantById.mockResolvedValue(variant({ reviewCount: 0 }));
     renderPage();
@@ -143,10 +158,11 @@ describe('VariantDetailPage reviews', () => {
     submitReview.mockResolvedValue({ id: 9, customerName: 'Jane', rating: 4, comment: 'Bien', createdAt: '2026-01-15T00:00:00.000Z' });
     renderPage();
 
-    expect(await screen.findByText('product.writeReview')).toBeInTheDocument();
+    // The form opens from «Escribir una reseña» (2026-10-18: reviews moved under the description).
+    fireEvent.click(await screen.findByRole('button', { name: 'product.writeReview' }));
 
     // Click the 4th star to set the rating
-    const stars = document.querySelectorAll('.vdp-reviews svg');
+    const stars = document.querySelectorAll('.vdp-rv-form svg');
     fireEvent.click(stars[3]);
     fireEvent.change(screen.getByPlaceholderText('product.reviewCommentPlaceholder'), { target: { value: 'Bien' } });
     fireEvent.click(screen.getByText('product.submitReview'));
@@ -163,7 +179,9 @@ describe('VariantDetailPage reviews', () => {
     });
     renderPage();
 
-    expect(await screen.findByText('product.editYourReview')).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole('button', { name: 'product.editReview' }));
+
+    expect(screen.getByText('product.editYourReview')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Ok')).toBeInTheDocument();
   });
 
@@ -356,13 +374,17 @@ describe('VariantDetailPage stale-response guard', () => {
       { initialEntries: ['/variant/1'] },
     );
     render(<RouterProvider router={router} />);
-    expect(await screen.findByDisplayValue('Genial')).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole('button', { name: 'product.editReview' }));
+    expect(screen.getByDisplayValue('Genial')).toBeInTheDocument();
 
     router.navigate('/variant/2');
     await screen.findByText('Lino Verde');
     await waitFor(() => expect(getMyReview).toHaveBeenCalledWith(2));
     await new Promise(r => setTimeout(r, 0));
 
+    // The form closes on the new variant and opens empty.
+    expect(screen.queryByDisplayValue('Genial')).not.toBeInTheDocument();
+    fireEvent.click(await screen.findByRole('button', { name: 'product.writeReview' }));
     expect(screen.queryByDisplayValue('Genial')).not.toBeInTheDocument();
     expect(screen.queryByText('product.editYourReview')).not.toBeInTheDocument();
   });
