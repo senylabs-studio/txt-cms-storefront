@@ -30,6 +30,7 @@ const GiftCardPage = lazyPage(() => import('./pages/GiftCard/GiftCardPage'));
 const CheckoutPage = lazyPage(() => import('./pages/Checkout/CheckoutPage'));
 const CheckoutSuccessPage = lazyPage(() => import('./pages/Checkout/CheckoutSuccessPage'));
 const CheckoutErrorPage = lazyPage(() => import('./pages/Checkout/CheckoutErrorPage'));
+const NotFoundPage = lazyPage(() => import('./pages/NotFound/NotFoundPage'));
 const LoginPage = lazyPage(() => import('./pages/Auth/LoginPage'));
 const RegisterPage = lazyPage(() => import('./pages/Auth/RegisterPage'));
 const ForgotPasswordPage = lazyPage(() => import('./pages/Auth/ForgotPasswordPage'));
@@ -106,7 +107,7 @@ function App() {
               </Route>
 
               {/* Fallback */}
-              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<NotFoundPage />} />
             </Routes>
             </Suspense>
             </PageErrorBoundary>

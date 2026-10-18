@@ -607,6 +607,9 @@
       "gots": "Certificado GOTS (Global Organic Textile Standard): fibras de cultivo ecológico, fabricación que respeta el medio ambiente y comercio socialmente responsable."
     }
   },
+  "notFound": {
+    "home": "Ir a la portada"
+  },
   "landing": {
     "comingSoon": "Próximamente...",
     "browseCatalog": "Ver catálogo"
