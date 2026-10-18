@@ -16,6 +16,9 @@
   font-size: 13px;
   color: color-mix(in srgb, var(--brand-color) 65%, #14171a);
 }
+/* Its height is kept while the languages (ES · CA · EN) load, so the header doesn't grow by a
+   few pixels and push the page down when they arrive. */
+.header-topbar .container > .d-flex { min-height: 24px; }
 
 .header-lang-switch { font-size: 0.72rem; }
 .header-lang-btn {
@@ -27,9 +30,10 @@
   padding: 0 4px;
   cursor: pointer;
   color: inherit;
-  opacity: .6;
 }
-.header-lang-btn.is-active { opacity: 1; font-weight: 700; }
+/* The inactive ones used to be faded (2.35:1, under WCAG AA): all in the bar's colour now, the
+   chosen one bold and underlined. */
+.header-lang-btn.is-active { font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
 
 .topbar-link {
   color: #495057;
@@ -76,6 +80,9 @@
 .brand-txt { color: #212529; }
 .brand-cms { color: var(--brand-color); }
 .brand-logo { height: 64px; width: auto; max-width: 160px; object-fit: contain; }
+/* The logo's height is kept while the site settings load (the name shows until then), so the
+   header doesn't grow when the logo arrives and push the page down. */
+.brand { min-height: 64px; }
 
 .brand-mini { display: flex; align-items: center; flex: none; }
 .brand-mini-logo { height: 34px; width: auto; max-width: 100px; object-fit: contain; border-radius: 50%; }
@@ -104,7 +111,7 @@
 .header-search-suggestion-empty {
   padding: 12px 14px;
   font-size: 13px;
-  color: #6c757d;
+  color: #5c636a;
 }
 
 .header-search-suggestion {
@@ -347,7 +354,7 @@
 .mega-section-title {
   font-size: 13px;
   font-weight: 600;
-  color: #6c757d;
+  color: #5c636a;
   text-decoration: none;
   text-transform: uppercase;
   letter-spacing: .6px;
@@ -572,6 +579,7 @@
   .header-icon-label { display: none; }
   .nav-menu-bar { display: none; }
   .brand-logo { height: 48px; }
+  .brand { min-height: 48px; }
 }
 
 /* >= 992px (desktop): action icon labels only show at wide desktop width */

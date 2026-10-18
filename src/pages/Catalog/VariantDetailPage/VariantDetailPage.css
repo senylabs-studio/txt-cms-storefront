@@ -159,7 +159,7 @@
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #6c757d;
+  color: #5c636a;
   text-decoration: none;
 }
 
@@ -173,13 +173,13 @@
 
 .vdp-type-value {
   font-size: 0.85rem;
-  color: #6c757d;
+  color: #5c636a;
   margin-bottom: 4px;
 }
 
 .vdp-ref {
   font-size: 0.78rem;
-  color: #adb5bd;
+  color: #5c636a;
   margin-bottom: 16px;
 }
 
@@ -205,7 +205,7 @@
 
 .vdp-price-unit {
   font-size: 0.82rem;
-  color: #6c757d;
+  color: #5c636a;
   margin-bottom: 20px;
 }
 
@@ -351,7 +351,7 @@
 
 .vdp-info-label {
   min-width: 130px;
-  color: #6c757d;
+  color: #5c636a;
   flex-shrink: 0;
 }
 
@@ -395,7 +395,7 @@
   text-transform: uppercase;
   color: #212529;
 }
-.vdp-rv-note { font-size: 0.8rem; color: #6c757d; }
+.vdp-rv-note { font-size: 0.8rem; color: #5c636a; }
 .vdp-rv-summary {
   display: flex;
   flex-wrap: wrap;
@@ -410,7 +410,7 @@
   min-width: 110px;
 }
 .vdp-rv-average { font-size: 2.6rem; font-weight: 700; line-height: 1; color: #212529; }
-.vdp-rv-total { font-size: 0.8rem; color: #6c757d; }
+.vdp-rv-total { font-size: 0.8rem; color: #5c636a; }
 .vdp-rv-bars {
   flex: 1 1 180px;
   list-style: none;
@@ -458,7 +458,7 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 8px;
-  color: #6c757d;
+  color: #5c636a;
   text-decoration: none;
 }
 .vdp-rating-link:hover span:last-child { text-decoration: underline; }

@@ -10,11 +10,22 @@
   height: 2rem;
 }
 
+/* 24×24 px to tap (WCAG 2.2 target size; the 10 px dot alone was too small), same 10 px dot. */
 .home-carousel .carousel-indicators [data-bs-target] {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+  position: relative;
+  width: 24px;
+  height: 24px;
+  margin: 0 2px;
+  border: 0;
+  background: transparent;
   opacity: .6;
+}
+.home-carousel .carousel-indicators [data-bs-target]::after {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border-radius: 50%;
+  background: #fff;
 }
 
 .home-carousel .carousel-indicators .active {

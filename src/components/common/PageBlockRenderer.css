@@ -1,7 +1,7 @@
 /* ── Image ────────────────────────────────────────────────────────────────────── */
 .pbr-image { margin: 0; }
 .pbr-image img { max-width: 100%; height: auto; display: block; }
-.pbr-image-caption { font-size: 0.85rem; color: #6c757d; margin-top: 4px; }
+.pbr-image-caption { font-size: 0.85rem; color: #5c636a; margin-top: 4px; }
 
 /* ── ImageText ────────────────────────────────────────────────────────────────── */
 .pbr-image-text-img { max-width: 100%; height: auto; border-radius: 4px; }
@@ -176,7 +176,7 @@
   color: #212529;
   margin: 0;
 }
-.pbr-accordion-chevron { margin-left: auto; flex: none; color: #6c757d; transition: transform 0.2s; }
+.pbr-accordion-chevron { margin-left: auto; flex: none; color: #5c636a; transition: transform 0.2s; }
 .pbr-accordion[open] .pbr-accordion-chevron { transform: rotate(180deg); color: var(--brand-color); }
 .pbr-accordion-body { padding: 0 1rem 1rem; color: #3d4541; }
 @media (prefers-reduced-motion: reduce) { .pbr-accordion-chevron { transition: none; } }
@@ -283,7 +283,7 @@
   font: 600 0.8rem 'Barlow', system-ui, sans-serif;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #6c757d;
+  color: #5c636a;
 }
 .pbr-card-label svg { color: var(--brand-color); flex: none; font-size: 1rem; }
 .pbr-card-value {
@@ -293,8 +293,8 @@
   margin-top: 0.35rem;
   overflow-wrap: anywhere;
 }
-.pbr-card-unit { font-size: 0.875rem; color: #6c757d; }
-.pbr-card-note { font-size: 0.82rem; color: #6c757d; }
+.pbr-card-unit { font-size: 0.875rem; color: #5c636a; }
+.pbr-card-note { font-size: 0.82rem; color: #5c636a; }
 .pbr-card-note-bottom { margin-top: auto; padding-top: 0.5rem; }
 .pbr-card-warning {
   display: inline-flex;
@@ -417,7 +417,7 @@
 .pbr-hours-table td { text-align: right; font-variant-numeric: tabular-nums; }
 .pbr-hours-table tr.is-today th,
 .pbr-hours-table tr.is-today td { font-weight: 600; }
-.pbr-hours-closed { color: #6c757d; }
+.pbr-hours-closed { color: #5c636a; }
 .pbr-hours-range { white-space: nowrap; }
 .pbr-hours-range + .pbr-hours-range::before { content: ' · '; }
 /* Narrow screens: one slot per line instead of wrapping mid-range. */
@@ -425,7 +425,7 @@
   .pbr-hours-range { display: block; }
   .pbr-hours-range + .pbr-hours-range::before { content: none; }
 }
-.pbr-hours-note { font-size: 0.85rem; color: #6c757d; margin: 0.5rem 0 0; }
+.pbr-hours-note { font-size: 0.85rem; color: #5c636a; margin: 0.5rem 0 0; }
 
 /* ── FaqSearch ────────────────────────────────────────────────────────────────── */
 .pbr-faq-search { max-width: 560px; }
@@ -438,14 +438,14 @@
   border-radius: 10px;
   padding: 0.6rem 0.9rem;
   margin: 0;
-  color: #6c757d;
+  color: #5c636a;
 }
 .pbr-faq-search-box:focus-within {
   border-color: var(--brand-color);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-color) 18%, transparent);
 }
 .pbr-faq-search-box input { border: 0; outline: 0; flex: 1; min-width: 0; background: transparent; color: #212529; font-size: 1rem; }
-.pbr-faq-search-empty { color: #6c757d; font-size: 0.9rem; margin: 0.6rem 0 0; }
+.pbr-faq-search-empty { color: #5c636a; font-size: 0.9rem; margin: 0.6rem 0 0; }
 
 /* ── TableOfContents ──────────────────────────────────────────────────────────── */
 .pbr-toc { background: #fff; border: 1px solid #e3e6e4; border-radius: 12px; padding: 1rem 1.25rem; }

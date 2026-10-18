@@ -470,6 +470,7 @@
     "add": "Afegir a favorits",
     "removeError": "No s'ha pogut eliminar de preferits.",
     "toggleError": "No s'ha pogut actualitzar preferits.",
+    "savedAfterLogin": "Desat als teus favorits.",
     "loadError": "No s'han pogut carregar els teus preferits."
   },
   "board": {

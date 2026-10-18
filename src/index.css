@@ -15,6 +15,9 @@
   /* The brand colour darkened enough to read as text on white (#06b773 → ~5:1, WCAG AA even at
      small sizes); follows whatever brand colour Site Settings sets. */
   --brand-text-color: color-mix(in srgb, var(--brand-color) 70%, black);
+  /* Secondary text (.text-muted and our own greys): #5c636a read 4.44:1 on the #f8f9fa page, just
+     under WCAG AA's 4.5:1 (Lighthouse, 2026-10-18); this one reads ~5.6:1. */
+  --bs-secondary-color: #5c636a;
 }
 
 /* Prices everywhere use the corporate colour (they used to be red in some places, dark grey in
@@ -178,8 +181,12 @@ body {
 .storefront-footer { border-top: 1px solid #e9ecef; }
 
 /* Top columns section */
-.footer-top { background: var(--brand-color); }
+/* The brand green darkened (70 % / 55 %) so the footer's white text reads at WCAG AA: on the
+   light brand green it was 1.9–2.6:1 (Lighthouse, 2026-10-18); now 5:1 and up. */
+.footer-top { background: color-mix(in srgb, var(--brand-color) 70%, black); }
 .footer-col-title {
+  /* An h2 (an h6 straight after the page's h1 skipped levels for screen readers), sized as before. */
+  line-height: 1.2;
   font-size: 14px;
   font-weight: 700;
   text-transform: uppercase;
@@ -188,21 +195,21 @@ body {
   margin-bottom: 10px;
 }
 .storefront-footer .footer-col-links { display: flex; flex-direction: column; gap: 6px; }
-.storefront-footer .footer-link { font-size: 14px; color: rgba(255,255,255,0.7); text-decoration: none; margin-left: 10px;}
+.storefront-footer .footer-link { font-size: 14px; color: #fff; text-decoration: none; margin-left: 10px;}
 .storefront-footer .footer-link:hover { color: #fff; text-decoration: underline; }
-.storefront-footer .footer-link-plain { font-size: 13px; color: rgba(255,255,255,0.6); }
+.storefront-footer .footer-link-plain { font-size: 13px; color: #fff; }
 
 /* Contact column */
 .storefront-footer .footer-contact-list { display: flex; flex-direction: column; gap: 8px; margin: 0; }
-.storefront-footer .footer-contact-list li { display: flex; align-items: flex-start; gap: 8px; font-size: 14px; color: rgba(255,255,255,0.85); }
+.storefront-footer .footer-contact-list li { display: flex; align-items: flex-start; gap: 8px; font-size: 14px; color: #fff; }
 .storefront-footer .footer-contact-icon { flex-shrink: 0; margin-top: 4px; font-size: 13px; color: #fff; }
-.storefront-footer .footer-contact-link { color: rgba(255,255,255,0.85); text-decoration: none; overflow-wrap: anywhere; }
+.storefront-footer .footer-contact-link { color: #fff; text-decoration: none; overflow-wrap: anywhere; }
 .storefront-footer .footer-contact-link:hover { color: #fff; text-decoration: underline; }
 .storefront-footer .footer-contact-hours { display: flex; flex-direction: column; }
 
 /* Bottom bar */
 .storefront-footer .footer-bottom {
-  background: color-mix(in srgb, var(--brand-color) 80%, black);
+  background: color-mix(in srgb, var(--brand-color) 55%, black);
   border-top: 1px solid rgba(255,255,255,0.15);
 }
 .storefront-footer .footer-bottom-inner {
@@ -219,7 +226,7 @@ body {
   align-items: center;
   gap: 6px;
 }
-.storefront-footer .footer-legal-link { font-size: 12px; color: rgba(255,255,255,0.7); text-decoration: none; }
+.storefront-footer .footer-legal-link { font-size: 12px; color: rgba(255,255,255,0.85); text-decoration: none; }
 .storefront-footer .footer-legal-link:hover { color: #fff; text-decoration: underline; }
 .storefront-footer .footer-legal-sep { color: rgba(255,255,255,0.35); font-size: 12px; }
 
@@ -239,7 +246,7 @@ body {
 }
 .storefront-footer .footer-social-btn:hover { background: rgba(255,255,255,0.42); transform: scale(1.1); color: #fff; }
 
-.storefront-footer .footer-copyright { font-size: 11px; color: rgba(255,255,255,0.6); padding: 4px 0 12px; margin: 0; }
+.storefront-footer .footer-copyright { font-size: 11px; color: rgba(255,255,255,0.85); padding: 4px 0 12px; margin: 0; }
 
 /* Logos column */
 .storefront-footer .footer-logos-list { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }

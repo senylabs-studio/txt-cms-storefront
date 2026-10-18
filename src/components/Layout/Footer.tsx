@@ -216,7 +216,7 @@ const Footer: React.FC = () => {
             <Row className="py-4 g-4">
               {visibleColumns.map((col, i) => (
                 <Col key={i} xs={12} sm={6} md={4}>
-                  <h6 className="footer-col-title">{col.title}</h6>
+                  <h2 className="footer-col-title">{col.title}</h2>
                   <FooterColContent col={col} />
                 </Col>
               ))}

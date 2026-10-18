@@ -22,6 +22,6 @@
 }
 .active-filters-clear {
   border: none; background: none; padding: 5px 4px;
-  color: #6c757d; font-size: 0.85rem; text-decoration: underline; cursor: pointer;
+  color: #5c636a; font-size: 0.85rem; text-decoration: underline; cursor: pointer;
 }
 .active-filters-clear:hover { color: var(--brand-text-color); }

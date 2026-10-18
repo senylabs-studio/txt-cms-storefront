@@ -2,7 +2,7 @@
   display: inline-block;
   padding: 3px 8px;
   border-radius: 4px;
-  background: var(--brand-color);
+  background: var(--brand-text-color); /* white on the light brand green read 2.61:1 */
   color: #fff;
   font-size: 10px;
   font-weight: 700;
