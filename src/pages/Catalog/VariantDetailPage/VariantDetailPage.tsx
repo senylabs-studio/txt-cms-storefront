@@ -295,6 +295,7 @@ const VariantDetailPage: React.FC = () => {
       if (currentIdRef.current !== variantId) return; // saved, but the customer is on another variant now
       setMyReview(prev => prev ? { ...prev, review: saved } : { hasPurchased: true, review: saved });
       setReviewMsg({ type: 'success', text: t('product.reviewSaved') });
+      setReviewFormOpen(false); // saved: the thanks shows on its own, the review heads the list
       changeReviewsPage(1, variantId);
     } catch (err) {
       if (currentIdRef.current === variantId) setReviewMsg({ type: 'danger', text: getApiErrorMessage(err, t('product.reviewSaveError')) });
@@ -396,6 +397,11 @@ const VariantDetailPage: React.FC = () => {
       {myReview.review ? t('product.editReview') : t('product.writeReview')}
     </Button>
   );
+  // The customer's own review heads the list, marked as theirs with an «Editar» button, wherever
+  // it falls by date (another page included): one review per customer and fabric, so it's edited,
+  // never written twice.
+  const ownReview = myReview?.review ?? null;
+  const listedReviews = ownReview ? [ownReview, ...reviews.filter(r => r.id !== ownReview.id)] : reviews;
   const reviewsBlock = (
     <section id="reviews" className="vdp-reviews" aria-labelledby="vdp-reviews-title">
       <div className="vdp-rv-head">
@@ -457,16 +463,24 @@ const VariantDetailPage: React.FC = () => {
 
       {reviewsError ? (
         <Alert variant="danger" className="py-2 mt-3">{reviewsError}</Alert>
-      ) : reviews.length > 0 && (
+      ) : listedReviews.length > 0 && (
         <div className="vdp-rv-list">
-          {reviews.map(r => (
-            <article key={r.id} className="vdp-rv-item">
+          {listedReviews.map(r => (
+            <article key={r.id} className={`vdp-rv-item${r.id === ownReview?.id ? ' vdp-rv-item--own' : ''}`}>
               <span className="vdp-rv-avatar" aria-hidden>{(r.customerName || '?').trim().charAt(0).toUpperCase()}</span>
               <div className="vdp-rv-body">
                 <div className="vdp-rv-meta">
                   <span className="fw-semibold">{r.customerName}</span>
                   <span className="vdp-rv-verified"><FaCheck size={10} aria-hidden /> {t('product.verifiedPurchase')}</span>
                   <span className="text-muted">{formatDate(r.createdAt)}</span>
+                  {r.id === ownReview?.id && (
+                    <>
+                      <span className="vdp-rv-own">{t('product.yourReviewBadge')}</span>
+                      <button type="button" className="btn btn-link p-0 vdp-rv-edit" onClick={() => setReviewFormOpen(true)}>
+                        {t('product.editShort')}
+                      </button>
+                    </>
+                  )}
                 </div>
                 <StarRating value={r.rating} size={13} />
                 {r.comment && <p className="vdp-rv-comment">{r.comment}</p>}

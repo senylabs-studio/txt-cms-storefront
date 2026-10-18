@@ -203,6 +203,39 @@ describe('VariantDetailPage reviews', () => {
     expect(await screen.findByText('product.reviewSaved')).toBeInTheDocument();
   });
 
+  // 2026-10-18: one review per customer and fabric — theirs heads the list, marked as theirs with
+  // «Editar», wherever it falls by date; saving closes the form.
+  it('lists the customer\'s own review first, with a button to edit it', async () => {
+    const mine = { id: 7, customerName: 'Emili', rating: 1, createdAt: '2026-10-18T17:29:00.000Z' };
+    getVariantById.mockResolvedValue(variant({ reviewCount: 2 }));
+    getVariantReviews.mockResolvedValue(reviewsPage([
+      { id: 3, customerName: 'Jane', rating: 5, comment: 'Excelente', createdAt: '2026-10-19T00:00:00.000Z' }, mine,
+    ]));
+    getMyReview.mockResolvedValue({ hasPurchased: true, review: mine });
+    renderPage();
+
+    await screen.findByText('product.yourReviewBadge');
+    const names = Array.from(document.querySelectorAll('.vdp-rv-item .fw-semibold')).map(e => e.textContent);
+    expect(names).toEqual(['Emili', 'Jane']);
+    fireEvent.click(screen.getByRole('button', { name: 'product.editShort' }));
+    expect(screen.getByText('product.editYourReview')).toBeInTheDocument();
+  });
+
+  it('closes the form once the review is saved, keeping the thanks', async () => {
+    getVariantById.mockResolvedValue(variant());
+    getMyReview.mockResolvedValue({ hasPurchased: true, review: null });
+    submitReview.mockResolvedValue({ id: 9, customerName: 'Jane', rating: 5, createdAt: '2026-01-15T00:00:00.000Z' });
+    renderPage();
+
+    fireEvent.click(await screen.findByRole('button', { name: 'product.writeReview' }));
+    fireEvent.click(document.querySelectorAll('.vdp-rv-form svg')[4]);
+    fireEvent.click(screen.getByText('product.submitReview'));
+
+    expect(await screen.findByText('product.reviewSaved')).toBeInTheDocument();
+    expect(screen.queryByPlaceholderText('product.reviewCommentPlaceholder')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'product.editReview' })).toBeInTheDocument();
+  });
+
   it('prefills the form with the existing review and labels it as editing', async () => {
     getVariantById.mockResolvedValue(variant());
     getMyReview.mockResolvedValue({

@@ -462,3 +462,15 @@
   text-decoration: none;
 }
 .vdp-rating-link:hover span:last-child { text-decoration: underline; }
+.vdp-rv-own {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #495057;
+  background: #f1f3f5;
+  border-radius: 4px;
+  padding: 1px 6px;
+}
+.vdp-rv-edit { font-size: 0.85rem; font-weight: 600; color: var(--brand-text-color); text-decoration: none; }
+.vdp-rv-edit:hover { text-decoration: underline; }
