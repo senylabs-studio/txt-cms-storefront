@@ -162,6 +162,11 @@ const VariantDetailPage: React.FC = () => {
   // The review form opens from «Escribir una reseña» / «Editar tu reseña».
   const [reviewFormOpen, setReviewFormOpen] = useState(false);
   const isPhone = useMediaQuery('(max-width: 767.98px)');
+  // The review emails («¿Qué te han parecido tus telas?», order delivered) and the order page link
+  // here with #reviews to write one: the form opens by itself for a customer who can review.
+  useEffect(() => {
+    if (hash === '#reviews' && myReview?.hasPurchased) setReviewFormOpen(true);
+  }, [hash, myReview]);
 
   // Recently viewed
   const [recentlyViewed, setRecentlyViewed] = useState<StorefrontVariant[]>([]);
@@ -376,7 +381,13 @@ const VariantDetailPage: React.FC = () => {
   // fabric. Rendered in one place only, so the form and the #reviews anchor are never doubled.
   const ratingCounts = variant.ratingCounts ?? [];
   const averageText = (variant.averageRating ?? 0).toLocaleString(i18n.language, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-  const writeButton = myReview?.hasPurchased && (
+  // Logged out (often someone opening a review email on another device): the button goes to the
+  // login and back here with #reviews, where the form opens if they bought the fabric.
+  const writeButton = !isAuthenticated ? (
+    <Link to={`/login?from=${encodeURIComponent(`/variant/${variant.id}#reviews`)}`} className="btn btn-outline-dark vdp-rv-write">
+      {t('product.writeReview')}
+    </Link>
+  ) : myReview?.hasPurchased && (
     <Button variant="outline-dark" className="vdp-rv-write" aria-expanded={reviewFormOpen} onClick={() => setReviewFormOpen(o => !o)}>
       {myReview.review ? t('product.editReview') : t('product.writeReview')}
     </Button>

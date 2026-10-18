@@ -59,8 +59,8 @@ const { getVariantReviews, getMyReview, submitReview } = vi.hoisted(() => ({
 }));
 vi.mock('../../../services/reviewService', () => ({ getVariantReviews, getMyReview, submitReview }));
 
-const renderPage = (variantId = '1') => render(
-  <MemoryRouter initialEntries={[`/variant/${variantId}`]}>
+const renderPage = (variantId = '1', hash = '') => render(
+  <MemoryRouter initialEntries={[`/variant/${variantId}${hash}`]}>
     <Routes><Route path="/variant/:id" element={<VariantDetailPage />} /></Routes>
   </MemoryRouter>,
 );
@@ -141,6 +141,26 @@ describe('VariantDetailPage reviews', () => {
 
     await screen.findByText('Tela Azul');
     expect(screen.queryByText('product.writeReview')).not.toBeInTheDocument();
+  });
+
+  // The review emails link to the page with #reviews: the form must be open on arrival, and a
+  // visitor who isn't logged in (email opened on another device) is sent to log in and back.
+  it('opens the review form when arriving with #reviews from a review email', async () => {
+    getVariantById.mockResolvedValue(variant());
+    getMyReview.mockResolvedValue({ hasPurchased: true, review: null });
+    Element.prototype.scrollIntoView = vi.fn(); // jsdom has none; the page scrolls to #reviews
+    renderPage('1', '#reviews');
+
+    expect(await screen.findByPlaceholderText('product.reviewCommentPlaceholder')).toBeInTheDocument();
+  });
+
+  it('offers a logged-out visitor to log in to write a review, coming back to the reviews', async () => {
+    mockAuth.isAuthenticated = false;
+    getVariantById.mockResolvedValue(variant());
+    renderPage();
+
+    const link = await screen.findByRole('link', { name: 'product.writeReview' });
+    expect(link).toHaveAttribute('href', `/login?from=${encodeURIComponent('/variant/1#reviews')}`);
   });
 
   it('does not fetch "mine" when the visitor is not authenticated', async () => {
