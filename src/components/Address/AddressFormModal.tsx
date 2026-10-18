@@ -110,7 +110,7 @@ const AddressFormModal: React.FC<Props> = ({ show, address, onHide, onSaved }) =
         {error && <Alert variant="danger" className="py-2">{error}</Alert>}
         <Row>
           <Col sm={6}>
-            <Form.Group className="mb-2">
+            <Form.Group controlId="address-alias" className="mb-2">
               <Form.Label>{t('account.alias')}</Form.Label>
               <Form.Control
                 value={form.alias ?? ''}
@@ -122,7 +122,7 @@ const AddressFormModal: React.FC<Props> = ({ show, address, onHide, onSaved }) =
             </Form.Group>
           </Col>
           <Col sm={6}>
-            <Form.Group className="mb-2">
+            <Form.Group controlId="address-recipient" className="mb-2">
               <Form.Label>{t('account.recipient')}</Form.Label>
               <Form.Control
                 value={form.recipientName ?? ''}
@@ -152,7 +152,7 @@ const AddressFormModal: React.FC<Props> = ({ show, address, onHide, onSaved }) =
             </Form.Group>
           </Col>
         </Row>
-        <Form.Group className="mb-2">
+        <Form.Group controlId="address-street" className="mb-2">
           <Form.Label>{t('account.street')}</Form.Label>
           <AddressAutocomplete
             value={form.street ?? ''}
@@ -174,7 +174,7 @@ const AddressFormModal: React.FC<Props> = ({ show, address, onHide, onSaved }) =
         </Form.Group>
         <Row>
           <Col sm={4}>
-            <Form.Group className="mb-2">
+            <Form.Group controlId="address-postalcode" className="mb-2">
               <Form.Label>{t('account.postalCode')}</Form.Label>
               <Form.Control
                 value={form.postalCode ?? ''}
@@ -185,7 +185,7 @@ const AddressFormModal: React.FC<Props> = ({ show, address, onHide, onSaved }) =
             </Form.Group>
           </Col>
           <Col sm={8}>
-            <Form.Group className="mb-2">
+            <Form.Group controlId="address-city" className="mb-2">
               <Form.Label>{t('account.city')}</Form.Label>
               <Form.Control
                 value={form.city ?? ''}
@@ -198,14 +198,14 @@ const AddressFormModal: React.FC<Props> = ({ show, address, onHide, onSaved }) =
         </Row>
         <Row>
           <Col sm={6}>
-            <Form.Group className="mb-2">
+            <Form.Group controlId="address-province" className="mb-2">
               <Form.Label>{t('account.province')}</Form.Label>
               <Form.Control value={form.province ?? ''} onChange={e => update({ province: e.target.value })} isInvalid={!!fieldErrors.province} />
               <Form.Control.Feedback type="invalid">{fieldErrors.province}</Form.Control.Feedback>
             </Form.Group>
           </Col>
           <Col sm={6}>
-            <Form.Group className="mb-2">
+            <Form.Group controlId="address-phone" className="mb-2">
               <Form.Label>{t('account.phone')}</Form.Label>
               <Form.Control value={form.phone ?? ''} onChange={e => update({ phone: e.target.value })} isInvalid={!!fieldErrors.phone} />
               <Form.Control.Feedback type="invalid">{fieldErrors.phone}</Form.Control.Feedback>

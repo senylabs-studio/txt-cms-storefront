@@ -65,7 +65,7 @@ const RegisterPage: React.FC = () => {
             {error && <Alert variant="danger" className="py-2">{error}</Alert>}
 
             <Form onSubmit={handleSubmit}>
-              <Form.Group className="mb-3">
+              <Form.Group controlId="auth-register-fullname" className="mb-3">
                 <Form.Label>{t('auth.register.fullName')}</Form.Label>
                 <Form.Control
                   type="text"
@@ -79,7 +79,7 @@ const RegisterPage: React.FC = () => {
                 <Form.Control.Feedback type="invalid">{fieldErrors.name}</Form.Control.Feedback>
               </Form.Group>
 
-              <Form.Group className="mb-3">
+              <Form.Group controlId="auth-login-email" className="mb-3">
                 <Form.Label>{t('auth.login.email')}</Form.Label>
                 <Form.Control
                   type="email"
@@ -92,7 +92,7 @@ const RegisterPage: React.FC = () => {
                 <Form.Control.Feedback type="invalid">{fieldErrors.email}</Form.Control.Feedback>
               </Form.Group>
 
-              <Form.Group className="mb-3">
+              <Form.Group controlId="auth-login-password" className="mb-3">
                 <Form.Label>{t('auth.login.password')}</Form.Label>
                 <PasswordInput
                   showRules
@@ -106,7 +106,7 @@ const RegisterPage: React.FC = () => {
                 />
               </Form.Group>
 
-              <Form.Group className="mb-3">
+              <Form.Group controlId="auth-register-phone" className="mb-3">
                 <Form.Label>{t('auth.register.phone')} <span className="text-muted">{t('auth.register.phoneOptional')}</span></Form.Label>
                 <Form.Control
                   type="tel"

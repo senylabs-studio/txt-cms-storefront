@@ -68,7 +68,7 @@ const ResetPasswordPage: React.FC = () => {
               <>
                 {error && <Alert variant="danger" className="py-2">{error}</Alert>}
                 <Form onSubmit={handleSubmit}>
-                  <Form.Group className="mb-3">
+                  <Form.Group controlId="auth-resetpassword-newpassword" className="mb-3">
                     <Form.Label>{t('auth.resetPassword.newPassword')}</Form.Label>
                     <PasswordInput
                       showRules
@@ -82,7 +82,7 @@ const ResetPasswordPage: React.FC = () => {
                     />
                   </Form.Group>
 
-                  <Form.Group className="mb-4">
+                  <Form.Group controlId="auth-resetpassword-confirmpassword" className="mb-4">
                     <Form.Label>{t('auth.resetPassword.confirmPassword')}</Form.Label>
                     <PasswordInput
                       value={confirmPassword}

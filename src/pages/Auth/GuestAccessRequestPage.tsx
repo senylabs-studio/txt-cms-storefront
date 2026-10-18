@@ -43,7 +43,7 @@ const GuestAccessRequestPage: React.FC = () => {
                 <p className="text-muted small">{t('auth.guestAccess.instructions')}</p>
                 {error && <Alert variant="danger" className="py-2">{error}</Alert>}
                 <Form onSubmit={handleSubmit}>
-                  <Form.Group className="mb-3">
+                  <Form.Group controlId="auth-login-email" className="mb-3">
                     <Form.Label>{t('auth.login.email')}</Form.Label>
                     <Form.Control
                       type="email"
@@ -55,7 +55,7 @@ const GuestAccessRequestPage: React.FC = () => {
                     />
                   </Form.Group>
 
-                  <Form.Group className="mb-4">
+                  <Form.Group controlId="auth-guestaccess-ordernumber" className="mb-4">
                     <Form.Label>{t('auth.guestAccess.orderNumber')}</Form.Label>
                     <Form.Control
                       type="number"

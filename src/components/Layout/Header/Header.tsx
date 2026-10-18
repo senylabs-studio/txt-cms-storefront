@@ -16,7 +16,8 @@ import { getLanguages, type StorefrontLanguage } from '../../../services/languag
 import type { StorefrontVariant } from '../../../types';
 import './Header.css';
 import IconTooltip from '../../common/IconTooltip/IconTooltip';
-import { formatPrice } from '../../../utils/pricing';
+import { formatPrice, formatPriceShort } from '../../../utils/pricing';
+import { getFreeShippingThreshold } from '../../../services/shippingService';
 
 
 const Header: React.FC = () => {
@@ -38,9 +39,13 @@ const Header: React.FC = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const debouncedSearch = useDebounce(search, 300);
   const [languages, setLanguages] = useState<StorefrontLanguage[]>([]);
+  // From the shipping rate itself: a figure written into the translations went stale (said 50 €
+  // while checkout charged shipping up to 60 €).
+  const [freeShippingFrom, setFreeShippingFrom] = useState<number | null>(null);
 
   useEffect(() => {
     getLanguages().then(setLanguages).catch(() => {});
+    getFreeShippingThreshold().then(setFreeShippingFrom);
   }, []);
 
   useEffect(() => {
@@ -184,7 +189,7 @@ const Header: React.FC = () => {
         <div className="header-topbar">
           <div className="container">
             <div className="d-flex justify-content-between align-items-center">
-              <small className="text-muted">{t('header.freeShipping')}</small>
+              <small className="text-muted">{freeShippingFrom != null && t('header.freeShipping', { amount: formatPriceShort(freeShippingFrom) })}</small>
               <div className="d-flex align-items-center gap-3">
                 <div className="d-flex gap-1 header-lang-switch">
                   {languages.map((lng, i) => (

@@ -138,7 +138,7 @@ const GiftCardPage: React.FC = () => {
               <Card>
                 <Card.Body>
                   <Form onSubmit={handleSubmit} noValidate>
-                    <Form.Group className="mb-3">
+                    <Form.Group controlId="giftcard-amountlabel" className="mb-3">
                       <Form.Label className="fw-semibold">{t('giftCard.amountLabel')}</Form.Label>
                       <div className="d-flex flex-wrap gap-2 mb-2 gift-card-amount-presets">
                         {giftCardPresets(config.minAmount, config.maxAmount, config.amountStep).map(v => (

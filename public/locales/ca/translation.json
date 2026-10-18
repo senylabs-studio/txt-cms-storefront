@@ -1,6 +1,6 @@
 {
   "header": {
-    "freeShipping": "Enviament gratuït en teixits de més de 50 €",
+    "freeShipping": "Enviament gratuït en teixits de més de {{amount}}",
     "myAccount": "El meu compte",
     "myOrders": "Les meves comandes",
     "loginToExistingAccount": "Iniciar sessió amb un altre compte",
@@ -606,6 +606,9 @@
       "oekoTex": "El teixit ha superat les anàlisis de substàncies nocives de l'estàndard OEKO-TEX®: és segur per a la pell.",
       "gots": "Certificat GOTS (Global Organic Textile Standard): fibres de cultiu ecològic, fabricació respectuosa amb el medi ambient i comerç socialment responsable."
     }
+  },
+  "notFound": {
+    "home": "Anar a la portada"
   },
   "landing": {
     "comingSoon": "Properament...",
