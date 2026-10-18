@@ -20,4 +20,13 @@ describe('LoginPage', () => {
     expect(screen.getByText(/auth\.login\.oldShopNotice/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'auth.login.oldShopLink' })).toHaveAttribute('href', '/register');
   });
+
+  // 2026-10-18: the labels weren't tied to their fields (no controlId), so a screen reader
+  // announced two unnamed text boxes.
+  it('names its fields by their labels', () => {
+    render(<MemoryRouter><LoginPage /></MemoryRouter>);
+
+    expect(screen.getByLabelText('auth.login.email')).toHaveAttribute('type', 'email');
+    expect(screen.getByLabelText('auth.login.password')).toHaveAttribute('type', 'password');
+  });
 });

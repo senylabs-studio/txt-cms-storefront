@@ -265,11 +265,11 @@ const AccountPage: React.FC = () => {
                 <h5 className="fw-semibold mb-3"><FaUser className="me-2" />{t('account.personalData')}</h5>
                 {profileMsg && <Alert variant={profileMsg.type} className="py-2">{profileMsg.text}</Alert>}
                 <Form onSubmit={handleSaveProfile}>
-                  <Form.Group className="mb-3">
+                  <Form.Group controlId="account-name" className="mb-3">
                     <Form.Label>{t('account.name')}</Form.Label>
                     <Form.Control value={name} onChange={e => setName(e.target.value)} required />
                   </Form.Group>
-                  <Form.Group className="mb-3">
+                  <Form.Group controlId="account-email" className="mb-3">
                     <Form.Label>{t('account.email')}</Form.Label>
                     <div className="d-flex gap-2">
                       <Form.Control value={profile.email} disabled />
@@ -288,11 +288,11 @@ const AccountPage: React.FC = () => {
                       </Form.Text>
                     )}
                   </Form.Group>
-                  <Form.Group className="mb-3">
+                  <Form.Group controlId="account-phone" className="mb-3">
                     <Form.Label>{t('account.phone')}</Form.Label>
                     <Form.Control value={phone} onChange={e => setPhone(e.target.value)} />
                   </Form.Group>
-                  <Form.Group className="mb-3">
+                  <Form.Group controlId="account-taxid" className="mb-3">
                     <Form.Label>{t('account.taxId')}</Form.Label>
                     <Form.Control value={taxId} onChange={e => setTaxId(e.target.value)} />
                   </Form.Group>
@@ -316,7 +316,7 @@ const AccountPage: React.FC = () => {
                   <h5 className="fw-semibold mb-3"><FaLock className="me-2" />{t('account.changePasswordTitle')}</h5>
                   {pwdMsg && <Alert variant={pwdMsg.type} className="py-2">{pwdMsg.text}</Alert>}
                   <Form onSubmit={handleChangePassword}>
-                    <Form.Group className="mb-3">
+                    <Form.Group controlId="account-currentpassword" className="mb-3">
                       <Form.Label>{t('account.currentPassword')}</Form.Label>
                       <PasswordInput
                         value={currentPassword}
@@ -325,7 +325,7 @@ const AccountPage: React.FC = () => {
                         feedback={pwdFieldErrors.currentPassword}
                       />
                     </Form.Group>
-                    <Form.Group className="mb-3">
+                    <Form.Group controlId="account-newpassword" className="mb-3">
                       <Form.Label>{t('account.newPassword')}</Form.Label>
                       <PasswordInput
                         showRules
@@ -335,7 +335,7 @@ const AccountPage: React.FC = () => {
                         feedback={pwdFieldErrors.newPassword}
                       />
                     </Form.Group>
-                    <Form.Group className="mb-3">
+                    <Form.Group controlId="account-confirmpassword" className="mb-3">
                       <Form.Label>{t('account.confirmPassword')}</Form.Label>
                       <PasswordInput
                         value={confirmPassword}
@@ -443,7 +443,7 @@ const AccountPage: React.FC = () => {
         <Form onSubmit={handleUpdateEmail}>
           <Modal.Body>
             {emailError && <Alert variant="danger" className="py-2">{emailError}</Alert>}
-            <Form.Group className="mb-3">
+            <Form.Group controlId="account-newemail" className="mb-3">
               <Form.Label>{t('account.newEmail')}</Form.Label>
               <Form.Control
                 type="email"
@@ -456,7 +456,7 @@ const AccountPage: React.FC = () => {
               <Form.Control.Feedback type="invalid">{emailFieldErrors.newEmail}</Form.Control.Feedback>
             </Form.Group>
             {!profile.isGuest && (
-              <Form.Group className="mb-2">
+              <Form.Group controlId="account-currentpasswordforemail" className="mb-2">
                 <Form.Label>{t('account.currentPasswordForEmail')}</Form.Label>
                 <PasswordInput
                   value={emailPassword}
@@ -501,7 +501,7 @@ const AccountPage: React.FC = () => {
           <Modal.Body>
             <p>{t('account.deleteAccountWarning')}</p>
             {deleteError && <Alert variant="danger" className="py-2">{deleteError}</Alert>}
-            <Form.Group>
+            <Form.Group controlId="account-deletereasonlabel">
               <Form.Label>{t('account.deleteReasonLabel')}</Form.Label>
               <Form.Control
                 as="textarea"

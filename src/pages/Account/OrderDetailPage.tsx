@@ -332,7 +332,7 @@ const OrderDetailPage: React.FC = () => {
         <Modal.Body>
           {cancelError && <Alert variant="danger" className="py-2">{cancelError}</Alert>}
           <p>{t('orderDetail.confirmCancel')}</p>
-          <Form.Group>
+          <Form.Group controlId="orderdetail-cancelreasonlabel">
             <Form.Label>{t('orderDetail.cancelReasonLabel')}</Form.Label>
             <Form.Control
               as="textarea"
@@ -360,7 +360,7 @@ const OrderDetailPage: React.FC = () => {
         <Modal.Body>
           {returnError && <Alert variant="danger" className="py-2">{returnError}</Alert>}
           <p>{t('orderDetail.returnPrompt')}</p>
-          <Form.Group>
+          <Form.Group controlId="orderdetail-returnreasonlabel">
             <Form.Label>{t('orderDetail.returnReasonLabel')}</Form.Label>
             <Form.Control
               as="textarea"

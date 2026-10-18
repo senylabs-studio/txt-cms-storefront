@@ -58,7 +58,7 @@ const LoginPage: React.FC = () => {
             {error && <Alert variant="danger" className="py-2">{error}</Alert>}
 
             <Form onSubmit={handleSubmit}>
-              <Form.Group className="mb-3">
+              <Form.Group controlId="auth-login-email" className="mb-3">
                 <Form.Label>{t('auth.login.email')}</Form.Label>
                 <Form.Control
                   type="email"
@@ -70,7 +70,7 @@ const LoginPage: React.FC = () => {
                 />
               </Form.Group>
 
-              <Form.Group className="mb-2">
+              <Form.Group controlId="auth-login-password" className="mb-2">
                 <Form.Label>{t('auth.login.password')}</Form.Label>
                 <PasswordInput
                   value={password}
