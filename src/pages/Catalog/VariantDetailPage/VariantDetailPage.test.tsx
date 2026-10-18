@@ -154,6 +154,18 @@ describe('VariantDetailPage reviews', () => {
     expect(await screen.findByPlaceholderText('product.reviewCommentPlaceholder')).toBeInTheDocument();
   });
 
+  it('sets the rating tapped in the email (?valorar=4)', async () => {
+    getVariantById.mockResolvedValue(variant());
+    getMyReview.mockResolvedValue({ hasPurchased: true, review: null });
+    Element.prototype.scrollIntoView = vi.fn();
+    renderPage('1', '?valorar=4#reviews');
+
+    await screen.findByPlaceholderText('product.reviewCommentPlaceholder');
+    expect(screen.getByRole('radio', { name: 'product.ratingOf' , checked: true })).toBeInTheDocument();
+    expect(screen.getAllByRole('radio').filter(r => r.getAttribute('aria-checked') === 'true')).toHaveLength(1);
+    expect(screen.getAllByRole('radio')[3]).toHaveAttribute('aria-checked', 'true');
+  });
+
   it('offers a logged-out visitor to log in to write a review, coming back to the reviews', async () => {
     mockAuth.isAuthenticated = false;
     getVariantById.mockResolvedValue(variant());

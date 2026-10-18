@@ -112,7 +112,7 @@ const VariantDetailPage: React.FC = () => {
   // so the browser's own jump to it never happened — scroll once it's there. The rails above it
   // («Combina con», same product, recently viewed) arrive later and pushed the reviews back down
   // out of view: keep them in place while the page settles, until the shopper scrolls themselves.
-  const { hash } = useLocation();
+  const { hash, search } = useLocation();
   useEffect(() => {
     if (hash !== '#reviews' || loading || !variant) return;
     const target = document.getElementById('reviews');
@@ -163,10 +163,14 @@ const VariantDetailPage: React.FC = () => {
   const [reviewFormOpen, setReviewFormOpen] = useState(false);
   const isPhone = useMediaQuery('(max-width: 767.98px)');
   // The review emails («¿Qué te han parecido tus telas?», order delivered) and the order page link
-  // here with #reviews to write one: the form opens by itself for a customer who can review.
+  // here with #reviews to write one: the form opens by itself for a customer who can review, with
+  // the rating already set when it came from a star tapped in the email (?valorar=1…5).
   useEffect(() => {
-    if (hash === '#reviews' && myReview?.hasPurchased) setReviewFormOpen(true);
-  }, [hash, myReview]);
+    if (hash !== '#reviews' || !myReview?.hasPurchased) return;
+    setReviewFormOpen(true);
+    const fromEmail = Number(new URLSearchParams(search).get('valorar'));
+    if (Number.isInteger(fromEmail) && fromEmail >= 1 && fromEmail <= 5) setReviewRating(fromEmail);
+  }, [hash, search, myReview]);
 
   // Recently viewed
   const [recentlyViewed, setRecentlyViewed] = useState<StorefrontVariant[]>([]);
@@ -384,7 +388,7 @@ const VariantDetailPage: React.FC = () => {
   // Logged out (often someone opening a review email on another device): the button goes to the
   // login and back here with #reviews, where the form opens if they bought the fabric.
   const writeButton = !isAuthenticated ? (
-    <Link to={`/login?from=${encodeURIComponent(`/variant/${variant.id}#reviews`)}`} className="btn btn-outline-dark vdp-rv-write">
+    <Link to={`/login?from=${encodeURIComponent(`/variant/${variant.id}${search}#reviews`)}`} className="btn btn-outline-dark vdp-rv-write">
       {t('product.writeReview')}
     </Link>
   ) : myReview?.hasPurchased && (
