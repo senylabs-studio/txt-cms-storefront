@@ -515,6 +515,8 @@
     "reviewCount": "({{count}} reseñas)",
     "reviewCount_one": "({{count}} reseña)",
     "reviewsTitle": "Reseñas de clientes",
+    "yourReviewBadge": "Tu reseña",
+    "editShort": "Editar",
     "reviewsVerifiedOnly": "Solo de clientes que lo han comprado",
     "verifiedPurchase": "Compra verificada",
     "reviewTotal": "{{count}} reseñas",

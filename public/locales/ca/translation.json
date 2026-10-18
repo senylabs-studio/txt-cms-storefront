@@ -515,6 +515,8 @@
     "reviewCount": "({{count}} ressenyes)",
     "reviewCount_one": "({{count}} ressenya)",
     "reviewsTitle": "Ressenyes de clients",
+    "yourReviewBadge": "La teva ressenya",
+    "editShort": "Editar",
     "reviewsVerifiedOnly": "Només de clients que l'han comprat",
     "verifiedPurchase": "Compra verificada",
     "reviewTotal": "{{count}} ressenyes",
