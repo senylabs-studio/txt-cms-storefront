@@ -470,6 +470,7 @@
     "add": "Add to favourites",
     "removeError": "Failed to remove from favorites.",
     "toggleError": "Failed to update favorites.",
+    "savedAfterLogin": "Saved to your favourites.",
     "loadError": "Your favourites couldn't be loaded."
   },
   "board": {

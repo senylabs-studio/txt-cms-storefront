@@ -7,6 +7,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import './FavoriteButton.css';
 import IconTooltip from '../IconTooltip/IconTooltip';
 import { loginUrl } from '../../../utils/session';
+import { savePendingFavorite } from '../../../utils/pendingFavorite';
 
 interface Props {
   productId?: number;
@@ -26,7 +27,8 @@ const FavoriteButton: React.FC<Props> = ({ productId, variantId, size = 'md', cl
   const handleClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!isAuthenticated) { navigate(loginUrl()); return; }
+    // Logged out: remembered, and saved once they're back from the login (FavoritesContext).
+    if (!isAuthenticated) { savePendingFavorite(productId, variantId); navigate(loginUrl()); return; }
     await toggle(productId, variantId);
   };
 

@@ -470,6 +470,7 @@
     "add": "Añadir a favoritos",
     "removeError": "No se pudo eliminar de favoritos.",
     "toggleError": "No se pudo actualizar favoritos.",
+    "savedAfterLogin": "Guardado en tus favoritos.",
     "loadError": "No se han podido cargar tus favoritos."
   },
   "board": {

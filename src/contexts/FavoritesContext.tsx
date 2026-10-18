@@ -4,6 +4,7 @@ import { getFavoriteIds, toggleFavorite } from '../services/favoriteService';
 import { useAuth } from './AuthContext';
 import { useToast } from './ToastContext';
 import { getApiErrorMessage } from '../utils/apiError';
+import { takePendingFavorite } from '../utils/pendingFavorite';
 
 interface FavoritesContextType {
   favoriteProductIds: Set<number>;
@@ -30,14 +31,30 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
     try {
       const ids = await getFavoriteIds();
-      setProductIds(new Set(ids.productIds));
-      setVariantIds(new Set(ids.variantIds));
+      const products = new Set(ids.productIds);
+      const variants = new Set(ids.variantIds);
+      // A heart tapped before logging in (FavoriteButton): saved now, unless it's already there.
+      const pending = takePendingFavorite();
+      const already = pending && (pending.variantId != null ? variants.has(pending.variantId) : products.has(pending.productId!));
+      if (pending && !already) {
+        try {
+          const result = await toggleFavorite(pending.productId, pending.variantId);
+          if (result.isFavorite) {
+            if (pending.variantId != null) variants.add(pending.variantId); else products.add(pending.productId!);
+            showToast('success', t('favorites.savedAfterLogin'));
+          }
+        } catch (err) {
+          showToast('danger', getApiErrorMessage(err, t('favorites.toggleError')));
+        }
+      }
+      setProductIds(products);
+      setVariantIds(variants);
     } catch {
       // silent — user may not be a customer yet
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- t/showToast only word the toast; reloading on them would replay nothing but refetch
   }, [isAuthenticated]);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- data load: setState here is the loading/reset step of an external fetch
   useEffect(() => { load(); }, [load]);
 
   const isFavorite = (productId?: number, variantId?: number) => {

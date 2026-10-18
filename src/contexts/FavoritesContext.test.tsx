@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { FavoritesProvider, useFavorites } from './FavoritesContext';
 import { ToastProvider } from './ToastContext';
+import { savePendingFavorite } from '../utils/pendingFavorite';
 
 const renderWithProviders = (ui: React.ReactElement) =>
   render(<ToastProvider>{ui}</ToastProvider>);
@@ -55,6 +56,26 @@ describe('FavoritesContext', () => {
 
     await waitFor(() => expect(screen.getByTestId('count')).toHaveTextContent('0'));
     expect(getFavoriteIds).not.toHaveBeenCalled();
+  });
+
+  // 2026-10-18: a heart tapped before logging in used to be lost on the way to the login.
+  it('saves a heart tapped before logging in once the customer is logged in', async () => {
+    savePendingFavorite(undefined, 5);
+    toggleFavorite.mockResolvedValue({ isFavorite: true });
+    renderWithProviders(<FavoritesProvider><Probe /></FavoritesProvider>);
+
+    await waitFor(() => expect(screen.getByTestId('fav-variant-5')).toHaveTextContent('yes'));
+    expect(toggleFavorite).toHaveBeenCalledWith(undefined, 5);
+    expect(sessionStorage.getItem('pending_favorite')).toBeNull();
+  });
+
+  it('does not toggle a pending heart that is already a favourite (which would remove it)', async () => {
+    savePendingFavorite(9, undefined);
+    getFavoriteIds.mockResolvedValue({ productIds: [9], variantIds: [] });
+    renderWithProviders(<FavoritesProvider><Probe /></FavoritesProvider>);
+
+    await waitFor(() => expect(screen.getByTestId('fav-product-9')).toHaveTextContent('yes'));
+    expect(toggleFavorite).not.toHaveBeenCalled();
   });
 
   it('toggle() optimistically flips state before the server responds', async () => {
