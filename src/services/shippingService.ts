@@ -24,6 +24,17 @@ export const getShippingOptions = async (shippingAddressId: number): Promise<App
   return res.data ?? [];
 };
 
+/** The free-shipping amount of the mainland Spain rate, as checkout applies it (null when that
+ * rate has none, or the lookup fails: the header then just doesn't advertise it). */
+export const getFreeShippingThreshold = async (): Promise<number | null> => {
+  try {
+    const res = await apiClient.get('/storefront/shipping/applicable', { params: { country: 'ES' } });
+    return typeof res.data?.freeShippingThreshold === 'number' ? res.data.freeShippingThreshold : null;
+  } catch {
+    return null;
+  }
+};
+
 /** The shop pickups for the customer's cart: no address needed (nothing is shipped). */
 export const getPickupOptions = async (): Promise<ApplicableShippingRate[]> => {
   const res = await apiClient.get('/storefront/checkout/pickup-options');

@@ -23,3 +23,10 @@ export function formatPrice(value: number | null | undefined): string {
   const locale = PRICE_LOCALES[(i18next.language ?? 'es').slice(0, 2)] ?? 'es-ES';
   return new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' }).format(value);
 }
+
+/** Like formatPrice, without the cents of a whole amount: "60 €" for a headline figure. */
+export function formatPriceShort(value: number): string {
+  const locale = PRICE_LOCALES[(i18next.language ?? 'es').slice(0, 2)] ?? 'es-ES';
+  const digits = Number.isInteger(value) ? 0 : 2;
+  return new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR', minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value);
+}
