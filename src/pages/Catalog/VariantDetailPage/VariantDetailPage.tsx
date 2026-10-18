@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { Container, Row, Col, Button, Badge, Alert, Form } from 'react-bootstrap';
-import { FaShoppingCart, FaArrowLeft, FaChevronLeft, FaChevronRight, FaStar, FaRegStar, FaRulerHorizontal, FaExpand } from 'react-icons/fa';
+import { FaShoppingCart, FaArrowLeft, FaChevronLeft, FaChevronRight, FaStar, FaRegStar, FaRulerHorizontal, FaExpand, FaCheck } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import FavoriteButton from '../../../components/common/FavoriteButton/FavoriteButton';
 import BoardButton from '../../../components/common/BoardButton/BoardButton';
@@ -31,6 +31,7 @@ import { formatPrice } from '../../../utils/pricing';
 import { parseFabricColors } from '../../../utils/fabricColors';
 import { formatDate } from '../../../utils/locale';
 import MetresInput from '../../../components/common/MetresInput/MetresInput';
+import { useMediaQuery } from '../../../hooks/useMediaQuery';
 
 const DEFAULT_MIN_QTY = 0.3;
 const DESC_THRESHOLD = 300;
@@ -111,7 +112,7 @@ const VariantDetailPage: React.FC = () => {
   // so the browser's own jump to it never happened — scroll once it's there. The rails above it
   // («Combina con», same product, recently viewed) arrive later and pushed the reviews back down
   // out of view: keep them in place while the page settles, until the shopper scrolls themselves.
-  const { hash } = useLocation();
+  const { hash, search } = useLocation();
   useEffect(() => {
     if (hash !== '#reviews' || loading || !variant) return;
     const target = document.getElementById('reviews');
@@ -158,6 +159,18 @@ const VariantDetailPage: React.FC = () => {
   const [reviewComment, setReviewComment] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
   const [reviewMsg, setReviewMsg] = useState<{ type: 'success' | 'danger'; text: string } | null>(null);
+  // The review form opens from «Escribir una reseña» / «Editar tu reseña».
+  const [reviewFormOpen, setReviewFormOpen] = useState(false);
+  const isPhone = useMediaQuery('(max-width: 767.98px)');
+  // The review emails («¿Qué te han parecido tus telas?», order delivered) and the order page link
+  // here with #reviews to write one: the form opens by itself for a customer who can review, with
+  // the rating already set when it came from a star tapped in the email (?valorar=1…5).
+  useEffect(() => {
+    if (hash !== '#reviews' || !myReview?.hasPurchased) return;
+    setReviewFormOpen(true);
+    const fromEmail = Number(new URLSearchParams(search).get('valorar'));
+    if (Number.isInteger(fromEmail) && fromEmail >= 1 && fromEmail <= 5) setReviewRating(fromEmail);
+  }, [hash, search, myReview]);
 
   // Recently viewed
   const [recentlyViewed, setRecentlyViewed] = useState<StorefrontVariant[]>([]);
@@ -224,6 +237,7 @@ const VariantDetailPage: React.FC = () => {
     setReviewRating(0);
     setReviewComment('');
     setReviewMsg(null);
+    setReviewFormOpen(false);
     getVariantReviews(variant.id, 1).then(r => {
       if (cancelled) return;
       setReviews(r.items);
@@ -366,6 +380,114 @@ const VariantDetailPage: React.FC = () => {
     </div>
   );
 
+  // Reviews right under the description (2026-10-18, design A): beside the photos on a computer,
+  // after the description on a phone. They used to sit at the very bottom, under every related
+  // fabric. Rendered in one place only, so the form and the #reviews anchor are never doubled.
+  const ratingCounts = variant.ratingCounts ?? [];
+  const averageText = (variant.averageRating ?? 0).toLocaleString(i18n.language, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  // Logged out (often someone opening a review email on another device): the button goes to the
+  // login and back here with #reviews, where the form opens if they bought the fabric.
+  const writeButton = !isAuthenticated ? (
+    <Link to={`/login?from=${encodeURIComponent(`/variant/${variant.id}${search}#reviews`)}`} className="btn btn-outline-dark vdp-rv-write">
+      {t('product.writeReview')}
+    </Link>
+  ) : myReview?.hasPurchased && (
+    <Button variant="outline-dark" className="vdp-rv-write" aria-expanded={reviewFormOpen} onClick={() => setReviewFormOpen(o => !o)}>
+      {myReview.review ? t('product.editReview') : t('product.writeReview')}
+    </Button>
+  );
+  const reviewsBlock = (
+    <section id="reviews" className="vdp-reviews" aria-labelledby="vdp-reviews-title">
+      <div className="vdp-rv-head">
+        <h2 id="vdp-reviews-title" className="vdp-rv-title">{t('product.reviewsTitle')}</h2>
+        <span className="vdp-rv-note">{t('product.reviewsVerifiedOnly')}</span>
+      </div>
+
+      {variant.reviewCount > 0 ? (
+        <div className="vdp-rv-summary">
+          <div className="vdp-rv-score">
+            <span className="vdp-rv-average">{averageText}</span>
+            <StarRating value={variant.averageRating ?? 0} />
+            <span className="vdp-rv-total">{t('product.reviewTotal', { count: variant.reviewCount })}</span>
+          </div>
+          <ul className="vdp-rv-bars">
+            {[5, 4, 3, 2, 1].map(stars => {
+              const count = ratingCounts[stars - 1] ?? 0;
+              return (
+                <li key={stars} className="vdp-rv-bar-row">
+                  <span aria-hidden>{stars}</span><FaStar size={10} className="text-warning" aria-hidden />
+                  <span className="vdp-rv-bar" aria-hidden><span style={{ width: `${Math.round(100 * count / variant.reviewCount)}%` }} /></span>
+                  <span aria-hidden className="vdp-rv-bar-count">{count}</span>
+                  <span className="visually-hidden">{t('product.ratingBar', { stars, count })}</span>
+                </li>
+              );
+            })}
+          </ul>
+          {writeButton}
+        </div>
+      ) : (
+        <div className="vdp-rv-empty">
+          <p className="text-muted mb-0">{t('product.noReviews')}</p>
+          {writeButton}
+        </div>
+      )}
+
+      {reviewFormOpen && myReview?.hasPurchased && (
+        <div className="vdp-rv-form">
+          <div className="fw-semibold mb-2">
+            {myReview.review ? t('product.editYourReview') : t('product.writeReview')}
+          </div>
+          {reviewMsg && <Alert variant={reviewMsg.type} className="py-2">{reviewMsg.text}</Alert>}
+          <div className="mb-2"><StarRating value={reviewRating} onChange={setReviewRating} size={22} /></div>
+          <Form.Control
+            as="textarea"
+            rows={3}
+            aria-label={t('product.reviewCommentPlaceholder')}
+            value={reviewComment}
+            onChange={e => setReviewComment(e.target.value)}
+            placeholder={t('product.reviewCommentPlaceholder')}
+            className="mb-2"
+          />
+          <Button variant="dark" disabled={submittingReview || reviewRating < 1} onClick={handleSubmitReview}>
+            {t('product.submitReview')}
+          </Button>
+        </div>
+      )}
+      {!reviewFormOpen && reviewMsg?.type === 'success' && <Alert variant="success" className="py-2 mt-3">{reviewMsg.text}</Alert>}
+
+      {reviewsError ? (
+        <Alert variant="danger" className="py-2 mt-3">{reviewsError}</Alert>
+      ) : reviews.length > 0 && (
+        <div className="vdp-rv-list">
+          {reviews.map(r => (
+            <article key={r.id} className="vdp-rv-item">
+              <span className="vdp-rv-avatar" aria-hidden>{(r.customerName || '?').trim().charAt(0).toUpperCase()}</span>
+              <div className="vdp-rv-body">
+                <div className="vdp-rv-meta">
+                  <span className="fw-semibold">{r.customerName}</span>
+                  <span className="vdp-rv-verified"><FaCheck size={10} aria-hidden /> {t('product.verifiedPurchase')}</span>
+                  <span className="text-muted">{formatDate(r.createdAt)}</span>
+                </div>
+                <StarRating value={r.rating} size={13} />
+                {r.comment && <p className="vdp-rv-comment">{r.comment}</p>}
+              </div>
+            </article>
+          ))}
+          {reviewsTotalPages > 1 && (
+            <div className="d-flex gap-2 mt-3">
+              <Button size="sm" variant="outline-secondary" disabled={reviewsPage <= 1} onClick={() => changeReviewsPage(reviewsPage - 1)}>
+                {t('product.previousPage')}
+              </Button>
+              <Button size="sm" variant="outline-secondary" disabled={reviewsPage >= reviewsTotalPages} onClick={() => changeReviewsPage(reviewsPage + 1)}>
+                {t('product.nextPage')}
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+    </section>
+  );
+
   return (
     <MainLayout>
       <Container className="py-4">
@@ -487,6 +609,7 @@ const VariantDetailPage: React.FC = () => {
             )}
 
             {descriptionBlock('vdp-desc--below-images d-none d-md-block')}
+            {!isPhone && reviewsBlock}
           </Col>
 
           {/* ── Info ── */}
@@ -506,10 +629,11 @@ const VariantDetailPage: React.FC = () => {
             <div className="vdp-ref">{t('product.ref')} {variant.code}</div>
 
             {variant.reviewCount > 0 && (
-              <div className="d-flex align-items-center gap-2 mb-2">
+              <a href="#reviews" className="vdp-rating-link"
+                onClick={e => { e.preventDefault(); document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>
                 <StarRating value={variant.averageRating ?? 0} />
-                <span className="text-muted small">{t('product.reviewCount', { count: variant.reviewCount })}</span>
-              </div>
+                <span className="small">{t('product.reviewCount', { count: variant.reviewCount })}</span>
+              </a>
             )}
 
             {/* Price */}
@@ -571,6 +695,7 @@ const VariantDetailPage: React.FC = () => {
 
             {/* Description: here only on phones — see descriptionBlock */}
             {descriptionBlock('d-md-none')}
+            {isPhone && reviewsBlock}
 
             {/* Information */}
             {(variant.width > 0 || variant.weight > 0 || compositionText || variant.pattern || variant.fall || variant.texture) && (
@@ -647,60 +772,6 @@ const VariantDetailPage: React.FC = () => {
           </div>
         )}
 
-        {/* Reviews */}
-        <div id="reviews" className="vdp-reviews mt-5">
-          <SectionTitle>{t('product.reviewsTitle')}</SectionTitle>
-
-          {myReview?.hasPurchased && (
-            <div className="border rounded p-3 mb-4 mt-2" style={{ maxWidth: 480 }}>
-              <div className="fw-semibold mb-2">
-                {myReview.review ? t('product.editYourReview') : t('product.writeReview')}
-              </div>
-              {reviewMsg && <Alert variant={reviewMsg.type} className="py-2">{reviewMsg.text}</Alert>}
-              <div className="mb-2"><StarRating value={reviewRating} onChange={setReviewRating} size={22} /></div>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                value={reviewComment}
-                onChange={e => setReviewComment(e.target.value)}
-                placeholder={t('product.reviewCommentPlaceholder')}
-                className="mb-2"
-              />
-              <Button size="sm" variant="dark" disabled={submittingReview || reviewRating < 1} onClick={handleSubmitReview}>
-                {t('product.submitReview')}
-              </Button>
-            </div>
-          )}
-
-          {reviewsError ? (
-            <Alert variant="danger" className="py-2">{reviewsError}</Alert>
-          ) : reviews.length === 0 ? (
-            <p className="text-muted">{t('product.noReviews')}</p>
-          ) : (
-            <>
-              {reviews.map(r => (
-                <div key={r.id} className="border-bottom py-3">
-                  <div className="d-flex align-items-center gap-2">
-                    <StarRating value={r.rating} size={13} />
-                    <span className="fw-semibold small">{r.customerName}</span>
-                    <span className="text-muted small">{formatDate(r.createdAt)}</span>
-                  </div>
-                  {r.comment && <p className="mb-0 mt-1 small">{r.comment}</p>}
-                </div>
-              ))}
-              {reviewsTotalPages > 1 && (
-                <div className="d-flex gap-2 mt-3">
-                  <Button size="sm" variant="outline-secondary" disabled={reviewsPage <= 1} onClick={() => changeReviewsPage(reviewsPage - 1)}>
-                    {t('product.previousPage')}
-                  </Button>
-                  <Button size="sm" variant="outline-secondary" disabled={reviewsPage >= reviewsTotalPages} onClick={() => changeReviewsPage(reviewsPage + 1)}>
-                    {t('product.nextPage')}
-                  </Button>
-                </div>
-              )}
-            </>
-          )}
-        </div>
       </Container>
     </MainLayout>
   );

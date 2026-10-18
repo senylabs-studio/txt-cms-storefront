@@ -59,8 +59,8 @@ const { getVariantReviews, getMyReview, submitReview } = vi.hoisted(() => ({
 }));
 vi.mock('../../../services/reviewService', () => ({ getVariantReviews, getMyReview, submitReview }));
 
-const renderPage = (variantId = '1') => render(
-  <MemoryRouter initialEntries={[`/variant/${variantId}`]}>
+const renderPage = (variantId = '1', hash = '') => render(
+  <MemoryRouter initialEntries={[`/variant/${variantId}${hash}`]}>
     <Routes><Route path="/variant/:id" element={<VariantDetailPage />} /></Routes>
   </MemoryRouter>,
 );
@@ -91,6 +91,21 @@ describe('VariantDetailPage reviews', () => {
     renderPage();
 
     expect(await screen.findByText('product.reviewCount(8)')).toBeInTheDocument();
+  });
+
+  // 2026-10-18: the reviews section sits right under the description, with the average, the
+  // count and a bar per star, and the stars by the title jump to it.
+  it('summarises the reviews with a bar per star, linked from the stars by the title', async () => {
+    getVariantById.mockResolvedValue(variant({ averageRating: 4.666, reviewCount: 3, ratingCounts: [0, 0, 0, 1, 2], description: 'Franela suave' }));
+    renderPage();
+
+    expect(await screen.findByText('4.7')).toBeInTheDocument();
+    expect(screen.getByText('product.reviewTotal(3)')).toBeInTheDocument();
+    expect(screen.getAllByText('product.ratingBar(2)')).toHaveLength(1);
+    expect(screen.getByText('product.reviewCount(3)').closest('a')).toHaveAttribute('href', '#reviews');
+    const section = document.getElementById('reviews')!;
+    const description = screen.getAllByText('product.description')[0];
+    expect(description.compareDocumentPosition(section) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   it('hides the rating summary when there are no reviews yet', async () => {
@@ -128,6 +143,38 @@ describe('VariantDetailPage reviews', () => {
     expect(screen.queryByText('product.writeReview')).not.toBeInTheDocument();
   });
 
+  // The review emails link to the page with #reviews: the form must be open on arrival, and a
+  // visitor who isn't logged in (email opened on another device) is sent to log in and back.
+  it('opens the review form when arriving with #reviews from a review email', async () => {
+    getVariantById.mockResolvedValue(variant());
+    getMyReview.mockResolvedValue({ hasPurchased: true, review: null });
+    Element.prototype.scrollIntoView = vi.fn(); // jsdom has none; the page scrolls to #reviews
+    renderPage('1', '#reviews');
+
+    expect(await screen.findByPlaceholderText('product.reviewCommentPlaceholder')).toBeInTheDocument();
+  });
+
+  it('sets the rating tapped in the email (?valorar=4)', async () => {
+    getVariantById.mockResolvedValue(variant());
+    getMyReview.mockResolvedValue({ hasPurchased: true, review: null });
+    Element.prototype.scrollIntoView = vi.fn();
+    renderPage('1', '?valorar=4#reviews');
+
+    await screen.findByPlaceholderText('product.reviewCommentPlaceholder');
+    expect(screen.getByRole('radio', { name: 'product.ratingOf' , checked: true })).toBeInTheDocument();
+    expect(screen.getAllByRole('radio').filter(r => r.getAttribute('aria-checked') === 'true')).toHaveLength(1);
+    expect(screen.getAllByRole('radio')[3]).toHaveAttribute('aria-checked', 'true');
+  });
+
+  it('offers a logged-out visitor to log in to write a review, coming back to the reviews', async () => {
+    mockAuth.isAuthenticated = false;
+    getVariantById.mockResolvedValue(variant());
+    renderPage();
+
+    const link = await screen.findByRole('link', { name: 'product.writeReview' });
+    expect(link).toHaveAttribute('href', `/login?from=${encodeURIComponent('/variant/1#reviews')}`);
+  });
+
   it('does not fetch "mine" when the visitor is not authenticated', async () => {
     mockAuth.isAuthenticated = false;
     getVariantById.mockResolvedValue(variant());
@@ -143,10 +190,11 @@ describe('VariantDetailPage reviews', () => {
     submitReview.mockResolvedValue({ id: 9, customerName: 'Jane', rating: 4, comment: 'Bien', createdAt: '2026-01-15T00:00:00.000Z' });
     renderPage();
 
-    expect(await screen.findByText('product.writeReview')).toBeInTheDocument();
+    // The form opens from «Escribir una reseña» (2026-10-18: reviews moved under the description).
+    fireEvent.click(await screen.findByRole('button', { name: 'product.writeReview' }));
 
     // Click the 4th star to set the rating
-    const stars = document.querySelectorAll('.vdp-reviews svg');
+    const stars = document.querySelectorAll('.vdp-rv-form svg');
     fireEvent.click(stars[3]);
     fireEvent.change(screen.getByPlaceholderText('product.reviewCommentPlaceholder'), { target: { value: 'Bien' } });
     fireEvent.click(screen.getByText('product.submitReview'));
@@ -163,7 +211,9 @@ describe('VariantDetailPage reviews', () => {
     });
     renderPage();
 
-    expect(await screen.findByText('product.editYourReview')).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole('button', { name: 'product.editReview' }));
+
+    expect(screen.getByText('product.editYourReview')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Ok')).toBeInTheDocument();
   });
 
@@ -356,13 +406,17 @@ describe('VariantDetailPage stale-response guard', () => {
       { initialEntries: ['/variant/1'] },
     );
     render(<RouterProvider router={router} />);
-    expect(await screen.findByDisplayValue('Genial')).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole('button', { name: 'product.editReview' }));
+    expect(screen.getByDisplayValue('Genial')).toBeInTheDocument();
 
     router.navigate('/variant/2');
     await screen.findByText('Lino Verde');
     await waitFor(() => expect(getMyReview).toHaveBeenCalledWith(2));
     await new Promise(r => setTimeout(r, 0));
 
+    // The form closes on the new variant and opens empty.
+    expect(screen.queryByDisplayValue('Genial')).not.toBeInTheDocument();
+    fireEvent.click(await screen.findByRole('button', { name: 'product.writeReview' }));
     expect(screen.queryByDisplayValue('Genial')).not.toBeInTheDocument();
     expect(screen.queryByText('product.editYourReview')).not.toBeInTheDocument();
   });
