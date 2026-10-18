@@ -72,7 +72,7 @@
 
 .cookie-cat-info { display: flex; flex-direction: column; gap: 0.15rem; }
 .cookie-cat-name { font-size: 0.875rem; font-weight: 600; color: #212529; }
-.cookie-cat-desc { font-size: 0.78rem; color: #6c757d; }
+.cookie-cat-desc { font-size: 0.78rem; color: #5c636a; }
 
 .cookie-cat-always {
   font-size: 0.75rem;

@@ -111,7 +111,7 @@
 }
 
 .gift-card-hero-text p {
-  color: var(--bs-secondary-color, #6c757d);
+  color: var(--bs-secondary-color, #5c636a);
 }
 
 @media (min-width: 768px) {

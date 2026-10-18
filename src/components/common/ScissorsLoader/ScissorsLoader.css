@@ -36,11 +36,13 @@
   .scissors-loader__blade-b { transform: rotate(14deg); }
 }
 
-/* PageLoader: fills the main area's height (viewport minus header/footer, roughly) and centres. */
+/* PageLoader: at least a whole screen tall, so the footer starts below the fold while a page
+   loads. It was a screen minus the footer, so the footer showed and then jumped down when the
+   content arrived: the home page's layout shift (CLS) was 0.98 on a phone (2026-10-18). */
 .page-loader {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  min-height: calc(100vh - 320px);
-  padding: 3rem 0;
+  min-height: 100vh;
+  padding: 22vh 0 3rem;
 }

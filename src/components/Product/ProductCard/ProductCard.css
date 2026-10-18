@@ -19,7 +19,9 @@
   color: #fff; font-weight: 700; font-size: 14px;
 }
 
-.product-card-product { font-size: 11px; color: #6c757d; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+.product-card-product { font-size: 11px; color: #5c636a; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+/* An h2 (it was an h6, skipping heading levels after the page's h1), sized like before. */
+.product-card-name { font-size: 1rem; line-height: 1.2; }
 .product-card-name a { color: #212529; text-decoration: none; font-weight: 600; font-size: 17px; line-height: 1.25; }
 .product-card-name a:hover { color: var(--brand-text-color); }
 

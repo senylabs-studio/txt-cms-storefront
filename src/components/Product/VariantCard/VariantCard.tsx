@@ -94,7 +94,7 @@ const VariantCard: React.FC<Props> = ({ variant }) => {
 
       <Card.Body className="d-flex flex-column">
         <div className="product-card-product">{productLabel}</div>
-        <Card.Title as="h6" className="product-card-name">
+        <Card.Title as="h2" className="product-card-name">
           <Link to={`/variant/${variant.id}`}>{title}</Link>
         </Card.Title>
         {(variant.width && variant.width > 0 || variant.composition) && (
