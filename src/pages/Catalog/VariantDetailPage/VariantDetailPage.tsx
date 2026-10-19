@@ -165,12 +165,15 @@ const VariantDetailPage: React.FC = () => {
   // The review emails («¿Qué te han parecido tus telas?», order delivered) and the order page link
   // here with #reviews to write one: the form opens by itself for a customer who can review, with
   // the rating already set when it came from a star tapped in the email (?valorar=1…5).
+  // Keyed on hasPurchased, not the whole myReview: saving replaces myReview, and with the address
+  // still ending in #reviews the form reopened right after «Gracias», back at the email's star.
+  const canReview = !!myReview?.hasPurchased;
   useEffect(() => {
-    if (hash !== '#reviews' || !myReview?.hasPurchased) return;
+    if (hash !== '#reviews' || !canReview) return;
     setReviewFormOpen(true);
     const fromEmail = Number(new URLSearchParams(search).get('valorar'));
     if (Number.isInteger(fromEmail) && fromEmail >= 1 && fromEmail <= 5) setReviewRating(fromEmail);
-  }, [hash, search, myReview]);
+  }, [hash, search, canReview]);
 
   // Recently viewed
   const [recentlyViewed, setRecentlyViewed] = useState<StorefrontVariant[]>([]);
