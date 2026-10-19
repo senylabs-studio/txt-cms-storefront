@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { MemoryRouter, Route, Routes, createMemoryRouter, RouterProvider } from 'react-router-dom';
 import VariantDetailPage from './VariantDetailPage';
 import type { StorefrontVariantDetail, ProductReview, PaginatedResponse } from '../../../types';
@@ -164,6 +164,22 @@ describe('VariantDetailPage reviews', () => {
     expect(screen.getByRole('radio', { name: 'product.ratingOf' , checked: true })).toBeInTheDocument();
     expect(screen.getAllByRole('radio').filter(r => r.getAttribute('aria-checked') === 'true')).toHaveLength(1);
     expect(screen.getAllByRole('radio')[3]).toHaveAttribute('aria-checked', 'true');
+  });
+
+  it('closes the form once a review sent from the email link is saved (it reopened at the email\'s star)', async () => {
+    getVariantById.mockResolvedValue(variant());
+    getMyReview.mockResolvedValue({ hasPurchased: true, review: null });
+    submitReview.mockResolvedValue({ id: 9, customerName: 'Jane', rating: 4, comment: 'Bien', createdAt: '2026-01-15T00:00:00.000Z' });
+    Element.prototype.scrollIntoView = vi.fn();
+    renderPage('1', '?valorar=4#reviews');
+
+    await screen.findByPlaceholderText('product.reviewCommentPlaceholder');
+    fireEvent.click(screen.getByText('product.submitReview'));
+
+    expect(await screen.findByText('product.reviewSaved')).toBeInTheDocument();
+    // The reopening came a render later: let the effects run before looking.
+    await act(() => new Promise(r => setTimeout(r, 100)));
+    expect(screen.queryByPlaceholderText('product.reviewCommentPlaceholder')).not.toBeInTheDocument();
   });
 
   it('offers a logged-out visitor to log in to write a review, coming back to the reviews', async () => {
