@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildMeta, injectMeta, cleanText, createJsonCache, NOT_FOUND, isLocalPath, requestHost, categoryRedirect, legacyAnswer, pickEncoding, canonicalPath, etagFor, isNotModified } from './meta.mjs';
+import { buildMeta, injectMeta, cleanText, createJsonCache, NOT_FOUND, isLocalPath, requestHost, categoryRedirect, legacyAnswer, pickEncoding, canonicalPath, etagFor, isNotModified, requestLanguage, languageAlternates, sitemapWithLanguages } from './meta.mjs';
 
 const site = { siteName: 'Tejidos Pulido', siteDescription: 'Tu tienda de tejidos de confianza.', logoUrl: 'https://cdn/logo.png' };
 const api = (routes) => async (path) => (path === '/storefront/site-settings' ? site : routes[path] ?? null);
@@ -284,5 +284,44 @@ describe('server helpers', () => {
     expect(canonicalPath('/cortinas')).toBeNull();
     expect(canonicalPath('/')).toBeNull();
     expect(canonicalPath('//')).toBe('/');
+  });
+});
+
+// 2026-10-19: Catalan and English were invisible to search engines (always served in Spanish, no
+// alternates). Each language is its own URL (?lng=ca|en) with hreflang links between the three.
+describe('languages for search engines', () => {
+  it('reads only the other languages from ?lng (Spanish has none)', () => {
+    expect(requestLanguage(new URLSearchParams('lng=ca'))).toBe('ca');
+    expect(requestLanguage(new URLSearchParams('lng=en&x=1'))).toBe('en');
+    expect(requestLanguage(new URLSearchParams('lng=es'))).toBeNull();
+    expect(requestLanguage(new URLSearchParams('lng=fr'))).toBeNull();
+    expect(requestLanguage(new URLSearchParams(''))).toBeNull();
+  });
+
+  it('writes the page language, its own canonical and the hreflang alternates', () => {
+    const html = '<!doctype html><html lang="es"><head><title>x</title>\n<meta name="description" content="x" /></head></html>';
+    const out = injectMeta(html, { siteName: 'S', title: 'Franel·la', description: 'd', type: 'website', image: null },
+      'https://shop/franela?lng=ca', { lang: 'ca', alternates: languageAlternates('https://shop', '/franela') });
+    expect(out).toContain('<html lang="ca">');
+    expect(out).toContain('<link rel="canonical" href="https://shop/franela?lng=ca" />');
+    expect(out).toContain('<link rel="alternate" hreflang="es" href="https://shop/franela" />');
+    expect(out).toContain('<link rel="alternate" hreflang="ca" href="https://shop/franela?lng=ca" />');
+    expect(out).toContain('<link rel="alternate" hreflang="en" href="https://shop/franela?lng=en" />');
+    expect(out).toContain('<link rel="alternate" hreflang="x-default" href="https://shop/franela" />');
+  });
+
+  it('gives a missing page no alternates', () => {
+    const out = injectMeta('<html lang="es"><title>x</title><meta name="description" content="x" />', { siteName: 'S', title: 'T', description: 'd', type: 'website', notFound: true },
+      'https://shop/nope', { alternates: languageAlternates('https://shop', '/nope') });
+    expect(out).not.toContain('hreflang');
+  });
+
+  it('lists every sitemap page in the three languages, each with all the alternates', () => {
+    const xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url>\n    <loc>https://shop/franela</loc>\n  </url>\n</urlset>';
+    const out = sitemapWithLanguages(xml);
+    expect(out).toContain('xmlns:xhtml="http://www.w3.org/1999/xhtml"');
+    expect(out.match(/<url>/g)).toHaveLength(3);
+    expect(out).toContain('<loc>https://shop/franela?lng=en</loc>');
+    expect(out.match(/hreflang="ca" href="https:\/\/shop\/franela\?lng=ca"/g)).toHaveLength(3);
   });
 });
