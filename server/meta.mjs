@@ -246,12 +246,52 @@ export function safeDecode(segment) {
   try { return decodeURIComponent(segment); } catch { return segment; }
 }
 
+// The shop in Catalan and English lives at the same paths with ?lng=ca|en (what i18n reads first),
+// so each language is its own URL for search engines; Spanish, the default, has no parameter.
+export const ALT_LANGUAGES = ['ca', 'en'];
+
+/** The ?lng= of a request when it's one of the other languages, else null (Spanish). */
+export const requestLanguage = (searchParams) => {
+  const lng = searchParams.get('lng');
+  return ALT_LANGUAGES.includes(lng) ? lng : null;
+};
+
+/** The page's URL in a language: Spanish without ?lng, the others with it. */
+export const languageUrl = (origin, pathname, lng) => `${origin}${pathname}${lng ? `?lng=${lng}` : ''}`;
+
+/** hreflang alternates for a page: each language's URL, Spanish as x-default. Catalan and English
+ * pages were invisible to search engines (only ever served in Spanish, no alternates; 2026-10-19). */
+export const languageAlternates = (origin, pathname) => [
+  { hreflang: 'es', href: languageUrl(origin, pathname, null) },
+  ...ALT_LANGUAGES.map(lng => ({ hreflang: lng, href: languageUrl(origin, pathname, lng) })),
+  { hreflang: 'x-default', href: languageUrl(origin, pathname, null) },
+];
+
+/** The API's sitemap (Spanish URLs) with every page also listed in Catalan and English, each
+ * entry carrying the xhtml:link alternates of all three (Google's sitemap hreflang format). */
+export function sitemapWithLanguages(xml) {
+  const urlBlocks = [...xml.matchAll(/<url>\s*<loc>([^<]+)<\/loc>([\s\S]*?)<\/url>/g)];
+  if (urlBlocks.length === 0) return xml;
+  const links = (loc) => ['es', ...ALT_LANGUAGES, 'x-default']
+    .map(h => `    <xhtml:link rel="alternate" hreflang="${h}" href="${withLng(loc, h === 'es' || h === 'x-default' ? null : h)}" />`)
+    .join('\n');
+  const entries = urlBlocks.flatMap(([, loc, rest]) => [null, ...ALT_LANGUAGES].map(lng =>
+    `  <url>\n    <loc>${withLng(loc, lng)}</loc>${rest.replace(/\s+$/, '')}\n${links(loc)}\n  </url>`));
+  return '<?xml version="1.0" encoding="UTF-8"?>\n'
+    + '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n'
+    + entries.join('\n') + '\n</urlset>\n';
+}
+// A sitemap <loc> is XML-escaped: a query string's & is &amp;.
+const withLng = (loc, lng) => (lng ? `${loc}${loc.includes('?') ? '&amp;' : '?'}lng=${lng}` : loc);
+
 /** Writes the preview into index.html: replaces <title> and the description, adds og:/twitter: tags,
- * the canonical URL, and noindex on a page that doesn't exist. */
-export function injectMeta(html, meta, url) {
+ * the canonical URL, the hreflang alternates and the page's language, and noindex on a page that
+ * doesn't exist. */
+export function injectMeta(html, meta, url, { lang = 'es', alternates = [] } = {}) {
   const tags = [
     meta.notFound ? '<meta name="robots" content="noindex" />' : '',
     url && !meta.notFound ? `<link rel="canonical" href="${escapeHtml(url)}" />` : '',
+    ...(meta.notFound ? [] : alternates.map(a => `<link rel="alternate" hreflang="${a.hreflang}" href="${escapeHtml(a.href)}" />`)),
     `<meta name="description" content="${escapeHtml(meta.description)}" />`,
     `<meta property="og:site_name" content="${escapeHtml(meta.siteName)}" />`,
     `<meta property="og:type" content="${escapeHtml(meta.type)}" />`,
@@ -267,6 +307,7 @@ export function injectMeta(html, meta, url) {
   // Replacer functions, not strings: a "$'" or "$&" in a CMS title is a replacement pattern in a
   // string and used to splice parts of index.html into the <title> (audit 2026-10-08).
   return html
+    .replace(/<html lang="[^"]*">/, () => `<html lang="${escapeHtml(lang)}">`)
     .replace(/<title>[\s\S]*?<\/title>/, () => `<title>${escapeHtml(meta.title)}</title>`)
     .replace(/<meta name="description"[^>]*>/, () => tags);
 }

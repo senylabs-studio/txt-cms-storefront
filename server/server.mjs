@@ -8,7 +8,7 @@ import { existsSync } from 'node:fs';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildMeta, injectMeta, safeDecode, createJsonCache, NOT_FOUND, requestHost, categoryRedirect, legacyAnswer, pickEncoding, canonicalPath, etagFor, isNotModified } from './meta.mjs';
+import { buildMeta, injectMeta, safeDecode, createJsonCache, NOT_FOUND, requestHost, categoryRedirect, legacyAnswer, pickEncoding, canonicalPath, etagFor, isNotModified, ALT_LANGUAGES, requestLanguage, languageUrl, languageAlternates, sitemapWithLanguages } from './meta.mjs';
 import { brotliCompressSync, gzipSync, constants as zlibConstants } from 'node:zlib';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -36,12 +36,16 @@ const TYPES = {
 };
 
 // API answers cached a few minutes: a shared link is often opened by many crawlers/people at once.
-const getJson = createJsonCache(async (path) => {
+// One cache per language: the API answers names and descriptions in the X-Language asked for.
+const jsonLoader = (lang) => async (path) => {
   if (!API_URL) return null;
-  const res = await fetch(API_URL + path, { signal: AbortSignal.timeout(5000), headers: { Accept: 'application/json' } });
+  const headers = { Accept: 'application/json', ...(lang ? { 'X-Language': lang } : {}) };
+  const res = await fetch(API_URL + path, { signal: AbortSignal.timeout(5000), headers });
   if (res.ok) return res.json();
   return res.status === 404 ? NOT_FOUND : null;
-});
+};
+const getJson = createJsonCache(jsonLoader(null));
+const getJsonIn = Object.fromEntries(ALT_LANGUAGES.map(lng => [lng, createJsonCache(jsonLoader(lng))]));
 // The shop's name and logo are in every preview: fetched at start and kept fresh, so a preview
 // asked while the API is waking up still has them. The home blocks too (the banner preload).
 const refreshSite = () => Promise.all(['/storefront/site-settings', '/storefront/home']
@@ -134,7 +138,8 @@ async function sitemapXml() {
   if (sitemapCache.body && sitemapCache.until > Date.now()) return sitemapCache.body;
   try {
     const r = await fetch(`${API_ORIGIN}/sitemap.xml`, { signal: AbortSignal.timeout(10000) });
-    if (r.ok) sitemapCache = { body: await r.text(), until: Date.now() + 60 * 60 * 1000 };
+    // Every page in Spanish, Catalan and English, with their hreflang alternates.
+    if (r.ok) sitemapCache = { body: sitemapWithLanguages(await r.text()), until: Date.now() + 60 * 60 * 1000 };
   } catch { /* keep the last good copy */ }
   return sitemapCache.body;
 }
@@ -185,11 +190,16 @@ createServer(async (req, res) => {
     // One URL per page: /Cortinas/ → /cortinas (query kept).
     const canonical = canonicalPath(url.pathname);
     if (canonical) return redirect(res, canonical + url.search);
-    const meta = await buildMeta(url.pathname, getJson);
-    const pageUrl = host || CANONICAL_HOST ? `${origin}${url.pathname}` : null;
+    // ?lng=ca|en: the same page in that language (title and description from the API in it), its
+    // own canonical URL, and hreflang alternates to the other two so each is indexed in its language.
+    const lng = requestLanguage(url.searchParams);
+    const meta = await buildMeta(url.pathname, lng ? getJsonIn[lng] : getJson);
+    const hasOrigin = Boolean(host || CANONICAL_HOST);
+    const pageUrl = hasOrigin ? languageUrl(origin, url.pathname, lng) : null;
+    const alternates = hasOrigin ? languageAlternates(origin, url.pathname) : [];
     // A page that doesn't exist answers 404 (still the app, which shows its own message).
     sendBody(req, res, meta.notFound ? 404 : 200, { ...SECURITY_HEADERS, ...noIndex, 'Content-Type': TYPES['.html'], 'Cache-Control': 'no-cache' },
-      Buffer.from(injectMeta(indexHtml, meta, pageUrl)));
+      Buffer.from(injectMeta(indexHtml, meta, pageUrl, { lang: lng ?? 'es', alternates })));
   } catch (err) {
     console.error(err);
     if (!res.headersSent) res.writeHead(500);
