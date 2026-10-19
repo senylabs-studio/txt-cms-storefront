@@ -200,7 +200,7 @@ const ProductFilters: React.FC<Props> = ({ facets, filters, onChange, onClose })
             valueMin={localMin} valueMax={localMax}
             onChange={handleSlider}
           />
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: '#adb5bd', marginTop: 2 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: '#5c636a', marginTop: 2 }}>
             <span>{formatPrice(absMin)}</span>
             <span>{formatPrice(absMax)}</span>
           </div>

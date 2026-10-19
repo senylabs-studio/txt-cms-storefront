@@ -36,6 +36,9 @@
   line-height: 1.5;
 }
 
+/* The link in the brand colour itself read 2.6:1 on white (Lighthouse, 2026-10-19). */
+.cookie-bar-text a { color: var(--brand-text-color); }
+
 .cookie-bar-actions {
   display: flex;
   gap: 0.5rem;
