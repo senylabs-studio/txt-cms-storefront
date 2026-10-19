@@ -19,7 +19,7 @@ import AddressFormModal from '../../components/Address/AddressFormModal';
 import { formatPrice } from '../../utils/pricing';
 import { cartItemName } from '../../utils/giftCard';
 import { loginUrl } from '../../utils/session';
-import { formatMeters } from '../../utils/locale';
+import { formatMeters, formatPercent } from '../../utils/locale';
 
 const CheckoutPage: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -527,7 +527,7 @@ const CheckoutPage: React.FC = () => {
 
                 {estimatedRecargo > 0 && !vatExempt && (
                   <div className="d-flex justify-content-between small text-muted mb-2">
-                    <span>{t('cart.recargoEquivalencia', { percent: cart?.recargoEquivalenciaPercent ?? 0 })}</span>
+                    <span>{t('cart.recargoEquivalencia', { percent: formatPercent(cart?.recargoEquivalenciaPercent ?? 0) })}</span>
                     <span>{formatPrice(estimatedRecargo)}</span>
                   </div>
                 )}

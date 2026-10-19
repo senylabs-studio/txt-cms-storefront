@@ -18,7 +18,7 @@ import CartCodes from '../../components/Cart/CartCodes/CartCodes';
 import CartQuantityInput from '../../components/Cart/CartQuantityInput/CartQuantityInput';
 import type { CartItem } from '../../types';
 import { loginUrl } from '../../utils/session';
-import { formatMeters } from '../../utils/locale';
+import { formatMeters, formatPercent } from '../../utils/locale';
 
 const CartPage: React.FC = () => {
   const { t } = useTranslation();
@@ -181,7 +181,7 @@ const CartPage: React.FC = () => {
                   )}
                   {cart!.recargoEquivalenciaAmount > 0 && (
                     <div className="d-flex justify-content-between small text-muted mb-1">
-                      <span>{t('cart.recargoEquivalencia', { percent: cart!.recargoEquivalenciaPercent })}</span>
+                      <span>{t('cart.recargoEquivalencia', { percent: formatPercent(cart!.recargoEquivalenciaPercent) })}</span>
                       <span>{formatPrice(cart!.recargoEquivalenciaAmount)}</span>
                     </div>
                   )}

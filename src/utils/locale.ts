@@ -23,6 +23,11 @@ export const countryName = (isoCode: string | null | undefined): string => {
 export const formatMeters = (value: number): string =>
   `${new Intl.NumberFormat(uiLocale(), { maximumFractionDigits: 2 }).format(value)} m`;
 
+/** A percentage as the UI language writes it: "5,2 %" (es/ca), "5.2%" (en). The recargo line
+ *  showed "(5.2%)" in Spanish (ensayo EN-10, 2026-10-19). */
+export const formatPercent = (value: number): string =>
+  new Intl.NumberFormat(uiLocale(), { style: 'percent', maximumFractionDigits: 2 }).format(value / 100);
+
 /** A quantity as typed: "1,5" or "1.5" → 1.5; anything else → NaN. */
 export const parseQuantity = (text: string): number => {
   const trimmed = text.trim();

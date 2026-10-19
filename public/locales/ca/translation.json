@@ -58,7 +58,7 @@
     "couponDiscount": "Cupó {{code}}",
     "couponApplyError": "No s'ha pogut aplicar el cupó.",
     "couponApplySuccess": "Cupó aplicat correctament.",
-    "recargoEquivalencia": "Recàrrec d'equivalència ({{percent}}%)",
+    "recargoEquivalencia": "Recàrrec d'equivalència ({{percent}})",
     "giftCardTitle": "Tens una targeta regal?",
     "giftCardPlaceholder": "Codi de la targeta",
     "giftCardApply": "Fer servir",

@@ -58,7 +58,7 @@
     "couponDiscount": "Cupón {{code}}",
     "couponApplyError": "No se ha podido aplicar el cupón.",
     "couponApplySuccess": "Cupón aplicado correctamente.",
-    "recargoEquivalencia": "Recargo de equivalencia ({{percent}}%)",
+    "recargoEquivalencia": "Recargo de equivalencia ({{percent}})",
     "giftCardTitle": "¿Tienes una tarjeta regalo?",
     "giftCardPlaceholder": "Código de la tarjeta",
     "giftCardApply": "Usar",
