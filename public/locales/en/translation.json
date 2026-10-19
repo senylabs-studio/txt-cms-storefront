@@ -58,7 +58,7 @@
     "couponDiscount": "Coupon {{code}}",
     "couponApplyError": "Couldn't apply the coupon.",
     "couponApplySuccess": "Coupon applied successfully.",
-    "recargoEquivalencia": "Equivalence surcharge ({{percent}}%)",
+    "recargoEquivalencia": "Equivalence surcharge ({{percent}})",
     "giftCardTitle": "Have a gift card?",
     "giftCardPlaceholder": "Gift card code",
     "giftCardApply": "Use",

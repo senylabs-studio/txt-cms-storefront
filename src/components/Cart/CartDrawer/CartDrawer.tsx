@@ -10,7 +10,7 @@ import { getApiErrorMessage } from '../../../utils/apiError';
 import './CartDrawer.css';
 import { formatPrice } from '../../../utils/pricing';
 import { cartItemName } from '../../../utils/giftCard';
-import { formatMeters } from '../../../utils/locale';
+import { formatMeters, formatPercent } from '../../../utils/locale';
 
 // Avoids floating-point artifacts from repeated +/- quantityStep arithmetic (e.g. 0.5 - 0.05
 // would otherwise become 0.44999999999999996 in JS).
@@ -160,7 +160,7 @@ const CartDrawer: React.FC = () => {
               )}
               {cart!.recargoEquivalenciaAmount > 0 && (
                 <div className="d-flex justify-content-between small text-muted mb-1">
-                  <span>{t('cart.recargoEquivalencia', { percent: cart!.recargoEquivalenciaPercent })}</span>
+                  <span>{t('cart.recargoEquivalencia', { percent: formatPercent(cart!.recargoEquivalenciaPercent) })}</span>
                   <span>{formatPrice(cart!.recargoEquivalenciaAmount)}</span>
                 </div>
               )}

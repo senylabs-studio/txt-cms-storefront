@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import i18next from 'i18next';
-import { formatDate, countryName } from './locale';
+import { formatDate, countryName, formatPercent } from './locale';
 
 describe('locale helpers follow the UI language, not the browser', () => {
   afterEach(() => { i18next.language = 'es'; });
@@ -20,5 +20,11 @@ describe('locale helpers follow the UI language, not the browser', () => {
   it('keeps an unknown or empty code', () => {
     expect(countryName('')).toBe('');
     expect(countryName('ZZZ')).toBe('ZZZ');
+  });
+
+  it('writes percentages the local way (recargo «5,2 %», not «5.2%», in Spanish)', () => {
+    expect(formatPercent(5.2).replace(/\u00a0/g, ' ')).toBe('5,2 %');
+    i18next.language = 'en';
+    expect(formatPercent(5.2)).toBe('5.2%');
   });
 });
