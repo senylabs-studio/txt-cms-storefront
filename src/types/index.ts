@@ -33,6 +33,8 @@ export interface StorefrontVariant {
   discountPercent: number;
   availableStock: number;
   thumbnailUrl?: string;
+  /** 300px WebP of the same photo, offered with thumbnailUrl in the card's srcset (phones). */
+  smallThumbnailUrl?: string;
   thumbnailAltText?: string;
   imageUrls?: string[];
   typeValue?: string;
@@ -54,6 +56,8 @@ export interface StorefrontImage {
   thumbnailUrl?: string;
   /** 1600px WebP (the original when there's none): the variant page's main photo. */
   displayUrl?: string;
+  /** 300px WebP: the variant page's thumbnail strip. */
+  smallUrl?: string;
   isRealScale: boolean;
   realWidthCm?: number;
   altText?: string;
@@ -349,6 +353,7 @@ export interface StorefrontPageItem {
   originalPrice: number;
   availableStock: number;
   thumbnailUrl?: string;
+  smallThumbnailUrl?: string;
   typeValue?: string;
   order: number;
   isNew?: boolean;

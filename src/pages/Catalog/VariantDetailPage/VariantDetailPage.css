@@ -199,7 +199,7 @@
 
 .vdp-price-original {
   font-size: 1.1rem;
-  color: #adb5bd;
+  color: #5c636a; /* #adb5bd read ~2:1 (Lighthouse, 2026-10-19) */
   text-decoration: line-through;
 }
 
@@ -297,7 +297,7 @@
 
 .vdp-meters {
   font-size: 0.78rem;
-  color: #adb5bd;
+  color: #5c636a; /* #adb5bd read ~2:1 (Lighthouse, 2026-10-19) */
   margin-bottom: 20px;
 }
 

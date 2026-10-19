@@ -594,8 +594,8 @@ const VariantDetailPage: React.FC = () => {
                     aria-pressed={i === selectedImage}
                     onClick={() => setSelectedImage(i)}
                   >
-                    {/* The small WebP, not the original (the strip downloaded every full photo). */}
-                    <img src={img.thumbnailUrl || img.url} alt={img.altText || `${variant.name} ${i + 1}`} loading="lazy" decoding="async" />
+                    {/* The 300px WebP, not the original (the strip downloaded every full photo). */}
+                    <img src={img.smallUrl || img.thumbnailUrl || img.url} alt={img.altText || `${variant.name} ${i + 1}`} loading="lazy" decoding="async" />
                   </button>
                 ))}
               </div>

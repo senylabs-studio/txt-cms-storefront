@@ -26,6 +26,7 @@ const PageItemsGrid: React.FC<Props> = ({ items, columns = 4, style }) => (
             discountPercent: 0,
             availableStock: item.availableStock,
             thumbnailUrl: item.thumbnailUrl,
+            smallThumbnailUrl: item.smallThumbnailUrl,
             typeValue: item.typeValue,
             productId: item.productId,
             productName: item.productName || item.name,

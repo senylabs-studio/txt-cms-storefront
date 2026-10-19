@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- The API and the photo storage are other origins: open their connections while the app's
+         JavaScript downloads, not after (Lighthouse: ~340 ms on a phone). -->
+    <link rel="preconnect" href="%VITE_API_URL%" crossorigin />
+    <link rel="preconnect" href="%VITE_IMAGES_ORIGIN%" />
     <!-- Overridden per-page by useDocumentMeta once React mounts and SiteSettings loads; this is
          only what a crawler or the browser tab shows before that happens. -->
     <title>TXT Shop</title>

@@ -20,6 +20,17 @@
   --bs-secondary-color: #5c636a;
 }
 
+/* Outline grey buttons (catalogue «Filtros», sort…): Bootstrap's #6c757d read 4.44:1 on the page's
+   #f8f9fa, just under WCAG AA (Lighthouse, 2026-10-19). */
+.btn-outline-secondary {
+  --bs-btn-color: #5c636a;
+  --bs-btn-border-color: #5c636a;
+  --bs-btn-hover-bg: #5c636a;
+  --bs-btn-hover-border-color: #5c636a;
+  --bs-btn-active-bg: #5c636a;
+  --bs-btn-active-border-color: #5c636a;
+}
+
 /* Prices everywhere use the corporate colour (they used to be red in some places, dark grey in
    others). */
 .sf-price { color: var(--brand-text-color); font-weight: 700; }

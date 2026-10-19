@@ -18,6 +18,9 @@ import NewBadge from '../../common/NewBadge/NewBadge';
 import { variantCardTitle } from '../../../utils/variantTitle';
 import MetresInput from '../../common/MetresInput/MetresInput';
 
+// A card's rendered width: half the screen on phones, a third on tablets, then at most ~300px.
+const CARD_IMG_SIZES = '(max-width: 575px) 50vw, (max-width: 991px) 33vw, 300px';
+
 interface Props { variant: StorefrontVariant; }
 
 const VariantCard: React.FC<Props> = ({ variant }) => {
@@ -75,7 +78,10 @@ const VariantCard: React.FC<Props> = ({ variant }) => {
           {variant.thumbnailUrl
             // Lazy: a catalog can list hundreds of cards (a phone loads more as it scrolls), and
             // only the ones near the screen should download.
-            ? <Card.Img variant="top" src={variant.thumbnailUrl} alt={variant.thumbnailAltText || variant.name} className="product-card-img" loading="lazy" decoding="async" />
+            // srcset: the 300px copy on phones (two cards a row, ~170 CSS px), the 600px above.
+            ? <Card.Img variant="top" src={variant.thumbnailUrl} alt={variant.thumbnailAltText || variant.name} className="product-card-img" loading="lazy" decoding="async"
+                srcSet={variant.smallThumbnailUrl ? `${variant.smallThumbnailUrl} 300w, ${variant.thumbnailUrl} 600w` : undefined}
+                sizes={variant.smallThumbnailUrl ? CARD_IMG_SIZES : undefined} />
             : <div className="product-card-placeholder">📦</div>}
           {(hasDiscount || variant.isNew) && (
             <div className="product-card-badges">
