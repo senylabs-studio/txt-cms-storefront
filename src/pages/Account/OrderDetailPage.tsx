@@ -239,7 +239,9 @@ const OrderDetailPage: React.FC = () => {
                   <tr key={i}>
                     <td>
                       {line.thumbnailUrl
-                        ? <img src={line.thumbnailUrl} alt={line.productName} style={{ width: 54, height: 36, objectFit: 'cover', borderRadius: 6, border: '1px solid #e9ecef' }} />
+                        ? (line.variantId && !line.giftCard
+                          ? <Link to={`/variant/${line.variantId}`}><img src={line.thumbnailUrl} alt={line.productName} style={{ width: 54, height: 36, objectFit: 'cover', borderRadius: 6, border: '1px solid #e9ecef' }} /></Link>
+                          : <img src={line.thumbnailUrl} alt={line.productName} style={{ width: 54, height: 36, objectFit: 'cover', borderRadius: 6, border: '1px solid #e9ecef' }} />)
                         : <div style={{ width: 44, height: 44, background: '#f8f9fa', borderRadius: 6, border: '1px solid #e9ecef', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>{line.giftCard ? <FaGift className="text-primary" /> : '📦'}</div>
                       }
                     </td>
@@ -259,7 +261,12 @@ const OrderDetailPage: React.FC = () => {
                         </>
                       ) : (
                         <>
-                      <div className="fw-semibold small">{line.productName}</div>
+                      <div className="fw-semibold small">
+                        {/* Back to the bought variant: to buy more of it, or to review it. */}
+                        {line.variantId
+                          ? <Link to={`/variant/${line.variantId}`} className="text-reset">{line.productName}</Link>
+                          : line.productName}
+                      </div>
                       <div className="text-muted" style={{ fontSize: 11 }}>{line.productCode}</div>
                         </>
                       )}

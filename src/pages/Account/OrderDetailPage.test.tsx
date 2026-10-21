@@ -294,6 +294,24 @@ describe('OrderDetailPage', () => {
     expect(screen.queryByText('orderDetail.leaveReview')).not.toBeInTheDocument();
   });
 
+  it('links a line with a variant to that variant, whatever the order status', async () => {
+    getOrderDetail.mockResolvedValue(order({
+      status: 'Paid',
+      lines: [{ productName: 'Tela azul', productCode: 'TA1', unitPrice: 10, discountPercent: 0, quantity: 2, subtotal: 20, variantId: 7, thumbnailUrl: 'https://x/t.webp' }],
+    }));
+    renderDetail();
+
+    expect((await screen.findByText('Tela azul')).closest('a')).toHaveAttribute('href', '/variant/7');
+    expect(screen.getByAltText('Tela azul').closest('a')).toHaveAttribute('href', '/variant/7');
+  });
+
+  it('leaves a line with no variant unlinked', async () => {
+    getOrderDetail.mockResolvedValue(order({ status: 'Paid' })); // default line has no variantId
+    renderDetail();
+
+    expect((await screen.findByText('Tela azul')).closest('a')).toBeNull();
+  });
+
   it('a gift card purchase offers each letter for download and no invoice', async () => {
     getOrderDetail.mockResolvedValue(order({
       status: 'Delivered', total: 45, isGiftCardPurchase: true,
