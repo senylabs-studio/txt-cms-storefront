@@ -8,7 +8,8 @@ import { FaTruck, FaGift, FaStore, FaArrowLeft, FaPlus } from 'react-icons/fa';
 import MainLayout from '../../components/Layout/MainLayout';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { checkout } from '../../services/cartService';
+import { checkout, placeBankTransferOrder } from '../../services/cartService';
+import { usePaymentMethods } from '../../contexts/PaymentMethodsContext';
 import { getProfile } from '../../services/profileService';
 import { getShippingOptions, getPickupOptions, type ApplicableShippingRate } from '../../services/shippingService';
 import { getApiErrorMessage } from '../../utils/apiError';
@@ -23,7 +24,10 @@ import { formatMeters, formatPercent } from '../../utils/locale';
 
 const CheckoutPage: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const { siteName, companyAddress, companyPostalCode, companyCity } = useSiteSettings();
+  const { siteName, companyAddress, companyPostalCode, companyCity, bankTransferAvailable } = useSiteSettings();
+  // What the card button's Redsys page takes (cards, wallets): every active method but PayPal,
+  // which has its own button. Only those with a logo uploaded in the CMS are shown.
+  const cardPageLogos = usePaymentMethods().filter(m => m.logoUrl && m.name.trim().toLowerCase() !== 'paypal');
   // The tab title: this screen's, not the previous page's.
   useDocumentMeta(`${t('checkout.title')} — ${siteName}`);
   const { cart, fetchCart } = useCart();
@@ -37,6 +41,7 @@ const CheckoutPage: React.FC = () => {
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [paypalBusy, setPaypalBusy] = useState(false);
+  const [transferLoading, setTransferLoading] = useState(false);
   const [error, setError] = useState('');
   // Options for the chosen address (null = none covers it, undefined = not looked up yet).
   const [shippingOptions, setShippingOptions] = useState<ApplicableShippingRate[] | null | undefined>(undefined);
@@ -240,6 +245,24 @@ const CheckoutPage: React.FC = () => {
     }
   };
 
+  // No provider: the order is placed right here, pending the transfer, and the success page shows
+  // where to pay (the email carries the same, with the proforma).
+  const handleBankTransfer = async () => {
+    setTransferLoading(true);
+    setError('');
+    try {
+      const order = await placeBankTransferOrder(buildCheckoutRequest());
+      fetchCart();
+      navigate('/checkout/success', { state: { bankTransfer: order } });
+    } catch (e: unknown) {
+      setError(getApiErrorMessage(e, t('checkout.initError')));
+      setTransferLoading(false);
+    }
+  };
+  // Not for a gift card (bought or applied): those stay with card/PayPal.
+  const offerTransfer = !!bankTransferAvailable && !isGiftCardPurchase && !cart?.giftCardCode && !nothingToPay;
+  const busy = loading || paypalBusy || transferLoading;
+
   if (!isAuthenticated) return null;
   if (!cart?.items?.length) return (
     <MainLayout>
@@ -442,23 +465,39 @@ const CheckoutPage: React.FC = () => {
                   size="lg"
                   className="w-100"
                   onClick={handleProceedToPayment}
-                  disabled={loading || paypalBusy || !addressReady}
+                  disabled={busy || !addressReady}
                 >
                   {loading
                     ? <><Spinner size="sm" animation="border" className="me-2" />{t('checkout.processing')}</>
                     : coveredByGiftCard ? t('checkout.confirmWithGiftCard') : nothingToPay ? t('checkout.confirmFree') : t('checkout.proceed')}
                 </Button>
+                {!nothingToPay && cardPageLogos.length > 0 && (
+                  <div className="d-flex flex-wrap justify-content-center align-items-center gap-2 mt-2" data-testid="card-page-logos">
+                    {cardPageLogos.map(m => <img key={m.id} src={m.logoUrl} alt={m.name} title={m.name} style={{ height: 24, width: 'auto' }} />)}
+                  </div>
+                )}
                 {coveredByGiftCard && <div className="small text-success mt-2">{t('checkout.coveredByGiftCard')}</div>}
                 {nothingToPay && !coveredByGiftCard && <div className="small text-success mt-2">{t('checkout.nothingToPay')}</div>}
 
                 {!nothingToPay && (
                   <PayPalCheckoutButton
                     buildRequest={buildCheckoutRequest}
-                    disabled={loading || !addressReady}
+                    disabled={loading || transferLoading || !addressReady}
                     onPaid={() => navigate('/checkout/success')}
                     onError={message => setError(message)}
                     onBusyChange={setPaypalBusy}
                   />
+                )}
+
+                {offerTransfer && (
+                  <div className="mt-3">
+                    <Button variant="outline-secondary" size="lg" className="w-100" onClick={handleBankTransfer} disabled={busy || !addressReady}>
+                      {transferLoading
+                        ? <><Spinner size="sm" animation="border" className="me-2" />{t('checkout.processing')}</>
+                        : t('checkout.payByTransfer')}
+                    </Button>
+                    <div className="small text-muted mt-1 text-center">{t('checkout.transferHint')}</div>
+                  </div>
                 )}
               </Card.Body>
             </Card>

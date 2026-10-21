@@ -64,6 +64,8 @@ export interface SiteSettings {
   linkedInUrl?: string;
   footerColumns: FooterColumn[];
   openingHours?: OpeningHoursDay[];
+  /** The checkout offers «Pagar por transferencia» (switched on in the CMS, with an IBAN). */
+  bankTransferAvailable?: boolean;
 }
 
 export const getSiteSettings = (): Promise<SiteSettings> =>

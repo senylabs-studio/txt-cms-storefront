@@ -233,7 +233,7 @@
     "orderNotes": "Order notes",
     "notesPlaceholder": "Special instructions...",
     "loading": "Loading...",
-    "proceed": "Proceed to payment",
+    "proceed": "Pay by card",
     "securePayment": "Secure payment",
     "backToDetails": "← Back to details",
     "orderSummary": "Order summary",
@@ -278,7 +278,9 @@
       "terms": "terms of sale",
       "withdrawal": "Remnants and items sold by the unit: you have 14 days to withdraw. Fabric cut to measure has no right of withdrawal (art. 103 c of the Spanish consumer law), though we accept its return if you pay the shipping both ways.",
       "withdrawalLink": "Withdrawal and returns"
-    }
+    },
+    "payByTransfer": "Pay by bank transfer",
+    "transferHint": "We'll give you the bank details when you confirm. We keep your order for 5 days and prepare it once the payment arrives."
   },
   "checkoutSuccess": {
     "title": "Order received!",
@@ -801,5 +803,21 @@
       "confirm": "Unsubscribe",
       "success": "Done: we won't send you more cart reminders."
     }
+  },
+  "bankTransfer": {
+    "amount": "Amount",
+    "iban": "IBAN",
+    "holder": "Account holder",
+    "concept": "Reference",
+    "deadline": "Pay by",
+    "note": "Please use the reference exactly as shown so we can match your payment. If it doesn't arrive in time, the order will be cancelled. We've also emailed you these details with the proforma invoice.",
+    "copyIban": "Copy IBAN",
+    "copyConcept": "Copy reference",
+    "copied": "Copied!",
+    "copyFailed": "Couldn't copy: select it and copy it by hand.",
+    "successTitle": "Order reserved!",
+    "successMessage": "To complete order #{{orderId}}, make a bank transfer with these details. As soon as we receive it we'll prepare your order and send you the invoice.",
+    "pendingTitle": "Awaiting bank transfer",
+    "pendingMessage": "To complete this order, make a bank transfer with these details."
   }
 }

@@ -233,7 +233,7 @@
     "orderNotes": "Notas del pedido",
     "notesPlaceholder": "Instrucciones especiales...",
     "loading": "Cargando...",
-    "proceed": "Ir al pago",
+    "proceed": "Pagar con tarjeta",
     "securePayment": "Pago seguro",
     "backToDetails": "← Volver a los detalles",
     "orderSummary": "Resumen del pedido",
@@ -278,7 +278,9 @@
       "terms": "condiciones de venta",
       "withdrawal": "Retales y artículos por unidades: tienes 14 días para desistir. Las telas cortadas a medida no admiten desistimiento (art. 103 c del TRLGDCU), aunque aceptamos su devolución si asumes los gastos de envío de ida y vuelta.",
       "withdrawalLink": "Desistimiento y devoluciones"
-    }
+    },
+    "payByTransfer": "Pagar por transferencia",
+    "transferHint": "Te damos los datos bancarios al confirmar. Reservamos tu pedido 5 días; lo preparamos al recibir el pago."
   },
   "checkoutSuccess": {
     "title": "¡Pedido recibido!",
@@ -801,5 +803,21 @@
       "confirm": "Darme de baja",
       "success": "Listo: no te enviaremos más avisos de carrito."
     }
+  },
+  "bankTransfer": {
+    "amount": "Importe",
+    "iban": "IBAN",
+    "holder": "Titular",
+    "concept": "Concepto",
+    "deadline": "Fecha límite",
+    "note": "Indica el concepto tal cual para que identifiquemos tu pago. Si no lo recibimos en el plazo, el pedido se cancelará. También te lo hemos enviado por email, con la factura proforma.",
+    "copyIban": "Copiar IBAN",
+    "copyConcept": "Copiar concepto",
+    "copied": "¡Copiado!",
+    "copyFailed": "No se ha podido copiar: selecciónalo y cópialo a mano.",
+    "successTitle": "¡Pedido reservado!",
+    "successMessage": "Para completar el pedido #{{orderId}}, haz una transferencia con estos datos. En cuanto la recibamos lo prepararemos y te enviaremos la factura.",
+    "pendingTitle": "Pendiente de transferencia",
+    "pendingMessage": "Para completar este pedido, haz una transferencia con estos datos."
   }
 }

@@ -11,6 +11,7 @@ import { useSiteSettings } from '../../contexts/SiteSettingsContext';
 import { useToast } from '../../contexts/ToastContext';
 import { getApiErrorMessage } from '../../utils/apiError';
 import PageLoader from '../../components/common/ScissorsLoader/PageLoader';
+import BankTransferDetails from '../../components/BankTransfer/BankTransferDetails';
 import { formatPrice } from '../../utils/pricing';
 import { downloadGiftCardLetter } from '../../services/giftCardService';
 import { formatDate, countryName } from '../../utils/locale';
@@ -167,6 +168,14 @@ const OrderDetailPage: React.FC = () => {
 
         {order.returnRequestedAt && (
           <Alert variant="info">{t('orderDetail.returnRequested', { date: formatDate(order.returnRequestedAt) })}</Alert>
+        )}
+
+        {order.bankTransfer && (
+          <Alert variant="warning">
+            <Alert.Heading as="h5">{t('bankTransfer.pendingTitle')}</Alert.Heading>
+            <p className="mb-2">{t('bankTransfer.pendingMessage')}</p>
+            <BankTransferDetails details={order.bankTransfer} />
+          </Alert>
         )}
 
         <Row className="mb-4">
