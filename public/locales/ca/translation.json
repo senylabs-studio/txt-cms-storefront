@@ -233,7 +233,7 @@
     "orderNotes": "Notes de la comanda",
     "notesPlaceholder": "Instruccions especials...",
     "loading": "Carregant...",
-    "proceed": "Anar al pagament",
+    "proceed": "Pagar amb targeta",
     "securePayment": "Pagament segur",
     "backToDetails": "← Tornar als detalls",
     "orderSummary": "Resum de la comanda",
@@ -278,7 +278,9 @@
       "terms": "condicions de venda",
       "withdrawal": "Retalls i articles per unitats: tens 14 dies per desistir. Les teles tallades a mida no admeten desistiment (art. 103 c del TRLGDCU), tot i que n’acceptem la devolució si assumeixes les despeses d’enviament d’anada i tornada.",
       "withdrawalLink": "Desistiment i devolucions"
-    }
+    },
+    "payByTransfer": "Pagar per transferència",
+    "transferHint": "Et donem les dades bancàries en confirmar. Reservem la teva comanda 5 dies; la preparem quan rebem el pagament."
   },
   "checkoutSuccess": {
     "title": "Comanda rebuda!",
@@ -801,5 +803,21 @@
       "confirm": "Donar-me de baixa",
       "success": "Fet: no t'enviarem més avisos de cistella."
     }
+  },
+  "bankTransfer": {
+    "amount": "Import",
+    "iban": "IBAN",
+    "holder": "Titular",
+    "concept": "Concepte",
+    "deadline": "Data límit",
+    "note": "Indica el concepte tal qual perquè identifiquem el teu pagament. Si no el rebem dins del termini, la comanda es cancel·larà. També te l'hem enviat per correu, amb la factura proforma.",
+    "copyIban": "Copiar l'IBAN",
+    "copyConcept": "Copiar el concepte",
+    "copied": "Copiat!",
+    "copyFailed": "No s'ha pogut copiar: selecciona-ho i copia-ho a mà.",
+    "successTitle": "Comanda reservada!",
+    "successMessage": "Per completar la comanda #{{orderId}}, fes una transferència amb aquestes dades. Tan bon punt la rebem la prepararem i t'enviarem la factura.",
+    "pendingTitle": "Pendent de transferència",
+    "pendingMessage": "Per completar aquesta comanda, fes una transferència amb aquestes dades."
   }
 }

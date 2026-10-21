@@ -295,6 +295,23 @@ export interface StorefrontOrderDetail {
   shippingAddress?: AddressSummary;
   billingAddress?: AddressSummary;
   lines: OrderLine[];
+  /** Placed to pay by bank transfer and not paid yet: what to transfer, where and by when. */
+  bankTransfer?: BankTransferDetails | null;
+}
+
+/** Where and how to pay an order placed by bank transfer. */
+export interface BankTransferDetails {
+  amount: number;
+  iban: string;
+  accountHolder: string;
+  concept: string;
+  /** UTC instant the order is cancelled if unpaid: the midnight (Madrid) ending the last day. */
+  paymentDueAt: string;
+}
+
+/** POST checkout/bank-transfer: the order placed, pending the transfer. */
+export interface BankTransferOrder extends BankTransferDetails {
+  orderId: number;
 }
 
 export interface AddressSummary {

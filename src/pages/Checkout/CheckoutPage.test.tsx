@@ -5,7 +5,10 @@ import CheckoutPage from './CheckoutPage';
 import type { Cart, CheckoutResponse, StorefrontProfile } from '../../types';
 import type { ApplicableShippingRate } from '../../services/shippingService';
 
-vi.mock('../../contexts/SiteSettingsContext', () => ({ useSiteSettings: () => ({ siteName: 'Shop' }) }));
+const mockSettings = vi.hoisted(() => ({ siteName: 'Shop', bankTransferAvailable: false }));
+vi.mock('../../contexts/SiteSettingsContext', () => ({ useSiteSettings: () => mockSettings }));
+const mockPaymentMethods = vi.hoisted(() => ({ list: [] as { id: number; name: string; logoUrl: string; sortOrder: number }[] }));
+vi.mock('../../contexts/PaymentMethodsContext', () => ({ usePaymentMethods: () => mockPaymentMethods.list }));
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'es' } }),
 }));
@@ -34,8 +37,8 @@ vi.mock('../../contexts/CartContext', () => ({
 }));
 vi.mock('../../contexts/ToastContext', () => ({ useToast: () => ({ showToast: vi.fn() }) }));
 
-const { checkout } = vi.hoisted(() => ({ checkout: vi.fn() }));
-vi.mock('../../services/cartService', () => ({ checkout }));
+const { checkout, placeBankTransferOrder } = vi.hoisted(() => ({ checkout: vi.fn(), placeBankTransferOrder: vi.fn() }));
+vi.mock('../../services/cartService', () => ({ checkout, placeBankTransferOrder }));
 
 const { getProfile, addAddress } = vi.hoisted(() => ({ getProfile: vi.fn(), addAddress: vi.fn() }));
 vi.mock('../../services/profileService', () => ({ getProfile, addAddress, updateAddress: vi.fn() }));
@@ -89,6 +92,8 @@ describe('CheckoutPage', () => {
     vi.clearAllMocks();
     mockAuth.isAuthenticated = true;
     mockCart.cart = null;
+    mockSettings.bankTransferAvailable = false;
+    mockPaymentMethods.list = [];
     getProfile.mockResolvedValue(profile());
     getShippingOptions.mockResolvedValue([validShippingRate]);
     getPickupOptions.mockResolvedValue([]);
@@ -497,5 +502,52 @@ describe('CheckoutPage', () => {
     // 20 + 5 shipping − 10 from the card
     await waitFor(() => expect(screen.getByText('15,00 €')).toBeInTheDocument());
     expect(screen.getByRole('button', { name: 'checkout.proceed' })).toBeInTheDocument();
+  });
+
+  // 2026-10-21: «Ir al pago» didn't say what was behind it — the card page's methods are shown.
+  it('shows the logos of what the card page takes, not PayPal (it has its own button)', async () => {
+    mockCart.cart = cartWithItems();
+    mockPaymentMethods.list = [
+      { id: 1, name: 'Visa', logoUrl: '/visa.png', sortOrder: 1 },
+      { id: 3, name: 'PayPal', logoUrl: '/paypal.png', sortOrder: 3 },
+      { id: 5, name: 'Apple Pay', logoUrl: '', sortOrder: 5 },
+    ];
+    render(<CheckoutPage />);
+
+    const logos = await screen.findByTestId('card-page-logos');
+    expect(within(logos).getByAltText('Visa')).toBeInTheDocument();
+    expect(within(logos).queryByAltText('PayPal')).not.toBeInTheDocument();
+    expect(within(logos).getAllByRole('img')).toHaveLength(1); // no logo uploaded, nothing shown
+  });
+
+  it('places a bank-transfer order and shows where to pay', async () => {
+    mockCart.cart = cartWithItems();
+    mockSettings.bankTransferAvailable = true;
+    const order = { orderId: 12, amount: 25, iban: 'ES12', accountHolder: 'TXT', concept: 'Pedido #12', paymentDueAt: '2026-10-26T23:00:00Z' };
+    placeBankTransferOrder.mockResolvedValue(order);
+    render(<CheckoutPage />);
+
+    const button = await screen.findByRole('button', { name: 'checkout.payByTransfer' });
+    await waitFor(() => expect(button).toBeEnabled());
+    fireEvent.click(button);
+
+    await waitFor(() => expect(navigate).toHaveBeenCalledWith('/checkout/success', { state: { bankTransfer: order } }));
+    expect(placeBankTransferOrder).toHaveBeenCalledWith(expect.objectContaining({ shippingAddressId: 1 }));
+    expect(checkout).not.toHaveBeenCalled();
+  });
+
+  it('offers no bank transfer with a gift card applied, or when the shop has it off', async () => {
+    mockCart.cart = { ...cartWithItems(), giftCardCode: 'ABCD-EFGH-JKLM', giftCardAvailable: 10, giftCardAmount: 10, amountDue: 10 };
+    mockSettings.bankTransferAvailable = true;
+    const { unmount } = render(<CheckoutPage />);
+    await screen.findByRole('button', { name: 'checkout.proceed' });
+    expect(screen.queryByRole('button', { name: 'checkout.payByTransfer' })).not.toBeInTheDocument();
+    unmount();
+
+    mockCart.cart = cartWithItems();
+    mockSettings.bankTransferAvailable = false;
+    render(<CheckoutPage />);
+    await screen.findByRole('button', { name: 'checkout.proceed' });
+    expect(screen.queryByRole('button', { name: 'checkout.payByTransfer' })).not.toBeInTheDocument();
   });
 });

@@ -1,5 +1,5 @@
 import apiClient from '../apiClient';
-import type { AddGiftCardRequest, Cart, CheckoutRequest, CheckoutResponse } from '../types';
+import type { AddGiftCardRequest, BankTransferOrder, Cart, CheckoutRequest, CheckoutResponse } from '../types';
 
 export const getCart = async (): Promise<Cart> => {
   const res = await apiClient.get('/storefront/cart');
@@ -53,5 +53,11 @@ export const removeGiftCard = async (): Promise<Cart> => {
 
 export const checkout = async (data: CheckoutRequest): Promise<CheckoutResponse> => {
   const res = await apiClient.post('/storefront/checkout', data);
+  return res.data;
+};
+
+/** Places the order to be paid by bank transfer: pending, its stock kept for a few days. */
+export const placeBankTransferOrder = async (data: CheckoutRequest): Promise<BankTransferOrder> => {
+  const res = await apiClient.post('/storefront/checkout/bank-transfer', data);
   return res.data;
 };

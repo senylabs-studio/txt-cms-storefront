@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Button, Card, Form, Alert, Spinner } from 'react-bootstrap';
 import { FaCheckCircle } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '../../components/Layout/MainLayout';
 import { useCart } from '../../contexts/CartContext';
@@ -11,10 +11,14 @@ import { convertGuestAccount } from '../../services/authService';
 import { getApiErrorMessage } from '../../utils/apiError';
 import { meetsPasswordRules } from '../../utils/password';
 import PasswordInput from '../../components/common/PasswordInput/PasswordInput';
+import BankTransferDetails from '../../components/BankTransfer/BankTransferDetails';
+import type { BankTransferOrder } from '../../types';
 
 const CheckoutSuccessPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  // Placed to pay by bank transfer (CheckoutPage): the order exists, the money is still to come.
+  const bankTransfer = (useLocation().state as { bankTransfer?: BankTransferOrder } | null)?.bankTransfer;
   const { fetchCart } = useCart();
   const { isGuest, login } = useAuth();
   const [password, setPassword] = useState('');
@@ -68,7 +72,14 @@ const CheckoutSuccessPage: React.FC = () => {
   return (
     <MainLayout>
       <Container className="py-5 text-center" style={{ maxWidth: 520 }}>
-        {confirmed === null ? (
+        {bankTransfer ? (
+          <>
+            <FaCheckCircle size={64} className="text-success mb-3" />
+            <h2 className="fw-bold mb-2">{t('bankTransfer.successTitle')}</h2>
+            <p className="text-muted mb-3">{t('bankTransfer.successMessage', { orderId: bankTransfer.orderId })}</p>
+            <Card className="mb-4"><Card.Body><BankTransferDetails details={bankTransfer} /></Card.Body></Card>
+          </>
+        ) : confirmed === null ? (
           <>
             <Spinner animation="border" className="mb-3" />
             <h2 className="fw-bold mb-2">{t('checkoutSuccess.confirmingTitle')}</h2>
