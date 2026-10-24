@@ -197,9 +197,12 @@ createServer(async (req, res) => {
     const hasOrigin = Boolean(host || CANONICAL_HOST);
     const pageUrl = hasOrigin ? languageUrl(origin, url.pathname, lng) : null;
     const alternates = hasOrigin ? languageAlternates(origin, url.pathname) : [];
+    // The home's blocks go in the page (cached here, refreshed every few minutes): it paints
+    // without waiting for the app to ask the API.
+    const homeBlocks = url.pathname === '/' ? await (lng ? getJsonIn[lng] : getJson)('/storefront/home').catch(() => null) : null;
     // A page that doesn't exist answers 404 (still the app, which shows its own message).
     sendBody(req, res, meta.notFound ? 404 : 200, { ...SECURITY_HEADERS, ...noIndex, 'Content-Type': TYPES['.html'], 'Cache-Control': 'no-cache' },
-      Buffer.from(injectMeta(indexHtml, meta, pageUrl, { lang: lng ?? 'es', alternates })));
+      Buffer.from(injectMeta(indexHtml, meta, pageUrl, { lang: lng ?? 'es', alternates, homeBlocks: Array.isArray(homeBlocks) ? homeBlocks : null })));
   } catch (err) {
     console.error(err);
     if (!res.headersSent) res.writeHead(500);

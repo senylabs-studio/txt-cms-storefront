@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildMeta, injectMeta, cleanText, createJsonCache, NOT_FOUND, isLocalPath, requestHost, categoryRedirect, legacyAnswer, pickEncoding, canonicalPath, etagFor, isNotModified, requestLanguage, languageAlternates, sitemapWithLanguages } from './meta.mjs';
+import { buildMeta, injectMeta, homeBlocksScript, cleanText, createJsonCache, NOT_FOUND, isLocalPath, requestHost, categoryRedirect, legacyAnswer, pickEncoding, canonicalPath, etagFor, isNotModified, requestLanguage, languageAlternates, sitemapWithLanguages } from './meta.mjs';
 
 const site = { siteName: 'Tejidos Pulido', siteDescription: 'Tu tienda de tejidos de confianza.', logoUrl: 'https://cdn/logo.png' };
 const api = (routes) => async (path) => (path === '/storefront/site-settings' ? site : routes[path] ?? null);
@@ -24,6 +24,31 @@ describe('share preview meta', () => {
     expect(home).toMatchObject({ title: 'Tejidos Pulido', description: 'Tu tienda de tejidos de confianza.', image: 'https://cdn/logo.png' });
     expect((await buildMeta('/cart', api({}))).title).toBe('Tejidos Pulido');
     expect((await buildMeta('/variant/999', api({}))).title).toBe('Tejidos Pulido');
+  });
+
+  // 2026-10-24: the variant page's main photo started downloading at 5.7 s on a phone.
+  it('preloads the photo a variant page shows first (its resized copy), not the original', async () => {
+    const meta = await buildMeta('/variant/42', api({
+      '/storefront/products/variants/42/meta': { title: 'T', imageUrl: 'https://cdn/v42.jpg', displayImageUrl: 'https://cdn/v42-1152.webp' },
+    }));
+    expect(meta.image).toBe('https://cdn/v42.jpg'); // link previews keep the original
+    expect(meta.preloadImage).toBe('https://cdn/v42-1152.webp');
+    // An API without the field (not deployed yet): no preload, nothing breaks.
+    const old = await buildMeta('/variant/42', api({ '/storefront/products/variants/42/meta': { title: 'T', imageUrl: 'https://cdn/v42.jpg' } }));
+    expect(old.preloadImage).toBeUndefined();
+  });
+
+  // 2026-10-24: the home painted its banner at 10.6 s on a phone, waiting for the app to ask the API.
+  it('puts the home blocks in the page as data, tagged with their language and safe in HTML', () => {
+    const blocks = [{ type: 'RichText', config: { html: '</script><script>alert(1)</script>' } }];
+    const tag = homeBlocksScript(blocks, 'ca');
+    expect(tag).toMatch(/^<script id="home-blocks" type="application\/json" data-lang="ca">/);
+    expect(tag.slice(0, -'</script>'.length)).not.toContain('</script>'); // the content can't close the tag
+    const json = tag.replace(/^<script[^>]*>/, '').replace(/<\/script>$/, '');
+    expect(JSON.parse(json)).toEqual(blocks);
+    expect(homeBlocksScript(null, 'es')).toBe('');
+    const html = injectMeta('<head><title>x</title>\n<meta name="description" content="x" /></head>', { title: 'T', description: 'd', siteName: 'S', type: 'website' }, null, { homeBlocks: blocks });
+    expect(html).toContain('id="home-blocks"');
   });
 
   it('preloads the home banner photo when the banner opens the page', async () => {
