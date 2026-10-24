@@ -229,7 +229,7 @@
     "shippingAddress": "Adreça d'enviament",
     "selectAddress": "-- Seleccionar --",
     "billingAddress": "Adreça de facturació",
-    "sameBilling": "-- Igual que enviament --",
+    "billingSameAsShipping": "Facturar a la mateixa adreça",
     "orderNotes": "Notes de la comanda",
     "notesPlaceholder": "Instruccions especials...",
     "loading": "Carregant...",
@@ -253,7 +253,6 @@
     "estimatedDeliveryRange": "Lliurament estimat: {{min}}–{{max}} dies feiners",
     "estimatedDeliveryExact": "Lliurament estimat: {{days}} dies feiners",
     "loadAddressesError": "No s'han pogut carregar les teves adreces.",
-    "orPayWith": "o paga amb",
     "paypalDeclined": "PayPal no ha acceptat aquest mètode de pagament. No s'ha fet cap càrrec: torna-ho a provar amb un altre.",
     "paypalUnconfirmed": "No hem pogut confirmar el teu pagament amb PayPal. Si s'ha completat, rebràs el correu de confirmació de la comanda d'aquí a uns minuts i el veuràs a Les meves comandes; no el tornis a pagar.",
     "paypalError": "No s'ha pogut completar el pagament amb PayPal. No s'ha fet cap càrrec.",
@@ -279,8 +278,16 @@
       "withdrawal": "Retalls i articles per unitats: tens 14 dies per desistir. Les teles tallades a mida no admeten desistiment (art. 103 c del TRLGDCU), tot i que n’acceptem la devolució si assumeixes les despeses d’enviament d’anada i tornada.",
       "withdrawalLink": "Desistiment i devolucions"
     },
-    "payByTransfer": "Pagar per transferència",
-    "transferHint": "Et donem les dades bancàries en confirmar. Reservem la teva comanda 5 dies; la preparem quan rebem el pagament."
+    "payByTransfer": "Confirmar la comanda i pagar per transferència",
+    "paymentMethod": "Forma de pagament",
+    "method": {
+      "card": "Targeta",
+      "cardHint": "Pagament segur a la passarel·la del nostre banc (Redsys). Introdueixes les dades a la pàgina següent.",
+      "paypal": "PayPal",
+      "paypalHint": "S'obre la finestra de PayPal per confirmar el pagament, sense sortir de la botiga.",
+      "transfer": "Transferència bancària",
+      "transferHint": "Et donem les dades bancàries en confirmar. Reservem la teva comanda 5 dies; la preparem quan rebem el pagament."
+    }
   },
   "checkoutSuccess": {
     "title": "Comanda rebuda!",

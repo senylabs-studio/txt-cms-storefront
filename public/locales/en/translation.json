@@ -229,7 +229,7 @@
     "shippingAddress": "Shipping address",
     "selectAddress": "-- Select --",
     "billingAddress": "Billing address",
-    "sameBilling": "-- Same as shipping --",
+    "billingSameAsShipping": "Bill to the same address",
     "orderNotes": "Order notes",
     "notesPlaceholder": "Special instructions...",
     "loading": "Loading...",
@@ -253,7 +253,6 @@
     "estimatedDeliveryRange": "Estimated delivery: {{min}}–{{max}} business days",
     "estimatedDeliveryExact": "Estimated delivery: {{days}} business days",
     "loadAddressesError": "Failed to load your addresses.",
-    "orPayWith": "or pay with",
     "paypalDeclined": "PayPal did not accept that payment method. You have not been charged: please try again with another one.",
     "paypalUnconfirmed": "We couldn't confirm your PayPal payment. If it went through, you'll get the order confirmation email in a few minutes and see it under My orders; please don't pay again.",
     "paypalError": "The PayPal payment could not be completed. You have not been charged.",
@@ -279,8 +278,16 @@
       "withdrawal": "Remnants and items sold by the unit: you have 14 days to withdraw. Fabric cut to measure has no right of withdrawal (art. 103 c of the Spanish consumer law), though we accept its return if you pay the shipping both ways.",
       "withdrawalLink": "Withdrawal and returns"
     },
-    "payByTransfer": "Pay by bank transfer",
-    "transferHint": "We'll give you the bank details when you confirm. We keep your order for 5 days and prepare it once the payment arrives."
+    "payByTransfer": "Place order and pay by bank transfer",
+    "paymentMethod": "Payment method",
+    "method": {
+      "card": "Card",
+      "cardHint": "Secure payment on our bank's payment page (Redsys). You enter your card details on the next page.",
+      "paypal": "PayPal",
+      "paypalHint": "PayPal's window opens for you to confirm the payment, without leaving the shop.",
+      "transfer": "Bank transfer",
+      "transferHint": "We'll give you the bank details when you confirm. We keep your order for 5 days and prepare it once the payment arrives."
+    }
   },
   "checkoutSuccess": {
     "title": "Order received!",

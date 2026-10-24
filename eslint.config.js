@@ -31,6 +31,18 @@ export default defineConfig([
       // into two, which was assessed and deliberately deferred; keep it from
       // blocking CI in the meantime.
       'react-refresh/only-export-components': 'warn',
+      // The browser's own dialogs are unstyled, untranslated and look like a scam on a shop:
+      // ask in a react-bootstrap Modal (see AccountPage's delete-account dialog), tell in a toast.
+      'no-restricted-globals': ['error',
+        { name: 'confirm', message: 'Ask in a Modal (see AccountPage).' },
+        { name: 'alert', message: 'Show a toast or an inline Alert.' },
+        { name: 'prompt', message: 'Ask in a Modal with a field.' },
+      ],
+      'no-restricted-properties': ['error',
+        { object: 'window', property: 'confirm', message: 'Ask in a Modal (see AccountPage).' },
+        { object: 'window', property: 'alert', message: 'Show a toast or an inline Alert.' },
+        { object: 'window', property: 'prompt', message: 'Ask in a Modal with a field.' },
+      ],
     },
   },
   {
