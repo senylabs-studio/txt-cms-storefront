@@ -40,7 +40,8 @@ const BankTransferDetails: React.FC<{ details: Details }> = ({ details }) => {
   const { t } = useTranslation();
   return (
     <>
-      <Table size="sm" className="mb-2 text-start">
+      <Table size="sm" className="mb-2 text-start" style={{ tableLayout: 'fixed', overflowWrap: 'anywhere' }}>
+        <colgroup><col style={{ width: '7.5rem' }} /><col /></colgroup>
         <tbody>
           <tr>
             <th className="text-muted fw-normal">{t('bankTransfer.amount')}</th>
@@ -48,7 +49,9 @@ const BankTransferDetails: React.FC<{ details: Details }> = ({ details }) => {
           </tr>
           <tr>
             <th className="text-muted fw-normal">{t('bankTransfer.iban')}</th>
-            <td className="fw-bold text-nowrap">
+            {/* The IBAN may wrap between its groups of four: kept on one line it pushed the table out
+                of the card on a phone (2026-10-24). */}
+            <td className="fw-bold">
               {details.iban}
               <CopyButton value={details.iban.replace(/\s+/g, '')} label={t('bankTransfer.copyIban')} />
             </td>

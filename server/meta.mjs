@@ -117,7 +117,7 @@ export async function buildMeta(pathname, getJson) {
   if (segments.length > 0) return base;
   const home = { ...base, jsonLd: storeLd(site) };
   const hero = await homeHeroImage(getJson).catch(() => null);
-  return hero ? { ...home, preloadImage: hero } : home;
+  return hero ? { ...home, preloadImage: hero.url, preloadImagePhone: hero.phoneUrl } : home;
 }
 
 /** The home banner's first photo when the banner opens the page: it paints first (the LCP), but as
@@ -127,8 +127,11 @@ async function homeHeroImage(getJson) {
   const blocks = await getJson('/storefront/home');
   if (!Array.isArray(blocks)) return null;
   const first = blocks.filter(b => b?.isActive !== false).sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))[0];
-  const url = first?.type === 'Banner' ? first.config?.slides?.[0]?.imageUrl : null;
-  return typeof url === 'string' && /^https?:\/\//.test(url) ? url : null;
+  const slide = first?.type === 'Banner' ? first.config?.slides?.[0] : null;
+  const web = (u) => typeof u === 'string' && /^https?:\/\//.test(u) ? u : undefined;
+  const url = web(slide?.imageUrl);
+  // Its centre cut for phones, when the API has made it: the phone preloads that one instead.
+  return url ? { url, phoneUrl: web(slide?.mobileImageUrl) } : null;
 }
 
 /** schema.org Product for search results (price, availability). Prices are per metre / unit in EUR. */
@@ -199,6 +202,17 @@ function storeLd(site) {
 }
 
 /** JSON for a <script> block: "<" escaped so CMS text can't close the tag. */
+/** The page's main photo, preloaded. With a phone cut, each screen preloads only its own one: the
+ *  same 480 px breakpoint as the banner's media query (LandingPage.css). */
+export const PHONE_MEDIA = '(max-width: 480px)';
+const preloadLinks = (meta) => {
+  if (!meta.preloadImage) return [];
+  const link = (href, media) => `<link rel="preload" as="image" href="${escapeHtml(href)}"${media ? ` media="${media}"` : ''} fetchpriority="high" />`;
+  return meta.preloadImagePhone
+    ? [link(meta.preloadImagePhone, PHONE_MEDIA), link(meta.preloadImage, '(min-width: 481px)')]
+    : [link(meta.preloadImage)];
+};
+
 /** The home blocks, in the page itself: the home used to wait for the app to load and then ask the
  *  API before painting anything (the banner image was downloaded at 2.5 s and painted at 10.6 s on
  *  a phone, 2026-10-24). Data, not code (type application/json), tagged with its language: the app
@@ -313,7 +327,7 @@ export function injectMeta(html, meta, url, { lang = 'es', alternates = [], home
     `<meta name="twitter:card" content="${meta.image ? 'summary_large_image' : 'summary'}" />`,
     meta.notFound ? '' : ldScript(meta.jsonLd, url),
     meta.notFound ? '' : ldScript(breadcrumbLd(meta.breadcrumb, url)),
-    meta.preloadImage ? `<link rel="preload" as="image" href="${escapeHtml(meta.preloadImage)}" fetchpriority="high" />` : '',
+    ...preloadLinks(meta),
     homeBlocksScript(homeBlocks, lang),
   ].filter(Boolean).join('\n    ');
   // Replacer functions, not strings: a "$'" or "$&" in a CMS title is a replacement pattern in a

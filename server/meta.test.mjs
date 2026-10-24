@@ -51,6 +51,16 @@ describe('share preview meta', () => {
     expect(html).toContain('id="home-blocks"');
   });
 
+  // 2026-10-24: a phone downloaded the whole 430 KB banner photo to show its centre.
+  it('preloads the banner\'s phone cut on phones and the full photo elsewhere, never both', async () => {
+    const home = await buildMeta('/', api({ '/storefront/home': [{ type: 'Banner', isActive: true, sortOrder: 0,
+      config: { slides: [{ imageUrl: 'https://cdn/hero.webp', mobileImageUrl: 'https://cdn/hero-phone.webp' }] } }] }));
+    expect(home.preloadImagePhone).toBe('https://cdn/hero-phone.webp');
+    const html = injectMeta('<head><title>x</title>\n<meta name="description" content="x" /></head>', home, 'https://shop/');
+    expect(html).toContain('<link rel="preload" as="image" href="https://cdn/hero-phone.webp" media="(max-width: 480px)" fetchpriority="high" />');
+    expect(html).toContain('<link rel="preload" as="image" href="https://cdn/hero.webp" media="(min-width: 481px)" fetchpriority="high" />');
+  });
+
   it('preloads the home banner photo when the banner opens the page', async () => {
     const banner = (url) => ({ type: 'Banner', isActive: true, sortOrder: 0, config: { slides: [{ imageUrl: url }, { imageUrl: 'https://cdn/2.webp' }] } });
     const home = await buildMeta('/', api({ '/storefront/home': [banner('https://cdn/hero.webp'), { type: 'FeaturedProducts', sortOrder: 1, config: {} }] }));

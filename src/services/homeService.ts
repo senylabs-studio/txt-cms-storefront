@@ -4,6 +4,8 @@ export type StorefrontHomeBlockType = 'Banner' | 'ImageGrid' | 'FeaturedProducts
 
 export interface HomeBannerSlide {
   imageUrl?: string;
+  /** The photo's centre cut for phones (≤ 480 px wide), when the API has made it. */
+  mobileImageUrl?: string;
   title?: string;
   subtitle?: string;
   buttonText?: string;
