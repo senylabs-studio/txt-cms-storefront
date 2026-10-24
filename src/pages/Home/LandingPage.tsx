@@ -23,6 +23,7 @@ import {
   type HomeReviewsBlockConfig,
   type HomeDividerBlockConfig,
 } from '../../services/homeService';
+import { homeBlocksFromPage } from '../../utils/homeBlocksFromPage';
 import FeaturedProductsGrid from '../../components/common/FeaturedProductsGrid/FeaturedProductsGrid';
 import { bannerTextPlacement } from '../../utils/bannerTextPlacement';
 import { blockLinkProps } from '../../utils/blockLinkProps';
@@ -343,13 +344,15 @@ const LandingPage: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { siteName, siteDescription } = useSiteSettings();
   useDocumentMeta(siteName, siteDescription || undefined);
-  const [blocks, setBlocks] = useState<StorefrontHomeBlock[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Painted at once from the copy the server put in the page; the API is still asked, and its
+  // answer replaces the blocks only if they changed (a CMS edit within the server's cache window).
+  const [blocks, setBlocks] = useState<StorefrontHomeBlock[]>(() => homeBlocksFromPage(i18n.language) ?? []);
+  const [loading, setLoading] = useState(() => homeBlocksFromPage(i18n.language) === null);
 
   useEffect(() => {
     getHomeBlocks()
-      .then(setBlocks)
-      .catch(() => setBlocks([]))
+      .then(fresh => setBlocks(prev => (JSON.stringify(prev) === JSON.stringify(fresh) ? prev : fresh)))
+      .catch(() => { /* keep what is shown: the page copy, or nothing */ })
       .finally(() => setLoading(false));
   }, [i18n.language]);
 

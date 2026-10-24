@@ -74,6 +74,9 @@ export async function buildMeta(pathname, getJson) {
           jsonLd: productLd({ name: v.title, description: cleanText(v.description), image, sku: v.code,
             brand: siteName, price: v.price, inStock: v.inStock, averageRating: v.averageRating, reviewCount: v.reviewCount,
             shipping: shippingLd(v) }),
+          // The page's main photo, as it shows it: found only once the app has asked for the variant,
+          // it started downloading at 5.7 s on a phone (2026-10-24). Preloaded with the HTML.
+          preloadImage: typeof v.displayImageUrl === 'string' && /^https?:\/\//.test(v.displayImageUrl) ? v.displayImageUrl : undefined,
           // Inicio › product › this variant (the results show the trail instead of the URL).
           breadcrumb: v.productSlug ? [
             { name: siteName, path: '/' },
@@ -196,6 +199,14 @@ function storeLd(site) {
 }
 
 /** JSON for a <script> block: "<" escaped so CMS text can't close the tag. */
+/** The home blocks, in the page itself: the home used to wait for the app to load and then ask the
+ *  API before painting anything (the banner image was downloaded at 2.5 s and painted at 10.6 s on
+ *  a phone, 2026-10-24). Data, not code (type application/json), tagged with its language: the app
+ *  uses it only when it matches the language it opens in. */
+export const homeBlocksScript = (blocks, lang) => Array.isArray(blocks)
+  ? `<script id="home-blocks" type="application/json" data-lang="${escapeHtml(lang)}">${JSON.stringify(blocks).replace(/</g, '\\u003c')}</script>`
+  : '';
+
 const ldScript = (data, url) => data
   ? `<script type="application/ld+json">${JSON.stringify(url ? { ...data, url, ...(data.offers ? { offers: { ...data.offers, url } } : {}) } : data).replace(/</g, '\\u003c')}</script>`
   : '';
@@ -287,7 +298,7 @@ const withLng = (loc, lng) => (lng ? `${loc}${loc.includes('?') ? '&amp;' : '?'}
 /** Writes the preview into index.html: replaces <title> and the description, adds og:/twitter: tags,
  * the canonical URL, the hreflang alternates and the page's language, and noindex on a page that
  * doesn't exist. */
-export function injectMeta(html, meta, url, { lang = 'es', alternates = [] } = {}) {
+export function injectMeta(html, meta, url, { lang = 'es', alternates = [], homeBlocks = null } = {}) {
   const tags = [
     meta.notFound ? '<meta name="robots" content="noindex" />' : '',
     url && !meta.notFound ? `<link rel="canonical" href="${escapeHtml(url)}" />` : '',
@@ -303,6 +314,7 @@ export function injectMeta(html, meta, url, { lang = 'es', alternates = [] } = {
     meta.notFound ? '' : ldScript(meta.jsonLd, url),
     meta.notFound ? '' : ldScript(breadcrumbLd(meta.breadcrumb, url)),
     meta.preloadImage ? `<link rel="preload" as="image" href="${escapeHtml(meta.preloadImage)}" fetchpriority="high" />` : '',
+    homeBlocksScript(homeBlocks, lang),
   ].filter(Boolean).join('\n    ');
   // Replacer functions, not strings: a "$'" or "$&" in a CMS title is a replacement pattern in a
   // string and used to splice parts of index.html into the <title> (audit 2026-10-08).
