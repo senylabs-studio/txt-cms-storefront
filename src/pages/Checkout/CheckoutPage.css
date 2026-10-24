@@ -1,0 +1,5 @@
+/* What's missing for free shipping: a nudge, in the brand's green, not grey small print. */
+.checkout-free-shipping-hint {
+  color: var(--brand-text-color);
+  background: color-mix(in srgb, var(--brand-color) 10%, white);
+}
