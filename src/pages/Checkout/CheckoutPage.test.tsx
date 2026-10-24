@@ -158,11 +158,14 @@ describe('CheckoutPage', () => {
     expect((screen.getByPlaceholderText('checkout.notesPlaceholder') as HTMLTextAreaElement).value).toBe('Llamar antes');
   });
 
-  // A customer who skipped the cart's code fields can still enter one here.
+  // A customer who skipped the cart's code fields can still enter one here — folded behind a
+  // link since 2026-10-24 (two empty fields above the total read as if one were needed).
   it('offers the coupon field in the summary and applies the code typed there', async () => {
     mockCart.cart = cartWithItems();
     mockCart.applyCoupon.mockResolvedValue(undefined);
     render(<CheckoutPage />);
+    expect(screen.queryByPlaceholderText('cart.couponPlaceholder')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'checkout.haveCode' }));
     fireEvent.change(screen.getByPlaceholderText('cart.couponPlaceholder'), { target: { value: 'PRUEBA10' } });
     fireEvent.click(screen.getByRole('button', { name: 'cart.applyCoupon' }));
     await waitFor(() => expect(mockCart.applyCoupon).toHaveBeenCalledWith('PRUEBA10'));
@@ -172,7 +175,7 @@ describe('CheckoutPage', () => {
     mockCart.cart = { ...cartWithItems(), couponCode: 'PRUEBA10', couponDiscountAmount: 2 };
     render(<CheckoutPage />);
     expect(screen.queryByPlaceholderText('cart.couponPlaceholder')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'cart.removeCoupon' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'cart.removeCoupon' })).toBeInTheDocument(); // unfolded
     await waitFor(() => expect(getProfile).toHaveBeenCalled());
   });
 
@@ -405,14 +408,14 @@ describe('CheckoutPage', () => {
     await waitFor(() => expect(getShippingOptions).toHaveBeenCalledTimes(2));
 
     resolveSecond([{ name: 'RateB', price: 8, shippingCost: 8, isFree: false }]);
-    await screen.findByText('RateB');
+    await screen.findByText(/RateB/);
 
     // The first (now-stale) address's slower response arrives after the switch — must be ignored.
     resolveFirst([{ name: 'RateA', price: 3, shippingCost: 3, isFree: false }]);
     await new Promise(r => setTimeout(r, 0));
 
-    expect(screen.getByText('RateB')).toBeInTheDocument();
-    expect(screen.queryByText('RateA')).not.toBeInTheDocument();
+    expect(screen.getByText(/RateB/)).toBeInTheDocument();
+    expect(screen.queryByText(/RateA/)).not.toBeInTheDocument();
   });
 
   it('disables "proceed to payment" when no shipping rate covers the address', async () => {
@@ -620,5 +623,12 @@ describe('CheckoutPage', () => {
     await waitFor(() => expect(proceed).toBeEnabled());
     fireEvent.click(proceed);
     await waitFor(() => expect(checkout).toHaveBeenCalledWith(expect.objectContaining({ shippingAddressId: 1, billingAddressId: 2 })));
+  });
+  it('says what is missing for free shipping, and that VAT is included', async () => {
+    mockCart.cart = cartWithItems();
+    getShippingOptions.mockResolvedValue([{ ...validShippingRate, freeShippingThreshold: 60 }]);
+    render(<CheckoutPage />);
+    expect(await screen.findByText('checkout.missingForFree')).toBeInTheDocument();
+    expect(screen.getByText('checkout.vatIncluded · Standard')).toBeInTheDocument();
   });
 });

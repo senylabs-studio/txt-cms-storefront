@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useDocumentMeta } from '../../hooks/useDocumentMeta';
 import { useSiteSettings } from '../../contexts/SiteSettingsContext';
-import { FaTruck, FaGift, FaStore, FaArrowLeft, FaPlus } from 'react-icons/fa';
+import { FaTruck, FaGift, FaStore, FaArrowLeft, FaPlus, FaTag } from 'react-icons/fa';
 import MainLayout from '../../components/Layout/MainLayout';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -18,6 +18,7 @@ import PayPalCheckoutButton from './PayPalCheckoutButton';
 import PaymentMethodPicker, { type CheckoutPaymentMethod } from './PaymentMethodPicker';
 import { getPayPalConfig, type PayPalConfig } from '../../services/paypalService';
 import CartCodes from '../../components/Cart/CartCodes/CartCodes';
+import './CheckoutPage.css';
 import AddressFormModal from '../../components/Address/AddressFormModal';
 import { formatPrice } from '../../utils/pricing';
 import { cartItemName } from '../../utils/giftCard';
@@ -48,6 +49,9 @@ const CheckoutPage: React.FC = () => {
   const [transferLoading, setTransferLoading] = useState(false);
   const [error, setError] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<CheckoutPaymentMethod>('card');
+  // The code fields stay folded: most orders have none, and two empty fields above the total
+  // read as if one were needed.
+  const [showCodes, setShowCodes] = useState(false);
   // PayPal is offered only when the shop has it set up (its button needs the client id).
   const [paypalConfig, setPaypalConfig] = useState<PayPalConfig | null>(null);
   // Options for the chosen address (null = none covers it, undefined = not looked up yet).
@@ -593,10 +597,12 @@ const CheckoutPage: React.FC = () => {
                 </div>}
 
                 {shippingRate && shippingRate.freeShippingThreshold && !shippingRate.isFree && (
-                  <div className="small text-muted mb-2">
-                    {t('checkout.freeShippingFrom', { threshold: formatPrice(shippingRate.freeShippingThreshold) })}{' '}
+                  <div className="small rounded px-2 py-1 mb-2 checkout-free-shipping-hint">
                     {/* Shipped without VAT, the threshold counts what's paid: the subtotal without VAT. */}
-                    {t('checkout.missingForFree', { missing: formatPrice(shippingRate.freeShippingThreshold - (vatExempt ? withoutVat(cartSubtotal) : cartSubtotal)) })}
+                    {t('checkout.missingForFree', {
+                      missing: formatPrice(shippingRate.freeShippingThreshold - (vatExempt ? withoutVat(cartSubtotal) : cartSubtotal)),
+                      threshold: formatPrice(shippingRate.freeShippingThreshold),
+                    })}
                   </div>
                 )}
                 {!isPickup && shippingRate === null && shippingId && (
@@ -622,7 +628,20 @@ const CheckoutPage: React.FC = () => {
                 {/* A code not entered in the cart can still go in here (only while none is applied:
                     the applied one shows with its «Quitar»). */}
                 <hr className="my-2" />
-                <CartCodes />
+                {/* Unfolded while a code is applied (its «Quitar» shows) or one was refused. */}
+                {isGiftCardPurchase || showCodes || cart.couponCode || cart.giftCardCode || cart.couponError || cart.giftCardError ? (
+                  <CartCodes />
+                ) : (
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="p-0 mb-3 d-inline-flex align-items-center gap-1"
+                    aria-expanded={false}
+                    onClick={() => setShowCodes(true)}
+                  >
+                    <FaTag aria-hidden />{t('checkout.haveCode')}
+                  </Button>
+                )}
                 <div className="d-flex justify-content-between fw-bold fs-5">
                   <span>{t('checkout.total')}</span>
                   <span>{formatPrice(estimatedTotal)}</span>
@@ -640,8 +659,10 @@ const CheckoutPage: React.FC = () => {
                   </>
                 )}
 
-                {shippingRate && (
-                  <div className="small text-muted mt-1">{shippingRate.name}</div>
+                {(shippingRate || !vatExempt) && (
+                  <div className="small text-muted mt-1">
+                    {[!vatExempt && t('checkout.vatIncluded'), shippingRate?.name].filter(Boolean).join(' · ')}
+                  </div>
                 )}
                 {shippingRate && (shippingRate.estimatedDaysMin != null || shippingRate.estimatedDaysMax != null) && (
                   <div className="small text-success mt-1">
