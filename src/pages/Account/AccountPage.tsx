@@ -255,11 +255,14 @@ const AccountPage: React.FC = () => {
   return (
     <MainLayout>
       <Container className="py-4">
-        <h2 className="fw-bold mb-4">{t('account.title')}</h2>
+        <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+          <h2 className="fw-bold mb-0">{t('account.title')}</h2>
+          <Link to="/account/orders" className="btn btn-outline-secondary">{t('account.viewOrders')}</Link>
+        </div>
 
         <Row>
           {/* Profile */}
-          <Col lg={5} className="mb-4">
+          <Col lg={6} className="mb-4">
             <Card>
               <Card.Body>
                 <h5 className="fw-semibold mb-3"><FaUser className="me-2" />{t('account.personalData')}</h5>
@@ -303,9 +306,6 @@ const AccountPage: React.FC = () => {
                     {saving ? <Spinner size="sm" animation="border" /> : t('account.save')}
                   </Button>
                 </Form>
-
-                <hr />
-                <Link to="/account/orders" className="btn btn-outline-secondary btn-sm w-100">{t('account.viewOrders')}</Link>
               </Card.Body>
             </Card>
 
@@ -352,6 +352,47 @@ const AccountPage: React.FC = () => {
               </Card>
             )}
 
+          </Col>
+
+          {/* Addresses, newsletter and privacy */}
+          <Col lg={6} className="mb-4">
+            <Card>
+              <Card.Body>
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <h5 className="fw-semibold mb-0"><FaMapMarkerAlt className="me-2" />{t('account.myAddresses')}</h5>
+                  <Button size="sm" variant="primary" onClick={openAddAddr}><FaPlus className="me-1" />{t('account.add')}</Button>
+                </div>
+
+                {addrListError && <Alert variant="danger" dismissible onClose={() => setAddrListError('')} className="py-2">{addrListError}</Alert>}
+
+                {profile.addresses.length === 0 ? (
+                  <p className="text-muted text-center py-3">{t('account.noAddresses')}</p>
+                ) : (
+                  profile.addresses.map(a => (
+                    <div key={a.id} className="border rounded p-3 mb-2 d-flex justify-content-between align-items-start">
+                      <div>
+                        <div className="fw-semibold">
+                          {a.alias}
+                          {a.isDefault && <Badge bg="primary" className="ms-2 fs-xs">{t('account.defaultBadge')}</Badge>}
+                        </div>
+                        <div className="text-muted small">{a.recipientName}</div>
+                        <div className="text-muted small">{a.street}, {a.postalCode} {a.city}{a.province ? `, ${a.province}` : ''}</div>
+                        <div className="text-muted small">{countryName(a.country)}{a.phone ? ` · ${a.phone}` : ''}</div>
+                      </div>
+                      <div className="d-flex gap-1 ms-2">
+                        <IconTooltip label={t('account.editAddress')}>
+                          <Button size="sm" variant="outline-secondary" aria-label={t('account.editAddress')} onClick={() => openEditAddr(a)}><FaEdit /></Button>
+                        </IconTooltip>
+                        <IconTooltip label={t('account.deleteAddress')}>
+                          <Button size="sm" variant="outline-danger" aria-label={t('account.deleteAddress')} onClick={() => setAddrToDelete(a.id)}><FaTrash /></Button>
+                        </IconTooltip>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </Card.Body>
+            </Card>
+
             {profile && (
               <Card className="mt-4">
                 <Card.Body>
@@ -388,46 +429,6 @@ const AccountPage: React.FC = () => {
                       {t('account.deleteAccount')}
                     </Button>
                   </>
-                )}
-              </Card.Body>
-            </Card>
-          </Col>
-
-          {/* Addresses */}
-          <Col lg={7} className="mb-4">
-            <Card>
-              <Card.Body>
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <h5 className="fw-semibold mb-0"><FaMapMarkerAlt className="me-2" />{t('account.myAddresses')}</h5>
-                  <Button size="sm" variant="primary" onClick={openAddAddr}><FaPlus className="me-1" />{t('account.add')}</Button>
-                </div>
-
-                {addrListError && <Alert variant="danger" dismissible onClose={() => setAddrListError('')} className="py-2">{addrListError}</Alert>}
-
-                {profile.addresses.length === 0 ? (
-                  <p className="text-muted text-center py-3">{t('account.noAddresses')}</p>
-                ) : (
-                  profile.addresses.map(a => (
-                    <div key={a.id} className="border rounded p-3 mb-2 d-flex justify-content-between align-items-start">
-                      <div>
-                        <div className="fw-semibold">
-                          {a.alias}
-                          {a.isDefault && <Badge bg="primary" className="ms-2 fs-xs">{t('account.defaultBadge')}</Badge>}
-                        </div>
-                        <div className="text-muted small">{a.recipientName}</div>
-                        <div className="text-muted small">{a.street}, {a.postalCode} {a.city}{a.province ? `, ${a.province}` : ''}</div>
-                        <div className="text-muted small">{countryName(a.country)}{a.phone ? ` · ${a.phone}` : ''}</div>
-                      </div>
-                      <div className="d-flex gap-1 ms-2">
-                        <IconTooltip label={t('account.editAddress')}>
-                          <Button size="sm" variant="outline-secondary" aria-label={t('account.editAddress')} onClick={() => openEditAddr(a)}><FaEdit /></Button>
-                        </IconTooltip>
-                        <IconTooltip label={t('account.deleteAddress')}>
-                          <Button size="sm" variant="outline-danger" aria-label={t('account.deleteAddress')} onClick={() => setAddrToDelete(a.id)}><FaTrash /></Button>
-                        </IconTooltip>
-                      </div>
-                    </div>
-                  ))
                 )}
               </Card.Body>
             </Card>
