@@ -15,6 +15,8 @@ import { getShippingOptions, getPickupOptions, type ApplicableShippingRate } fro
 import { getApiErrorMessage } from '../../utils/apiError';
 import type { CustomerAddress, CheckoutResponse, CheckoutRequest } from '../../types';
 import PayPalCheckoutButton from './PayPalCheckoutButton';
+import PaymentMethodPicker, { type CheckoutPaymentMethod } from './PaymentMethodPicker';
+import { getPayPalConfig, type PayPalConfig } from '../../services/paypalService';
 import CartCodes from '../../components/Cart/CartCodes/CartCodes';
 import AddressFormModal from '../../components/Address/AddressFormModal';
 import { formatPrice } from '../../utils/pricing';
@@ -25,8 +27,8 @@ import { formatMeters, formatPercent } from '../../utils/locale';
 const CheckoutPage: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { siteName, companyAddress, companyPostalCode, companyCity, bankTransferAvailable } = useSiteSettings();
-  // What the card button's Redsys page takes (cards, wallets): every active method but PayPal,
-  // which has its own button. Only those with a logo uploaded in the CMS are shown.
+  // What the card option's Redsys page takes (cards, wallets): every active method but PayPal,
+  // which is its own option. Only those with a logo uploaded in the CMS are shown.
   const cardPageLogos = usePaymentMethods().filter(m => m.logoUrl && m.name.trim().toLowerCase() !== 'paypal');
   // The tab title: this screen's, not the previous page's.
   useDocumentMeta(`${t('checkout.title')} — ${siteName}`);
@@ -38,11 +40,16 @@ const CheckoutPage: React.FC = () => {
   const [addressesError, setAddressesError] = useState('');
   const [shippingId, setShippingId] = useState<number | undefined>();
   const [billingId, setBillingId] = useState<number | undefined>();
+  // Delivered: invoiced to the shipping address unless unticked (the usual case, one click less).
+  const [billingSameAsShipping, setBillingSameAsShipping] = useState(true);
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [paypalBusy, setPaypalBusy] = useState(false);
   const [transferLoading, setTransferLoading] = useState(false);
   const [error, setError] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<CheckoutPaymentMethod>('card');
+  // PayPal is offered only when the shop has it set up (its button needs the client id).
+  const [paypalConfig, setPaypalConfig] = useState<PayPalConfig | null>(null);
   // Options for the chosen address (null = none covers it, undefined = not looked up yet).
   const [shippingOptions, setShippingOptions] = useState<ApplicableShippingRate[] | null | undefined>(undefined);
   const [chosenRateId, setChosenRateId] = useState<number | undefined>();
@@ -73,6 +80,12 @@ const CheckoutPage: React.FC = () => {
     }).catch(err => setAddressesError(getApiErrorMessage(err, t('checkout.loadAddressesError'))));
   // eslint-disable-next-line react-hooks/exhaustive-deps -- one-off checkout bootstrap per auth state; fetchCart/navigate/t don't change what's loaded
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    let active = true;
+    getPayPalConfig().then(c => { if (active) setPaypalConfig(c); }).catch(() => { /* no PayPal option */ });
+    return () => { active = false; };
+  }, []);
 
   // A new address ships the order (that's why it was added); billing keeps the one chosen, or
   // takes the new one when there was none. Picking up, it can only be for the invoice.
@@ -216,7 +229,7 @@ const CheckoutPage: React.FC = () => {
     // A pickup ships nothing: no delivery address is sent (nor kept on the order).
     shippingAddressId: cart?.isGiftCardPurchase || isPickup ? undefined : shippingId,
     shippingRateId: cart?.isGiftCardPurchase ? undefined : shippingRate?.id,
-    billingAddressId: billingId,
+    billingAddressId: !isPickup && billingSameAsShipping ? shippingId : billingId,
     notes: notes || undefined,
     browserAcceptHeader: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
     browserUserAgent: navigator.userAgent,
@@ -262,6 +275,14 @@ const CheckoutPage: React.FC = () => {
   // Not for a gift card (bought or applied): those stay with card/PayPal.
   const offerTransfer = !!bankTransferAvailable && !isGiftCardPurchase && !cart?.giftCardCode && !nothingToPay;
   const busy = loading || paypalBusy || transferLoading;
+  const paypalAvailable = !nothingToPay && !!paypalConfig?.enabled && !!paypalConfig.clientId;
+  const paymentMethods: CheckoutPaymentMethod[] = [
+    'card',
+    ...(paypalAvailable ? ['paypal' as const] : []),
+    ...(offerTransfer ? ['transfer' as const] : []),
+  ];
+  // The choice no longer offered (a gift card applied meanwhile, say): back to the card.
+  const method = paymentMethods.includes(paymentMethod) ? paymentMethod : 'card';
 
   if (!isAuthenticated) return null;
   if (!cart?.items?.length) return (
@@ -418,21 +439,31 @@ const CheckoutPage: React.FC = () => {
                           </Form.Group>
                         )}
 
-                        <Form.Group className="mb-3" controlId="checkout-billing-address">
-                          <Form.Label className="fw-semibold">{t('checkout.billingAddress')}</Form.Label>
-                          <Form.Select value={billingId ?? ''} onChange={e => setBillingId(e.target.value ? Number(e.target.value) : undefined)}>
-                            <option value="">{t('checkout.sameBilling')}</option>
-                            {addresses.map(a => (
-                              <option key={a.id} value={a.id}>{a.alias} — {a.street}, {a.city}</option>
-                            ))}
-                          </Form.Select>
-                        </Form.Group>
+                        <Form.Check
+                          type="checkbox"
+                          id="checkout-billing-same"
+                          className="mb-3"
+                          checked={billingSameAsShipping}
+                          onChange={e => setBillingSameAsShipping(e.target.checked)}
+                          label={t('checkout.billingSameAsShipping')}
+                        />
+                        {!billingSameAsShipping && (
+                          <Form.Group className="mb-3" controlId="checkout-billing-address">
+                            <Form.Label className="fw-semibold">{t('checkout.billingAddress')}</Form.Label>
+                            <Form.Select value={billingId ?? ''} onChange={e => setBillingId(e.target.value ? Number(e.target.value) : undefined)}>
+                              <option value="">{t('checkout.selectAddress')}</option>
+                              {addresses.map(a => (
+                                <option key={a.id} value={a.id}>{a.alias} — {a.street}, {a.city}</option>
+                              ))}
+                            </Form.Select>
+                          </Form.Group>
+                        )}
                       </>
                     )}
                   </>
                 )}
 
-                <Form.Group className="mb-3" controlId="checkout-notes">
+                <Form.Group controlId="checkout-notes">
                   <Form.Label className="fw-semibold">{t('checkout.orderNotes')}</Form.Label>
                   <Form.Control
                     as="textarea"
@@ -443,11 +474,29 @@ const CheckoutPage: React.FC = () => {
                   />
                 </Form.Group>
 
-                {error && <Alert variant="danger" className="py-2">{error}</Alert>}
+              </Card.Body>
+            </Card>
+
+            <Card className="mt-3">
+              <Card.Body>
+                {!nothingToPay && paymentMethods.length > 1 && (
+                  <>
+                    <h5 className="fw-bold mb-3">{t('checkout.paymentMethod')}</h5>
+                    <PaymentMethodPicker
+                      methods={paymentMethods}
+                      value={method}
+                      onChange={setPaymentMethod}
+                      disabled={busy}
+                      cardLogos={cardPageLogos}
+                    />
+                  </>
+                )}
+
+                {error && <Alert variant="danger" className="py-2 mt-3">{error}</Alert>}
 
                 {/* Right before ordering (TRLGDCU art. 97–98, LSSI art. 27): the terms, and the
                     withdrawal rules — fabric cut to measure has none. In a new tab: the form stays. */}
-                <div className="small text-muted mb-2">
+                <div className={`small text-muted mb-2${!nothingToPay && paymentMethods.length > 1 ? ' mt-3' : ''}`}>
                   <p className="mb-1">
                     {t('checkout.legal.accept')}{' '}
                     <a href="/terminos-condiciones" target="_blank" rel="noopener noreferrer">{t('checkout.legal.terms')}</a>.
@@ -460,45 +509,44 @@ const CheckoutPage: React.FC = () => {
                   )}
                 </div>
 
-                <Button
-                  variant="primary"
-                  size="lg"
-                  className="w-100"
-                  onClick={handleProceedToPayment}
-                  disabled={busy || !addressReady}
-                >
-                  {loading
-                    ? <><Spinner size="sm" animation="border" className="me-2" />{t('checkout.processing')}</>
-                    : coveredByGiftCard ? t('checkout.confirmWithGiftCard') : nothingToPay ? t('checkout.confirmFree') : t('checkout.proceed')}
-                </Button>
-                {!nothingToPay && cardPageLogos.length > 0 && (
-                  <div className="d-flex flex-wrap justify-content-center align-items-center gap-2 mt-2" data-testid="card-page-logos">
-                    {cardPageLogos.map(m => <img key={m.id} src={m.logoUrl} alt={m.name} title={m.name} style={{ height: 24, width: 'auto' }} />)}
-                  </div>
-                )}
-                {coveredByGiftCard && <div className="small text-success mt-2">{t('checkout.coveredByGiftCard')}</div>}
-                {nothingToPay && !coveredByGiftCard && <div className="small text-success mt-2">{t('checkout.nothingToPay')}</div>}
-
-                {!nothingToPay && (
+                {/* One button, for the method chosen above. PayPal's is its own SDK button: it opens
+                    PayPal's window from that very click. */}
+                {method === 'paypal' && paypalConfig ? (
                   <PayPalCheckoutButton
+                    config={paypalConfig}
                     buildRequest={buildCheckoutRequest}
                     disabled={loading || transferLoading || !addressReady}
                     onPaid={() => navigate('/checkout/success')}
                     onError={message => setError(message)}
                     onBusyChange={setPaypalBusy}
                   />
+                ) : method === 'transfer' ? (
+                  <Button variant="primary" size="lg" className="w-100" onClick={handleBankTransfer} disabled={busy || !addressReady}>
+                    {transferLoading
+                      ? <><Spinner size="sm" animation="border" className="me-2" />{t('checkout.processing')}</>
+                      : t('checkout.payByTransfer')}
+                  </Button>
+                ) : (
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    className="w-100"
+                    onClick={handleProceedToPayment}
+                    disabled={busy || !addressReady}
+                  >
+                    {loading
+                      ? <><Spinner size="sm" animation="border" className="me-2" />{t('checkout.processing')}</>
+                      : coveredByGiftCard ? t('checkout.confirmWithGiftCard') : nothingToPay ? t('checkout.confirmFree') : t('checkout.proceed')}
+                  </Button>
                 )}
-
-                {offerTransfer && (
-                  <div className="mt-3">
-                    <Button variant="outline-secondary" size="lg" className="w-100" onClick={handleBankTransfer} disabled={busy || !addressReady}>
-                      {transferLoading
-                        ? <><Spinner size="sm" animation="border" className="me-2" />{t('checkout.processing')}</>
-                        : t('checkout.payByTransfer')}
-                    </Button>
-                    <div className="small text-muted mt-1 text-center">{t('checkout.transferHint')}</div>
+                {/* Only the card: no picker to show what the card page takes. */}
+                {!nothingToPay && paymentMethods.length === 1 && cardPageLogos.length > 0 && (
+                  <div className="d-flex flex-wrap justify-content-center align-items-center gap-2 mt-2" data-testid="card-page-logos">
+                    {cardPageLogos.map(m => <img key={m.id} src={m.logoUrl} alt={m.name} title={m.name} style={{ height: 24, width: 'auto' }} />)}
                   </div>
                 )}
+                {coveredByGiftCard && <div className="small text-success mt-2">{t('checkout.coveredByGiftCard')}</div>}
+                {nothingToPay && !coveredByGiftCard && <div className="small text-success mt-2">{t('checkout.nothingToPay')}</div>}
               </Card.Body>
             </Card>
           </Col>

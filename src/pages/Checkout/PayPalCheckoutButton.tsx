@@ -1,14 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { PayPalProvider, PayPalOneTimePaymentButton } from '@paypal/react-paypal-js/sdk-v6';
 import { useTranslation } from 'react-i18next';
 import {
-  cancelPayPalOrder, capturePayPalOrder, createPayPalOrder, getPayPalConfig, type PayPalConfig,
+  cancelPayPalOrder, capturePayPalOrder, createPayPalOrder, type PayPalConfig,
 } from '../../services/paypalService';
 import { getApiErrorMessage } from '../../utils/apiError';
 import type { CheckoutRequest } from '../../types';
 import './PayPalCheckoutButton.css';
 
 interface Props {
+  // Loaded by the page, which offers PayPal as a payment method only when it's enabled.
+  config: PayPalConfig;
   // Built at click time, so it carries the address/notes currently selected.
   buildRequest: () => CheckoutRequest;
   disabled: boolean;
@@ -30,9 +32,8 @@ const isUnanswered = (err: unknown) => {
 
 // PayPal inside the storefront: PayPal's own window opens over our page and the customer comes
 // back already paid — no redirect to Redsys. Renders nothing unless PayPal is configured.
-const PayPalCheckoutButton: React.FC<Props> = ({ buildRequest, disabled, onPaid, onError, onBusyChange }) => {
+const PayPalCheckoutButton: React.FC<Props> = ({ config, buildRequest, disabled, onPaid, onError, onBusyChange }) => {
   const { t, i18n } = useTranslation();
-  const [config, setConfig] = useState<PayPalConfig | null>(null);
   // The PayPal order of the attempt in progress — onCancel/onError don't receive it.
   const currentOrderId = useRef<string | null>(null);
   // While the capture is in flight the attempt must not be cancelled: the server may be
@@ -41,12 +42,6 @@ const PayPalCheckoutButton: React.FC<Props> = ({ buildRequest, disabled, onPaid,
   // createOrder already showed why it failed; PayPal's onError must not replace that message.
   const createFailed = useRef(false);
 
-  useEffect(() => {
-    let active = true;
-    getPayPalConfig().then(c => { if (active) setConfig(c); }).catch(() => { /* no PayPal button */ });
-    return () => { active = false; };
-  }, []);
-
   // Leaving the checkout with PayPal's window still open: unlock the cart, or every payment is
   // refused as "pago en curso" until the in-flight guard expires.
   useEffect(() => () => {
@@ -54,7 +49,7 @@ const PayPalCheckoutButton: React.FC<Props> = ({ buildRequest, disabled, onPaid,
     if (id && !capturing.current) cancelPayPalOrder(id).catch(() => { /* expires by itself */ });
   }, []);
 
-  if (!config?.enabled || !config.clientId) return null;
+  if (!config.enabled || !config.clientId) return null;
 
   // Unlock the cart so the customer can retry (any method) right away.
   const releaseAttempt = () => {
@@ -65,8 +60,7 @@ const PayPalCheckoutButton: React.FC<Props> = ({ buildRequest, disabled, onPaid,
   };
 
   return (
-    <div className="mt-3 paypal-checkout" data-testid="paypal-checkout">
-      <div className="text-center text-muted small my-2">{t('checkout.orPayWith')}</div>
+    <div className="paypal-checkout" data-testid="paypal-checkout">
       <PayPalProvider
         clientId={config.clientId}
         environment={config.environment}

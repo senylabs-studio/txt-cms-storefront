@@ -6,8 +6,10 @@ import PayPalCheckoutButton from './PayPalCheckoutButton';
 const i18n = vi.hoisted(() => ({ t: (key: string) => key, i18n: { language: 'es' } }));
 vi.mock('react-i18next', () => ({ useTranslation: () => i18n }));
 
+const config = { enabled: true, clientId: 'CID', environment: 'sandbox', currency: 'EUR' } as const;
+
 const api = vi.hoisted(() => ({
-  getPayPalConfig: vi.fn(), createPayPalOrder: vi.fn(), capturePayPalOrder: vi.fn(), cancelPayPalOrder: vi.fn(),
+  createPayPalOrder: vi.fn(), capturePayPalOrder: vi.fn(), cancelPayPalOrder: vi.fn(),
 }));
 vi.mock('../../services/paypalService', () => api);
 
@@ -44,22 +46,19 @@ vi.mock('@paypal/react-paypal-js/sdk-v6', () => ({
 const setup = () => {
   const onPaid = vi.fn();
   const onError = vi.fn();
-  render(<PayPalCheckoutButton buildRequest={() => ({ shippingAddressId: 7 })} disabled={false} onPaid={onPaid} onError={onError} />);
+  render(<PayPalCheckoutButton config={config} buildRequest={() => ({ shippingAddressId: 7 })} disabled={false} onPaid={onPaid} onError={onError} />);
   return { onPaid, onError };
 };
 
 describe('PayPalCheckoutButton', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    api.getPayPalConfig.mockResolvedValue({ enabled: true, clientId: 'CID', environment: 'sandbox', currency: 'EUR' });
     api.createPayPalOrder.mockResolvedValue({ payPalOrderId: 'PP-1', amount: 45.9 });
     api.cancelPayPalOrder.mockResolvedValue(undefined);
   });
 
-  it('renders nothing when PayPal is not configured', async () => {
-    api.getPayPalConfig.mockResolvedValue({ enabled: false, environment: 'sandbox', currency: 'EUR' });
-    setup();
-    await waitFor(() => expect(api.getPayPalConfig).toHaveBeenCalled());
+  it('renders nothing when PayPal is not configured', () => {
+    render(<PayPalCheckoutButton config={{ enabled: false, environment: 'sandbox', currency: 'EUR' }} buildRequest={() => ({})} disabled={false} onPaid={vi.fn()} onError={vi.fn()} />);
     expect(screen.queryByTestId('paypal-checkout')).toBeNull();
   });
 
@@ -90,7 +89,7 @@ describe('PayPalCheckoutButton', () => {
 
   it('reports busy while a PayPal attempt is open, and idle once it is closed', async () => {
     const onBusyChange = vi.fn();
-    render(<PayPalCheckoutButton buildRequest={() => ({ shippingAddressId: 7 })} disabled={false} onPaid={vi.fn()} onError={vi.fn()} onBusyChange={onBusyChange} />);
+    render(<PayPalCheckoutButton config={config} buildRequest={() => ({ shippingAddressId: 7 })} disabled={false} onPaid={vi.fn()} onError={vi.fn()} onBusyChange={onBusyChange} />);
 
     fireEvent.click(await screen.findByText('create'));
     await waitFor(() => expect(onBusyChange).toHaveBeenLastCalledWith(true));
@@ -127,7 +126,7 @@ describe('PayPalCheckoutButton', () => {
   // Regression tests: leaving the checkout (route change) with PayPal's window still open never
   // released the cart, so for 5 minutes any payment was refused as "pago en curso".
   it('releases the cart when the checkout is left with an attempt open', async () => {
-    const { unmount } = render(<PayPalCheckoutButton buildRequest={() => ({ shippingAddressId: 7 })} disabled={false} onPaid={vi.fn()} onError={vi.fn()} />);
+    const { unmount } = render(<PayPalCheckoutButton config={config} buildRequest={() => ({ shippingAddressId: 7 })} disabled={false} onPaid={vi.fn()} onError={vi.fn()} />);
     fireEvent.click(await screen.findByText('create'));
     await waitFor(() => expect(api.createPayPalOrder).toHaveBeenCalled());
 
@@ -138,7 +137,7 @@ describe('PayPalCheckoutButton', () => {
 
   it('does not release the cart while the payment is being captured', async () => {
     api.capturePayPalOrder.mockReturnValue(new Promise(() => {}));
-    const { unmount } = render(<PayPalCheckoutButton buildRequest={() => ({ shippingAddressId: 7 })} disabled={false} onPaid={vi.fn()} onError={vi.fn()} />);
+    const { unmount } = render(<PayPalCheckoutButton config={config} buildRequest={() => ({ shippingAddressId: 7 })} disabled={false} onPaid={vi.fn()} onError={vi.fn()} />);
     fireEvent.click(await screen.findByText('create'));
     await waitFor(() => expect(api.createPayPalOrder).toHaveBeenCalled());
     fireEvent.click(screen.getByText('approve'));

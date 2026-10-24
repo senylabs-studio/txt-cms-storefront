@@ -47,7 +47,9 @@ vi.mock('../../services/countryService', () => ({ getVisibleCountries: vi.fn().m
 const { getShippingOptions, getPickupOptions } = vi.hoisted(() => ({ getShippingOptions: vi.fn(), getPickupOptions: vi.fn() }));
 vi.mock('../../services/shippingService', () => ({ getShippingOptions, getPickupOptions }));
 // PayPal has its own tests (PayPalCheckoutButton.test.tsx); here it just must not load the SDK.
-vi.mock('./PayPalCheckoutButton', () => ({ default: () => null }));
+vi.mock('./PayPalCheckoutButton', () => ({ default: () => <div data-testid="paypal-checkout" /> }));
+const { getPayPalConfig } = vi.hoisted(() => ({ getPayPalConfig: vi.fn() }));
+vi.mock('../../services/paypalService', () => ({ getPayPalConfig }));
 
 const cartWithItems = (): Cart => ({
   id: 1,
@@ -97,6 +99,7 @@ describe('CheckoutPage', () => {
     getProfile.mockResolvedValue(profile());
     getShippingOptions.mockResolvedValue([validShippingRate]);
     getPickupOptions.mockResolvedValue([]);
+    getPayPalConfig.mockResolvedValue({ enabled: false, environment: 'sandbox', currency: 'EUR' });
     HTMLFormElement.prototype.submit = vi.fn();
   });
 
@@ -146,8 +149,11 @@ describe('CheckoutPage', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: 'account.save' }));
 
     await waitFor(() => expect(addAddress).toHaveBeenCalled());
-    await waitFor(() => expect((screen.getAllByRole('combobox')[0] as HTMLSelectElement).value).toBe('2'));
-    expect((screen.getAllByRole('combobox')[1] as HTMLSelectElement).value).toBe('1');
+    await waitFor(() => expect((screen.getByLabelText('checkout.shippingAddress') as HTMLSelectElement).value).toBe('2'));
+    // Billing: still «the same» by default; unticked, it keeps the address it had.
+    expect(screen.getByLabelText('checkout.billingSameAsShipping')).toBeChecked();
+    fireEvent.click(screen.getByLabelText('checkout.billingSameAsShipping'));
+    expect((screen.getByLabelText('checkout.billingAddress') as HTMLSelectElement).value).toBe('1');
     expect(navigate).not.toHaveBeenCalled();
     expect((screen.getByPlaceholderText('checkout.notesPlaceholder') as HTMLTextAreaElement).value).toBe('Llamar antes');
   });
@@ -527,7 +533,9 @@ describe('CheckoutPage', () => {
     placeBankTransferOrder.mockResolvedValue(order);
     render(<CheckoutPage />);
 
-    const button = await screen.findByRole('button', { name: 'checkout.payByTransfer' });
+    fireEvent.click(await screen.findByRole('radio', { name: 'checkout.method.transfer' }));
+    const button = screen.getByRole('button', { name: 'checkout.payByTransfer' });
+    expect(screen.queryByRole('button', { name: 'checkout.proceed' })).not.toBeInTheDocument(); // one button
     await waitFor(() => expect(button).toBeEnabled());
     fireEvent.click(button);
 
@@ -541,13 +549,76 @@ describe('CheckoutPage', () => {
     mockSettings.bankTransferAvailable = true;
     const { unmount } = render(<CheckoutPage />);
     await screen.findByRole('button', { name: 'checkout.proceed' });
-    expect(screen.queryByRole('button', { name: 'checkout.payByTransfer' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('radio', { name: 'checkout.method.transfer' })).not.toBeInTheDocument();
     unmount();
 
     mockCart.cart = cartWithItems();
     mockSettings.bankTransferAvailable = false;
     render(<CheckoutPage />);
     await screen.findByRole('button', { name: 'checkout.proceed' });
-    expect(screen.queryByRole('button', { name: 'checkout.payByTransfer' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('radio', { name: 'checkout.method.transfer' })).not.toBeInTheDocument();
+  });
+
+  // 2026-10-24: one choice and one button, instead of three stacked pay buttons.
+  it('picks the payment method first, then shows only that method\'s button', async () => {
+    mockCart.cart = cartWithItems();
+    mockSettings.bankTransferAvailable = true;
+    getPayPalConfig.mockResolvedValue({ enabled: true, clientId: 'CID', environment: 'sandbox', currency: 'EUR' });
+    mockPaymentMethods.list = [{ id: 1, name: 'Visa', logoUrl: '/visa.png', sortOrder: 1 }];
+    render(<CheckoutPage />);
+
+    // Card by default: its button, and the card page's logos on its option.
+    const card = await screen.findByRole('radio', { name: /^checkout.method.card/ });
+    expect(card).toBeChecked();
+    expect(within(screen.getByTestId('card-page-logos')).getByAltText('Visa')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'checkout.proceed' })).toBeInTheDocument();
+    expect(screen.queryByTestId('paypal-checkout')).not.toBeInTheDocument();
+
+    fireEvent.click(await screen.findByRole('radio', { name: 'checkout.method.paypal' }));
+    expect(screen.getByTestId('paypal-checkout')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'checkout.proceed' })).not.toBeInTheDocument();
+    expect(screen.getByText('checkout.method.paypalHint')).toBeInTheDocument();
+  });
+
+  it('offers no picker when the card is the only way to pay', async () => {
+    mockCart.cart = cartWithItems();
+    render(<CheckoutPage />);
+    await screen.findByRole('button', { name: 'checkout.proceed' });
+    await waitFor(() => expect(getPayPalConfig).toHaveBeenCalled());
+    expect(screen.queryByRole('radiogroup', { name: 'checkout.paymentMethod' })).not.toBeInTheDocument();
+  });
+  // 2026-10-24: invoiced to the shipping address by default; another one only when unticked.
+  it('bills to the shipping address unless «Facturar a la misma dirección» is unticked', async () => {
+    mockCart.cart = cartWithItems();
+    const casa = { id: 1, alias: 'Casa', recipientName: 'Jane', street: 'Calle 1', city: 'Madrid', postalCode: '28001', country: 'ES', isDefault: true };
+    const empresa = { id: 2, alias: 'Empresa', recipientName: 'Jane SL', street: 'Calle 2', city: 'Madrid', postalCode: '28002', country: 'ES', isDefault: false };
+    getProfile.mockResolvedValue({ ...profile(), addresses: [casa, empresa] });
+    checkout.mockResolvedValue(checkoutResponse);
+    render(<CheckoutPage />);
+
+    const same = await screen.findByLabelText('checkout.billingSameAsShipping');
+    expect(same).toBeChecked();
+    expect(screen.queryByLabelText('checkout.billingAddress')).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('checkout.shippingAddress'), { target: { value: '2' } });
+    const proceed = screen.getByRole('button', { name: 'checkout.proceed' });
+    await waitFor(() => expect(proceed).toBeEnabled());
+    fireEvent.click(proceed);
+    await waitFor(() => expect(checkout).toHaveBeenCalledWith(expect.objectContaining({ shippingAddressId: 2, billingAddressId: 2 })));
+  });
+
+  it('unticked, the invoice goes to the address chosen for it', async () => {
+    mockCart.cart = cartWithItems();
+    const casa = { id: 1, alias: 'Casa', recipientName: 'Jane', street: 'Calle 1', city: 'Madrid', postalCode: '28001', country: 'ES', isDefault: true };
+    const empresa = { id: 2, alias: 'Empresa', recipientName: 'Jane SL', street: 'Calle 2', city: 'Madrid', postalCode: '28002', country: 'ES', isDefault: false };
+    getProfile.mockResolvedValue({ ...profile(), addresses: [casa, empresa] });
+    checkout.mockResolvedValue(checkoutResponse);
+    render(<CheckoutPage />);
+
+    fireEvent.click(await screen.findByLabelText('checkout.billingSameAsShipping'));
+    fireEvent.change(screen.getByLabelText('checkout.billingAddress'), { target: { value: '2' } });
+    const proceed = screen.getByRole('button', { name: 'checkout.proceed' });
+    await waitFor(() => expect(proceed).toBeEnabled());
+    fireEvent.click(proceed);
+    await waitFor(() => expect(checkout).toHaveBeenCalledWith(expect.objectContaining({ shippingAddressId: 1, billingAddressId: 2 })));
   });
 });
