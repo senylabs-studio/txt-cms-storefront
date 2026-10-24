@@ -80,6 +80,12 @@
 
 /* The CMS height is meant for desktop; on phones cap it so the products below show on the
    first screen (svh: the visible height with the browser bars shown; vh is the fallback). */
+/* Phones get the photo's centre cut (made by the API: 2:1, 560 px high) — the same breakpoint as the
+   server's preload (server/meta.mjs). !important: the full photo is an inline style. */
+@media (max-width: 480px) {
+  .home-banner--phone-cut { background-image: var(--home-banner-phone) !important; }
+}
+
 @media (max-width: 767.98px) {
   .home-banner {
     min-height: min(var(--home-banner-h, 500px), 45vh);

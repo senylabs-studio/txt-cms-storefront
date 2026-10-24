@@ -82,6 +82,24 @@ describe('LandingPage external links', () => {
   });
 });
 
+describe('LandingPage banner phone cut', () => {
+  // 2026-10-24: phones downloaded the whole banner photo to show its centre.
+  it('gives the slide its phone cut (used by the phone media query) and keeps the full photo', async () => {
+    getHomeBlocks.mockResolvedValue([{
+      id: 4, title: 'Hero', type: 'Banner', isActive: true, sortOrder: 0,
+      config: { slides: [{ imageUrl: '/a.webp', mobileImageUrl: '/a-phone.webp', title: 'Otoño' }, { imageUrl: '/b.webp', title: 'Sin recorte' }] },
+    } as StorefrontHomeBlock]);
+    renderPage();
+
+    const cut = (await screen.findByText('Otoño')).closest('.home-banner') as HTMLElement;
+    expect(cut).toHaveClass('home-banner--phone-cut');
+    expect(cut.style.backgroundImage).toContain('/a.webp');
+    expect(cut.style.getPropertyValue('--home-banner-phone')).toBe('url(/a-phone.webp)');
+    const plain = (await screen.findByText('Sin recorte')).closest('.home-banner') as HTMLElement;
+    expect(plain).not.toHaveClass('home-banner--phone-cut');
+  });
+});
+
 describe('LandingPage banner text position', () => {
   it('places the slide text block in the position picked in the CMS', async () => {
     const block: StorefrontHomeBlock = {

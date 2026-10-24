@@ -63,6 +63,16 @@ const BannerSlideContent: React.FC<{ slide: HomeBannerSlide }> = ({ slide }) => 
   );
 };
 
+// The slide's photo; on a phone its centre cut (a fraction of the bytes, as sharp there): the full
+// photo is the CSS background, the cut a variable the phone media query in LandingPage.css uses.
+const slideBackground = (slide: HomeBannerSlide): { className: string; style: React.CSSProperties } => ({
+  className: slide.mobileImageUrl ? 'home-banner home-banner--phone-cut' : 'home-banner',
+  style: {
+    backgroundImage: slide.imageUrl ? `url(${slide.imageUrl})` : undefined,
+    ...(slide.mobileImageUrl ? { '--home-banner-phone': `url(${slide.mobileImageUrl})` } : {}),
+  } as React.CSSProperties,
+});
+
 const BannerBlock: React.FC<{ config: HomeBannerBlockConfig }> = ({ config }) => {
   const slides = config.slides ?? [];
   // The CMS height is a desktop height: passed as a CSS variable (not an inline min-height) so
@@ -75,8 +85,8 @@ const BannerBlock: React.FC<{ config: HomeBannerBlockConfig }> = ({ config }) =>
     const slide = slides[0];
     return (
       <div
-        className="home-banner"
-        style={{ backgroundImage: slide.imageUrl ? `url(${slide.imageUrl})` : undefined, ...heightVar, ...bannerTextPlacement(slide.textAlign, slide.textVerticalAlign) }}
+        className={slideBackground(slide).className}
+        style={{ ...slideBackground(slide).style, ...heightVar, ...bannerTextPlacement(slide.textAlign, slide.textVerticalAlign) }}
       >
         <BannerSlideLink url={slide.buttonUrl} hasButton={!!slide.buttonText} label={slide.title || slide.subtitle} />
         <BannerSlideContent slide={slide} />
@@ -89,8 +99,8 @@ const BannerBlock: React.FC<{ config: HomeBannerBlockConfig }> = ({ config }) =>
       {slides.map((slide, i) => (
         <Carousel.Item key={i}>
           <div
-            className="home-banner"
-            style={{ backgroundImage: slide.imageUrl ? `url(${slide.imageUrl})` : undefined, ...heightVar, ...bannerTextPlacement(slide.textAlign, slide.textVerticalAlign) }}
+            className={slideBackground(slide).className}
+            style={{ ...slideBackground(slide).style, ...heightVar, ...bannerTextPlacement(slide.textAlign, slide.textVerticalAlign) }}
           >
             <BannerSlideLink url={slide.buttonUrl} hasButton={!!slide.buttonText} label={slide.title || slide.subtitle} />
             <BannerSlideContent slide={slide} />
