@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Row, Col, Button, Badge } from 'react-bootstrap';
+import { Container, Row, Col, Button } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaShoppingCart } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +9,7 @@ import { useToast } from '../../../contexts/ToastContext';
 import { getApiErrorMessage } from '../../../utils/apiError';
 import { getDiscountInfo, formatPrice } from '../../../utils/pricing';
 import NewBadge from '../NewBadge/NewBadge';
+import OfferBadge from '../OfferBadge/OfferBadge';
 import { variantCardTitle } from '../../../utils/variantTitle';
 import { blockLinkProps } from '../../../utils/blockLinkProps';
 import './FeaturedProductsGrid.css';
@@ -100,7 +101,7 @@ const FeaturedProductsGrid: React.FC<Props> = ({ title, variants = [], products 
         {allItems.map(item => {
           const slug = item._isVariant ? `/variant/${item.id}` : `/product/${item.slug}`;
           const outOfStock = item.availableStock <= 0;
-          const { hasGroupDiscount, hasDiscount } = getDiscountInfo(item.price, item.originalPrice, item.discountPercent);
+          const { hasDiscount } = getDiscountInfo(item.price, item.originalPrice, item.discountPercent);
           const thumbnail = item.thumbnailUrl ?? item.imageUrls?.[0];
 
           return (
@@ -113,11 +114,7 @@ const FeaturedProductsGrid: React.FC<Props> = ({ title, variants = [], products 
                   {(hasDiscount || item.isNew) && (
                     <div className="position-absolute top-0 start-0 m-2 d-flex flex-column align-items-start gap-1">
                       {item.isNew && <NewBadge />}
-                      {hasDiscount && (
-                        <Badge bg="danger" style={{ fontSize: 10 }}>
-                          {hasGroupDiscount ? `−${item.discountPercent}%` : t('product.offer')}
-                        </Badge>
-                      )}
+                      <OfferBadge price={item.price} originalPrice={item.originalPrice} discountPercent={item.discountPercent} />
                     </div>
                   )}
                   {outOfStock && <div className="home-featured-outofstock">{t('product.outOfStock')}</div>}

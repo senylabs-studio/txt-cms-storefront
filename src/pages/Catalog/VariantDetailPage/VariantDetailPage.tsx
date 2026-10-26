@@ -32,6 +32,7 @@ import { parseFabricColors } from '../../../utils/fabricColors';
 import { formatDate } from '../../../utils/locale';
 import MetresInput from '../../../components/common/MetresInput/MetresInput';
 import { useMediaQuery } from '../../../hooks/useMediaQuery';
+import OfferBadge from '../../../components/common/OfferBadge/OfferBadge';
 
 const DEFAULT_MIN_QTY = 0.3;
 const DESC_THRESHOLD = 300;
@@ -661,7 +662,7 @@ const VariantDetailPage: React.FC = () => {
               )}
               {hasGroupDiscount
                 ? <Badge bg="success">−{variant.discountPercent}%</Badge>
-                : hasDiscount && <Badge bg="danger">{t('product.offer')}</Badge>}
+                : <OfferBadge price={variant.price} originalPrice={variant.originalPrice} className="offer-badge--price" />}
             </div>
             <div className="vdp-price-unit">{t('product.priceUnit')}</div>
 

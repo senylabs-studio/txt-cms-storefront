@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Badge, Button, InputGroup } from 'react-bootstrap';
+import { Card, Button, InputGroup } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { FaShoppingCart, FaCheck, FaTimes } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
@@ -15,6 +15,7 @@ import { getApiErrorMessage } from '../../../utils/apiError';
 import '../ProductCard/ProductCard.css';
 import IconTooltip from '../../common/IconTooltip/IconTooltip';
 import NewBadge from '../../common/NewBadge/NewBadge';
+import OfferBadge from '../../common/OfferBadge/OfferBadge';
 import { variantCardTitle } from '../../../utils/variantTitle';
 import MetresInput from '../../common/MetresInput/MetresInput';
 
@@ -86,11 +87,7 @@ const VariantCard: React.FC<Props> = ({ variant }) => {
           {(hasDiscount || variant.isNew) && (
             <div className="product-card-badges">
               {variant.isNew && <NewBadge />}
-              {hasDiscount && (
-                <Badge bg="danger" className="discount-badge">
-                  {hasGroupDiscount ? `−${variant.discountPercent}%` : t('product.offer')}
-                </Badge>
-              )}
+              <OfferBadge price={variant.price} originalPrice={variant.originalPrice} discountPercent={variant.discountPercent} />
             </div>
           )}
           {outOfStock && <div className="out-of-stock-overlay">{t('product.outOfStock')}</div>}
