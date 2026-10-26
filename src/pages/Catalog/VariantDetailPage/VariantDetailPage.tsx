@@ -27,7 +27,7 @@ import { useMaterialAbbreviations } from '../../../hooks/useMaterialAbbreviation
 import { useFabricGuide, fabricGuideFibreHref } from '../../../hooks/useFabricGuide';
 import './VariantDetailPage.css';
 import PageLoader from '../../../components/common/ScissorsLoader/PageLoader';
-import { formatPrice } from '../../../utils/pricing';
+import { formatPercentOff, formatPrice, salePercent } from '../../../utils/pricing';
 import { parseFabricColors } from '../../../utils/fabricColors';
 import { formatDate } from '../../../utils/locale';
 import MetresInput from '../../../components/common/MetresInput/MetresInput';
@@ -659,10 +659,18 @@ const VariantDetailPage: React.FC = () => {
               {(hasDiscount || hasGroupDiscount) && (
                 <span className="vdp-price-original">{formatPrice(variant.originalPrice)}</span>
               )}
-              {hasGroupDiscount
-                ? <Badge bg="success">−{variant.discountPercent}%</Badge>
-                : hasDiscount && <Badge bg="danger">{t('product.offer')}</Badge>}
+              {hasGroupDiscount && <Badge bg="success">−{variant.discountPercent}%</Badge>}
             </div>
+            {/* A sale: what a metre saves, and the percentage (option A, user 2026-10-26). The cards
+                keep their «OFERTA | −X %» label. */}
+            {hasDiscount && !hasGroupDiscount && (
+              <div className="vdp-saving">
+                {t('product.saving', { amount: formatPrice(variant.originalPrice - variant.price) })}
+                {salePercent(variant.price, variant.originalPrice) > 0 && (
+                  <span className="vdp-saving-percent">{formatPercentOff(salePercent(variant.price, variant.originalPrice))}</span>
+                )}
+              </div>
+            )}
             <div className="vdp-price-unit">{t('product.priceUnit')}</div>
 
             {/* Stock */}

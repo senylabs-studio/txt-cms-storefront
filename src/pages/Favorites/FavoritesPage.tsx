@@ -18,6 +18,7 @@ import { variantCardTitle } from '../../utils/variantTitle';
 import IconTooltip from '../../components/common/IconTooltip/IconTooltip';
 import { formatPrice } from '../../utils/pricing';
 import { loginUrl } from '../../utils/session';
+import OfferBadge from '../../components/common/OfferBadge/OfferBadge';
 
 const FavoritesPage: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -118,11 +119,8 @@ const FavoritesPage: React.FC = () => {
                       {thumbnail
                         ? <img src={thumbnail} alt={entity.name} className="fav-card-img" />
                         : <div className="fav-card-placeholder">📦</div>}
-                      {(hasDiscount || hasGroupDiscount) && (
-                        <Badge bg="danger" className="position-absolute top-0 start-0 m-2" style={{ fontSize: 10 }}>
-                          {hasGroupDiscount ? `−${entity.discountPercent}%` : t('product.offer')}
-                        </Badge>
-                      )}
+                      <OfferBadge price={entity.price} originalPrice={entity.originalPrice} discountPercent={entity.discountPercent}
+                        className="position-absolute top-0 start-0 m-2" />
                       {outOfStock && <div className="fav-card-outofstock">{t('product.outOfStock')}</div>}
                     </Link>
                     {/* Column + mt-auto: the buttons sit at the bottom whether the name takes one line or two. */}

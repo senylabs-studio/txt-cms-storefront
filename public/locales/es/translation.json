@@ -549,6 +549,7 @@
     "widthUnit": "cm",
     "weightUnit": "gr/m²",
     "offer": "OFERTA",
+    "saving": "Ahorras {{amount}} por metro",
     "ref": "Ref.",
     "priceUnit": "€/m",
     "inStock": "En stock",

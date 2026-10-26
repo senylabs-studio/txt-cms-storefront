@@ -30,3 +30,16 @@ export function formatPriceShort(value: number): string {
   const digits = Number.isInteger(value) ? 0 : 2;
   return new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR', minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value);
 }
+
+/** How much a sale takes off, in whole percent, rounded DOWN: the label never promises more than
+ *  the real discount (5,00 € from 9,95 € is 49,7 % → 49). 0 when there's no sale. */
+export function salePercent(price: number, originalPrice: number): number {
+  if (!(originalPrice > 0) || !(originalPrice > price)) return 0;
+  return Math.floor((1 - price / originalPrice) * 100 + 1e-9);
+}
+
+/** "−40 %" in Spanish and Catalan, "−40%" in English (each language's own percent style). */
+export function formatPercentOff(percent: number): string {
+  const locale = PRICE_LOCALES[(i18next.language ?? 'es').slice(0, 2)] ?? 'es-ES';
+  return `−${new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 0 }).format(percent / 100)}`;
+}

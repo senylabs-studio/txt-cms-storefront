@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatPrice, formatPriceShort } from './pricing';
+import { formatPrice, formatPriceShort, salePercent, formatPercentOff } from './pricing';
 
 describe('formatPrice', () => {
   it('puts the euro sign after the number, with a decimal comma', () => {
@@ -20,5 +20,26 @@ describe('formatPriceShort', () => {
 
   it('keeps them otherwise', () => {
     expect(formatPriceShort(59.9).replace(/\s/g, ' ')).toBe('59,90 €');
+  });
+});
+
+// 2026-10-26: the offer label shows how much comes off («OFERTA | −40 %»).
+describe('salePercent', () => {
+  it('rounds down, so the label never promises more than the real discount', () => {
+    expect(salePercent(5.95, 9.95)).toBe(40);  // 40,2 %
+    expect(salePercent(5.00, 9.95)).toBe(49);  // 49,7 %
+    expect(salePercent(4.95, 9.95)).toBe(50);  // 50,3 %
+    expect(salePercent(5.95, 13.50)).toBe(55); // 55,9 %
+    expect(salePercent(6, 12)).toBe(50);       // exact, no float slip to 49
+  });
+
+  it('is 0 without a sale', () => {
+    expect(salePercent(9.95, 9.95)).toBe(0);
+    expect(salePercent(9.95, 0)).toBe(0);
+    expect(salePercent(9.90, 9.95)).toBe(0); // under 1 %
+  });
+
+  it('writes the percentage the way the language does', () => {
+    expect(formatPercentOff(40).replace(/\s/g, ' ')).toBe('−40 %');
   });
 });
