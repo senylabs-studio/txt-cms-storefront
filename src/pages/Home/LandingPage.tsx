@@ -24,6 +24,7 @@ import {
   type HomeDividerBlockConfig,
 } from '../../services/homeService';
 import { homeBlocksFromPage } from '../../utils/homeBlocksFromPage';
+import { reportStalePageData } from '../../utils/pageData';
 import FeaturedProductsGrid from '../../components/common/FeaturedProductsGrid/FeaturedProductsGrid';
 import { bannerTextPlacement } from '../../utils/bannerTextPlacement';
 import { blockLinkProps } from '../../utils/blockLinkProps';
@@ -361,7 +362,11 @@ const LandingPage: React.FC = () => {
 
   useEffect(() => {
     getHomeBlocks()
-      .then(fresh => setBlocks(prev => (JSON.stringify(prev) === JSON.stringify(fresh) ? prev : fresh)))
+      .then(fresh => {
+        const copy = homeBlocksFromPage(i18n.language);
+        if (copy && JSON.stringify(copy) !== JSON.stringify(fresh)) reportStalePageData();
+        setBlocks(prev => (JSON.stringify(prev) === JSON.stringify(fresh) ? prev : fresh));
+      })
       .catch(() => { /* keep what is shown: the page copy, or nothing */ })
       .finally(() => setLoading(false));
   }, [i18n.language]);

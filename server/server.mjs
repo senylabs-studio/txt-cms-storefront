@@ -46,12 +46,23 @@ const jsonLoader = (lang) => async (path) => {
 };
 const getJson = createJsonCache(jsonLoader(null));
 const getJsonIn = Object.fromEntries(ALT_LANGUAGES.map(lng => [lng, createJsonCache(jsonLoader(lng))]));
-// The shop's name and logo are in every preview: fetched at start and kept fresh, so a preview
-// asked while the API is waking up still has them. The home blocks too (the banner preload).
-const refreshSite = () => Promise.all(['/storefront/site-settings', '/storefront/home']
-  .map(path => getJson(path, { refresh: true }).catch(() => {})));
+// The shop's settings (name, logo…) are in every page and preview: fetched at start and kept fresh,
+// so a page asked while the API is waking up still has them. The home blocks too.
+const SITE_PATHS = ['/storefront/site-settings', '/storefront/home'];
+const refreshSite = (caches = [getJson]) => Promise.all(caches.flatMap(cache =>
+  SITE_PATHS.map(path => cache(path, { refresh: true }).catch(() => {}))));
 refreshSite();
 setInterval(refreshSite, 4 * 60 * 1000).unref();
+// A CMS change shows in the page copies at once instead of within a few minutes: the app asks for
+// this when the API's answer differs from the copy it got (src/utils/pageData.ts). Anyone can ask,
+// so at most every 30 s, and all it does is read the API again.
+const REFRESH_EVERY_MS = 30 * 1000;
+let lastRefreshAt = 0;
+const refreshNow = () => {
+  if (Date.now() - lastRefreshAt < REFRESH_EVERY_MS) return;
+  lastRefreshAt = Date.now();
+  refreshSite([getJson, ...Object.values(getJsonIn)]);
+};
 
 // Text goes compressed (audit 2026-10-14: ~950 KB of JS/CSS went raw on a first visit; Azure
 // passes Node's responses through as they are). Files never change while the server runs, so
@@ -152,6 +163,12 @@ createServer(async (req, res) => {
       return redirect(res, `https://${CANONICAL_HOST}${url.pathname}${url.search}`);
     const origin = `https://${CANONICAL_HOST || host}`;
 
+    if (url.pathname === '/__refresh') {
+      if (req.method !== 'POST') { res.writeHead(405, { ...SECURITY_HEADERS, Allow: 'POST' }); return res.end(); }
+      refreshNow();
+      res.writeHead(204, { ...SECURITY_HEADERS, 'Cache-Control': 'no-store' });
+      return res.end();
+    }
     if (url.pathname === '/robots.txt') {
       // Cached only when the host is the configured one, not whatever the request said.
       res.writeHead(200, { ...SECURITY_HEADERS, 'Content-Type': TYPES['.txt'], 'Cache-Control': CANONICAL_HOST ? 'public, max-age=3600' : 'no-cache' });
@@ -199,10 +216,13 @@ createServer(async (req, res) => {
     const alternates = hasOrigin ? languageAlternates(origin, url.pathname) : [];
     // The home's blocks go in the page (cached here, refreshed every few minutes): it paints
     // without waiting for the app to ask the API.
-    const homeBlocks = url.pathname === '/' ? await (lng ? getJsonIn[lng] : getJson)('/storefront/home').catch(() => null) : null;
+    const getInLanguage = lng ? getJsonIn[lng] : getJson;
+    const homeBlocks = url.pathname === '/' ? await getInLanguage('/storefront/home').catch(() => null) : null;
+    // And the shop's settings on every page: the header paints with the logo, name and colour.
+    const siteSettings = await getInLanguage('/storefront/site-settings').catch(() => null);
     // A page that doesn't exist answers 404 (still the app, which shows its own message).
     sendBody(req, res, meta.notFound ? 404 : 200, { ...SECURITY_HEADERS, ...noIndex, 'Content-Type': TYPES['.html'], 'Cache-Control': 'no-cache' },
-      Buffer.from(injectMeta(indexHtml, meta, pageUrl, { lang: lng ?? 'es', alternates, homeBlocks: Array.isArray(homeBlocks) ? homeBlocks : null })));
+      Buffer.from(injectMeta(indexHtml, meta, pageUrl, { lang: lng ?? 'es', alternates, homeBlocks: Array.isArray(homeBlocks) ? homeBlocks : null, siteSettings })));
   } catch (err) {
     console.error(err);
     if (!res.headersSent) res.writeHead(500);

@@ -201,7 +201,6 @@ function storeLd(site) {
   };
 }
 
-/** JSON for a <script> block: "<" escaped so CMS text can't close the tag. */
 /** The page's main photo, preloaded. With a phone cut, each screen preloads only its own one: the
  *  same 480 px breakpoint as the banner's media query (LandingPage.css). */
 export const PHONE_MEDIA = '(max-width: 480px)';
@@ -213,12 +212,25 @@ const preloadLinks = (meta) => {
     : [link(meta.preloadImage)];
 };
 
-/** The home blocks, in the page itself: the home used to wait for the app to load and then ask the
- *  API before painting anything (the banner image was downloaded at 2.5 s and painted at 10.6 s on
- *  a phone, 2026-10-24). Data, not code (type application/json), tagged with its language: the app
- *  uses it only when it matches the language it opens in. */
-export const homeBlocksScript = (blocks, lang) => Array.isArray(blocks)
-  ? `<script id="home-blocks" type="application/json" data-lang="${escapeHtml(lang)}">${JSON.stringify(blocks).replace(/</g, '\\u003c')}</script>`
+/** Data for the first paint, in the page itself. Data, not code (type application/json), tagged
+ *  with its language: the app uses it only when it matches the language it opens in, and still
+ *  asks the API (src/utils/pageData.ts). "<" escaped so CMS text can't close the tag. */
+const pageDataScript = (id, data, lang) =>
+  `<script id="${id}" type="application/json" data-lang="${escapeHtml(lang)}">${JSON.stringify(data).replace(/</g, '\\u003c')}</script>`;
+
+/** The home blocks: the home used to wait for the app to load and then ask the API before painting
+ *  anything (the banner image was downloaded at 2.5 s and painted at 10.6 s on a phone, 2026-10-24). */
+export const homeBlocksScript = (blocks, lang) => Array.isArray(blocks) ? pageDataScript('home-blocks', blocks, lang) : '';
+
+/** The shop settings, on every page: the header showed the default «TXT Shop» and colour until the
+ *  app had asked the API for the logo (2026-10-26). */
+export const siteSettingsScript = (settings, lang) =>
+  settings && typeof settings === 'object' && !Array.isArray(settings) ? pageDataScript('site-settings', settings, lang) : '';
+
+/** The logo, fetched with the CSS instead of after the app has run. Not high priority: the page's
+ *  main photo goes first. */
+const logoPreload = (settings) => typeof settings?.logoUrl === 'string' && /^https?:\/\//.test(settings.logoUrl)
+  ? `<link rel="preload" as="image" href="${escapeHtml(settings.logoUrl)}" />`
   : '';
 
 const ldScript = (data, url) => data
@@ -312,7 +324,7 @@ const withLng = (loc, lng) => (lng ? `${loc}${loc.includes('?') ? '&amp;' : '?'}
 /** Writes the preview into index.html: replaces <title> and the description, adds og:/twitter: tags,
  * the canonical URL, the hreflang alternates and the page's language, and noindex on a page that
  * doesn't exist. */
-export function injectMeta(html, meta, url, { lang = 'es', alternates = [], homeBlocks = null } = {}) {
+export function injectMeta(html, meta, url, { lang = 'es', alternates = [], homeBlocks = null, siteSettings = null } = {}) {
   const tags = [
     meta.notFound ? '<meta name="robots" content="noindex" />' : '',
     url && !meta.notFound ? `<link rel="canonical" href="${escapeHtml(url)}" />` : '',
@@ -328,6 +340,8 @@ export function injectMeta(html, meta, url, { lang = 'es', alternates = [], home
     meta.notFound ? '' : ldScript(meta.jsonLd, url),
     meta.notFound ? '' : ldScript(breadcrumbLd(meta.breadcrumb, url)),
     ...preloadLinks(meta),
+    logoPreload(siteSettings),
+    siteSettingsScript(siteSettings, lang),
     homeBlocksScript(homeBlocks, lang),
   ].filter(Boolean).join('\n    ');
   // Replacer functions, not strings: a "$'" or "$&" in a CMS title is a replacement pattern in a
