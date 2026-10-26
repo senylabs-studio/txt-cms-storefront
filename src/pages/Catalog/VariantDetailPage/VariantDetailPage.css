@@ -203,6 +203,25 @@
   text-decoration: line-through;
 }
 
+/* A sale: «Ahorras 3,00 € por metro −25 %» under the price (option A, 2026-10-26). */
+.vdp-saving {
+  color: #b02a37; /* darker than the badge red: ~6:1 on the page */
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
+}
+
+.vdp-saving-percent {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #b02a37;
+  color: #fff;
+  font-weight: 700;
+}
+
 .vdp-price-unit {
   font-size: 0.82rem;
   color: #5c636a;

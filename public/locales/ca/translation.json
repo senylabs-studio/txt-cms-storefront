@@ -549,6 +549,7 @@
     "widthUnit": "cm",
     "weightUnit": "g/m²",
     "offer": "OFERTA",
+    "saving": "Estalvies {{amount}} per metre",
     "ref": "Ref.",
     "priceUnit": "€/m",
     "inStock": "En estoc",

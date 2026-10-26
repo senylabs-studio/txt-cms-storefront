@@ -21,5 +21,3 @@
   background: #fff;
   color: #b02a37; /* a darker red than the badge: ~6:1 on white */
 }
-/* Next to the price on a variant page */
-.offer-badge--price { font-size: 12px; align-self: center; }

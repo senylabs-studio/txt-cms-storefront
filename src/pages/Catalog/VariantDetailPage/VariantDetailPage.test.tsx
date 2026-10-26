@@ -7,7 +7,8 @@ import type { StorefrontVariantDetail, ProductReview, PaginatedResponse } from '
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string, opts?: { count?: number }) => opts?.count != null ? `${key}(${opts.count})` : key,
+    t: (key: string, opts?: { count?: number; amount?: string }) =>
+      opts?.count != null ? `${key}(${opts.count})` : opts?.amount != null ? `${key}(${opts.amount})` : key,
     i18n: { language: 'en' },
   }),
 }));
@@ -634,5 +635,38 @@ describe('VariantDetailPage photos', () => {
     await screen.findByText('Tela Azul');
 
     expect(container.querySelector('.vdp-main-img')).toHaveAttribute('src', 'https://img/1-display.webp');
+  });
+});
+
+// 2026-10-26 (option A): a sale shows what a metre saves and the percentage under the price.
+describe('VariantDetailPage sale', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    getVariantReviews.mockResolvedValue(reviewsPage([]));
+    getMyReview.mockResolvedValue({ hasPurchased: false, review: null });
+  });
+
+  it('says how much a metre saves and the percentage, rounded down', async () => {
+    getVariantById.mockResolvedValue(variant({ price: 8.95, originalPrice: 11.95 }));
+    const { container } = renderPage();
+    await screen.findByText('Tela Azul');
+
+    const saving = container.querySelector('.vdp-saving');
+    expect(saving?.textContent?.replace(/\s/g, ' ')).toMatch(/^product\.saving\(3,00 €\)−25 ?%$/);
+    expect(container.querySelector('.offer-badge')).toBeNull(); // the card label isn't repeated here
+  });
+
+  it('shows no saving line without a sale, nor for a group discount (it keeps its badge)', async () => {
+    getVariantById.mockResolvedValue(variant());
+    const { container, unmount } = renderPage();
+    await screen.findByText('Tela Azul');
+    expect(container.querySelector('.vdp-saving')).toBeNull();
+    unmount();
+
+    getVariantById.mockResolvedValue(variant({ price: 9, originalPrice: 10, discountPercent: 10 }));
+    const second = renderPage();
+    await screen.findByText('Tela Azul');
+    expect(second.container.querySelector('.vdp-saving')).toBeNull();
+    expect(screen.getByText('−10%')).toBeInTheDocument();
   });
 });

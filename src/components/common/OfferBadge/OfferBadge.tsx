@@ -10,7 +10,7 @@ interface Props {
   className?: string;
 }
 
-/** The red discount label of a card or a variant page. A group discount shows its percentage
+/** The red discount label of a product card. A group discount shows its percentage
  *  («−10 %»); a sale shows «OFERTA | −40 %» (option B, user 2026-10-26), or just «OFERTA» when it
  *  takes off less than 1 %. Nothing without a discount. */
 const OfferBadge: React.FC<Props> = ({ price, originalPrice, discountPercent, className }) => {
