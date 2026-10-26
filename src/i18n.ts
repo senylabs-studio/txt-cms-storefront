@@ -21,7 +21,8 @@ i18n
       caches: ['localStorage'],
     },
     backend: {
-      loadPath: '/locales/{{lng}}/translation.json',
+      // ?v= changes whenever the texts do (vite.config.ts): never old texts with new code.
+      loadPath: `/locales/{{lng}}/translation.json?v=${__LOCALES_VERSION__}`,
     },
     react: {
       useSuspense: false,
