@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildMeta, injectMeta, homeBlocksScript, cleanText, createJsonCache, NOT_FOUND, isLocalPath, requestHost, categoryRedirect, legacyAnswer, pickEncoding, canonicalPath, etagFor, isNotModified, requestLanguage, languageAlternates, sitemapWithLanguages } from './meta.mjs';
+import { buildMeta, injectMeta, homeBlocksScript, siteSettingsScript, cleanText, createJsonCache, NOT_FOUND, isLocalPath, requestHost, categoryRedirect, legacyAnswer, pickEncoding, canonicalPath, etagFor, isNotModified, requestLanguage, languageAlternates, sitemapWithLanguages } from './meta.mjs';
 
 const site = { siteName: 'Tejidos Pulido', siteDescription: 'Tu tienda de tejidos de confianza.', logoUrl: 'https://cdn/logo.png' };
 const api = (routes) => async (path) => (path === '/storefront/site-settings' ? site : routes[path] ?? null);
@@ -49,6 +49,19 @@ describe('share preview meta', () => {
     expect(homeBlocksScript(null, 'es')).toBe('');
     const html = injectMeta('<head><title>x</title>\n<meta name="description" content="x" /></head>', { title: 'T', description: 'd', siteName: 'S', type: 'website' }, null, { homeBlocks: blocks });
     expect(html).toContain('id="home-blocks"');
+  });
+
+  // 2026-10-26: the header showed «TXT Shop» and the default colour until the app asked the API.
+  it('puts the shop settings in every page and preloads the logo, but not a logo from a non-web URL', () => {
+    const head = '<head><title>x</title>\n<meta name="description" content="x" /></head>';
+    const meta = { title: 'T', description: 'd', siteName: 'S', type: 'website' };
+    const html = injectMeta(head, meta, null, { lang: 'en', siteSettings: { siteName: 'Tejidos <Pulido>', logoUrl: 'https://cdn/logo.png' } });
+    expect(html).toContain('<link rel="preload" as="image" href="https://cdn/logo.png" />');
+    expect(html).toContain('<script id="site-settings" type="application/json" data-lang="en">');
+    expect(html).not.toContain('<Pulido>');
+    expect(injectMeta(head, meta, null, { siteSettings: { logoUrl: 'javascript:alert(1)' } })).not.toContain('rel="preload"');
+    expect(siteSettingsScript(null, 'es')).toBe('');
+    expect(siteSettingsScript(Symbol.for('storefront.notFound'), 'es')).toBe('');
   });
 
   // 2026-10-24: a phone downloaded the whole 430 KB banner photo to show its centre.
